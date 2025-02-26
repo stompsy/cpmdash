@@ -1,0 +1,8 @@
+@import 'tailwindcss' source(none);
+@theme {
+  --font-sans: InterVariable, sans-serif;
+}
+
+/* Only watch tailwindcss from these files. Will shorten css files */
+@source "../templates/**/*.html";
+@source "../**/templates/**/*.html";

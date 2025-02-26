@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.8",
+    "tailwindcss": "^4.0.8"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx @tailwindcss/cli -i ./input.css -o ../static/css/main.css --watch",
+    "prod": "npx @tailwindcss/cli -i ./input.css -o ../staticfiles/css/main.css --minify"
+  }
+}
