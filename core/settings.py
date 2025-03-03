@@ -40,10 +40,10 @@ INSTALLED_APPS = [
     # Third party apps
     "django_browser_reload",
     # Local apps
-    "dash",
+    "cases.apps.CasesConfig",
+    "dashboard.apps.DashboardConfig",
+    "timeline.apps.TimelineConfig",
 ]
-
-AUTH_USER_MODEL = "dash.UserProfile"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

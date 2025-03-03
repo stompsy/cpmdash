@@ -1,4 +1,11 @@
 __pycache__/
 node_modules/
 venv/
+staticfiles/
 *.sqlite3
+
+# Data
+referrals_port_clean.csv
+*.ipynb
+*.csv
+*.xlsx
