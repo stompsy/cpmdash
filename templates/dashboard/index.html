@@ -14,7 +14,80 @@
 {% block content %}
 <main>
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        Dashboard
+        <div class="flex flex-wrap gap-4">
+            <div class="flex flex-col flex-1 p-6 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-center text-md text-gray-800 font-normal">Unique Patients</div>
+                <div class="text-4xl text-center mt-1 text-black font-extrabold">{{ patients_count }}</div>
+                <div class="mt-1 text-center text-md text-gray-700 font-medium">2021-{% now 'Y' %}</div>
+            </div>
+            <div class="flex flex-col flex-1 p-6 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-center text-md text-gray-800 font-normal">Referrals</div>
+                <div class="text-4xl text-center mt-1 text-black font-extrabold">{{ referrals_count }}</div>
+                <div class="mt-1 text-center text-md text-gray-700 font-medium">
+                    <span class="text-green-600 font-bold">{{ referral_trend_symbol }}</span>
+                    <span class="text-green-600 font-bold">{{ referral_difference }}</span>
+                    <span class="text-black font-semibold">({{ referral_percentage_difference }}%)</span>
+                </div>
+            </div>
+            <div class="flex flex-col flex-1 p-6 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-center text-md text-gray-800 font-normal">PORT Referrals</div>
+                <div class="text-4xl text-center mt-1 text-black font-extrabold">{{ odreferrals_count }}</div>
+                <div class="mt-1 text-center text-md text-gray-700 font-medium">
+                    <span class="text-green-600 font-bold">{{ odreferral_trend_symbol }}</span>
+                    <span class="text-green-600 font-bold">{{ odreferral_difference }}</span>
+                    <span class="text-black font-semibold">({{ odreferral_percentage_difference }}%)</span>
+                </div>
+            </div>
+            <div class="flex flex-col flex-1 p-6 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-center text-md text-gray-800 font-normal">Encounters</div>
+                <div class="text-4xl text-center mt-1 text-black font-extrabold">{{ encounters_count }}</div>
+                <div class="mt-1 text-center text-md text-gray-700 font-medium">
+                    <span class="text-red-600 font-bold">{{ encounter_trend_symbol }}</span>
+                    <span class="text-red-600 font-bold">{{ encounter_difference }}</span>
+                    <span class="text-black font-semibold">({{ encounter_percentage_difference }}%)</span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-2 flex flex-wrap gap-4">
+            <div class="flex flex-col flex-1 px-6 py-2 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-xs text-gray-800 font-normal">This number represents unique patients since Jan. 2021. Although ~10% of this number are high utilizers of emergency services and are seen continually throughout the year.</div>
+            </div>
+            <div class="flex flex-col flex-1 px-6 py-2 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-xs text-gray-800 font-normal">Began tracking referrals in Oct. 2022. This number is likely another 1/3 as much. Patients receive 1-3 outgoing referrals</div>
+            </div>
+            <div class="flex flex-col flex-1 px-6 py-2 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-xs text-gray-800 font-normal">The Post-Overdose Response Team (PORT) pilot program began Mar. 2024. The number shown here is the amount of confirmed overdoses that PAFD has responded to.</div>
+            </div>
+            <div class="flex flex-col flex-1 px-6 py-2 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-xs text-gray-800 font-normal">We began tracking individual encounters in Oct. 2022. This number could be as much as 30% higher than what is seen here.</div>
+            </div>
+        </div>
     </div>
 </main>
 {% endblock content %}
+
+{% comment %}
+
+"title": title,
+"description": description,
+"patients_count": patients_count,
+"referrals_count": referrals_count,
+"odreferrals_count": odreferrals_count,
+"encounters_count": encounters_count,
+"this_quarter_referral_count": this_quarter_referral_count,
+"last_quarter_referral_count": last_quarter_referral_count,
+"this_quarter_odreferral_count": this_quarter_odreferral_count,
+"last_quarter_odreferral_count": last_quarter_odreferral_count,
+"this_quarter_encounter_count": this_quarter_encounter_count,
+"last_quarter_encounter_count": last_quarter_encounter_count,
+"referral_difference": referral_difference,
+"referral_percentage_difference": round(referral_percentage_difference, 2),
+"odreferral_difference": odreferral_difference,
+"odreferral_percentage_difference": round(odreferral_percentage_difference, 2),
+"encounter_difference": encounter_difference,
+"encounter_percentage_difference": round(encounter_percentage_difference, 2),
+"referral_trend_symbol": referral_trend_symbol,
+"odreferral_trend_symbol": odreferral_trend_symbol,
+"encounter_trend_symbol": encounter_trend_symbol,
+
+{% endcomment %}

@@ -18,6 +18,9 @@ class Patients(models.Model):
     marital_status = models.CharField(max_length=30)
     veteran_status = models.CharField(max_length=30)
 
+    def __str__(self):
+        return "Patient ID: " + str(self.id)
+
 
 class Referrals(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -33,6 +36,9 @@ class Referrals(models.Model):
     referral_type_2 = models.CharField(max_length=50)
     referral_type_3 = models.CharField(max_length=50)
     referral_type_4 = models.CharField(max_length=50)
+
+    def __str__(self):
+        return "Referral ID: " + str(self.ID)
 
 
 class ODReferrals(models.Model):
@@ -87,6 +93,9 @@ class ODReferrals(models.Model):
     client_agrees_to_mat = models.IntegerField()
     delay_in_referral = models.CharField(max_length=50)
 
+    def __str__(self):
+        return "OD Referral ID: " + str(self.ID)
+
 
 class Encounters(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -99,3 +108,6 @@ class Encounters(models.Model):
     encounter_type_cat2 = models.CharField(max_length=50)
     encounter_type_cat3 = models.CharField(max_length=50)
     encounter_stage = models.CharField(max_length=50)
+
+    def __str__(self):
+        return "Encounter ID: " + str(self.ID)

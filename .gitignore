@@ -3,6 +3,7 @@ node_modules/
 venv/
 staticfiles/
 *.sqlite3
+*.pyc
 
 # Data
 referrals_port_clean.csv
