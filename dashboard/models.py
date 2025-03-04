@@ -1,6 +1,40 @@
 from django.db import models
 
 
+class Patients(models.Model):
+    id = models.AutoField(primary_key=True)
+    client_3c = models.IntegerField()
+    age = models.IntegerField()
+    case_management = models.IntegerField()
+    gender = models.CharField(max_length=20)
+    insurance = models.CharField(max_length=50)
+    pcp_agency = models.CharField(max_length=50)
+    race = models.CharField(max_length=50)
+    sex = models.CharField(max_length=20)
+    sud = models.BooleanField()
+    zip_code = models.CharField(max_length=50)
+    created_date = models.DateField()
+    modified_date = models.DateField()
+    marital_status = models.CharField(max_length=30)
+    veteran_status = models.CharField(max_length=30)
+
+
+class Referrals(models.Model):
+    ID = models.AutoField(primary_key=True)
+    patient_ID = models.IntegerField()
+    created = models.DateField()
+    date_received = models.DateField()
+    referral_agency = models.CharField(max_length=50)
+    encounter_type_cat1 = models.CharField(max_length=50)
+    encounter_type_cat2 = models.CharField(max_length=50)
+    encounter_type_cat3 = models.CharField(max_length=50)
+    referral_type_0 = models.CharField(max_length=50)
+    referral_type_1 = models.CharField(max_length=50)
+    referral_type_2 = models.CharField(max_length=50)
+    referral_type_3 = models.CharField(max_length=50)
+    referral_type_4 = models.CharField(max_length=50)
+
+
 class ODReferrals(models.Model):
     ID = models.AutoField(primary_key=True)
     patient_id = models.IntegerField()
@@ -52,3 +86,16 @@ class ODReferrals(models.Model):
     bup_admin = models.IntegerField()
     client_agrees_to_mat = models.IntegerField()
     delay_in_referral = models.CharField(max_length=50)
+
+
+class Encounters(models.Model):
+    ID = models.AutoField(primary_key=True)
+    referral_ID = models.IntegerField()
+    port_referral_ID = models.IntegerField()
+    patient_ID = models.IntegerField()
+    encounter_date = models.DateField()
+    pcp_agency = models.CharField(max_length=50)
+    encounter_type_cat1 = models.CharField(max_length=50)
+    encounter_type_cat2 = models.CharField(max_length=50)
+    encounter_type_cat3 = models.CharField(max_length=50)
+    encounter_stage = models.CharField(max_length=50)
