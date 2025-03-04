@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block heading %}
+<header class="bg-white shadow-sm">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <p class="text-center md:text-start md:text-md tracking-tight text-gray-700">{{ title }}</p>
+        <h1 class="text-center text-3xl md:text-start md:text-3xl font-bold text-gray-900">{{ description }}</h1>
+    </div>
+</header>
+{% endblock heading %}
+
+{% block content %}
+<main>
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="md:flex md:flex-row flex-col w-full justify-start items-start gap-4">
+            <div class="md:w-1/4 w-full mb-6 bg-white rounded-lg p-6">
+                <ul class="bg-base-200 rounded-box w-full">
+                    <li class="text-xl font-bold pb-2">Category</li>
+                    <li class="p-2 hover:bg-gray-200 rounded-lg"><a href="{% url 'index' %}">Opioid Epidemic</a></li>
+                    <li class="p-2 hover:bg-gray-200 rounded-lg"><a href="{% url 'index' %}">Public Health</a></li>
+                    <li class="p-2 hover:bg-gray-200 rounded-lg"><a href="{% url 'index' %}">Behavioral Health</a></li>
+                    <li class="p-2 hover:bg-gray-200 rounded-lg"><a href="{% url 'index' %}">Homelessness</a></li>
+                    <li class="p-2 hover:bg-gray-200 rounded-lg"><a href="{% url 'index' %}">High 911 Utilization</a></li>
+                    <li class="p-2 hover:bg-gray-200 rounded-lg"><a href="{% url 'index' %}">Chronic Illness</a></li>
+                    <li class="p-2 hover:bg-gray-200 rounded-lg"><a href="{% url 'index' %}">Patient Advocacy</a></li>
+                </ul>
+            </div>
+            <div class="grid grid-cols-3 gap-4 md:w-3/4 w-full">
+                <div class="col-span-3 md:col-span-2">
+                    <a href="#">
+                        <div
+                            class="rounded-t-lg h-[300px] bg-[url(/static/media/Histogram2-3cc0e953cc3545f28cff5fad12936ceb-3735331520.png)] bg-cover bg-center"
+                        >
+                            <div class="flex flex-col justify-start relative gap-0.5 left-6 top-6 h-auto w-56 font-mono bg-white rounded-lg p-4">
+                                <p class="text-sm leading-3.5 text-black">Overdose Response</p>
+                                <p class="pt-2 text-xl leading-6 text-black">Headline. Primary info here.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-start p-6 gap-1 rounded-b-lg bg-white">
+                            <h1 class="text-2xl font-bold">Case Study 1</h1>
+                            <p class="text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-span-3 md:col-span-1">
+                    <a href="#">
+                        <div class="rounded-t-lg h-[300px] bg-gray-300">
+                            <div class="flex flex-col justify-start relative gap-0.5 left-6 top-6 h-24 w-32 font-mono">
+                                <p class="text-sm leading-3.5 text-black">Patient</p>
+                                <p class="pt-2 text-xl leading-6 text-black">Headline. Primary info here.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-start p-6 gap-1 rounded-b-lg bg-white">
+                            <h1 class="text-2xl font-bold">Case Study 2</h1>
+                            <p class="text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-span-3 md:col-span-1">
+                    <a href="#">
+                        <div class="rounded-t-lg h-[300px] bg-gray-300">
+                            <div class="flex flex-col justify-start relative gap-0.5 left-6 top-6 h-24 w-32 font-mono">
+                                <p class="text-sm leading-3.5 text-black">Overdose</p>
+                                <p class="pt-2 text-xl leading-6 text-black">Headline. Primary info here.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-start p-6 gap-1 rounded-b-lg bg-white">
+                            <h1 class="text-2xl font-bold">Case Study 3</h1>
+                            <p class="text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-span-3 md:col-span-1">
+                    <a href="#">
+                        <div class="rounded-t-lg h-[300px] bg-gray-300">
+                            <div class="flex flex-col justify-start relative gap-0.5 left-6 top-6 h-24 w-32 font-mono">
+                                <p class="text-sm leading-3.5 text-black">Encounter</p>
+                                <p class="pt-2 text-xl leading-6 text-black">Headline. Primary info here.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-start p-6 gap-1 rounded-b-lg bg-white">
+                            <h1 class="text-2xl font-bold">Case Study 4</h1>
+                            <p class="text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-span-3 md:col-span-1">
+                    <a href="#">
+                        <div class="rounded-t-lg h-[300px] bg-gray-300">
+                            <div class="flex flex-col justify-start relative gap-0.5 left-6 top-6 h-24 w-32 font-mono">
+                                <p class="text-sm leading-3.5 text-black">Encounter</p>
+                                <p class="pt-2 text-xl leading-6 text-black">Headline. Primary info here.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-start p-6 gap-1 rounded-b-lg bg-white">
+                            <h1 class="text-2xl font-bold">Case Study 5</h1>
+                            <p class="text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}

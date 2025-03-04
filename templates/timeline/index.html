@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block heading %}
+<header class="bg-white shadow-sm">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900">{{ title }}</h1>
+        <span class="text-sm text-gray-500">{{ description }}</span>
+    </div>
+</header>
+{% endblock heading %}
+
+{% block content %}
+<main>
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        Timeline content
+    </div>
+</main>
+{% endblock content %}

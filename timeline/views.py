@@ -2,4 +2,7 @@ from django.shortcuts import render
 
 
 def timeline(request):
-    return render(request, "timeline/index.html")
+    title = "Timeline"
+    description = "This is a timeline page"
+    context = {"title": title, "description": description}
+    return render(request, "timeline/index.html", context=context)
