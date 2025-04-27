@@ -1,6 +1,8 @@
 Django==5.2
 python-decouple
-django-browser-reload
 gunicorn
 dj-database-url
 psycopg[binary]
+whitenoise[brotli]
+
+django-browser-reload
