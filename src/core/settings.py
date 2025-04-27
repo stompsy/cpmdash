@@ -22,7 +22,7 @@ REPO_DIR = BASE_DIR.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("DJANGO_SECRET_KEY", cast=str)
+SECRET_KEY = config("DJANGO_SECRET_KEY", cast=str, default=get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DJANGO_DEBUG", cast=bool, default=False)
