@@ -91,7 +91,7 @@ class ODReferrals(models.Model):
     transported_by = models.CharField(max_length=50)
     narcan_given = models.BooleanField()
     narcan_doses_prior_to_ems = models.IntegerField()
-    narcan_prior_to_ems_dosage = models.IntegerField()
+    narcan_prior_to_ems_dosage = models.FloatField()
     narcan_doses_by_ems = models.IntegerField()
     narcan_by_ems_dosage = models.FloatField()
     leave_behind_narcan_amount = models.IntegerField()
