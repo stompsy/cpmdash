@@ -63,11 +63,25 @@ for host in RAILWAY_HOSTS:
 
 # Application definition
 SITE_ID = 1
-INSTALLED_APPS = INSTALLED_APPS
+
+DJANGO_INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "commando.apps.CommandoConfig",
+]
+
 
 if DEBUG:
     INSTALLED_APPS.append(
         "django_browser_reload",
+    ),
+    INSTALLED_APPS.append(
+        "whitenoise.runserver_nostatic",
     )
 
 MIDDLEWARE = [
