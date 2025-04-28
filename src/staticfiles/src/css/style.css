@@ -1,0 +1,57 @@
+/*
+    Make some adjustments to the modebar container and buttons
+    - Buttons are styled with a border, padding, and hover effects
+    - The modebar is transparent and has a slight shadow effect
+    - The buttons are aligned in a row and placed at the top right of the container
+*/
+
+.modebar-container {
+    top: -40px !important;
+    right: 10px !important;
+    left: auto !important;
+    bottom: auto !important;
+    position: absolute !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    background-color: transparent !important;
+    padding: 4px;
+    z-index: 1000;
+}
+
+.modebar-container .modebar-btn {
+    margin: 0px 0px;
+    padding: 4px 4px;
+    background-color: transparent;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    justify-content: center;
+}
+
+.modebar-container .modebar-btn:hover {
+    background-color: #e0e0e0;
+    transform: scale(1.05);
+}
+.modebar-container .modebar-btn:active {
+    background-color: #d0d0d0;
+    transform: scale(0.95);
+}
+.modebar-container .modebar-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: #333;
+}
+.modebar-container .modebar-btn svg:hover {
+    fill: #000;
+}

@@ -9,6 +9,8 @@ __pycache__/
 # Distribution / packaging
 .Python
 src/staticfiles/src/css/input.css
+src/staticfiles/src/data
+
 build/
 develop-eggs/
 dist/

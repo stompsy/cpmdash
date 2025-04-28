@@ -4,5 +4,7 @@ gunicorn
 dj-database-url
 psycopg[binary]
 whitenoise[brotli]
+pandas
+plotly
 
 django-browser-reload

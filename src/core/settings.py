@@ -15,7 +15,6 @@ from pathlib import Path
 from decouple import config, Csv
 from django.core.management.utils import get_random_secret_key
 
-from .installed import INSTALLED_APPS
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -64,7 +63,7 @@ for host in RAILWAY_HOSTS:
 # Application definition
 SITE_ID = 1
 
-DJANGO_INSTALLED_APPS = [
+INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -72,9 +71,17 @@ DJANGO_INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-    "commando.apps.CommandoConfig",
+    
+    # Third-party apps
+    # "django_browser_reload",
+    # "whitenoise.runserver_nostatic",
+    
+    # Local apps
+    "cases",
+    "commando",
+    "dashboard",
+    "timeline",
 ]
-
 
 if DEBUG:
     INSTALLED_APPS.append(
@@ -201,6 +208,9 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# Plotly theme settings
+PLOTLY_THEME = "light"  # or "dark"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

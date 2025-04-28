@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block heading %}
+<header class="bg-white shadow-sm">
+    <div class="flex mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 justify-between">
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900">{{ title }}</h1>
+
+    </div>
+</header>
+{% endblock heading %}
+
+{% block content %}
+<main>
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap gap-4">
+            <div class="flex flex-col flex-1 p-6 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-center text-md text-gray-800 font-normal">Unique Patients</div>
+                <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ patients_count }}</div>
+                <div class="mt-1 text-center text-md text-gray-700 font-medium">2021-{% now 'Y' %}</div>
+            </div>
+            <div class="flex flex-col flex-1 p-6 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-center text-md text-gray-800 font-normal">Referrals</div>
+                <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ referrals_count }}</div>
+                <div class="mt-1 text-center text-md text-gray-700 font-medium">
+                    <span class="text-green-600 font-bold">{{ referral_trend_symbol }}</span>
+                    <span class="text-green-600 font-bold">{{ referral_difference }}</span>
+                    <span class="text-black font-semibold">({{ referral_percentage_difference }}%)</span>
+                </div>
+            </div>
+            <div class="flex flex-col flex-1 p-6 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-center text-md text-gray-800 font-normal">PORT Referrals</div>
+                <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ odreferrals_count }}</div>
+                <div class="mt-1 text-center text-md text-gray-700 font-medium">
+                    <span class="text-green-600 font-bold">{{ odreferral_trend_symbol }}</span>
+                    <span class="text-green-600 font-bold">{{ odreferral_difference }}</span>
+                    <span class="text-black font-semibold">({{ odreferral_percentage_difference }}%)</span>
+                </div>
+            </div>
+            <div class="flex flex-col flex-1 p-6 bg-gray-200 rounded-md min-w-[200px]">
+                <div class="text-center text-md text-gray-800 font-normal">Encounters</div>
+                <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ encounters_count }}</div>
+                <div class="mt-1 text-center text-md text-gray-700 font-medium">
+                    <span class="text-red-600 font-bold">{{ encounter_trend_symbol }}</span>
+                    <span class="text-red-600 font-bold">{{ encounter_difference }}</span>
+                    <span class="text-black font-semibold">({{ encounter_percentage_difference }}%)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}

@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="h-full bg-gray-100" lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{% block title %} {% endblock title %}</title>
+		<link rel="stylesheet" href="{% static 'src/css/output.css' %}">
+		<link rel="stylesheet" href="{% static 'src/css/style.css' %}">
+		<link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+		<script src="{% static 'src/js/htmx.min.js' %}"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+		<style type="text/tailwindcss">
+			[x-cloak] {
+				display: none !important;
+			}
+		</style>
+	</head>
+	<body class="h-full">
+		<div class="min-h-full">
+			{% include 'includes/header.html' %}
+			{% block heading %} {% endblock heading %}
+			{% block content %} {% endblock content %}
+			{% include 'includes/footer.html' %}
+		</div>
+	</body>
+</html>
