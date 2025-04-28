@@ -70,9 +70,6 @@ class ODReferrals(models.Model):
     od_date = models.DateTimeField(
         auto_now=False, auto_now_add=False, null=True, default=None
     )
-    od_time = models.TimeField(
-        auto_now=False, auto_now_add=False, null=True, default=None
-    )
     delay_in_referral = models.CharField(max_length=50)
     cpm_notification = models.CharField(max_length=50)
     cpm_disposition = models.CharField(max_length=50)
