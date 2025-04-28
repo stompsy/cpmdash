@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+src/staticfiles/src/css/input.css
 build/
 develop-eggs/
 dist/
