@@ -97,7 +97,6 @@ class ODReferrals(models.Model):
     leave_behind_narcan_amount = models.IntegerField()
     persons_trained = models.FloatField(null=True)
     referral_to_sud_agency = models.BooleanField()
-    no_referral_reason = models.CharField(max_length=50, default="No data", null=True)
     referral_rediscovery = models.IntegerField()
     referral_reflections = models.IntegerField()
     referral_pbh = models.IntegerField()

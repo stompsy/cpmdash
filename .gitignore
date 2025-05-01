@@ -6,11 +6,27 @@ __pycache__/
 # C extensions
 *.so
 
+# Temp ignore files
+src/dashboard/charts/od_cpm_disposition.py
+src/dashboard/charts/od_cpm_notification.py
+src/dashboard/charts/od_density_heatmap.py
+src/dashboard/charts/od_fatality_charts.py
+src/dashboard/charts/od_hist_hourly.py
+src/dashboard/charts/od_hist_monthly.py
+src/dashboard/charts/od_line_hourly.py
+src/dashboard/charts/od_map.py
+src/dashboard/charts/od_pie_fatal_nonfatal.py
+src/dashboard/charts/od_pie_living_situation.py
+src/dashboard/charts/od_referral_source.py
+src/dashboard/charts/od_repeats_scatter.py
+src/dashboard/charts/od_stack_insurance.py
+src/dashboard/charts/od_stack_livingsituation.py
+
 # Distribution / packaging
 .Python
 src/staticfiles/src/css/input.css
-src/staticfiles/src/data
-
+src/staticfiles/src/data/docs
+src/staticfiles/src/data/migration
 build/
 develop-eggs/
 dist/
