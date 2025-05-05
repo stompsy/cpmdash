@@ -7,6 +7,13 @@ from dashboard.models import Referrals
 
 from dashboard.utils.tailwind_colors import TAILWIND_COLORS
 
+odreferrals = Referrals.objects.all()
+df = pd.DataFrame.from_records(
+    odreferrals.values(
+        "referral_agency",
+    )
+)
+
 # 15 hue families × 2 shades (400 + 500) = 30 colors
 families = [
     "red", "orange", "amber", "yellow", "lime", "green",
@@ -19,13 +26,6 @@ tokens = [f"{hue}-{shade}" for hue in families for shade in (600, 500, 400, 300)
 
 # Build your color sequence
 color_sequence = [TAILWIND_COLORS[token] for token in tokens]
-
-odreferrals = Referrals.objects.all()
-df = pd.DataFrame.from_records(
-    odreferrals.values(
-        "referral_agency",
-    )
-)
 
 # count referrals per agency, keep top 50
 top100 = (
