@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 from plotly.offline import plot
 
-from ..utils.plotly import style_plotly_layout
+from ...utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
 
 
@@ -42,7 +42,7 @@ hourly_df = df["hour"].value_counts().sort_index().reset_index()
 hourly_df.columns = ["Hour of Day", "Overdose Count"]
 
 # Bar chart: Working hours vs Outside working hours
-def build_chart_od_work_hours(theme="light"):
+def build_chart_od_work_hours(theme):
     fig = px.bar(
         work_hour_df,
         x="Time Category",
@@ -57,7 +57,7 @@ def build_chart_od_work_hours(theme="light"):
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        export_filename="pafd_cpm_bar_work_hours",
+        export_filename="pafd_cpm_chart_work_hours",
         scroll_zoom=False,
         y_title="Overdose Count",
         margin=dict(t=0, l=75, r=20, b=65),

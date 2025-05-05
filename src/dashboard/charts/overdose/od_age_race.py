@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 from plotly.offline import plot
 
-from ..utils.plotly import style_plotly_layout
+from ...utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
 
 
@@ -20,7 +20,7 @@ race_order = (
 )
 
 # Build the chart
-def build_chart_od_age_race(theme="light"):
+def build_chart_od_age_race(theme):
     fig = px.box(
         df,
         x="patient_race",

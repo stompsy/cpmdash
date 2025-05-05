@@ -20,53 +20,79 @@ html {
         "wdth" 100;
 }
 
+/* reposition and restyle the entire modebar */
 .modebar-container {
+    position: absolute !important;
     top: -40px !important;
     right: 10px !important;
-    left: auto !important;
-    bottom: auto !important;
-    position: absolute !important;
     display: flex !important;
     flex-direction: row !important;
-    justify-content: flex-end !important;
+    justify-content: center !important;
     align-items: center !important;
-    background-color: transparent !important;
-    padding: 4px;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 6px;
+    border-radius: 8px;
     z-index: 1000;
 }
 
+.modebar-group {
+    align-items: center !important;
+    /* border: 1px solid #333 !important; */
+    background-color: transparent !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    border-radius: 4px !important;
+    color: #333 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    flex-direction: row !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 14px !important;
+    flex-wrap: nowrap !important;
+    height: auto !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    text-align: center !important;
+    width: auto !important;
+    z-index: 1000 !important;
+}
+
+  /* restyle each icon button */
 .modebar-container .modebar-btn {
-    margin: 0px 0px;
-    padding: 4px 4px;
+    margin: 0;
+    padding: 6px;
     background-color: transparent;
-    border: 1px solid #ccc;
+    border: 1px solid #333333;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
     font-size: 14px;
     font-family: Arial, sans-serif;
     color: #333;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
     display: flex;
-    flex-direction: row;
-    align-items: end;
+    align-items: center;
     justify-content: center;
 }
 
+  /* hover & active states */
 .modebar-container .modebar-btn:hover {
-    background-color: #e0e0e0;
+    background-color: #232323;
     transform: scale(1.05);
 }
 .modebar-container .modebar-btn:active {
     background-color: #d0d0d0;
     transform: scale(0.95);
 }
+
+  /* icon sizing + color */
 .modebar-container .modebar-btn svg {
     width: 16px;
     height: 16px;
     fill: #333;
 }
-.modebar-container .modebar-btn svg:hover {
+.modebar-container .modebar-btn:hover svg {
     fill: #000;
 }

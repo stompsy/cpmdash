@@ -25,18 +25,18 @@ def get_odreferral_counts():
 def get_od_metrics(year: int, population: int = 20_000) -> dict:
     """
     Returns a dict with:
-      - count: total OD referrals in `year`
-      - rate_per_100k: referrals per 100 000 population
-      - percentage: % of population with at least one referral
+        - count: total OD referrals in `year`
+        - rate_per_100k: referrals per 100 000 population
+        - percentage: % of population with at least one referral
     """
-    # 1) fetch count
+    # fetch count
     count = ODReferrals.objects.filter(od_date__year=year).count()
 
-    # 2) guard zero‐pop
+    # guard zero‐pop
     if not population:
         return {'count': count, 'rate_per_100k': 0.0, 'percentage': 0.0}
 
-    # 3) compute
+    # compute
     rate_per_100k = (count / population) * 100_000
     percentage    = (count / population) * 100
 

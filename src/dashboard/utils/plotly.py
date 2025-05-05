@@ -1,35 +1,45 @@
 # dashboard/utils/plotly.py
+from dashboard.utils.tailwind_colors import TAILWIND_COLORS
 
 
 def style_plotly_layout(
     fig,
-    theme="light",
-    axis_font_size=12,
-    font_family="Courier New",
+    theme="dark",
+    hovermode_unified=False,
+    axis_font_size=13,
+    font_family="Roboto",
     export_filename="pafd_cpm_chart",
     enable_image_export=True,
     scroll_zoom=True,
     show_legend=False,
+    show_modebar=True,
+    height=500,
     x_title=None,
     y_title=None,
-    height=400,
-    margin=dict(t=0, l=40, r=20, b=40),
+    margin=None,
 ):
 
     if theme == "dark":
-        axis_font_color = "#d1d5db"
-        font_color = "#e5e7eb"
-        plot_bg = "#111827"
-        paper_bg = "#1f2937"
-        grid_color = "#374151"
+        axis_font_color =   TAILWIND_COLORS["slate-500"]
+        font_color =        TAILWIND_COLORS["slate-500"]
+        plot_bg =           TAILWIND_COLORS["transparent"]
+        paper_bg =          TAILWIND_COLORS["transparent"]
+        grid_color =        TAILWIND_COLORS["gray-800"]
     else:
-        axis_font_color = "#374151"
-        font_color = "#1f2937"
-        plot_bg = "#ffffff"
-        paper_bg = "#ffffff"
-        grid_color = "#e5e7eb"
+        axis_font_color =   TAILWIND_COLORS["slate-500"]
+        font_color =        TAILWIND_COLORS["slate-500"]
+        plot_bg =           TAILWIND_COLORS["white"]
+        paper_bg =          TAILWIND_COLORS["white"]
+        grid_color =        TAILWIND_COLORS["slate-800"]
 
-    fig.update_layout(
+    # default margin if not supplied
+    margin = margin or dict(t=40, l=20, r=20, b=20)
+
+    # if using unified hovers, ensure top margin is tall enough
+    if hovermode_unified:
+        margin["t"] = max(margin.get("t", 0), 80)
+
+    layout_updates = dict(
         title=None,
         showlegend=show_legend,
         font=dict(family=font_family, size=axis_font_size, color=font_color),
@@ -49,18 +59,36 @@ def style_plotly_layout(
         ),
         margin=margin,
         height=height,
+        autosize=True,
         plot_bgcolor=plot_bg,
         paper_bgcolor=paper_bg,
-        modebar={
-            "orientation": "h",
-        },
+        modebar={"orientation": "h",},
     )
+    
+    # add unified hovermode + styling if requested
+    if hovermode_unified:
+        layout_updates["hovermode"] = "x unified"
+        layout_updates["hoverlabel"] = {
+            "bgcolor": TAILWIND_COLORS["gray-800"],
+            "bordercolor": TAILWIND_COLORS["gray-600"],
+            "font": {
+                "family": font_family,
+                "size": axis_font_size,
+                "color": TAILWIND_COLORS["gray-50"],
+            }
+        }
+
+    fig.update_layout(**layout_updates)
+
+    config = {
+        "responsive": True,
+        "displaylogo": False,
+        "scrollZoom": scroll_zoom,
+        "displayModeBar": show_modebar,     # ← respect the new flag
+    }
 
     if enable_image_export:
-        fig._config = {
-            "displaylogo": False,
-            "scrollZoom": scroll_zoom,
-            "displayModeBar": True,
+        config.update({
             "toImageButtonOptions": {
                 "format": "svg",
                 "filename": export_filename,
@@ -69,14 +97,10 @@ def style_plotly_layout(
                 "scale": 1,
             },
             "modeBarButtonsToRemove": [
-                "zoom",
-                "pan",
-                "lasso2d",
-                "select2d",
-                "autoScale",
-                "zoomIn",
-                "zoomOut",
+                "zoom", "pan", "lasso2d", "select2d",
+                "autoScale", "zoomIn", "zoomOut",
             ],
-        }
-
+        })
+    
+    fig._config = config
     return fig
