@@ -17,7 +17,7 @@ from .charts.overdose.od_stack_insurance import *
 from .charts.overdose.od_fatality_charts import *
 from .charts.overdose.od_repeats_scatter import *
 from .charts.overdose.od_referral_delay import *
-from .charts.referral.od_agency_treemap import *
+# from .charts.referral.od_agency_treemap import build_chart_od_agency_treemap
 
 
 def dashboard(request):
@@ -118,7 +118,6 @@ def odreferrals(request):
     fig_od_map              = build_chart_od_map(theme="dark")
     fig_density_map         = build_chart_od_density_heatmap(theme="dark")
     fig_od_monthly          = build_chart_od_hist_monthly(theme="dark")
-    fig_agency_treemap      = build_chart_od_agency_treemap(theme="dark")
 
     return render(
         request,
@@ -146,7 +145,6 @@ def odreferrals(request):
             "od_referral_delay":            fig_referral_delay,
             "fig_repeats_scatter":          fig_repeats_scatter,
             "fig_od_map":                   fig_od_map,
-            "fig_agency_treemap":           fig_agency_treemap,
             "theme": theme,
         },
     )
