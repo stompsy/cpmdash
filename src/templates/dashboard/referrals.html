@@ -22,39 +22,15 @@
 <main>
     <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col md:flex-row">
-                <div class="flex flex-col flex-1/4 min-w-[200px]">
-                    <div class="text-md font-normal">Non-Fatal vs. Fatal Overdoses by Month</div>
-                    <div class="mt-1 text-sm font-bold">[<span class="bg-red-600">2024 selected</span>]</div>
-                    <div class="bg-slate-800 rounded-sm px-4 py-6 mt-10 ring shadow-xl ring-gray-900/5">
-                        <div class="opacity-100">
-                            <span class="inline-flex items-center justify-center rounded-md bg-green-500 p-1 shadow-lg">
-                                <svg
-                                    class="h-6 w-6 text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    aria-hidden="true"
-                                    >
-                                    <path d="M12 7V9" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                                    <path d="M12 13.01L12.01 12.9989" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                                    <path d="M3 20.2895V5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V15C21 16.1046 20.1046 17 19 17H7.96125C7.35368 17 6.77906 17.2762 6.39951 17.7506L4.06852 20.6643C3.71421 21.1072 3 20.8567 3 20.2895Z" stroke="#ffffff" stroke-width="1.5"></path>
-                                </svg>
-                            </span>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-xl text-red-400 font-semibold">
+                        <h3>Referrals Analysis</h3>
+                    </div>
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4">
+                            Referrals by Agency
                         </div>
-                        <p class="text-white mt-5 text-md font-droid font-bold tracking-tight ">WA State Fatal Overdoses</p>
-                        <p class="text-white mt-2 text-sm font-roboto">
-                            2023 - Clallam County was 2nd in WA State for fatal overdoses.
-                            By the end of 2024 we were 10th. We are currently 12th out of 39 counties in WA State.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex flex-col flex-3/4 grow min-w-[200px]">
-                    <div class="text-xl text-gray-200 font-semibold text-right">
-                        <h3>General Statistics</h3>
-                    </div>
-                    <div class="text-md font-normal">
-                        <div class="relative p-4 text-right mr-20">Referrals by Agency</div>
                         {% autoescape off %}
                         {{ fig_agency_treemap|safe }}
                         {% endautoescape %}

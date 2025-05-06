@@ -84,14 +84,14 @@
     </section>
     <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-3/4 min-w-[200px]">
-                    <div class="text-xl text-gray-200 font-semibold p-2 rounded-md">
-                        <h3>Trends Over Time</h3>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-xl text-red-400 font-semibold">
+                        <h3>Trends over time</h3>
                     </div>
-                    <div class="text-md font-normal">
-                        <div class="relative p-4 pl-7">
-                            Overdoses by Year and Month [<span class="bg-red-600">2024 Selected</span>]
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4">
+                            Overdoses by Year and Month [<span class="bg-red-500">2024 Selected</span>]
                         </div>
                         {% autoescape off %}
                         {{ od_monthly|safe }}
@@ -100,38 +100,13 @@
                 </div>
             </div>
         </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 min-w-[200px]">
-                    <div class="text-md font-normal">Density Heatmap of Overdose Incidents</div>
-                    <div class="mt-1 text-sm text-gray-500 font-bold">by Hour and Day of the Week</div>
-                    <div class="bg-slate-800 rounded-sm px-4 py-6 mt-10 ring shadow-xl ring-gray-900/5">
-                        <div class="opacity-100">
-                            <span class="inline-flex items-center justify-center rounded-md bg-green-500 p-1 shadow-lg">
-                                <svg
-                                    class="h-6 w-6 text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    aria-hidden="true"
-                                    >
-                                    <path d="M12 7V9" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                                    <path d="M12 13.01L12.01 12.9989" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                                    <path d="M3 20.2895V5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V15C21 16.1046 20.1046 17 19 17H7.96125C7.35368 17 6.77906 17.2762 6.39951 17.7506L4.06852 20.6643C3.71421 21.1072 3 20.8567 3 20.2895Z" stroke="#ffffff" stroke-width="1.5"></path>
-                                </svg>
-                            </span>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Density Heatmap of Overdose Incidents by Day and Hour
                         </div>
-                        <p class="text-white mt-5 text-md font-droid font-bold tracking-tight ">WA State Fatal Overdoses</p>
-                        <p class="text-white mt-2 text-sm font-roboto">
-                            There have been zero incidents between 19:00-20:00,
-                            so it is blended into the surrounding hours. The heatmap shows the number of overdose incidents
-                            per hour of the day, with the lightest color indicating the most incidents.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 min-w-[200px]">
-                    <div class="mt-8 text-md font-normal">
-                        <div class="relative p-4 text-right mr-20">Overdoses by Day and Hour</div>
                         {% autoescape off %}
                         {{ fig_density_map|safe }}
                         {% endautoescape %}
@@ -139,42 +114,27 @@
                 </div>
             </div>
         </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 min-w-[200px]">
-                    <div class="text-md font-normal">Density Heatmap of Overdose Incidents</div>
-                    <div class="mt-1 text-sm text-gray-500 font-bold">by Hour and Day of the Week</div>
-                    <div class="bg-slate-800 rounded-sm px-4 py-6 mt-10 ring shadow-xl ring-gray-900/5">
-                        <div class="opacity-100">
-                            <span class="inline-flex items-center justify-center rounded-md bg-green-500 p-1 shadow-lg">
-                                <svg
-                                    class="h-6 w-6 text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    aria-hidden="true"
-                                    >
-                                    <path d="M12 7V9" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                                    <path d="M12 13.01L12.01 12.9989" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                                    <path d="M3 20.2895V5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V15C21 16.1046 20.1046 17 19 17H7.96125C7.35368 17 6.77906 17.2762 6.39951 17.7506L4.06852 20.6643C3.71421 21.1072 3 20.8567 3 20.2895Z" stroke="#ffffff" stroke-width="1.5"></path>
-                                </svg>
-                            </span>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Overdoses by Working Hours
                         </div>
-                        <p class="text-white mt-5 text-md font-droid font-bold tracking-tight ">Overdose Incidents by Working Hours</p>
-                        <p class="text-white mt-2 text-sm font-roboto">
-                            There have been zero incidents between 19:00-20:00,
-                            so it is blended into the surrounding hours. The heatmap shows the number of overdose incidents
-                            per hour of the day, with the lightest color indicating the most incidents.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-md text-gray-800 font-normal">
-                        <div class="relative p-4 text-right mr-20">Overdoses by Working Hours</div>
                         {% autoescape off %}
                         {{ od_work_hours|safe }}
                         {% endautoescape %}
-                        <div class="relative p-4 text-right mr-20">Overdoses by Hour of Day</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Overdoses by Hour of Day
+                        </div>
                         {% autoescape off %}
                         {{ chart_od_hist_hourly|safe }}
                         {% endautoescape %}
@@ -182,14 +142,13 @@
                 </div>
             </div>
         </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-md text-gray-800 font-normal">Overdose Incidents by Working Hours</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-md text-gray-800 font-normal">
-                        <div class="relative p-4 pl-7 bg-white rounded-t-md">Repeat Overdoses</div>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Repeat overdoses by Case
+                        </div>
                         {% autoescape off %}
                         {{ fig_repeats_scatter|safe }}
                         {% endautoescape %}
@@ -200,20 +159,15 @@
     </section>
     <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="text-xl text-gray-200 font-semibold p-2 rounded-md">
-                <h4>Geographic Analysis</h4>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-md text-gray-800 font-normal">Map of Overdoses in the City of Port Angeles</div>
-                    <div class="mt-1 text-sm font-bold text-gray-700">(03/2024-present)</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="bg-white border-b-black rounded-md"></div>
-                    <div class="text-md text-gray-800 font-normal">
-                        <div class="relative p-4 pl-6 bg-white rounded-t-md">Overdoses by Location</div>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-xl text-red-400 font-semibold">
+                        <h3>Geographic Analysis</h3>
+                    </div>
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4">
+                            Map of Overdoses in the City of Port Angeles
+                        </div>
                         {% autoescape off %}
                         {{ fig_od_map|safe }}
                         {% endautoescape %}
@@ -224,27 +178,62 @@
     </section>
     <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="text-xl text-gray-200 font-semibold p-2 rounded-md">
-                <h4>Substance-Specific Insights</h4>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Total Overdose Cases</div>
-                    <div class="mt-1 text-center text-sm font-bold text-gray-700">2024</div>
-                    <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ odreferrals_count }}</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-md text-gray-800 font-normal">
-                        <div class="relative p-4 pl-6 bg-white rounded-t-md">Suspected Drug</div>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-xl text-red-400 font-semibold">
+                        <h3>Substance-Specific Insights</h3>
+                    </div>
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4">
+                            Suspected Drug
+                        </div>
                         {% autoescape off %}
-                        {{ charts.suspected_drug|safe }}
+                        {{ fig_od_sus_drug|safe }}
                         {% endautoescape %}
                     </div>
-                    <hr class="my-4">
-                    <div class="text-md text-gray-800 font-normal">
-                        <div class="relative p-4 pl-6 bg-white rounded-t-md">Narcan Given</div>
+                </div>
+            </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Narcan Given
+                        </div>
+                        {% autoescape off %}
+                        {{ fig_od_narcan_given|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-xl text-red-400 font-semibold">
+                        <h3>Emergency Response Metrics</h3>
+                    </div>
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4">
+                            CPR Administered
+                        </div>
+                        {% autoescape off %}
+                        {{ charts.cpr_administered|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Police ITA
+                        </div>
                         {% autoescape off %}
                         {{ charts.narcan_given|safe }}
                         {% endautoescape %}
@@ -252,37 +241,13 @@
                 </div>
             </div>
         </div>
-    </section>
-    <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="text-xl text-gray-200 font-semibold p-2 rounded-md">
-                <h4>Emergency Response Metrics</h4>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Total Overdose Cases</div>
-                    <div class="mt-1 text-center text-sm font-bold text-gray-700">2024</div>
-                    <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ odreferrals_count }}</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-md text-gray-800 font-normal">
-                        <div class="relative p-4 pl-6 bg-white rounded-t-md">CPR Administered</div>
-                        {% autoescape off %}
-                        {{ charts.cpr_administered|safe }}
-                        {% endautoescape %}
-                    </div>
-                    <hr class="my-4">
-                    <div class="text-md text-gray-800 font-normal">
-                        <div class="relative p-4 pl-6 bg-white rounded-t-md">Police ITA</div>
-                        {% autoescape off %}
-                        {{ charts.police_ita|safe }}
-                        {% endautoescape %}
-                    </div>
-                    <hr class="my-4">
-                    <div class="text-md text-gray-800 font-normal">
-                        <div class="relative p-4 pl-6 bg-white rounded-t-md">Disposition</div>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Disposition
+                        </div>
                         {% autoescape off %}
                         {{ charts.disposition|safe }}
                         {% endautoescape %}
@@ -290,34 +255,18 @@
                 </div>
             </div>
         </div>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Fatal vs. Non-fatal Overdoses</div>
-                    <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ patients_count }}</div>
-                    <div class="mt-1 text-center text-md text-gray-700">{{ od_rate }} ODs/100k</div>
-                    <div class="mt-1 text-center text-md text-gray-700">{{ od_fatality_rate }} Deaths/100k</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Graph here</div>
-                </div>
-            </div>
-        </div>
     </section>
     <section>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="text-xl text-gray-200 font-semibold p-2 rounded-md">
-                <h4>CPM-Specific Metrics</h4>
-            </div>
-        </div>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Distribution of Delay in Referral</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-md text-gray-800 font-normal">
-                        <div class="relative p-4 pl-7 bg-white rounded-t-md">Delay in Referral</div>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-xl text-red-400 font-semibold">
+                        <h3>CPM-Specific Metrics</h3>
+                    </div>
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4">
+                            Delay in Referral
+                        </div>
                         {% autoescape off %}
                         {{ od_referral_delay|safe }}
                         {% endautoescape %}
@@ -328,64 +277,28 @@
     </section>
     <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="text-xl text-gray-200 font-semibold p-2 rounded-md">
-                <h4>Criminal Justice & Law Enforcement</h4>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Total Overdose Cases</div>
-                    <div class="mt-1 text-center text-sm font-bold text-gray-700">2024</div>
-                    <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ odreferrals_count }}</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Graph here</div>
-                </div>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Fatal vs. Non-fatal Overdoses</div>
-                    <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ patients_count }}</div>
-                    <div class="mt-1 text-center text-md text-gray-700">{{ od_rate }} ODs/100k</div>
-                    <div class="mt-1 text-center text-md text-gray-700">{{ od_fatality_rate }} Deaths/100k</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Graph here</div>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-xl text-red-400 font-semibold">
+                        <h3>Criminal Justice & Law Enforcement</h3>
+                    </div>
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
     <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="text-xl text-gray-200 font-semibold p-2 rounded-md">
-                <h4>Social & Economic Factors</h4>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Total Overdose Cases</div>
-                    <div class="mt-1 text-center text-sm font-bold text-gray-700">2024</div>
-                    <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ odreferrals_count }}</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Graph here</div>
-                </div>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="flex flex-col flex-1/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Fatal vs. Non-fatal Overdoses</div>
-                    <div class="text-4xl text-center mt-2 text-black font-extrabold">{{ patients_count }}</div>
-                    <div class="mt-1 text-center text-md text-gray-700">{{ od_rate }} ODs/100k</div>
-                    <div class="mt-1 text-center text-md text-gray-700">{{ od_fatality_rate }} Deaths/100k</div>
-                </div>
-                <div class="flex flex-col flex-3/4 p-6 bg-gray-200 rounded-md min-w-[200px]">
-                    <div class="text-center text-md text-gray-800 font-normal">Graph here</div>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-xl text-red-400 font-semibold">
+                        <h3>Social & Economic Factors</h3>
+                    </div>
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4"></div>
+                    </div>
                 </div>
             </div>
         </div>

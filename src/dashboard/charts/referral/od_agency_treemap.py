@@ -61,8 +61,9 @@ def build_chart_od_agency_treemap(theme):
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        export_filename="pafd_cpm_agency_treemap",
+        export_filename="pafd_cpm_chart_agency_treemap",
         scroll_zoom=False,
+        margin=dict(t=0, l=0, r=0, b=0),
     )
 
     return plot(fig, output_type="div", config=fig._config)
