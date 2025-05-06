@@ -24,7 +24,7 @@ from .charts.overdose.od_referral_delay import *
 from .charts.overdose.od_sus_drug import *
 # from .charts.overdose.od_narcan_given import *
 
-from .charts.referral.od_agency_treemap import build_chart_od_agency_treemap
+# from .charts.referral.od_agency_treemap import build_chart_od_agency_treemap
 
 
 def dashboard(request):
@@ -74,7 +74,7 @@ def referrals(request):
     title = "Referrals"
     description = "This is a Referrals page"
     
-    fig_agency_treemap      = build_chart_od_agency_treemap(theme="dark")
+    # fig_agency_treemap      = build_chart_od_agency_treemap(theme="dark")
 
     return render(
         request,
@@ -82,7 +82,7 @@ def referrals(request):
         {
             "title":                        title,
             "description":                  description,
-            "fig_agency_treemap":           fig_agency_treemap,
+            # "fig_agency_treemap":           fig_agency_treemap,
             "theme": theme,
         },
     )
