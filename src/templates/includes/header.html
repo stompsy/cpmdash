@@ -5,7 +5,8 @@
                 <div class="flex items-center">
                     <div class="shrink-0">
                         {% with request.resolver_match.url_name as url_name %}
-                        <a href="{% url 'index' %}">
+                        {% comment %} {% url 'index' %} {% endcomment %}
+                        <a href="#">
                             <svg class="size-8 text-white hover:text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                                 <path fill-rule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.546 3.75 3.75 0 0 1 3.255 3.718Z" clip-rule="evenodd" />
                             </svg>
@@ -15,11 +16,13 @@
                     <div class="hidden md:block">
                         <div class="ml-10 flex items-baseline space-x-4">
                             {% with request.resolver_match.url_name as url_name %}
-                            <a href="{% url 'index' %}" class="{% if url_name == 'index' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Solutions</a>
+                            {% comment %} {% url 'index' %} {% endcomment %}
+                            <a href="#" class="{% if url_name == 'index' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Solutions</a>
                             <!-- Profile dropdown -->
                             <div x-data="{ dashLinksOpen: false }" @mouseenter="dashLinksOpen = true" @mouseleave="dashLinksOpen = false" class="relative">
-                                <a @mouseenter="dashLinksOpen = true" href="{% url 'dashboard' %}" class="{% if url_name == 'dashboard' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Dashboard</a>
-                                <div
+                                {% comment %} {% url 'dashboard' %} {% endcomment %}
+                                <a @mouseenter="dashLinksOpen = true" href="#" class="{% if url_name == 'dashboard' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Dashboard</a>
+                                {% comment %} <div
                                     x-show="dashLinksOpen"
                                     x-cloak
                                     x-transition:enter="transition ease-out duration-100"
@@ -34,9 +37,10 @@
                                     <a href="{% url 'referrals' %}" class="block px-4 py-2 text-sm text-gray-700 border-1 border-transparent hover:bg-gray-200 hover:border-1 hover:border-gray-500" role="menuitem" tabindex="-1" id="dash-link-item-1">Referrals</a>
                                     <a href="{% url 'odreferrals' %}" class="block px-4 py-2 text-sm text-gray-700 border-1 border-transparent hover:bg-gray-200 hover:border-1 hover:border-gray-500" role="menuitem" tabindex="-1" id="dash-link-item-2">PORT Referrals</a>
                                     <a href="{% url 'encounters' %}" class="block px-4 py-2 text-sm text-gray-700 border-1 border-transparent hover:bg-gray-200 hover:border-1 hover:border-gray-500 rounded-b-md" role="menuitem" tabindex="-1" id="dash-link-item-3">Encounters</a>
-                                </div>
+                                </div> {% endcomment %}
                             </div>
-                            <a href="{% url 'timeline' %}" class="{% if url_name == 'timeline' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Timeline</a>
+                            {% comment %} {% url 'timeline' %} {% endcomment %}
+                            <a href="#" class="{% if url_name == 'timeline' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Timeline</a>
                             {% endwith %}
                         </div>
                     </div>
@@ -66,21 +70,22 @@
                                     </svg>
                                 </button>
                             </div>
+                            {% comment %} x-show="profileOpen"
+                            x-cloak
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="transform opacity-0 scale-95"
+                            x-transition:enter-end="transform opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="transform opacity-100 scale-100"
+                            x-transition:leave-end="transform opacity-0 scale-95"
+                            @click.away="profileOpen = false" 
                             <div
-                                x-show="profileOpen"
-                                x-cloak
-                                x-transition:enter="transition ease-out duration-100"
-                                x-transition:enter-start="transform opacity-0 scale-95"
-                                x-transition:enter-end="transform opacity-100 scale-100"
-                                x-transition:leave="transition ease-in duration-75"
-                                x-transition:leave-start="transform opacity-100 scale-100"
-                                x-transition:leave-end="transform opacity-0 scale-95"
-                                @click.away="profileOpen = false"
                                 class="absolute right-0 z-10 mt-1 w-44 origin-top-right rounded-md bg-white ring-1 shadow-lg ring-black/5 focus:outline-hidden" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                                 <a href="{% url 'index' %}" class="block px-4 py-2 text-sm text-gray-700 border-2 border-transparent hover:bg-gray-200 hover:border-2 hover:border-gray-500 rounded-t-md" role="menuitem" tabindex="-1" id="user-menu-item-0">Your Profile</a>
                                 <a href="{% url 'dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 border-2 border-transparent hover:bg-gray-200 hover:border-2 hover:border-gray-500" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a>
                                 <a href="{% url 'timeline' %}" class="block px-4 py-2 text-sm text-gray-700 border-2 border-transparent hover:bg-gray-200 hover:border-2 hover:border-gray-500 rounded-b-md" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a>
                             </div>
+                            {% endcomment %}
                         </div>
                     </div>
                 </div>
@@ -112,9 +117,12 @@
         >
             <div class="space-y-1 px-2 pt-2 pb-3 sm:px-3">
                 {% with request.resolver_match.url_name as url_name %}
-                <a href="{% url 'index' %}" class="{% if url_name == 'index' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Case Studies</a>
-                <a href="{% url 'dashboard' %}" class="{% if url_name == 'dashboard' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Dashboard</a>
-                <a href="{% url 'timeline' %}" class="{% if url_name == 'timeline' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Timeline</a>
+                {% comment %} {% url 'index' %} {% endcomment %}
+                <a href="#" class="{% if url_name == 'index' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Case Studies</a>
+                {% comment %} {% url 'dashboard' %} {% endcomment %}
+                <a href="#" class="{% if url_name == 'dashboard' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Dashboard</a>
+                {% comment %} {% url 'timeline' %} {% endcomment %}
+                <a href="#" class="{% if url_name == 'timeline' %}bg-gray-900 text-white {% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %} rounded-md px-3 py-2 text-sm font-medium">Timeline</a>
                 {% endwith %}
             </div>
             <div class="border-t border-gray-700 pt-4 pb-3">

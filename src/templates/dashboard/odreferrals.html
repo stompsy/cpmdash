@@ -4,84 +4,16 @@
 {% block title %}{{ title }}{% endblock title %}
 
 {% block heading %}
-<header>
+<section>
     <div class="flex flex-col mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 justify-between bg-gray-900">
         <h1 class="font-black tracking-tight text-gray-100">{{ title }}</h1>
         <h3 class="font-roboto text-2xl md:-translate-y-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-white">{{ description }}</h3>
     </div>
-</header>
+</section>
 {% endblock heading %}
-
-{% comment %}
-<div class="flex justify-end text-sm text-blue-600 mb-2">
-    <a href="?theme=dark" class="hover:underline">Dark Mode</a>
-    <a href="?theme=light" class="mr-4 hover:underline">Light Mode</a>
-</div>
-{% endcomment %}
 
 {% block content %}
 <main>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-xl text-red-400 font-semibold">
-                        <h3>General Statistics</h3>
-                    </div>
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4">
-                            Correlation Between Age and Sex
-                        </div>
-                        {% autoescape off %}
-                        {{ od_age_sex|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Correlation Between Age and Race
-                        </div>
-                        {% autoescape off %}
-                        {{ od_age_race|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Overdoses by Living Situation and Outcome
-                        </div>
-                        {% autoescape off %}
-                        {{ od_living_sit|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Overdoses by Insurance Type and Outcome
-                        </div>
-                        {% autoescape off %}
-                        {{ od_insurance|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
     <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
             <div class="flex flex-col gap-4">
@@ -109,34 +41,6 @@
                         </div>
                         {% autoescape off %}
                         {{ fig_density_map|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Overdoses by Working Hours
-                        </div>
-                        {% autoescape off %}
-                        {{ od_work_hours|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Overdoses by Hour of Day
-                        </div>
-                        {% autoescape off %}
-                        {{ chart_od_hist_hourly|safe }}
                         {% endautoescape %}
                     </div>
                 </div>
@@ -194,20 +98,6 @@
                 </div>
             </div>
         </div>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Narcan Given
-                        </div>
-                        {% autoescape off %}
-                        {{ fig_od_narcan_given|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
     </section>
     <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
@@ -221,21 +111,7 @@
                             CPR Administered
                         </div>
                         {% autoescape off %}
-                        {{ charts.cpr_administered|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Police ITA
-                        </div>
-                        {% autoescape off %}
-                        {{ charts.narcan_given|safe }}
+                        {{ fig_cpr_admin|safe }}
                         {% endautoescape %}
                     </div>
                 </div>
@@ -249,7 +125,7 @@
                             Disposition
                         </div>
                         {% autoescape off %}
-                        {{ charts.disposition|safe }}
+                        {{ fig_call_disposition|safe }}
                         {% endautoescape %}
                     </div>
                 </div>
@@ -269,6 +145,48 @@
                         </div>
                         {% autoescape off %}
                         {{ od_referral_delay|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Overdoses by Working Hours
+                        </div>
+                        {% autoescape off %}
+                        {{ od_work_hours|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4">
+                            CPM Notification
+                        </div>
+                        {% autoescape off %}
+                        {{ fig_cpm_notification|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg text-slate-200 font-normal">
+                        <div class="p-4">
+                            CPM Disposition
+                        </div>
+                        {% autoescape off %}
+                        {{ fig_cpm_disposition|safe }}
                         {% endautoescape %}
                     </div>
                 </div>
@@ -294,10 +212,62 @@
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
                     <div class="text-xl text-red-400 font-semibold">
-                        <h3>Social & Economic Factors</h3>
+                        <h3>Social and Economic Factors</h3>
+                    </div>
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Overdoses by Living Situation and Outcome
+                        </div>
+                        {% autoescape off %}
+                        {{ od_living_sit|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Overdoses by Insurance Type and Outcome
+                        </div>
+                        {% autoescape off %}
+                        {{ od_insurance|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-xl text-red-400 font-semibold">
+                        <h3>General Statistics</h3>
                     </div>
                     <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4"></div>
+                        <div class="p-4">
+                            Correlation Between Age and Sex
+                        </div>
+                        {% autoescape off %}
+                        {{ od_age_sex|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-lg font-normal">
+                        <div class="p-4">
+                            Correlation Between Age and Race
+                        </div>
+                        {% autoescape off %}
+                        {{ od_age_race|safe }}
+                        {% endautoescape %}
                     </div>
                 </div>
             </div>

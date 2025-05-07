@@ -6,21 +6,23 @@ from ...utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
 
 
-odreferrals = ODReferrals.objects.all()
-df = pd.DataFrame.from_records(
-    odreferrals.values(
-        "patient_age",
-        "patient_race",
-    )
-)
-
-# Count and sort by number of data points per race
-race_order = (
-    df["patient_race"].value_counts().sort_values(ascending=False).index.tolist()
-)
-
 # Build the chart
 def build_chart_od_age_race(theme):
+
+    odreferrals = ODReferrals.objects.all()
+    df = pd.DataFrame.from_records(
+        odreferrals.values(
+            "patient_age",
+            "patient_race",
+        )
+    )
+
+    # Count and sort by number of data points per race
+    race_order = (
+        df["patient_race"].value_counts().sort_values(ascending=False).index.tolist()
+    )
+
+
     fig = px.box(
         df,
         x="patient_race",

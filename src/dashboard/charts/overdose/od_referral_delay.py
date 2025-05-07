@@ -36,5 +36,6 @@ def build_chart_referral_delay(theme="light"):
         fig,
         theme=theme,
         export_filename="pafd_cpm_od_delay_in_referral",
+        scroll_zoom=False,
     )
     return plot(fig, output_type="div", config=fig._config)

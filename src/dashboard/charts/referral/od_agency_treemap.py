@@ -7,31 +7,33 @@ from dashboard.models import Referrals
 
 from dashboard.utils.tailwind_colors import TAILWIND_COLORS
 
-referrals = Referrals.objects.all()
-df = pd.DataFrame.from_records(
-    referrals.values(
-        "referral_agency",
-    )
-)
-
-families = [
-    "red", "orange", "amber", "yellow", "lime", "green",
-    "emerald", "teal", "cyan", "sky", "blue", "indigo",
-    "violet", "purple", "fuchsia", "pink", "rose", "slate",
-    "gray", "zinc", "neutral", "stone",
-]
-tokens = [f"{hue}-{shade}" for hue in families for shade in (600, 500, 400, 300)]
-color_sequence = [TAILWIND_COLORS[token] for token in tokens]
-
-top100 = (
-    df["referral_agency"]
-    .dropna()
-    .value_counts()
-    .nlargest(100)
-    .reset_index()
-)
 
 def build_chart_od_agency_treemap(theme):
+
+    referrals = Referrals.objects.all()
+    df = pd.DataFrame.from_records(
+        referrals.values(
+            "referral_agency",
+        )
+    )
+
+    families = [
+        "red", "orange", "amber", "yellow", "lime", "green",
+        "emerald", "teal", "cyan", "sky", "blue", "indigo",
+        "violet", "purple", "fuchsia", "pink", "rose", "slate",
+        "gray", "zinc", "neutral", "stone",
+    ]
+    tokens = [f"{hue}-{shade}" for hue in families for shade in (600, 500, 400, 300)]
+    color_sequence = [TAILWIND_COLORS[token] for token in tokens]
+
+    top100 = (
+        df["referral_agency"]
+        .dropna()
+        .value_counts()
+        .nlargest(100)
+        .reset_index()
+    )
+
     fig = px.treemap(
         top100,
         path=["referral_agency"],   # <-- uses that column

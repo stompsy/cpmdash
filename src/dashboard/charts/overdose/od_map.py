@@ -43,7 +43,7 @@ def build_chart_od_map(theme):
         size_max=25,  # max size of bubble
         color="overdose_outcome",
         color_continuous_scale="Reds",
-        zoom=10,
+        zoom=11.5,
         mapbox_style="open-street-map",
         title=None,
         hover_data={"count": True, "lat": False, "long": False},
@@ -52,7 +52,7 @@ def build_chart_od_map(theme):
     # Center map on Port Angeles, WA
     fig.update_layout(
         mapbox=dict(
-            center=dict(lat=48.1181, lon=-123.4550),  # Port Angeles, WA
+            center=dict(lat=48.1125, lon=-123.4550),  # Port Angeles, WA
         ),
         legend_title_text=None,
     )

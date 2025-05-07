@@ -11,7 +11,7 @@ qs = (
         ODReferrals.objects
         .values('suspected_drug')
         .annotate(count=Count('ID'))
-        .order_by('count')  # smallest → largest
+        .order_by('count').reverse()  # smallest → largest
     )
 
 df = pd.DataFrame(qs).fillna({'suspected_drug': 'Unknown'})
@@ -22,11 +22,6 @@ df['drug_group'] = df['suspected_drug'].apply(
 
 def build_chart_sus_drug(theme):
     
-    color_map = {
-        'Fentanyl-related': '#FF4136',
-        'Other':            '#888888',
-    }
-    
     fent_first = (
         df[df['drug_group'] == 'Fentanyl-related']['suspected_drug']
         .to_list()
@@ -34,13 +29,18 @@ def build_chart_sus_drug(theme):
         .to_list()
     )
     
+    custom_map = {
+        'Fentanyl-related':    '#EF553B',
+        'Other':               '#636EFA',
+    }
+    
     fig = px.bar(
         df,
         x='count',
         y='suspected_drug',
         orientation='h',
         color='drug_group',
-        color_discrete_map=color_map,
+        color_discrete_map=custom_map,
         category_orders={'suspected_drug': fent_first},
         labels={
             'count': 'Number of Overdoses',

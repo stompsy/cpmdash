@@ -5,26 +5,36 @@ from .models import *
 
 from .charts.od_utils import *
 
+# General statistics
 from .charts.overdose.od_age_race import *
 from .charts.overdose.od_age_sex import *
 from .charts.overdose.od_stack_livingsituation import *
 from .charts.overdose.od_stack_insurance import *
 
+# Trends over time
 from .charts.overdose.od_hist_monthly import *
 from .charts.overdose.od_density_heatmap import *
 from .charts.overdose.od_bar_workhours import *
 from .charts.overdose.od_hist_hourly import *
 from .charts.overdose.od_repeats_scatter import *
 
+# Geographic
 from .charts.overdose.od_map import *
 
-from .charts.overdose.od_fatality_charts import *
+# CPM specific metrics
 from .charts.overdose.od_referral_delay import *
+from .charts.overdose.od_cpm_notification import *
+from .charts.overdose.od_cpm_disposition import *
 
+# Substance specific
 from .charts.overdose.od_sus_drug import *
-# from .charts.overdose.od_narcan_given import *
 
-# from .charts.referral.od_agency_treemap import build_chart_od_agency_treemap
+# Emergency response metrics
+from .charts.overdose.od_cpr_admin import *
+from .charts.overdose.od_call_disposition import *
+
+# Referrals
+from .charts.referral.od_agency_treemap import build_chart_od_agency_treemap
 
 
 def dashboard(request):
@@ -74,7 +84,7 @@ def referrals(request):
     title = "Referrals"
     description = "This is a Referrals page"
     
-    # fig_agency_treemap      = build_chart_od_agency_treemap(theme="dark")
+    fig_agency_treemap      = build_chart_od_agency_treemap(theme="dark")
 
     return render(
         request,
@@ -82,7 +92,7 @@ def referrals(request):
         {
             "title":                        title,
             "description":                  description,
-            # "fig_agency_treemap":           fig_agency_treemap,
+            "fig_agency_treemap":           fig_agency_treemap,
             "theme": theme,
         },
     )
@@ -93,44 +103,35 @@ def odreferrals(request):
     theme = get_theme_from_request(request)
     title = "PORT Referrals"
     description = "Key metrics for analyzing Post Overdose Response Team data"
-    
-    od_counts = get_odreferral_counts()
-    copa_population = 20_000
-    fatal_dispositions = ["CPR attempted", "DOA"]
-    years = [2024, 2025]
-    
-    od_stats = { y: get_od_metrics(y, copa_population) for y in years }
-
-    od_fatality_rate_2025 = get_od_fatality_rate_year(
-        year=2025,
-        fatal_dispositions=fatal_dispositions,
-        copa_population=copa_population
-    )
-    
-    od_fatality_rate_2024 = get_od_fatality_rate_year(
-        year=2024,
-        fatal_dispositions=fatal_dispositions,
-        copa_population=copa_population
-    )
+    # od_counts = get_odreferral_counts()
         
-    
+    # General statistics
     fig_od_age_race         = build_chart_od_age_race(theme="dark")
     fig_od_age_sex          = build_chart_od_age_sex(theme="dark")
     fig_od_living_sit       = build_chart_od_stack_livingsituation(theme="dark")
     fig_od_insurance        = build_chart_od_stack_insurance(theme="dark")
     
+    # Trends over time
     fig_od_monthly          = build_chart_od_hist_monthly(theme="dark")
     fig_density_map         = build_chart_od_density_heatmap(theme="dark")
     fig_od_work_hours       = build_chart_od_work_hours(theme="dark")
     fig_od_hist_hourly      = build_chart_od_hist_hourly(theme="dark")
     fig_repeats_scatter     = build_chart_repeats_scatter(theme="dark")
     
+    # Geographic
     fig_od_map              = build_chart_od_map(theme="dark")
     
+    # CPM specific metrics
     fig_referral_delay      = build_chart_referral_delay(theme="dark")
+    fig_cpm_notification    = build_chart_cpm_notification(theme="dark")
+    fig_cpm_disposition     = build_chart_cpm_disposition(theme="dark")
     
+    # Substance specific
     fig_od_sus_drug         = build_chart_sus_drug(theme="dark")
-    # fig_od_narcan_given     = build_chart_narcan_given(theme="dark")
+    
+    # Emergency response metrics
+    fig_cpr_admin           = build_chart_cpr_admin(theme="dark")
+    fig_call_disposition    = build_chart_call_disposition(theme="dark")
     
     return render(
         request,
@@ -138,14 +139,8 @@ def odreferrals(request):
         {
             "title":                        title,
             "description":                  description,
-            # "chart_od_fatal_nfatal": chart_od_fatal_nfatal,
-            # "chart_od_line_hourly": chart_od_line_hourly,
-            
-            'total_odreferrals':            od_counts['total'],
-            'by_year':                      od_counts['by_year'],
-            "od_stats":                     od_stats,
-            "od_fatality_rate_2025":        od_fatality_rate_2025,
-            "od_fatality_rate_2024":        od_fatality_rate_2024,
+            # 'total_odreferrals':            od_counts['total'],
+            # 'by_year':                      od_counts['by_year'],
             
             "od_age_race":                  fig_od_age_race,
             "od_age_sex":                   fig_od_age_sex,
@@ -161,9 +156,13 @@ def odreferrals(request):
             "fig_od_map":                   fig_od_map,
             
             "od_referral_delay":            fig_referral_delay,
+            "fig_cpm_notification":         fig_cpm_notification,
+            "fig_cpm_disposition":          fig_cpm_disposition,
             
             "fig_od_sus_drug":              fig_od_sus_drug,
-            # "fig_od_narcan_given":          fig_od_narcan_given,
+            
+            "fig_cpr_admin":                fig_cpr_admin,
+            "fig_call_disposition":         fig_call_disposition,
             
             "theme": theme,
         },
