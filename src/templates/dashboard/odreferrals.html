@@ -7,7 +7,7 @@
 <section>
     <div class="flex flex-col mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 justify-between bg-gray-900">
         <h1 class="font-black tracking-tight text-gray-100">{{ title }}</h1>
-        <h3 class="font-roboto text-2xl md:-translate-y-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-white">{{ description }}</h3>
+        <h3 class="font-roboto text-2xl md:-translate-y-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-200 to-white">{{ description }}</h3>
     </div>
 </section>
 {% endblock heading %}
@@ -15,15 +15,43 @@
 {% block content %}
 <main>
     <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+        <!-- ADD OVERDOSE COUNT ?-->
+    </section>
+    <section class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+        <!-- Section title -->
+        <h3 class="mb-4 text-xl text-red-400 font-semibold">Overdose Trends Over Time</h3>
+
+        <!-- Rationale -->
+        <p class="mb-4">
+            Tracking monthly overdose counts (stacked by fatal vs. non-fatal) helps us 
+            evaluate program impact, allocate resources where they’re needed most, 
+            and spot emerging risks in near real-time.
+        </p>
+
+        <!-- Key insights -->
+        <ul class="list-disc list-inside space-y-2 mb-6">
+            <li>
+                <span class="font-semibold">Fatal overdoses</span> in Port Angeles fell from 
+                <span class="font-semibold">51 in 2023</span> to 
+                <span class="font-semibold">5 in 2024</span> — a >90% reduction.
+            </li>
+            <li>
+                <span class="font-semibold">Overdose calls for service</span> steadily declined 
+                between <span class="font-semibold">May 2024</span> and 
+                <span class="font-semibold">November 2024</span>.
+            </li>
+            <li>
+                Stacked bars show monthly totals by outcome, while daily markers reveal spikes 
+                and troughs at a finer granularity.
+            </li>
+        </ul>
+        <!-- Chart container -->
+        <div id="od_trend_chart">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
-                    <div class="text-xl text-red-400 font-semibold">
-                        <h3>Trends over time</h3>
-                    </div>
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4">
-                            Overdoses by Year and Month [<span class="bg-red-500">2024 Selected</span>]
+                    <div class="text-lg text-slate-100 font-normal">
+                        <div class="py-4">
+                            Overdoses by Year and Month [<span class="bg-slate-700 text-slate-300">2024 Selected</span>]
                         </div>
                         {% autoescape off %}
                         {{ od_monthly|safe }}
@@ -32,6 +60,14 @@
                 </div>
             </div>
         </div>
+        <!-- Chart description -->
+        <p class="text-sm italic">
+            <strong>Chart description:</strong> Monthly overdose counts (fatal vs. non-fatal), 
+            Jan 2023–Dec 2024. Use the built-in range selector or year-buttons to zoom into 
+            any period.
+        </p>
+    </section>
+    <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
@@ -46,6 +82,8 @@
                 </div>
             </div>
         </div>
+    </section>
+    <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
@@ -117,6 +155,8 @@
                 </div>
             </div>
         </div>
+    </section>
+    <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
@@ -150,6 +190,8 @@
                 </div>
             </div>
         </div>
+    </section>
+    <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
@@ -164,6 +206,8 @@
                 </div>
             </div>
         </div>
+    </section>
+    <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
@@ -178,6 +222,8 @@
                 </div>
             </div>
         </div>
+    </section>
+    <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
@@ -225,6 +271,8 @@
                 </div>
             </div>
         </div>
+    </section>
+    <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
@@ -258,6 +306,8 @@
                 </div>
             </div>
         </div>
+    </section>
+    <section>
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col min-w-[200px]">
