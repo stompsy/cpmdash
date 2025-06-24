@@ -123,7 +123,7 @@ def odreferrals_trends(request):
     fig_density_map         = build_chart_od_density_heatmap(theme="dark")
     fig_od_work_hours       = build_chart_od_work_hours(theme=theme)
     fig_od_hist_hourly      = build_chart_od_hist_hourly(theme=theme)
-    fig_repeats_scatter     = build_chart_repeats_scatter(theme=theme)
+    fig_repeats_scatter     = build_chart_repeats_scatter(theme="dark")
 
     return render(
         request,

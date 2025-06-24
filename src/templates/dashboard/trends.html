@@ -117,6 +117,14 @@
                                                 {{ fig_density_map|safe }}
                                                 {% endautoescape %}
                                             </div>
+                                            <div class="text-2xl text-slate-100 font-normal">
+                                                <div class="py-4">
+                                                    Repeat overdoses by Case
+                                                </div>
+                                                {% autoescape off %}
+                                                {{ fig_repeats_scatter|safe }}
+                                                {% endautoescape %}
+                                            </div>
                                         </div>
                                     </div>
 
