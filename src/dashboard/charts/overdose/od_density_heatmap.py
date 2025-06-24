@@ -19,13 +19,19 @@ def build_chart_od_density_heatmap(theme):
 
     df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
     df["od_date__hour"] = df["od_date"].dt.hour
+    
+    hours = list(range(24))
+    df["od_date__hour"] = pd.Categorical(
+        df["od_date__hour"], categories=hours, ordered=True
+    )
+    
     df["od_date__day_of_week_full"] = df["od_date"].dt.day_name()
     df["od_date__day_of_week"] = df["od_date__day_of_week_full"].str[:3]
 
     # Order days
     days_order = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     df["od_date__day_of_week"] = pd.Categorical(
-        df["od_date__day_of_week"], categories=days_order, ordered=True
+        df["od_date__day_of_week"], categories=days_order, ordered=False
     )
 
     # Pivot table
@@ -34,6 +40,7 @@ def build_chart_od_density_heatmap(theme):
         columns="od_date__hour",
         aggfunc="size",
         fill_value=0,
+        observed=False,    # keep the current (in-place) behavior
     )
 
     # Lookup full names for hover
@@ -116,6 +123,6 @@ def build_chart_od_density_heatmap(theme):
         scroll_zoom=False,
         x_title="Hour of Day",
         y_title="Day of Week",
-        margin=dict(t=0, l=75, r=20, b=65),
+        margin=dict(t=0, l=60, r=20, b=65),
     )
     return plot(fig, output_type="div", config=fig._config)

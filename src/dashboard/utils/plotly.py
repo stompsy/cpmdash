@@ -20,14 +20,14 @@ def style_plotly_layout(
 ):
 
     if theme == "dark":
-        axis_font_color =   TAILWIND_COLORS["slate-500"]
-        font_color =        TAILWIND_COLORS["slate-500"]
+        axis_font_color =   TAILWIND_COLORS["slate-200"]
+        font_color =        TAILWIND_COLORS["slate-200"]
         plot_bg =           TAILWIND_COLORS["transparent"]
         paper_bg =          TAILWIND_COLORS["transparent"]
         grid_color =        TAILWIND_COLORS["gray-800"]
     else:
-        axis_font_color =   TAILWIND_COLORS["slate-500"]
-        font_color =        TAILWIND_COLORS["slate-500"]
+        axis_font_color =   TAILWIND_COLORS["slate-800"]
+        font_color =        TAILWIND_COLORS["slate-800"]
         plot_bg =           TAILWIND_COLORS["white"]
         paper_bg =          TAILWIND_COLORS["white"]
         grid_color =        TAILWIND_COLORS["slate-800"]

@@ -96,7 +96,7 @@ def build_chart_od_hist_monthly(theme):
 
     fig.update_layout(
         bargap=0.1,
-        xaxis_range=["2024-03-01", "2024-12-31"],
+        # xaxis_range=["2024-03-01", "2024-12-31"],
     )
 
     fig = style_plotly_layout(
@@ -105,7 +105,7 @@ def build_chart_od_hist_monthly(theme):
         export_filename="pafd_cpm_chart_hist_monthly",
         scroll_zoom=False,
         margin=dict(t=0, l=20, r=20, b=55),
-        x_title="Date range selector [2024 selected]",
+        x_title="Date range selector",
         # y_title="Count of Overdoses",
     )
 

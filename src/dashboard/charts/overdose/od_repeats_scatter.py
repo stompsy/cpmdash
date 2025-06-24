@@ -35,9 +35,11 @@ def build_chart_repeats_scatter(theme):
     df = df[df["patient_id"].isin(repeat_ids)].copy()
 
     # Map patient age and short sex
-    age_map = df.groupby("patient_id")["patient_age"].min()
+    age_map = df.groupby("patient_id", observed=False)["patient_age"].min()
     sex_map = (
-        df.groupby("patient_id")["patient_sex"].last().map({"Male": "M", "Female": "F"})
+        df.groupby("patient_id", observed=False)["patient_sex"]
+        .last()
+        .map({"Male": "M", "Female": "F"})
     )
     df["merged_label"] = df["patient_id"].map(
         lambda pid: f"{age_map[pid]} {sex_map[pid]}"
@@ -54,7 +56,11 @@ def build_chart_repeats_scatter(theme):
 
     # Sort and calculate time difference
     df.sort_values(by=["merged_label", "od_date"], inplace=True)
-    df["days_since_last_od"] = df.groupby("merged_label")["od_date"].diff().dt.days
+    df["days_since_last_od"] = (
+        df.groupby("merged_label", observed=False)["od_date"]
+        .diff()
+        .dt.days
+    )
     df["days_since_last_od"] = df["days_since_last_od"].fillna("First OD")
 
     # Assign darker color palette

@@ -1,25 +1,83 @@
 {% load static %}
 <!DOCTYPE html>
-<html class="h-full bg-slate-800" lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>{% block title %} {% endblock title %}</title>
-		<link rel="stylesheet" href="{% static 'src/css/output.css' %}">
-		<link rel="stylesheet" href="{% static 'src/css/style.css' %}">
-		<link rel="stylesheet" href="https://use.typekit.net/zsd4udt.css">
-		{% comment %} <script src="{% static 'src/js/htmx.min.js' %}"></script> {% endcomment %}
-		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
-		<style type="text/tailwindcss">
-			[x-cloak] { display: none !important; }
-		</style>
-	</head>
-	<body class="h-full font-droid text-gray-100">
-		<div class="min-h-full">
-			{% include 'includes/header.html' %}
-			{% block heading %} {% endblock heading %}
-			{% block content %} {% endblock content %}
-			{% include 'includes/footer.html' %}
-		</div>
-	</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>{% block title %} {% endblock title %}</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'src/media/favicon.ico' %}"/>
+    <link rel="stylesheet" href="{% static 'src/css/output.css' %}" />
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </head>
+  <body
+    x-data="{ page: 'Trends', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+      darkMode = JSON.parse(localStorage.getItem('darkMode'));
+      $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    {% include 'partials/preloader.html' %}
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      {% include 'partials/sidebar.html' %}
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        {% include 'partials/overlay.html' %}
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        {% include 'partials/header.html' %}
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="p-6 mx-auto">
+            <div class="grid grid-cols-12 gap-4 md:gap-6">
+
+              <div class="col-span-12 space-y-6 xl:col-span-12">
+                <!-- Metric Group One -->
+                {% block heading %} {% endblock heading %}
+                <!-- Metric Group One -->
+              </div>
+
+              <div class="col-span-12 space-y-6 xl:col-span-12">
+                <!-- Metric Group One -->
+                {% include 'partials/metric-group/metric-group-01.html' %}
+                <!-- Metric Group One -->
+              </div>
+
+              <div class="col-span-12 xl:col-span-12">
+                <!-- ====== Table One Start -->
+                {% block content %} {% endblock content %}
+                <!-- ====== Table One End -->
+              </div>
+
+              {% comment %} <div class="col-span-12 xl:col-span-12">
+                <!-- ====== Table One Start -->
+                {% include 'partials/table/table-01.html' %}
+                <!-- ====== Table One End -->
+              </div> {% endcomment %}
+            </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
 </html>

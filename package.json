@@ -1,8 +1,26 @@
 {
-  "dependencies": {
-    "@tailwindcss/cli": "^4.1.4",
-    "tailwindcss": "^4.1.4"
+  "name": "cpmdash",
+  "version": "0.0.1",
+  "description": "CPM Dashboard is a web application for monitoring and analyzing data collected by Community Paramedics at Port Angeles Fire Department.",
+  "keywords": [],
+  "author": {
+    "name": "Brian Gerdes",
+    "email": "brian.gerdes@protonmail.com"
   },
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.8",
+    "@tailwindcss/forms": "^0.5.10",
+    "tailwindcss": "^4.1.8"
+  },
+  "dependencies": {
+    "@alpinejs/persist": "^3.14.9",
+    "alpinejs": "^3.14.9",
+    "apexcharts": "^4.7.0",
+    "chart.js": "^4.4.9",
+    "jsvectormap": "^1.6.0"
+  },
+  "main": "index.js",
   "scripts": {
     "dev": "npx @tailwindcss/cli -i src/staticfiles/src/css/input.css -o src/staticfiles/src/css/output.css --watch",
     "build": "npx @tailwindcss/cli -i src/staticfiles/src/css/input.css -o src/staticfiles/src/css/output.css --minify"

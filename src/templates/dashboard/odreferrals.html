@@ -1,327 +1,149 @@
-{% extends 'base.html' %}
+
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+        />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>{% block title %} {% endblock title %}</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'src/media/favicon.ico' %}"/>
+        <link rel="stylesheet" href="{% static 'src/css/output.css' %}" />
+        <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    </head>
+    <body
+        x-data="{ page: 'Overview', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false, 'isProfileInfoModal': false, 'isProfileAddressModal': false }"
+        x-init="
+            darkMode = JSON.parse(localStorage.getItem('darkMode'));
+            $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+        :class="{'dark bg-gray-900': darkMode === true}"
+    >
+        <!-- ===== Preloader Start ===== -->
+        {% include 'partials/preloader.html' %}
+        <!-- ===== Preloader End ===== -->
 
-{% block title %}{{ title }}{% endblock title %}
+        <!-- ===== Page Wrapper Start ===== -->
+        <div class="flex h-screen overflow-hidden">
+            <!-- ===== Sidebar Start ===== -->
+            {% include 'partials/sidebar.html' %}
+            <!-- ===== Sidebar End ===== -->
 
-{% block heading %}
-<section>
-    <div class="flex flex-col mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 justify-between bg-gray-900">
-        <h1 class="font-black tracking-tight text-gray-100">{{ title }}</h1>
-        <h3 class="font-roboto text-2xl md:-translate-y-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-200 to-white">{{ description }}</h3>
-    </div>
-</section>
-{% endblock heading %}
+            <!-- ===== Content Area Start ===== -->
+            <div
+                class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+            >
+                <!-- Small Device Overlay Start -->
+                {% include 'partials/overlay.html' %}
+                <!-- Small Device Overlay End -->
 
-{% block content %}
-<main>
-    <section>
-        <!-- ADD OVERDOSE COUNT ?-->
-    </section>
-    <section class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-        <!-- Section title -->
-        <h3 class="mb-4 text-xl text-red-400 font-semibold">Overdose Trends Over Time</h3>
+                <!-- ===== Header Start ===== -->
+                {% include 'partials/header.html' %}
+                <!-- ===== Header End ===== -->
 
-        <!-- Rationale -->
-        <p class="mb-4">
-            Tracking monthly overdose counts (stacked by fatal vs. non-fatal) helps us 
-            evaluate program impact, allocate resources where they’re needed most, 
-            and spot emerging risks in near real-time.
-        </p>
+                <!-- ===== Main Content Start ===== -->
+                <main>
+                    <div
+                        class="p-8 mx-auto"
+                    >
+                        <!-- Page Title Section Start -->
+                        <section class="mx-auto dark:bg-gray-900">
+                            <!-- Section title -->
+                            <div class="relative isolate overflow-hidden py-6 sm:py-10 lg:overflow-visible">
+                                <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+                                    <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+                                        <div class="lg:pr-4">
+                                            <div class="lg:max-w-2xl">
+                                                <p class="text-base/7 font-semibold text-brand-500 dark:text-brand-400">Post Overdose Response Team (PORT)</p>
+                                                <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl">
+                                                    Operation Shielding Hope
+                                                </h1>
+                                                <p class="mt-6 text-xl/8 text-gray-700 dark:text-gray-400">
+                                                    Community Paramedics in Port Angeles are leading a groundbreaking initiative to reduce opioid overdoses and provide compassionate, in-field care. By responding directly to overdose scenes, offering medication-assisted treatment, and linking survivors to long-term recovery services, they’re transforming crisis moments into pathways toward hope and healing.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
 
-        <!-- Key insights -->
-        <ul class="list-disc list-inside space-y-2 mb-6">
-            <li>
-                <span class="font-semibold">Fatal overdoses</span> in Port Angeles fell from 
-                <span class="font-semibold">51 in 2023</span> to 
-                <span class="font-semibold">5 in 2024</span> — a >90% reduction.
-            </li>
-            <li>
-                <span class="font-semibold">Overdose calls for service</span> steadily declined 
-                between <span class="font-semibold">May 2024</span> and 
-                <span class="font-semibold">November 2024</span>.
-            </li>
-            <li>
-                Stacked bars show monthly totals by outcome, while daily markers reveal spikes 
-                and troughs at a finer granularity.
-            </li>
-        </ul>
-        <!-- Chart container -->
-        <div id="od_trend_chart">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg text-slate-100 font-normal">
-                        <div class="py-4">
-                            Overdoses by Year and Month [<span class="bg-slate-700 text-slate-300">2024 Selected</span>]
-                        </div>
-                        {% autoescape off %}
-                        {{ od_monthly|safe }}
-                        {% endautoescape %}
+                                    <div class="-mt-12 -ml-12 p-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
+                                        <img class="w-3xl max-w-none rounded-xl bg-gray-900 shadow-xl ring-1 ring-gray-400/10 sm:w-228"
+                                            src="{% static 'src/media/pafd_cpm.jpg' %}"
+                                            alt="Community Paramedic Response Team" />
+                                    </div>
+
+                                    <div class="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+                                        <div class="lg:pr-4">
+                                            <div class="max-w-xl text-base/7 text-gray-700 dark:text-gray-400 lg:max-w-lg">
+                                                <p>
+                                                    In the first months of implementation, Community Medics responded to 23 overdoses. 78% of those individuals were linked to substance use disorder services. When CPMs are not present, that linkage rate drops to just 3%. 
+                                                </p>
+
+                                                <ul role="list" class="mt-8 space-y-8 text-gray-600 dark:text-gray-400">
+                                                    <li class="flex gap-x-3">
+                                                        <svg class="mt-1 size-5 flex-none text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+                                                        </svg>
+                                                        <span>
+                                                            <strong class="font-semibold text-gray-900 dark:text-brand-400">Timely Intervention.</strong> Field-based follow-ups within 72 hours help build trust and reduce repeat overdoses.
+                                                        </span>
+                                                    </li>
+                                                    <li class="flex gap-x-3">
+                                                        <svg class="mt-1 size-5 flex-none text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 3v4.5l-4.5 9A2.25 2.25 0 007.25 21h9.5a2.25 2.25 0 002-3.25l-4.5-9V3" />
+                                                        </svg>
+                                                        <span>
+                                                            <strong class="font-semibold text-gray-900 dark:text-brand-400">Integrated Care.</strong> CPMs provide buprenorphine in the field, reducing withdrawal symptoms that can lead to treatment refusal.
+                                                        </span>
+                                                    </li>
+                                                    <li class="flex gap-x-3">
+                                                        <svg class="mt-1 size-5 flex-none text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M9 17V9m4 8v-5m4 5V5" />
+                                                        </svg>
+                                                        <span>
+                                                            <strong class="font-semibold text-gray-900 dark:text-brand-400">Community Impact.</strong> Overdose fatality rate in Clallam County fell 63% between March 2024 and March 2025.
+                                                        </span>
+                                                    </li>
+                                                </ul>
+
+                                                <p class="mt-8">
+                                                    Through trusted partnerships with PAPD, ReDiscovery, Reflections Counseling, and others, CPMs coordinate services that save lives and relieve pressure on emergency units. Their work exemplifies how public safety-led outreach can turn a moment of crisis into a turning point toward recovery.
+                                                </p>
+
+                                                <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Redefining the Response</h2>
+                                                <p class="mt-6">
+                                                    Operation Shielding Hope represents a shift in how our city responds to addiction. It’s a model rooted in empathy, connection, and evidence-based care—and it’s working. With your continued support, Port Angeles is not only confronting the opioid crisis, but leading the way with a public health-driven solution.
+                                                </p>
+
+                                                <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Opioid Settlement Funds</h2>
+                                                <p class="mt-6">
+                                                    In May of 2022, Attorney General Bob Ferguson announced a $518 million settlement with several major opioid distributors aimed at resolving opioid-related claims. Following City Council approval on July 5, 2023, approximately $1.8M of these funds will be allocated to the City of Port Angeles over the next 18 years to address the opioid crisis, including substance use treatment, access to overdose-reversal drugs, and services to assist with those struggling with addition.
+                                                </p>
+
+                                                <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Goals and Scope</h2>
+                                                <p class="mt-6">
+                                                    The City's goal when distributing these funds is to reduce the impact to public safety services, healthcare facilities, local businesses, and our City residents and visitors through effective and strategic measures, such as treatment, prevention, and education on opioid use and abuse. 
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <!-- Page Title Section End -->
                     </div>
-                </div>
+                </main>
+                <!-- ===== Main Content End ===== -->
             </div>
+            <!-- ===== Content Area End ===== -->
         </div>
-        <!-- Chart description -->
-        <p class="text-sm italic">
-            <strong>Chart description:</strong> Monthly overdose counts (fatal vs. non-fatal), 
-            Jan 2023–Dec 2024. Use the built-in range selector or year-buttons to zoom into 
-            any period.
-        </p>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Density Heatmap of Overdose Incidents by Day and Hour
-                        </div>
-                        {% autoescape off %}
-                        {{ fig_density_map|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Repeat overdoses by Case
-                        </div>
-                        {% autoescape off %}
-                        {{ fig_repeats_scatter|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-xl text-red-400 font-semibold">
-                        <h3>Geographic Analysis</h3>
-                    </div>
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4">
-                            Map of Overdoses in the City of Port Angeles
-                        </div>
-                        {% autoescape off %}
-                        {{ fig_od_map|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-xl text-red-400 font-semibold">
-                        <h3>Substance-Specific Insights</h3>
-                    </div>
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4">
-                            Suspected Drug
-                        </div>
-                        {% autoescape off %}
-                        {{ fig_od_sus_drug|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-xl text-red-400 font-semibold">
-                        <h3>Emergency Response Metrics</h3>
-                    </div>
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4">
-                            CPR Administered
-                        </div>
-                        {% autoescape off %}
-                        {{ fig_cpr_admin|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Disposition
-                        </div>
-                        {% autoescape off %}
-                        {{ fig_call_disposition|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-xl text-red-400 font-semibold">
-                        <h3>CPM-Specific Metrics</h3>
-                    </div>
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4">
-                            Delay in Referral
-                        </div>
-                        {% autoescape off %}
-                        {{ od_referral_delay|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Overdoses by Working Hours
-                        </div>
-                        {% autoescape off %}
-                        {{ od_work_hours|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4">
-                            CPM Notification
-                        </div>
-                        {% autoescape off %}
-                        {{ fig_cpm_notification|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4">
-                            CPM Disposition
-                        </div>
-                        {% autoescape off %}
-                        {{ fig_cpm_disposition|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-xl text-red-400 font-semibold">
-                        <h3>Criminal Justice & Law Enforcement</h3>
-                    </div>
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-xl text-red-400 font-semibold">
-                        <h3>Social and Economic Factors</h3>
-                    </div>
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Overdoses by Living Situation and Outcome
-                        </div>
-                        {% autoescape off %}
-                        {{ od_living_sit|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Overdoses by Insurance Type and Outcome
-                        </div>
-                        {% autoescape off %}
-                        {{ od_insurance|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-xl text-red-400 font-semibold">
-                        <h3>General Statistics</h3>
-                    </div>
-                    <div class="text-lg text-slate-200 font-normal">
-                        <div class="p-4">
-                            Correlation Between Age and Sex
-                        </div>
-                        {% autoescape off %}
-                        {{ od_age_sex|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col min-w-[200px]">
-                    <div class="text-lg font-normal">
-                        <div class="p-4">
-                            Correlation Between Age and Race
-                        </div>
-                        {% autoescape off %}
-                        {{ od_age_race|safe }}
-                        {% endautoescape %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</main>
-{% endblock content %}
+        <!-- ===== Page Wrapper End ===== -->
+
+        <!-- BEGIN MODAL -->
+        {% include 'partials/profile/profile-info-modal.html' %}
+        {% include 'partials/profile/profile-address-modal.html' %}
+        <!-- END MODAL -->
+    </body>
+</html>

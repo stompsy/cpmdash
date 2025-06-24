@@ -4,8 +4,8 @@ from . import views
 
 
 urlpatterns = [
-    path("", include("cases.urls")),
-    path("dashboard/", include("dashboard.urls")),
+    path("", include("dashboard.urls")),
+    # path("dashboard/", include("dashboard.urls")),
     path("timeline/", include("timeline.urls")),
     path("health/", views.health_check, name="health_check"),
     path("admin/", admin.site.urls),

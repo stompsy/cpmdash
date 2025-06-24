@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block heading %}
+<section>
+    <div class="flex flex-col mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 justify-between dark:bg-gray-900">
+        <h1 class="text-title-2xl font-tienne dark:text-gray-100 tracking-tight">{{ title }}</h1>
+        <h3 class="text-theme-xl font-roboto md:-translate-y-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-200 to-white">{{ description }}</h3>
+    </div>
+</section>
+{% endblock heading %}
+
+{% block content %}
+<main>
+    <section class="mx-auto px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+        <!-- Section title -->
+        <h3 class="mb-4 text-red-400 font-semibold">Social & Economic Factors</h3>
+
+        <!-- Rationale -->
+        <p class="mb-4 text-white">
+            Tracking monthly overdose counts (stacked by fatal vs. non-fatal) helps us 
+            evaluate program impact, allocate resources where they’re needed most, 
+            and spot emerging risks in near real-time.
+        </p>
+
+        <!-- Key insights -->
+        <ul class="text-white list-disc list-inside space-y-2 mb-6">
+            <li>
+                There were 
+                <span class="font-semibold">51 confirmed</span> fatal overdoses in Clallam County in
+                <span class="font-semibold">2023</span>.
+                <span class="font-semibold">Fatal overdoses</span> in Clallam County currently stand at 
+                <span class="font-semibold">17</span> in 2024, with another 
+                <span class="font-semibold">8 suspected</span> awaiting toxicology confirmation.
+            </li>
+        </ul>
+        <!-- Chart container -->
+        <div id="od_trend_chart">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-2xl text-slate-100 font-normal">
+                        <div class="py-4">
+                            Overdoses by Living Situation and Outcome
+                        </div>
+                        {% autoescape off %}
+                        {{ od_living_sit|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Chart description -->
+        <p class="text-sm italic">
+            <strong>Chart description:</strong> Monthly overdose counts (fatal vs. non-fatal), 
+            Jan 2023–Dec 2024. Use the built-in range selector or year-buttons to zoom into 
+            any period.
+        </p>
+    </section>
+
+    <section class="mx-auto px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
+        <!-- Section title -->
+        <h3 class="mb-4 text-4xl text-red-400 font-semibold">Social & Economic Factors</h3>
+
+        <!-- Rationale -->
+        <p class="mb-4 text-white">
+            Tracking monthly overdose counts (stacked by fatal vs. non-fatal) helps us 
+            evaluate program impact, allocate resources where they’re needed most, 
+            and spot emerging risks in near real-time.
+        </p>
+
+        <!-- Key insights -->
+        <ul class="text-white list-disc list-inside space-y-2 mb-6">
+            <li>
+                There were 
+                <span class="font-semibold">51 confirmed</span> fatal overdoses in Clallam County in
+                <span class="font-semibold">2023</span>.
+                <span class="font-semibold">Fatal overdoses</span> in Clallam County currently stand at 
+                <span class="font-semibold">17</span> in 2024, with another 
+                <span class="font-semibold">8 suspected</span> awaiting toxicology confirmation.
+            </li>
+        </ul>
+        <!-- Chart container -->
+        <div id="od_trend_chart">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col min-w-[200px]">
+                    <div class="text-2xl text-slate-100 font-normal">
+                        <div class="py-4">
+                            Overdoses by Insurance Type and Outcome
+                        </div>
+                        {% autoescape off %}
+                        {{ od_insurance|safe }}
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Chart description -->
+        <p class="text-sm italic">
+            <strong>Chart description:</strong> Monthly overdose counts (fatal vs. non-fatal), 
+            Jan 2023–Dec 2024. Use the built-in range selector or year-buttons to zoom into 
+            any period.
+        </p>
+    </section>
+</main>
+{% endblock content %}
