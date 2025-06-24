@@ -18,6 +18,7 @@ src/dashboard/charts/od_referral_source.py
 # Distribution / packaging
 .Python
 src/staticfiles/src/css/input.css
+src/staticfiles/src/css/style.css
 src/staticfiles/src/data/docs
 src/staticfiles/src/data/migration
 build/
