@@ -21,199 +21,168 @@
             $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
         :class="{'dark bg-gray-900': darkMode === true}"
     >
-        <!-- ===== Preloader Start ===== -->
+        <!-- Preloader -->
         {% include 'partials/preloader.html' %}
-        <!-- ===== Preloader End ===== -->
-
-        <!-- ===== Page Wrapper Start ===== -->
+        <!-- Page Wrapper Start ===== -->
         <div class="flex h-screen overflow-hidden">
-            <!-- ===== Sidebar Start ===== -->
+            <!-- Sidebar -->
             {% include 'partials/sidebar.html' %}
-            <!-- ===== Sidebar End ===== -->
-
-            <!-- ===== Content Area Start ===== -->
+            <!-- Content Area Start -->
             <div
                 class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
             >
-                <!-- Small Device Overlay Start -->
+                <!-- Small Device Overlay -->
                 {% include 'partials/overlay.html' %}
-                <!-- Small Device Overlay End -->
-
-                <!-- ===== Header Start ===== -->
+                <!-- Header -->
                 {% include 'partials/header.html' %}
-                <!-- ===== Header End ===== -->
-
-                <!-- ===== Main Content Start ===== -->
+                <!-- Main Content Start -->
                 <main>
                     <div
                         class="p-8 mx-auto"
                     >
-                        <!-- Page Title Section Start -->
-                        <section class="mx-auto dark:bg-gray-900">
-                            <!-- Section title -->
-                            <div class="relative isolate overflow-hidden py-6 sm:py-10 lg:overflow-visible">
-                                <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
-                                    <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-                                        <div class="lg:pr-4">
-                                            <div class="lg:max-w-2xl">
-                                                <p class="text-base/7 font-semibold text-brand-500 dark:text-brand-400">Post Overdose Response Team (PORT)</p>
-                                                <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl">
-                                                    Overdose Trends Over Time
-                                                </h1>
-                                                <div class="mt-12 lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
-                                                    <!-- Data Cards Column -->
-                                                    <div class="rounded-lg w-full">
-                                                        <dl class="grid grid-cols-1 xsm:grid-cols-2 md:grid-cols-4 2xl:grid-cols-4 gap-4">
-                                                            <!-- Total Overdoses -->
-                                                            <div class="flex flex-col breakpoint-2xsm:flex-row justify-start bg-white dark:bg-gray-800 rounded-lg px-4 py-3">
-                                                                <dt class="text-sm text-black dark:text-gray-400">Total Overdoses</dt>
-                                                                <dd class="order-first text-2xl font-semibold tracking-tight text-black dark:text-white sm:text-3xl">150</dd>
-                                                            </div>
-
-                                                            <!-- Fatal Overdoses -->
-                                                            <div class="flex flex-col breakpoint-2xsm:flex-row justify-start bg-white dark:bg-gray-800 rounded-lg px-4 py-3">
-                                                                <dt class="text-sm text-black dark:text-gray-400">Fatal Overdoses</dt>
-                                                                <dd class="order-first text-2xl font-semibold tracking-tight text-black dark:text-white sm:text-3xl">5</dd>
-                                                            </div>
-
-                                                            <!-- Repeat Overdoses -->
-                                                            <div class="flex flex-col breakpoint-2xsm:flex-row justify-start bg-white dark:bg-gray-800 rounded-lg px-4 py-3">
-                                                                <dt class="text-sm text-black dark:text-gray-400">Repeat Overdoses</dt>
-                                                                <dd class="order-first text-2xl font-semibold tracking-tight text-black dark:text-white sm:text-3xl">10</dd>
-                                                            </div>
-
-                                                            <!-- Referral Success -->
-                                                            <div class="flex flex-col breakpoint-2xsm:flex-row justify-start bg-white dark:bg-gray-800 rounded-lg px-4 py-3">
-                                                                <dt class="text-sm text-black dark:text-gray-400">Referral Success</dt>
-                                                                <dd class="order-first text-2xl font-semibold tracking-tight text-black dark:text-white sm:text-3xl">97%</dd>
-                                                            </div>
-                                                        </dl>
-                                                    </div>
-                                                </div>
-                                                <p class="mt-12 text-xl/8 text-gray-700 dark:text-gray-300">
-                                                    Tracking monthly overdose counts (stacked by fatal vs. non-fatal) helps us 
-                                                    evaluate program impact, allocate resources where they’re needed most, 
-                                                    and spot emerging risks in near real-time.
-                                                </p>
-                                            </div>
-                                        </div>
+                        <!-- Section 1: Introduction -->
+                        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-end-safe">
+                            <div>
+                                <p class="text-base font-semibold text-brand-500">Post Overdose Response Team (PORT)</p>
+                                <h1 class="mt-2 text-4xl font-semibold text-gray-900 dark:text-white">Overdose Trends Over Time</h1>
+                                <p class="mt-6 text-xl text-gray-700 dark:text-gray-300">
+                                    Tracking monthly overdose counts helps us evaluate program impact, allocate resources where they’re 
+                                    needed most, and spot emerging risks in near real-time.
+                                </p>
+                            </div>
+                            <div class="mt-6">
+                                <!-- Data Cards -->
+                                <dl class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                                        <dd class="order-first text-2xl font-bold text-gray-900 dark:text-white">{{ total_overdoses }}</dd>
+                                        <dt class="text-sm text-gray-500">Total Overdoses</dt>
                                     </div>
-
-                                    <div class="-mt-6 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
-                                        <div class="flex flex-col min-w-[200px]">
-                                            <div class="text-2xl text-slate-100 font-normal">
-                                                <div class="py-4">
-                                                    Overdoses by Year and Month [<span class="bg-slate-700 text-slate-300">2024 Selected</span>]
-                                                </div>
-                                                {% autoescape off %}
-                                                {{ od_monthly|safe }}
-                                                {% endautoescape %}
-                                            </div>
-                                            <div class="text-2xl text-slate-100 font-normal">
-                                                <div class="py-4">
-                                                    Density Heatmap of Overdose Incidents by Day and Hour
-                                                </div>
-                                                {% autoescape off %}
-                                                {{ fig_density_map|safe }}
-                                                {% endautoescape %}
-                                            </div>
-                                            <div class="text-2xl text-slate-100 font-normal">
-                                                <div class="py-4">
-                                                    Repeat overdoses by Case
-                                                </div>
-                                                {% autoescape off %}
-                                                {{ fig_repeats_scatter|safe }}
-                                                {% endautoescape %}
-                                            </div>
-                                        </div>
+                                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                                        <dd class="order-first text-2xl font-bold text-gray-900 dark:text-white">{{ fatal_overdoses }}</dd>
+                                        <dt class="text-sm text-gray-500">Fatal Overdoses</dt>
                                     </div>
-
-                                    <div class="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-                                        <div class="lg:pr-4">
-                                            <div class="max-w-xl text-base/7 text-gray-700 dark:text-gray-400 lg:max-w-lg">
-                                                <ul role="list" class="mt-2 space-y-8 text-gray-600 dark:text-gray-400">
-                                                    <!-- Problem -->
-                                                    <li class="flex gap-x-3">
-                                                        <svg class="mt-1 size-5 flex-none text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
-                                                        </svg>
-                                                        <span>
-                                                            <strong class="font-semibold text-gray-900 dark:text-brand-400">Problem.</strong> 
-                                                            Port Angeles faces a public health crisis from rising opioid overdoses:
-                                                            <ul class="list-disc list-inside mt-2">
-                                                                <li>Clallam County reached <strong>73.3 overdose deaths per 100,000</strong> in early 2024.</li>
-                                                                <li>Survivors often refused treatment due to withdrawal after high-dose naloxone.</li>
-                                                                <li>Repeat overdoses and EMS fatigue strained emergency response systems.</li>
-                                                            </ul>
-                                                        </span>
-                                                    </li>
-
-                                                    <!-- Solution -->
-                                                    <li class="flex gap-x-3">
-                                                        <svg class="mt-1 size-5 flex-none text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 3v4.5l-4.5 9A2.25 2.25 0 007.25 21h9.5a2.25 2.25 0 002-3.25l-4.5-9V3" />
-                                                        </svg>
-                                                        <span>
-                                                            <strong class="font-semibold text-gray-900 dark:text-brand-400">Solution.</strong> 
-                                                            <strong><em>Operation Shielding Hope</em></strong> connects overdose survivors to care in real time:
-                                                            <ul class="list-disc list-inside mt-2">
-                                                                <li>Community Paramedics administer <strong>buprenorphine</strong> in the field.</li>
-                                                                <li><strong>78%</strong> of survivors accepted referral when CPMs were present (vs. 3% without).</li>
-                                                                <li>Funded by the University of Washington and Opioid Settlement grants.</li>
-                                                            </ul>
-                                                        </span>
-                                                    </li>
-
-                                                    <!-- Rationale -->
-                                                    <li class="flex gap-x-3">
-                                                        <svg class="mt-1 size-5 flex-none text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M9 17V9m4 8v-5m4 5V5" />
-                                                        </svg>
-                                                        <span>
-                                                            <strong class="font-semibold text-gray-900 dark:text-brand-400">Rationale.</strong> 
-                                                            Ongoing overdose tracking informs better decisions:
-                                                            <ul class="list-disc list-inside mt-2">
-                                                                <li>Reveals high-risk areas and changing overdose patterns.</li>
-                                                                <li>Guides resource allocation and targeted outreach.</li>
-                                                                <li>Strengthens grant applications and program accountability.</li>
-                                                            </ul>
-                                                        </span>
-                                                    </li>
-                                                </ul>
-
-
-                                                <p class="mt-8">
-                                                    Through trusted partnerships with PAPD, ReDiscovery, Reflections Counseling, and others, CPMs coordinate services that save lives and relieve pressure on emergency units. Their work exemplifies how public safety-led outreach can turn a moment of crisis into a turning point toward recovery.
-                                                </p>
-
-                                                <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Redefining the Response</h2>
-                                                <p class="mt-6">
-                                                    Operation Shielding Hope represents a shift in how our city responds to addiction. It’s a model rooted in empathy, connection, and evidence-based care—and it’s working. With your continued support, Port Angeles is not only confronting the opioid crisis, but leading the way with a public health-driven solution.
-                                                </p>
-
-                                                <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Opioid Settlement Funds</h2>
-                                                <p class="mt-6">
-                                                    In May of 2022, Attorney General Bob Ferguson announced a $518 million settlement with several major opioid distributors aimed at resolving opioid-related claims. Following City Council approval on July 5, 2023, approximately $1.8M of these funds will be allocated to the City of Port Angeles over the next 18 years to address the opioid crisis, including substance use treatment, access to overdose-reversal drugs, and services to assist with those struggling with addition.
-                                                </p>
-
-                                                <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Goals and Scope</h2>
-                                                <p class="mt-6">
-                                                    The City's goal when distributing these funds is to reduce the impact to public safety services, healthcare facilities, local businesses, and our City residents and visitors through effective and strategic measures, such as treatment, prevention, and education on opioid use and abuse. 
-                                                </p>
-                                            </div>
-                                        </div>
+                                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                                        <dd class="text-2xl font-bold text-gray-900 dark:text-white">{{ repeat_overdoses }}</dd>
+                                        <dt class="text-sm text-gray-500">
+                                            Repeat Overdoses<br/>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ repeat_patients }} patients • {{ percent_repeat }}%
+                                            </span>
+                                        </dt>
                                     </div>
-                                </div>
+                                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                                        <dd class="order-first text-2xl font-bold text-gray-900 dark:text-white">97%</dd>
+                                        <dt class="text-sm text-gray-500">Referral Success</dt>
+                                    </div>
+                                </dl>
                             </div>
                         </section>
-                        <!-- Page Title Section End -->
+
+                        <!-- Section 2: Fatal and Non-Fatal Tracking Rationale -->
+                        <section class="mt-16">
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Why Track Fatal and Non-Fatal Overdoses Over Time?</h2>
+                            <p class="mt-4 text-gray-700 dark:text-gray-300">Identifying and understanding patterns in overdose types allows Community Paramedics to optimize outreach and intervention strategies.</p>
+                            <ul class="mt-4 list-disc list-inside text-gray-700 dark:text-gray-300">
+                                <li>Clallam County’s fatal overdose rate dropped from 73.3 to 34.8 per 100,000 from March 2024 to March 2025—a 63% decrease.</li>
+                                <li>PORT’s early intervention model yielded a 78% linkage to SUD services when CPMs responded on scene.</li>
+                                <li>Repeat overdoses were drastically reduced when overdose survivors were met by CPMs trained to handle precipitated withdrawal.</li>
+                                <li>CPM data informs real-time public health responses and strengthens grant applications.</li>
+                            </ul>
+                        </section>
+
+                        <!-- Section 3: Monthly Overdose Chart -->
+                        <section class="mt-16">
+                            <div class="text-white">
+                                <div class="py-4">Overdoses by Year and Month [<span class="bg-slate-700 text-slate-300">2024 Selected</span>]</div>
+                                {% autoescape off %}{{ od_monthly|safe }}{% endautoescape %}
+                            </div>
+                        </section>
+
+
+                        <!-- Section 4: Overdose by Day and Hour Rationale -->
+                        <section class="mt-16">
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Why Analyze Overdoses by Day and Hour?</h2>
+                            <p class="mt-4 text-gray-700 dark:text-gray-300">Knowing when overdoses occur helps deploy resources more effectively and identify high-risk windows for intervention.</p>
+                            <ul class="mt-4 list-disc list-inside text-gray-700 dark:text-gray-300">
+                                <li>CPMs can respond to peak hours with targeted deployments, reducing 911 overuse.</li>
+                                <li>In 2024, 121 patients reduced 911 usage post-intervention, saving nearly $360,000.</li>
+                                <li>Peak-time analysis supports strategic scheduling of Community EMTs and partnership coordination.</li>
+                                <li>Time-based tracking improves training for first responders to anticipate overdose surges.</li>
+                            </ul>
+                            <div class="mt-6 text-white">
+                                <div class="py-4">Density Heatmap of Overdose Incidents by Day and Hour</div>
+                                {% autoescape off %}{{ fig_density_map|safe }}{% endautoescape %}
+                            </div>
+                        </section>
+
+                        <section class="mt-6">
+                            <!-- Overdose Counts by Time Region -->
+                            <div class="mt-10">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Overdose Counts by Time Region</h3>
+                                <ul class="mt-4 list-disc pl-6 text-sm text-gray-700 dark:text-gray-300">
+                                    <li><strong>Early Morning</strong> (00:00–08:00): {{ density_stats.early_morning.count }} overdoses ({{ density_stats.early_morning.pct }}%)</li><br/>
+                                    <li><strong>Weekend Daytime</strong> (08:00–16:00, Sat–Sun): {{ density_stats.weekend_daytime.count }} overdoses ({{ density_stats.weekend_daytime.pct }}%)</li>
+                                    <li><strong>Working Hours</strong> (08:00–16:00, Mon–Fri): {{ density_stats.working_hours.count }} overdoses ({{ density_stats.working_hours.pct }}%)</li><br/>
+                                    <li><strong>Weekend Early Evening</strong> (16:00–19:00, Sat–Sun): {{ density_stats.weekend_early_evening.count }} overdoses ({{ density_stats.weekend_early_evening.pct }}%)</li>
+                                    <li><strong>Early Evening</strong> (16:00–19:00, Mon–Fri): {{ density_stats.early_evening.count }} overdoses ({{ density_stats.early_evening.pct }}%)</li><br/>
+                                    <li><strong>Late Evening</strong> (19:00–24:00): {{ density_stats.late_evening.count }} overdoses ({{ density_stats.late_evening.pct }}%)</li>
+                                </ul>
+                            </div>
+                        </section>
+
+                        <!-- Section 5: Repeat Overdose Rationale -->
+                        <section class="mt-16">
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Why Track Repeat Overdoses?</h2>
+                            <p class="mt-4 text-gray-700 dark:text-gray-300">Repeat overdoses signal critical gaps in care. Each recurrence offers insight into systemic failures, from lack of follow-up to incarceration or treatment disruptions.</p>
+                            <p class="mt-2 italic text-gray-600 dark:text-gray-400">Case data often show that long gaps between overdoses may reflect periods of incarceration or stabilization in treatment—not necessarily improved safety.</p>
+                            <ul class="mt-4 list-disc list-inside text-gray-700 dark:text-gray-300">
+                                <li>Only 3% of overdose survivors linked to services when CPMs didn’t respond—versus 78% when they did.</li>
+                                <li>CPMs act as a critical bridge for survivors during moments of readiness for change.</li>
+                                <li>Tracking recurrence helps predict which individuals may need intense case management.</li>
+                                <li>Visualizing overdose intervals can indicate jail releases or post-discharge instability.</li>
+                            </ul>
+
+                            <!-- Year-over-Year Comparison Table -->
+                            <div class="mt-10">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Year-over-Year Comparison</h3>
+                                <div class="overflow-x-auto rounded-lg shadow ring-1 ring-black ring-opacity-5">
+                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead class="bg-gray-50 dark:bg-gray-800">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Repeat Overdoses</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Patients</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">% of Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                            {% for item in repeat_stats_by_year %}
+                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ item.year }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ item.repeat_overdoses }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ item.repeat_patients }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ item.percent_repeat }}%</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Scatter Plot of Repeat Overdoses by Case -->
+                            <div class="mt-10 text-white">
+                                <div class="text-lg font-semibold text-gray-900 dark:text-white">Repeat overdoses by Case</div>
+                                {% autoescape off %}{{ fig_repeats_scatter|safe }}{% endautoescape %}
+                            </div>
+
+                        </section>
                     </div>
                 </main>
-                <!-- ===== Main Content End ===== -->
+                <!-- Main Content End -->
             </div>
-            <!-- ===== Content Area End ===== -->
+            <!-- Content Area End -->
         </div>
-        <!-- ===== Page Wrapper End ===== -->
+        <!-- Page Wrapper End -->
 
         <!-- BEGIN MODAL -->
         {% include 'partials/profile/profile-info-modal.html' %}
@@ -221,74 +190,3 @@
         <!-- END MODAL -->
     </body>
 </html>
-
-{% comment %} 
-                            <!-- Chart container -->
-                            <div id="od_trend_chart">
-                                <div class="flex flex-col gap-4">
-                                    <div class="flex flex-col min-w-[200px]">
-                                        <div class="text-2xl text-slate-100 font-normal">
-                                            <div class="py-4">
-                                                Overdoses by Year and Month [<span class="bg-slate-700 text-slate-300">2024 Selected</span>]
-                                            </div>
-                                            {% autoescape off %}
-                                            {{ od_monthly|safe }}
-                                            {% endautoescape %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Chart description -->
-                            <p class="text-sm italic">
-                                <strong>Chart description:</strong> Monthly overdose counts (fatal vs. non-fatal), 
-                                Jan 2023–Dec 2024. Use the built-in range selector or year-buttons to zoom into 
-                                any period.
-                            </p>
-                        </section>
-                        <section>
-                            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-                                <div class="flex flex-col gap-4">
-                                    <div class="flex flex-col min-w-[200px]">
-                                        <div class="text-lg font-normal">
-                                            <div class="p-4">
-                                                Density Heatmap of Overdose Incidents by Day and Hour
-                                            </div>
-                                            {% autoescape off %}
-                                            {{ fig_density_map|safe }}
-                                            {% endautoescape %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                        <section>
-                            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 bg-gray-900">
-                                <div class="flex flex-col gap-4">
-                                    <div class="flex flex-col min-w-[200px]">
-                                        <div class="text-lg font-normal">
-                                            <div class="p-4">
-                                                Repeat overdoses by Case
-                                            </div>
-                                            {% autoescape off %}
-                                            {{ fig_repeats_scatter|safe }}
-                                            {% endautoescape %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
-                    <!-- Overdose Trends Section End -->
-                </main>
-                <!-- ===== Main Content End ===== -->
-            </div>
-            <!-- ===== Content Area End ===== -->
-        </div>
-        <!-- ===== Page Wrapper End ===== -->
-
-        <!-- BEGIN MODAL -->
-        {% include 'partials/profile/profile-info-modal.html' %}
-        {% include 'partials/profile/profile-address-modal.html' %}
-        <!-- END MODAL -->
-    </body>
-</html> {% endcomment %}

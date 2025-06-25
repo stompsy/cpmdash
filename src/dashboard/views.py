@@ -1,9 +1,13 @@
 from django.shortcuts import render
-from .utils.theme import get_theme_from_request
+from django.utils.timezone import now
+from datetime import datetime
 
 from .models import *
+from django.db.models import Count
 
+from .utils.theme import get_theme_from_request
 from .charts.od_utils import *
+from collections import defaultdict
 
 # General statistics
 from .charts.overdose.od_age_race import *
@@ -113,30 +117,96 @@ def odreferrals(request):
 
 
 def odreferrals_trends(request):
-
     theme = get_theme_from_request(request)
     title = "PORT Referrals"
     description = "Key metrics - Trends"
 
     # Trends over time
-    fig_od_monthly          = build_chart_od_hist_monthly(theme="dark")
-    fig_density_map         = build_chart_od_density_heatmap(theme="dark")
-    fig_od_work_hours       = build_chart_od_work_hours(theme=theme)
-    fig_od_hist_hourly      = build_chart_od_hist_hourly(theme=theme)
-    fig_repeats_scatter     = build_chart_repeats_scatter(theme="dark")
+    fig_od_monthly                  = build_chart_od_hist_monthly(theme="dark")
+    fig_density_map, density_stats  = build_chart_od_density_heatmap(theme="dark")
+    fig_od_work_hours               = build_chart_od_work_hours(theme=theme)
+    fig_od_hist_hourly              = build_chart_od_hist_hourly(theme=theme)
+    fig_repeats_scatter             = build_chart_repeats_scatter(theme="dark")
+
+    # Total overdoses
+    total_overdoses = ODReferrals.objects.count()
+
+    # Fatal overdoses
+    fatal_overdoses = ODReferrals.objects.filter(
+        disposition__in=["CPR attempted", "DOA"]
+    ).count()
+
+    current_year = now().year
+
+    # Filter to current year
+    year_qs = ODReferrals.objects.filter(od_date__year=current_year)
+
+    # Group by patient ID
+    repeats_this_year = (
+        year_qs.exclude(patient_id__isnull=True)
+        .values("patient_id")
+        .annotate(num=Count("patient_id"))
+        .filter(num__gt=1)
+    )
+
+    # Count of repeat patients
+    repeat_patients = repeats_this_year.count()
+
+    # Sum of repeat overdoses excluding each patient's first
+    repeat_overdoses = sum([r["num"] - 1 for r in repeats_this_year])
+
+    # Total overdoses this year
+    total_overdoses = year_qs.count()
+
+    # Percentage of repeats
+    percent_repeat = round((repeat_overdoses / total_overdoses) * 100, 1) if total_overdoses > 0 else 0
+    
+    # List of years to compare
+    years_to_compare = [2024, 2025]
+    repeat_stats_by_year = []
+
+    for year in years_to_compare:
+        qs_year = ODReferrals.objects.filter(od_date__year=year).exclude(patient_id__isnull=True)
+
+        total = qs_year.count()
+
+        grouped = (
+            qs_year
+            .values("patient_id")
+            .annotate(num=Count("patient_id"))
+            .filter(num__gt=1)
+        )
+
+        repeat_overdoses = sum([r["num"] - 1 for r in grouped])
+        repeat_patients = grouped.count()
+        percent_repeat = round((repeat_overdoses / total) * 100, 1) if total > 0 else 0
+
+        repeat_stats_by_year.append({
+            "year": year,
+            "total": total,
+            "repeat_overdoses": repeat_overdoses,
+            "repeat_patients": repeat_patients,
+            "percent_repeat": percent_repeat,
+        })
 
     return render(
         request,
         "dashboard/trends.html",
         {
-            "title":                        title,
-            "description":                  description,
-
-            "od_monthly":                   fig_od_monthly,
-            "fig_density_map":              fig_density_map,
-            "od_work_hours":                fig_od_work_hours,
-            "chart_od_hist_hourly":         fig_od_hist_hourly,
-            "fig_repeats_scatter":          fig_repeats_scatter,
+            "title": title,
+            "description": description,
+            "od_monthly": fig_od_monthly,
+            "fig_density_map": fig_density_map,
+            "density_stats": density_stats,
+            "od_work_hours": fig_od_work_hours,
+            "chart_od_hist_hourly": fig_od_hist_hourly,
+            "fig_repeats_scatter": fig_repeats_scatter,
+            "fatal_overdoses": fatal_overdoses,
+            "repeat_overdoses": repeat_overdoses,
+            "repeat_patients": repeat_patients,
+            "percent_repeat": percent_repeat,
+            "total_overdoses": total_overdoses,
+            "repeat_stats_by_year": repeat_stats_by_year,
             "theme": theme,
         },
     )

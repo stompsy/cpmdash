@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import plot
+from datetime import datetime
 
 from ...utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
@@ -73,6 +74,32 @@ def build_chart_repeats_scatter(theme):
 
     # Build the line chart
     fig = go.Figure()
+    
+    # Find range of years
+    years = sorted(df["od_date"].dt.year.dropna().unique())
+
+    # Get chart Y-range (merged_label categories)
+    y_categories = list(df["merged_label"].cat.categories)
+
+    # Add transparent vertical bands for each year
+    year_colors = {
+        2021: "rgba(100, 149, 237, 0.07)",
+        2022: "rgba(34, 139, 34, 0.07)",
+        2023: "rgba(255, 165, 0, 0.07)",
+        2024: "rgba(220, 20, 60, 0.03)",
+    }
+
+    for year in years:
+        fig.add_shape(
+            type="rect",
+            xref="x", yref="paper",
+            x0=f"{year}-01-01", x1=f"{year}-12-31",
+            y0=0, y1=1,
+            fillcolor=year_colors.get(year, "rgba(0,0,0,0.05)"),
+            line=dict(width=0),
+            layer="below"
+        )
+    
     for label in unique_labels:
         patient_df = df[df["merged_label"] == label]
         fig.add_trace(
@@ -94,57 +121,16 @@ def build_chart_repeats_scatter(theme):
                     size=10,
                 ),
                 customdata=patient_df[
-                    [
-                        "merged_label",
-                        "od_date",
-                        "days_since_last_od",
-                        "narcan_doses_prior_to_ems",
-                        "narcan_prior_to_ems_dosage",
-                    ]
+                    ["merged_label", "od_date", "days_since_last_od"]
                 ],
                 hovertemplate=(
                     "Patient: %{customdata[0]}<br>"
                     "OD Date: %{customdata[1]|%b %d, %Y}<br>"
-                    "Days Since Last OD: %{customdata[2]}<br>"
-                    "Narcan Doses: %{customdata[3]}<br>"
-                    "Total Narcan: %{customdata[4]}<extra></extra>"
+                    "Days Since Last OD: %{customdata[2]}<extra></extra>"
                 ),
                 showlegend=False,
             )
         )
-        
-    # Add a "Narcan Doses" trace with ▲ markers, sized by dose count
-    for label in unique_labels:
-        narcan_df = df[
-            (df["merged_label"] == label)
-            & (df["narcan_doses_prior_to_ems"].fillna(0) > 0)
-        ]
-        if not narcan_df.empty:
-            fig.add_trace(
-                go.Scatter(
-                    x=narcan_df["od_date"],
-                    y=[label] * len(narcan_df),
-                    mode="markers",
-                    name="Narcan Doses",
-                    marker=dict(
-                        symbol="triangle-up",
-                        size=narcan_df["narcan_doses_prior_to_ems"] * 4,  # scale as you like
-                        color="royalblue",
-                    ),
-                    # <-- send the actual dose count into customdata
-                    customdata=narcan_df[
-                        ["narcan_doses_prior_to_ems", "narcan_prior_to_ems_dosage"]
-                    ].values,
-                    hovertemplate=(
-                        "Patient: %{text}<br>"
-                        "Date: %{x|%b %d, %Y}<br>"
-                        "Narcan Doses: %{customdata[0]}<br>"
-                        "Total Narcan: %{customdata[1]}mg<extra></extra>"
-                    ),
-                    text=[label] * len(narcan_df),
-                    showlegend=(label == unique_labels[0]),
-                )
-            )
     
     # Update x-axis: show every month, abbreviated year
     fig.update_xaxes(
