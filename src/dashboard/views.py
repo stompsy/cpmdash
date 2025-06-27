@@ -128,38 +128,34 @@ def odreferrals_trends(request):
     fig_od_hist_hourly              = build_chart_od_hist_hourly(theme=theme)
     fig_repeats_scatter             = build_chart_repeats_scatter(theme="dark")
 
-    # Total overdoses
+    # Total overdoses (all time)
     total_overdoses = ODReferrals.objects.count()
 
-    # Fatal overdoses
+    # Fatal overdoses (all time)
     fatal_overdoses = ODReferrals.objects.filter(
         disposition__in=["CPR attempted", "DOA"]
     ).count()
 
-    current_year = now().year
-
-    # Filter to current year
-    year_qs = ODReferrals.objects.filter(od_date__year=current_year)
-
-    # Group by patient ID
-    repeats_this_year = (
-        year_qs.exclude(patient_id__isnull=True)
+    # All-time repeat overdose statistics for header cards
+    all_time_repeats = (
+        ODReferrals.objects.exclude(patient_id__isnull=True)
         .values("patient_id")
         .annotate(num=Count("patient_id"))
         .filter(num__gt=1)
     )
 
-    # Count of repeat patients
-    repeat_patients = repeats_this_year.count()
+    # Count of repeat patients (all time)
+    repeat_patients = all_time_repeats.count()
 
-    # Sum of repeat overdoses excluding each patient's first
-    repeat_overdoses = sum([r["num"] - 1 for r in repeats_this_year])
+    # Sum of repeat overdoses excluding each patient's first (all time)
+    repeat_overdoses = sum([r["num"] - 1 for r in all_time_repeats])
 
-    # Total overdoses this year
-    total_overdoses = year_qs.count()
-
-    # Percentage of repeats
+    # Percentage of repeats (all time)
     percent_repeat = round((repeat_overdoses / total_overdoses) * 100, 1) if total_overdoses > 0 else 0
+    
+    # Referral success rate (all time) - based on referral_to_sud_agency field
+    successful_referrals = ODReferrals.objects.filter(referral_to_sud_agency=True).count()
+    referral_success_rate = round((successful_referrals / total_overdoses) * 100, 1) if total_overdoses > 0 else 0
     
     # List of years to compare
     years_to_compare = [2024, 2025]
@@ -177,16 +173,16 @@ def odreferrals_trends(request):
             .filter(num__gt=1)
         )
 
-        repeat_overdoses = sum([r["num"] - 1 for r in grouped])
-        repeat_patients = grouped.count()
-        percent_repeat = round((repeat_overdoses / total) * 100, 1) if total > 0 else 0
+        repeat_overdoses_year = sum([r["num"] - 1 for r in grouped])
+        repeat_patients_year = grouped.count()
+        percent_repeat_year = round((repeat_overdoses_year / total) * 100, 1) if total > 0 else 0
 
         repeat_stats_by_year.append({
             "year": year,
             "total": total,
-            "repeat_overdoses": repeat_overdoses,
-            "repeat_patients": repeat_patients,
-            "percent_repeat": percent_repeat,
+            "repeat_overdoses": repeat_overdoses_year,
+            "repeat_patients": repeat_patients_year,
+            "percent_repeat": percent_repeat_year,
         })
 
     return render(
@@ -205,6 +201,7 @@ def odreferrals_trends(request):
             "repeat_overdoses": repeat_overdoses,
             "repeat_patients": repeat_patients,
             "percent_repeat": percent_repeat,
+            "referral_success_rate": referral_success_rate,
             "total_overdoses": total_overdoses,
             "repeat_stats_by_year": repeat_stats_by_year,
             "theme": theme,

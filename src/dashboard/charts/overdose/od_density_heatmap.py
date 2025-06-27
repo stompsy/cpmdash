@@ -116,6 +116,7 @@ def build_chart_od_density_heatmap(theme):
             text=hover_text,
             hoverinfo="text",
             colorscale=light_palette,
+            showscale=False,
         )
     )
     fig.update_xaxes(
@@ -125,21 +126,6 @@ def build_chart_od_density_heatmap(theme):
         tickformat="02d", # pad with zero
         title="Hour of Day",
     )
-    # fig.update_traces(
-    #     colorbar=dict(
-    #         title=None,
-    #         orientation="h",
-    #         x=0.98,
-    #         y=0.98,
-    #         xanchor="right",
-    #         yanchor="top",
-    #         len=0.5,
-    #         thickness=15,
-    #         tickfont=dict(size=12, color="white"),
-    #         outlinewidth=1, # border line around the colorbar
-    #         outlinecolor="lightgray",
-    #     )
-    # )
     
     # Add working hours rectangle
     fig.add_shape(
@@ -148,7 +134,7 @@ def build_chart_od_density_heatmap(theme):
         x1=15.5, # Working hours
         y0=-0.5,
         y1=4.5, # Covers all weekdays (Monday to Friday)
-        line=dict(color="white", width=2, dash="solid"),
+        line=dict(color="white", width=2, dash="dot"),
         fillcolor="rgba(0,0,0,0)",  # Transparent fill
     )
     fig.add_annotation(
@@ -336,6 +322,7 @@ def build_chart_od_density_heatmap(theme):
         fig,
         theme=theme,
         export_filename="pafd_cpm_chart_heatmap_density",
+        show_legend=False,
         scroll_zoom=False,
         x_title="Hour of Day",
         y_title="Day of Week",
