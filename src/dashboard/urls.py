@@ -10,6 +10,7 @@ urlpatterns = [
     path("odreferrals/trends/", views.odreferrals_trends, name="odreferrals_trends"),
     path("odreferrals/geographic/", views.odreferrals_geographic, name="odreferrals_geographic"),
     path("odreferrals/substances/", views.odreferrals_substances, name="odreferrals_substances"),
+    path("odreferrals/operations/", views.odreferrals_operations, name="odreferrals_operations"),
     path("odreferrals/response/", views.odreferrals_response, name="odreferrals_response"),
     path("odreferrals/cpm/", views.odreferrals_cpm, name="odreferrals_cpm"),
     path("odreferrals/socioeconomic/", views.odreferrals_socioeconomic, name="odreferrals_socioeconomic"),

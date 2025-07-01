@@ -28,9 +28,9 @@ def style_plotly_layout(
     else:
         axis_font_color =   TAILWIND_COLORS["slate-800"]
         font_color =        TAILWIND_COLORS["slate-800"]
-        plot_bg =           TAILWIND_COLORS["white"]
-        paper_bg =          TAILWIND_COLORS["white"]
-        grid_color =        TAILWIND_COLORS["slate-800"]
+        plot_bg =           TAILWIND_COLORS["transparent"]  # Make both themes transparent for better blending
+        paper_bg =          TAILWIND_COLORS["transparent"]  # Make both themes transparent for better blending
+        grid_color =        TAILWIND_COLORS["slate-200"]   # Lighter grid for light mode
 
     # default margin if not supplied
     margin = margin or dict(t=40, l=20, r=20, b=20)

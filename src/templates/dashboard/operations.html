@@ -1,0 +1,283 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+        />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>{% block title %} {% endblock title %}</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'src/media/favicon.ico' %}"/>
+        <link rel="stylesheet" href="{% static 'src/css/output.css' %}" />
+        
+        <!-- Dynamic Plotly Theme Manager -->
+        <script>
+            // Plotly theme configuration
+            const plotlyThemes = {
+                dark: {
+                    axisColor: '#e2e8f0',     // slate-200
+                    fontColor: '#e2e8f0',     // slate-200
+                    plotBg: 'rgba(0,0,0,0)',  // transparent
+                    paperBg: 'rgba(0,0,0,0)', // transparent
+                    gridColor: '#1f2937'      // gray-800
+                },
+                light: {
+                    axisColor: '#1e293b',     // slate-800
+                    fontColor: '#1e293b',     // slate-800
+                    plotBg: '#ffffff',        // white
+                    paperBg: '#ffffff',       // white
+                    gridColor: '#e2e8f0'      // slate-200 for better visibility in light mode
+                }
+            };
+
+            function updatePlotlyTheme(isDark) {
+                const theme = isDark ? plotlyThemes.dark : plotlyThemes.light;
+                
+                // Find all Plotly plots
+                document.querySelectorAll('.js-plotly-plot').forEach(function(plotDiv) {
+                    if (plotDiv._fullLayout) {
+                        // Update layout with new theme
+                        Plotly.relayout(plotDiv, {
+                            'font.color': theme.fontColor,
+                            'xaxis.title.font.color': theme.axisColor,
+                            'yaxis.title.font.color': theme.axisColor,
+                            'xaxis.gridcolor': theme.gridColor,
+                            'yaxis.gridcolor': theme.gridColor,
+                            'xaxis.tickfont.color': theme.fontColor,
+                            'yaxis.tickfont.color': theme.fontColor,
+                            'plot_bgcolor': theme.plotBg,
+                            'paper_bgcolor': theme.paperBg
+                        });
+                        
+                        // Apply y-axis tick alignment and positioning
+                        setTimeout(function() {
+                            const yAxisTicks = plotDiv.querySelectorAll('.yaxislayer-above text, .yaxis text');
+                            yAxisTicks.forEach(function(tick) {
+                                tick.style.textAnchor = 'start';
+                                tick.style.dominantBaseline = 'middle';
+                                tick.style.transform = 'translateX(10px)';
+                            });
+                        }, 100);
+                    }
+                });
+            }
+        </script>
+        
+        <!-- CSS for additional Plotly styling -->
+        <style>
+            /* Ensure Plotly charts inherit theme colors */
+            .js-plotly-plot {
+                transition: all 0.3s ease;
+            }
+            
+            /* Y-axis tick styling that works with both themes */
+            .js-plotly-plot .yaxislayer-above text,
+            .js-plotly-plot .yaxis text {
+                transition: fill 0.3s ease, transform 0.3s ease;
+            }
+            
+            /* Dark mode specific overrides */
+            .dark .js-plotly-plot .main-svg {
+                color: #e2e8f0;
+            }
+            
+            /* Light mode specific overrides */
+            .js-plotly-plot .main-svg {
+                color: #1e293b;
+            }
+        </style>
+        
+        <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    </head>
+    <body
+        x-data="{ page: 'Operations', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false, 'isProfileInfoModal': false, 'isProfileAddressModal': false }"
+        x-init="
+            darkMode = JSON.parse(localStorage.getItem('darkMode'));
+            $watch('darkMode', value => {
+                localStorage.setItem('darkMode', JSON.stringify(value));
+                // Update Plotly charts when theme changes
+                setTimeout(() => updatePlotlyTheme(value), 100);
+            });
+            // Initial theme setup after DOM is loaded
+            $nextTick(() => {
+                setTimeout(() => {
+                    updatePlotlyTheme(darkMode);
+                    // Also apply initial y-axis styling
+                    document.querySelectorAll('.js-plotly-plot').forEach(function(plotDiv) {
+                        const yAxisTicks = plotDiv.querySelectorAll('.yaxislayer-above text, .yaxis text');
+                        yAxisTicks.forEach(function(tick) {
+                            tick.style.textAnchor = 'start';
+                            tick.style.dominantBaseline = 'middle';
+                        });
+                    });
+                }, 500);
+            });"
+        :class="{'dark bg-gray-900': darkMode === true}"
+    >
+        <!-- Preloader -->
+        {% include 'partials/preloader.html' %}
+        <!-- Page Wrapper Start ===== -->
+        <div class="flex h-screen overflow-hidden">
+            <!-- Sidebar -->
+            {% include 'partials/sidebar.html' %}
+            <!-- Content Area Start -->
+            <div
+                class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+            >
+                <!-- Small Device Overlay -->
+                {% include 'partials/overlay.html' %}
+                <!-- Header -->
+                {% include 'partials/header.html' %}
+                <!-- Main Content Start -->
+                <main>
+                    <div class="p-8 mx-auto">
+
+                        <!-- Introduction -->
+                        <section class="mt-4 mb-16">
+                            <div>
+                                <p class="text-base font-semibold text-brand-500 dark:text-brand-300">Post Overdose Response Team (PORT)</p>
+                                <h1 class="mt-2 text-4xl font-semibold text-gray-900 dark:text-white">Expanding Access Through Time-Aware Deployment</h1>
+                                <p class="mt-6 text-xl text-gray-700 dark:text-gray-300">
+                                    Emergency medical resources are most effective when aligned with when and where crises occur. 
+                                    At the Port Angeles Fire Department, operational metrics illuminate a clear truth: overdoses 
+                                    do not follow business hours. To optimize Community Paramedic (CPM) coverage and improve outcomes, 
+                                    we used time-based overdose data to reevaluate our existing staffing model.
+                                </p>
+                            </div>
+                        </section>
+
+                        <!-- Overdose by Day and Hour Rationale -->
+                        <section class="my-16">
+                            <!-- Two-column layout: Text left, Cards right -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6 items-center">
+                                <!-- Left Column: Problem & Insights Text -->
+                                <div class="space-y-6">
+                                    <div>
+                                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Problem</h3>
+                                        <p class="text-gray-700 dark:text-gray-300">
+                                            Our team currently operates five 8-hour shifts, typically covering 08:00–16:00. While 
+                                            this aligns with traditional agency hours, it 
+                                            <strong class="bg-brand-600 text-gray-100 dark:bg-brand-600 dark:text-gray-100 px-1 py-0.5 rounded font-semibold">
+                                                only covers {{ current_coverage }}% of overdoses</strong>
+                                            Patients experiencing crises in the early morning, late evening, or weekends often go unseen 
+                                            by CPMs, resulting in missed opportunities for engagement and follow-up care.
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Insights</h3>
+                                        <p class="text-gray-700 dark:text-gray-300">
+                                            Overdose patterns reveal critical gaps in current coverage. Our data shows when and where 
+                                            intervention opportunities are most needed.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: Time Region Cards Grid -->
+                                <div class="md:bg-gradient-to-r md:from-blue-50 md:to-indigo-50 dark:from-gray-800 dark:to-gray-900 md:rounded-l-lg md:p-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
+                                        {% for region in time_regions %}
+                                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-300">
+                                            <div class="p-3">
+                                                <!-- Region info with name and count in columns -->
+                                                <div class="grid grid-cols-3 gap-2 mb-2">
+                                                    <div class="col-span-2">
+                                                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap overflow-hidden text-ellipsis">{{ region.name }}</h4>
+                                                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ region.time }}</p>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ region.count }}</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Percentage bar -->
+                                                <div>
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <span class="text-xs font-medium text-gray-900 dark:text-white">{{ region.percentage }}%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                                        <div class="{{ region.color }} h-1.5 rounded-full transition-all duration-300" style="width: {{ region.percentage }}%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Overdose by Time Region -->
+                            <div class="my-16">
+                                <div>
+                                    <div class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Overdoses by Time Region</div>
+
+                                    <!-- Heatmap -->
+                                    <div class="relative">
+                                        <!-- Heatmap container -->
+                                        <div>
+                                            {% autoescape off %}{{ fig_density_map|safe }}{% endautoescape %}
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-8">{% autoescape off %}{{ fig_time_region_bars|safe }}{% endautoescape %}</div>
+                                </div>
+                            </div>
+
+                            <!-- Summary Statistics -->
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                    <div>
+                                        <div class="text-3xl font-bold">{{ current_coverage }}%</div>
+                                        <div class="text-sm opacity-90">Current Coverage</div>
+                                        <div class="text-xs opacity-75">Working Hours Only</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-3xl font-bold">{{ missed_opportunities }}%</div>
+                                        <div class="text-sm opacity-90">Missed Opportunities</div>
+                                        <div class="text-xs opacity-75">Outside Current Hours</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-3xl font-bold">{{ proposed_coverage }}%</div>
+                                        <div class="text-sm opacity-90">Proposed Coverage</div>
+                                        <div class="text-xs opacity-75">09:00–19:00 Shift</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Solution</h3>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                We proposed transitioning to a <strong class="bg-gray-600 text-gray-100 dark:bg-gray-400 dark:text-gray-800 px-1 py-0.5 rounded font-semibold">4-day, 10-hour shift model</strong>, running from <strong class="bg-gray-600 text-gray-100 dark:bg-gray-400 dark:text-gray-800 px-1 py-0.5 rounded font-semibold">09:00–19:00</strong>. This simple shift captures both working hours and early evening windows, raising our coverage from {{ current_coverage }}% to nearly {{ proposed_coverage }}%.
+                            </p>
+
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Resolution</h3>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                By aligning shifts with overdose timing:
+                                <ul class="list-disc pl-5 mt-2">
+                                    <li>CPMs are more likely to engage during periods of high overdose risk</li>
+                                    <li>We reduce pressure on EMS and improve response continuity</li>
+                                    <li>Coverage improves by nearly 70% without increasing headcount</li>
+                                </ul>
+                            </p>
+
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Retrospection</h3>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                This case demonstrates the power of operational metrics—not just to analyze what’s wrong, but to guide what’s possible. Even small shifts in deployment can result in transformational change when rooted in real-world data.
+                            </p>
+                        </section>
+                    </div>
+                </main>
+                <!-- Main Content End -->
+            </div>
+            <!-- Content Area End -->
+        </div>
+        <!-- Page Wrapper End -->
+
+        <!-- BEGIN MODAL -->
+        {% include 'partials/profile/profile-info-modal.html' %}
+        {% include 'partials/profile/profile-address-modal.html' %}
+        <!-- END MODAL -->
+    </body>
+</html>

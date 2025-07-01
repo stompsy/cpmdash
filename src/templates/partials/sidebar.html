@@ -133,6 +133,15 @@
                 </li>
                 <li>
                   <a
+                    href="{% url 'odreferrals_operations' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'Operations' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Operations
+                  </a>
+                </li>
+                <li>
+                  <a
                     href="{% url 'odreferrals_response' %}"
                     class="menu-dropdown-item group"
                     :class="page === 'EMS' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"

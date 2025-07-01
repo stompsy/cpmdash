@@ -64,6 +64,16 @@ def build_chart_od_density_heatmap(theme):
     
     light_palette = px.colors.sequential.Viridis   # matter
     
+    # Region colors matching the time region cards
+    region_colors = {
+        "early_morning": "#3B82F6",     # bg-blue-500
+        "working_hours": "#10B981",     # bg-green-500  
+        "early_evening": "#F97316",     # bg-orange-500
+        "late_evening": "#8B5CF6",      # bg-purple-500
+        "weekend_daytime": "#EAB308",   # bg-yellow-500
+        "weekend_evening": "#EC4899",   # bg-pink-500
+    }
+
     # Region masks
     early_morning_mask = df["od_date"].dt.hour < 8
 
@@ -124,17 +134,93 @@ def build_chart_od_density_heatmap(theme):
         tick0=0,
         dtick=1,
         tickformat="02d", # pad with zero
-        title="Hour of Day",
+        title="",  # Remove x-axis title
+    )
+    fig.update_yaxes(
+        title="",  # Remove y-axis title
     )
     
-    # Add working hours rectangle
+    # Add color overlay masks for each time region
+    # Early Morning (00:00-07:59, All days) - Blue
+    fig.add_shape(
+        type="rect",
+        x0=-0.5,
+        x1=7.5,
+        y0=-0.5,
+        y1=6.5,
+        fillcolor="rgba(59, 130, 246, 0.15)",  # Semi-transparent blue
+        line=dict(width=0),
+        layer="below"
+    )
+    
+    # Working Hours (08:00-15:59, Mon-Fri) - Green
     fig.add_shape(
         type="rect",
         x0=7.5,
-        x1=15.5, # Working hours
+        x1=15.5,
         y0=-0.5,
-        y1=4.5, # Covers all weekdays (Monday to Friday)
-        line=dict(color="white", width=2, dash="dot"),
+        y1=4.5,
+        fillcolor="rgba(16, 185, 129, 0.15)",  # Semi-transparent green
+        line=dict(width=0),
+        layer="below"
+    )
+    
+    # Weekend Daytime (08:00-15:59, Sat-Sun) - Yellow
+    fig.add_shape(
+        type="rect",
+        x0=7.5,
+        x1=15.5,
+        y0=4.5,
+        y1=6.5,
+        fillcolor="rgba(234, 179, 8, 0.15)",  # Semi-transparent yellow
+        line=dict(width=0),
+        layer="below"
+    )
+    
+    # Early Evening (16:00-18:59, Mon-Fri) - Orange
+    fig.add_shape(
+        type="rect",
+        x0=15.5,
+        x1=18.5,
+        y0=-0.5,
+        y1=4.5,
+        fillcolor="rgba(249, 115, 22, 0.15)",  # Semi-transparent orange
+        line=dict(width=0),
+        layer="below"
+    )
+    
+    # Weekend Evening (16:00-18:59, Sat-Sun) - Pink
+    fig.add_shape(
+        type="rect",
+        x0=15.5,
+        x1=18.5,
+        y0=4.5,
+        y1=6.5,
+        fillcolor="rgba(236, 72, 153, 0.15)",  # Semi-transparent pink
+        line=dict(width=0),
+        layer="below"
+    )
+    
+    # Late Evening (19:00-23:59, All days) - Purple
+    fig.add_shape(
+        type="rect",
+        x0=18.5,
+        x1=23.5,
+        y0=-0.5,
+        y1=6.5,
+        fillcolor="rgba(139, 92, 246, 0.15)",  # Semi-transparent purple
+        line=dict(width=0),
+        layer="below"
+    )
+    
+    # Add working hours rectangle border
+    fig.add_shape(
+        type="rect",
+        x0=7.55,  # Smaller gap from 7.6
+        x1=15.45, # Smaller gap from 15.4
+        y0=-0.45,  # Smaller inset from -0.4
+        y1=4.45,   # Smaller inset from 4.4
+        line=dict(color="white", width=2, dash="solid"),
         fillcolor="rgba(0,0,0,0)",  # Transparent fill
     )
     fig.add_annotation(
@@ -154,21 +240,21 @@ def build_chart_od_density_heatmap(theme):
         x=7.6,
         y=4.1,
         text=f"{working_hours_count} overdoses • {working_hours_pct}%",
-        font=dict(size=12, color="lightgray"),
+        font=dict(size=12, color="white"),
         xanchor="left",
         yanchor="top",
         showarrow=False,
     )
 
     
-    # Add early morning hours rectangle
+    # Add early morning hours rectangle border
     fig.add_shape(
         type="rect",
-        x0=-0.5,
-        x1=7.5,  # Covers hours 00:00 through 07:59
-        y0=-0.5,
-        y1=6.5,  # Covers all days (Monday to Sunday)
-        line=dict(color="white", width=2, dash="dot"),
+        x0=-0.45,  # Smaller inset from -0.4
+        x1=7.45,   # Smaller gap before working hours (was 7.4)
+        y0=-0.45,  # Smaller inset from -0.4
+        y1=6.45,   # Smaller inset from 6.4
+        line=dict(color=region_colors["early_morning"], width=2, dash="solid"),
         fillcolor="rgba(0,0,0,0)",  # Transparent fill
     )
     fig.add_annotation(
@@ -188,7 +274,7 @@ def build_chart_od_density_heatmap(theme):
         x=-0.4,
         y=6.1,
         text=f"{early_morning_count} overdoses • {early_morning_pct}%",
-        font=dict(size=12, color="lightgray"),
+        font=dict(size=12, color="white"),
         xanchor="left",
         yanchor="top",
         showarrow=False,
@@ -198,11 +284,11 @@ def build_chart_od_density_heatmap(theme):
     # Add Saturday and Sunday from 08:00 to 16:00 rectangle
     fig.add_shape(
         type="rect",
-        x0=7.5,
-        x1=15.5,  # 08:00 to 16:00
-        y0=4.5,
-        y1=6.5,   # Covers Sat (index 5) and Sun (index 6)
-        line=dict(color="white", width=2, dash="dot"),
+        x0=7.55,   # Smaller gap from 7.6
+        x1=15.45,  # Smaller gap from 15.4
+        y0=4.55,   # Smaller gap after working hours (was 4.6)
+        y1=6.45,   # Smaller inset from 6.4
+        line=dict(color=region_colors["weekend_daytime"], width=2, dash="solid"),
         fillcolor="rgba(0,0,0,0)",  # Transparent
     )
     fig.add_annotation(
@@ -222,7 +308,7 @@ def build_chart_od_density_heatmap(theme):
         x=7.6,
         y=6.1,
         text=f"{weekend_daytime_count} overdoses • {weekend_daytime_pct}%",
-        font=dict(size=12, color="lightgray"),
+        font=dict(size=12, color="white"),
         xanchor="left",
         yanchor="top",
         showarrow=False,
@@ -232,11 +318,11 @@ def build_chart_od_density_heatmap(theme):
     # Covers Mon–Fri from 16:00 to 18:59
     fig.add_shape(
         type="rect",
-        x0=15.5,
-        x1=18.5,  # 16:00 to 19:00
-        y0=-0.5,
-        y1=4.5,   # Mon–Fri
-        line=dict(color="white", width=2, dash="dot"),
+        x0=15.55,  # Smaller gap after working hours (was 15.6)
+        x1=18.45,  # Smaller gap from 18.4
+        y0=-0.45,  # Smaller inset from -0.4
+        y1=4.45,   # Smaller inset from 4.4
+        line=dict(color=region_colors["early_evening"], width=2, dash="solid"),
         fillcolor="rgba(0,0,0,0)",
     )
     fig.add_annotation(
@@ -252,7 +338,7 @@ def build_chart_od_density_heatmap(theme):
         x=15.6,
         y=4.1,
         text=f"{early_evening_count} overdoses • {early_evening_pct}%",
-        font=dict(size=12, color="lightgray"),
+        font=dict(size=12, color="white"),
         xanchor="left",
         yanchor="top",
         showarrow=False,
@@ -262,17 +348,17 @@ def build_chart_od_density_heatmap(theme):
     # Covers Sat–Sun from 16:00 to 18:59
     fig.add_shape(
         type="rect",
-        x0=15.5,
-        x1=18.5,  # 16:00 to 19:00
-        y0=4.5,
-        y1=6.5,   # Sat–Sun
-        line=dict(color="white", width=2, dash="dot"),
+        x0=15.55,  # Smaller gap after weekend daytime (was 15.6)
+        x1=18.45,  # Smaller gap from 18.4
+        y0=4.55,   # Smaller gap after weekend daytime (was 4.6)
+        y1=6.45,   # Smaller inset from 6.4
+        line=dict(color=region_colors["weekend_evening"], width=2, dash="solid"),
         fillcolor="rgba(0,0,0,0)",
     )
     fig.add_annotation(
         x=15.6,
         y=6.4,
-        text="<b>Weekend Early Evening</b>",
+        text="<b>Weekend Evening</b>",
         font=dict(size=14, color="white"),
         xanchor="left",
         yanchor="top",
@@ -282,7 +368,7 @@ def build_chart_od_density_heatmap(theme):
         x=15.6,
         y=6.1,
         text=f"{weekend_early_evening_count} overdoses • {weekend_early_evening_pct}%",
-        font=dict(size=12, color="lightgray"),
+        font=dict(size=12, color="white"),
         xanchor="left",
         yanchor="top",
         showarrow=False,
@@ -292,11 +378,11 @@ def build_chart_od_density_heatmap(theme):
     # Covers all days from 19:00 to 23:59
     fig.add_shape(
         type="rect",
-        x0=18.5,
-        x1=23.5,  # 19:00 to 23:59
-        y0=-0.5,
-        y1=6.5,   # Mon–Sun
-        line=dict(color="white", width=2, dash="dot"),
+        x0=18.55,  # Smaller gap after early evening (was 18.6)
+        x1=23.45,  # Smaller gap from 23.4
+        y0=-0.45,  # Smaller inset from -0.4
+        y1=6.45,   # Smaller inset from 6.4
+        line=dict(color=region_colors["late_evening"], width=2, dash="solid"),
         fillcolor="rgba(0,0,0,0)",
     )
     fig.add_annotation(
@@ -312,7 +398,7 @@ def build_chart_od_density_heatmap(theme):
         x=18.6,
         y=6.1,
         text=f"{late_evening_count} overdoses • {late_evening_pct}%",
-        font=dict(size=12, color="lightgray"),
+        font=dict(size=12, color="white"),
         xanchor="left",
         yanchor="top",
         showarrow=False,
@@ -324,9 +410,9 @@ def build_chart_od_density_heatmap(theme):
         export_filename="pafd_cpm_chart_heatmap_density",
         show_legend=False,
         scroll_zoom=False,
-        x_title="Hour of Day",
-        y_title="Day of Week",
-        margin=dict(t=0, l=60, r=20, b=65),
+        x_title="",  # Remove x-axis title
+        y_title="",  # Remove y-axis title
+        margin=dict(t=0, l=0, r=16, b=0),
     )
     return plot(fig, output_type="div", config=fig._config), {
         "early_morning": {"count": early_morning_count, "pct": early_morning_pct},

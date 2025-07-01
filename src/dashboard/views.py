@@ -18,12 +18,15 @@ from .charts.overdose.od_stack_insurance import *
 # Trends over time
 from .charts.overdose.od_hist_monthly import *
 from .charts.overdose.od_density_heatmap import *
-from .charts.overdose.od_bar_workhours import *
-from .charts.overdose.od_hist_hourly import *
-from .charts.overdose.od_repeats_scatter import *
 
 # Geographic
 from .charts.overdose.od_map import *
+
+# Operation metrics
+from .charts.overdose.od_repeats_scatter import *
+from .charts.overdose.od_time_region import *
+from .charts.overdose.od_bar_workhours import *
+from .charts.overdose.od_hist_hourly import *
 
 # CPM specific metrics
 from .charts.overdose.od_referral_delay import *
@@ -125,7 +128,6 @@ def odreferrals_trends(request):
     fig_od_monthly                  = build_chart_od_hist_monthly(theme="dark")
     fig_density_map, density_stats  = build_chart_od_density_heatmap(theme="dark")
     fig_od_work_hours               = build_chart_od_work_hours(theme=theme)
-    fig_od_hist_hourly              = build_chart_od_hist_hourly(theme=theme)
     fig_repeats_scatter             = build_chart_repeats_scatter(theme="dark")
 
     # Total overdoses (all time)
@@ -153,9 +155,19 @@ def odreferrals_trends(request):
     # Percentage of repeats (all time)
     percent_repeat = round((repeat_overdoses / total_overdoses) * 100, 1) if total_overdoses > 0 else 0
     
-    # Referral success rate (all time) - based on referral_to_sud_agency field
-    successful_referrals = ODReferrals.objects.filter(referral_to_sud_agency=True).count()
-    referral_success_rate = round((successful_referrals / total_overdoses) * 100, 1) if total_overdoses > 0 else 0
+    # Referral success rate (all time) - handle both boolean True and string representations
+    successful_referrals = ODReferrals.objects.filter(
+        referral_to_sud_agency=True
+    ).count()
+    
+    # Also count string representations that might exist in SQLite
+    string_true_referrals = ODReferrals.objects.extra(
+        where=["referral_to_sud_agency = 'true' OR referral_to_sud_agency = 'True' OR referral_to_sud_agency = '1'"]
+    ).count()
+    
+    # Total successful referrals
+    total_successful = successful_referrals + string_true_referrals
+    referral_success_rate = round((total_successful / total_overdoses) * 100, 1) if total_overdoses > 0 else 0
     
     # List of years to compare
     years_to_compare = [2024, 2025]
@@ -195,7 +207,6 @@ def odreferrals_trends(request):
             "fig_density_map": fig_density_map,
             "density_stats": density_stats,
             "od_work_hours": fig_od_work_hours,
-            "chart_od_hist_hourly": fig_od_hist_hourly,
             "fig_repeats_scatter": fig_repeats_scatter,
             "fatal_overdoses": fatal_overdoses,
             "repeat_overdoses": repeat_overdoses,
@@ -255,6 +266,95 @@ def odreferrals_substances(request):
     )
 
 
+def odreferrals_operations(request):
+    
+    theme = get_theme_from_request(request)
+    title = "PORT Referrals"
+    description = "Key metrics - Operation Metrics"
+
+    # Charts for operations page
+    fig_density_map, density_stats  = build_chart_od_density_heatmap(theme="dark")
+    fig_time_region_bars            = build_chart_od_time_region_bars(theme="dark")
+    fig_od_hist_hourly              = build_chart_od_hist_hourly(theme="dark")
+
+    # Time region data for insights cards - use actual data from density stats
+    time_regions = [
+        {
+            "name": "Early Morning",
+            "time": "00:00–08:00",
+            "count": density_stats["early_morning"]["count"],
+            "percentage": density_stats["early_morning"]["pct"],
+            "icon": "🌙",
+            "color": "bg-blue-500",
+            "description": "Nighttime overdoses"
+        },
+        {
+            "name": "Working Hours",
+            "time": "08:00–16:00, M–F",
+            "count": density_stats["working_hours"]["count"],
+            "percentage": density_stats["working_hours"]["pct"],
+            "icon": "🏢",
+            "color": "bg-green-500",
+            "description": "Current CPM coverage"
+        },
+        {
+            "name": "Early Evening",
+            "time": "16:00–19:00, M–F",
+            "count": density_stats["early_evening"]["count"],
+            "percentage": density_stats["early_evening"]["pct"],
+            "icon": "🌇",
+            "color": "bg-orange-500",
+            "description": "Post-work hours"
+        },
+        {
+            "name": "Late Evening",
+            "time": "19:00–24:00",
+            "count": density_stats["late_evening"]["count"],
+            "percentage": density_stats["late_evening"]["pct"],
+            "icon": "🌃",
+            "color": "bg-purple-500",
+            "description": "Evening peak"
+        },
+        {
+            "name": "Weekend Daytime",
+            "time": "08:00–16:00",
+            "count": density_stats["weekend_daytime"]["count"],
+            "percentage": density_stats["weekend_daytime"]["pct"],
+            "icon": "☀️",
+            "color": "bg-yellow-500",
+            "description": "Weekend day hours"
+        },
+        {
+            "name": "Weekend Evening",
+            "time": "16:00–19:00",
+            "count": density_stats["weekend_early_evening"]["count"],
+            "percentage": density_stats["weekend_early_evening"]["pct"],
+            "icon": "🌆",
+            "color": "bg-pink-500",
+            "description": "Weekend evenings"
+        }
+    ]
+
+    return render(
+        request,
+        "dashboard/operations.html",
+        {
+            "title": title,
+            "description": description,
+            "fig_density_map": fig_density_map,
+            "density_stats": density_stats,
+            "fig_time_region_bars": fig_time_region_bars,
+            "fig_od_hist_hourly": fig_od_hist_hourly,
+            "time_regions": time_regions,
+            "theme": theme,
+            # Summary statistics
+            "current_coverage": density_stats["working_hours"]["pct"],
+            "missed_opportunities": round(100 - density_stats["working_hours"]["pct"], 1),
+            "proposed_coverage": round(density_stats["working_hours"]["pct"] + density_stats["early_evening"]["pct"], 1),
+        },
+    )
+
+
 def odreferrals_response(request):
     
     theme = get_theme_from_request(request)
@@ -262,9 +362,9 @@ def odreferrals_response(request):
     description = "Key metrics - Emergency Response Metrics"
 
     # Emergency response metrics
-    fig_cpr_admin           = build_chart_cpr_admin(theme="dark")
-    fig_call_disposition    = build_chart_call_disposition(theme="dark")
-    
+    fig_cpr_admin                   = build_chart_cpr_admin(theme="dark")
+    fig_call_disposition            = build_chart_call_disposition(theme="dark")
+
     return render(
         request,
         "dashboard/response.html",
