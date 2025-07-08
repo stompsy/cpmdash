@@ -30,7 +30,6 @@ def build_chart_od_time_region_bars(theme):
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        export_filename="pafd_cpm_chart_heatmap_density",
         show_legend=False,
         scroll_zoom=False,
         x_title="Time Region",

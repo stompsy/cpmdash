@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.utils.timezone import now
 from datetime import datetime
+import json
 
 from .models import *
 from django.db.models import Count
@@ -27,6 +28,8 @@ from .charts.overdose.od_repeats_scatter import *
 from .charts.overdose.od_time_region import *
 from .charts.overdose.od_bar_workhours import *
 from .charts.overdose.od_hist_hourly import *
+from .charts.overdose.od_hourly_breakdown import *
+from .charts.overdose.od_shift_scenarios import *
 
 # CPM specific metrics
 from .charts.overdose.od_referral_delay import *
@@ -91,7 +94,7 @@ def referrals(request):
     title = "Referrals"
     description = "This is a Referrals page"
 
-    fig_agency_treemap      = build_chart_od_agency_treemap(theme="dark")
+    fig_agency_treemap      = build_chart_od_agency_treemap(theme=theme)
 
     return render(
         request,
@@ -125,10 +128,10 @@ def odreferrals_trends(request):
     description = "Key metrics - Trends"
 
     # Trends over time
-    fig_od_monthly                  = build_chart_od_hist_monthly(theme="dark")
-    fig_density_map, density_stats  = build_chart_od_density_heatmap(theme="dark")
+    fig_od_monthly                  = build_chart_od_hist_monthly(theme=theme)
+    fig_density_map, density_stats  = build_chart_od_density_heatmap(theme=theme)
     fig_od_work_hours               = build_chart_od_work_hours(theme=theme)
-    fig_repeats_scatter             = build_chart_repeats_scatter(theme="dark")
+    fig_repeats_scatter             = build_chart_repeats_scatter(theme=theme)
 
     # Total overdoses (all time)
     total_overdoses = ODReferrals.objects.count()
@@ -227,7 +230,7 @@ def odreferrals_geographic(request):
     description = "Key metrics - Geographic"
     
     # Geographic
-    fig_od_map              = build_chart_od_map(theme="dark")
+    fig_od_map              = build_chart_od_map(theme=theme)
     
     return render(
         request,
@@ -250,7 +253,7 @@ def odreferrals_substances(request):
     description = "Key metrics - Substances"
     
     # Substance specific
-    fig_od_sus_drug         = build_chart_sus_drug(theme="dark")
+    fig_od_sus_drug         = build_chart_sus_drug(theme=theme)
     
     return render(
         request,
@@ -273,65 +276,197 @@ def odreferrals_operations(request):
     description = "Key metrics - Operation Metrics"
 
     # Charts for operations page
-    fig_density_map, density_stats  = build_chart_od_density_heatmap(theme="dark")
-    fig_time_region_bars            = build_chart_od_time_region_bars(theme="dark")
-    fig_od_hist_hourly              = build_chart_od_hist_hourly(theme="dark")
+    fig_density_map, density_stats  = build_chart_od_density_heatmap(theme=theme)
+    fig_time_region_bars            = build_chart_od_time_region_bars(theme=theme)
+    fig_od_hist_hourly              = build_chart_od_hist_hourly(theme=theme)
+    
+    # Build new detailed analytics
+    fig_hourly_breakdown = build_chart_od_hourly_breakdown(theme=theme)
+    fig_day_of_week_totals = build_chart_day_of_week_totals(theme=theme)
+    fig_shift_scenarios = build_chart_shift_scenarios(theme=theme)
+    fig_cost_benefit_analysis = build_chart_cost_benefit_analysis(theme=theme)
+    
+    # Get shift scenario data for summary cards
+    scenarios_data = calculate_coverage_scenarios()
 
-    # Time region data for insights cards - use actual data from density stats
-    time_regions = [
+    # Calculate statistics for both old and new time boundaries
+    def calculate_region_stats(use_old_boundaries=False):
+        import pandas as pd
+        from .models import ODReferrals
+        
+        # Get all overdose data
+        odreferrals = ODReferrals.objects.all()
+        df = pd.DataFrame.from_records(odreferrals.values("od_date"))
+        df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
+        df = df.dropna(subset=["od_date"])
+        
+        total_count = len(df)
+        
+        if use_old_boundaries:
+            # Old time boundaries (08:00-16:00 working hours)
+            early_morning_mask = df["od_date"].dt.hour < 8  # 00:00-07:59
+            working_hours_mask = (
+                df["od_date"].dt.hour.between(8, 15)  # 08:00-15:59
+                & df["od_date"].dt.weekday.isin([0, 1, 2, 3, 4])  # Mon–Fri
+            )
+            weekend_daytime_mask = (
+                df["od_date"].dt.hour.between(8, 15)  # 08:00-15:59
+                & df["od_date"].dt.weekday.isin([5, 6])  # Sat–Sun
+            )
+            early_evening_mask = (
+                df["od_date"].dt.hour.between(16, 18)  # 16:00-18:59
+                & df["od_date"].dt.weekday.isin([0, 1, 2, 3, 4])  # Mon–Fri
+            )
+            weekend_early_evening_mask = (
+                df["od_date"].dt.hour.between(16, 18)  # 16:00-18:59
+                & df["od_date"].dt.weekday.isin([5, 6])  # Sat–Sun
+            )
+            late_evening_mask = df["od_date"].dt.hour >= 19  # 19:00-23:59
+        else:
+            # New time boundaries (09:00-17:00 working hours) - same as heatmap
+            early_morning_mask = df["od_date"].dt.hour < 9  # 00:00-08:59
+            working_hours_mask = (
+                df["od_date"].dt.hour.between(9, 16)  # 09:00-16:59
+                & df["od_date"].dt.weekday.isin([0, 1, 2, 3, 4])  # Mon–Fri
+            )
+            weekend_daytime_mask = (
+                df["od_date"].dt.hour.between(9, 16)  # 09:00-16:59
+                & df["od_date"].dt.weekday.isin([5, 6])  # Sat–Sun
+            )
+            early_evening_mask = (
+                df["od_date"].dt.hour.between(17, 18)  # 17:00-18:59
+                & df["od_date"].dt.weekday.isin([0, 1, 2, 3, 4])  # Mon–Fri
+            )
+            weekend_early_evening_mask = (
+                df["od_date"].dt.hour.between(17, 18)  # 17:00-18:59
+                & df["od_date"].dt.weekday.isin([5, 6])  # Sat–Sun
+            )
+            late_evening_mask = df["od_date"].dt.hour >= 19  # 19:00-23:59
+        
+        # Calculate counts and percentages
+        early_morning_count = early_morning_mask.sum()
+        working_hours_count = working_hours_mask.sum()
+        weekend_daytime_count = weekend_daytime_mask.sum()
+        early_evening_count = early_evening_mask.sum()
+        weekend_early_evening_count = weekend_early_evening_mask.sum()
+        late_evening_count = late_evening_mask.sum()
+        
+        percent = lambda x: round((x / total_count) * 100, 1) if total_count else 0
+        
+        return {
+            "early_morning": {"count": int(early_morning_count), "pct": percent(early_morning_count)},
+            "working_hours": {"count": int(working_hours_count), "pct": percent(working_hours_count)},
+            "weekend_daytime": {"count": int(weekend_daytime_count), "pct": percent(weekend_daytime_count)},
+            "early_evening": {"count": int(early_evening_count), "pct": percent(early_evening_count)},
+            "weekend_early_evening": {"count": int(weekend_early_evening_count), "pct": percent(weekend_early_evening_count)},
+            "late_evening": {"count": int(late_evening_count), "pct": percent(late_evening_count)},
+        }
+    
+    # Calculate stats for both boundary definitions
+    stats_old = calculate_region_stats(use_old_boundaries=True)
+    stats_new = calculate_region_stats(use_old_boundaries=False)
+
+    # Time region data for insights cards - both old and new (proposed) hour definitions
+    time_regions_old = [
         {
             "name": "Early Morning",
             "time": "00:00–08:00",
-            "count": density_stats["early_morning"]["count"],
-            "percentage": density_stats["early_morning"]["pct"],
-            "icon": "🌙",
+            "count": stats_old["early_morning"]["count"],
+            "percentage": stats_old["early_morning"]["pct"],
             "color": "bg-blue-500",
             "description": "Nighttime overdoses"
         },
         {
             "name": "Working Hours",
             "time": "08:00–16:00, M–F",
-            "count": density_stats["working_hours"]["count"],
-            "percentage": density_stats["working_hours"]["pct"],
-            "icon": "🏢",
+            "count": stats_old["working_hours"]["count"],
+            "percentage": stats_old["working_hours"]["pct"],
             "color": "bg-green-500",
             "description": "Current CPM coverage"
         },
         {
             "name": "Early Evening",
             "time": "16:00–19:00, M–F",
-            "count": density_stats["early_evening"]["count"],
-            "percentage": density_stats["early_evening"]["pct"],
-            "icon": "🌇",
+            "count": stats_old["early_evening"]["count"],
+            "percentage": stats_old["early_evening"]["pct"],
             "color": "bg-orange-500",
             "description": "Post-work hours"
         },
         {
             "name": "Late Evening",
             "time": "19:00–24:00",
-            "count": density_stats["late_evening"]["count"],
-            "percentage": density_stats["late_evening"]["pct"],
-            "icon": "🌃",
+            "count": stats_old["late_evening"]["count"],
+            "percentage": stats_old["late_evening"]["pct"],
             "color": "bg-purple-500",
             "description": "Evening peak"
         },
         {
             "name": "Weekend Daytime",
             "time": "08:00–16:00",
-            "count": density_stats["weekend_daytime"]["count"],
-            "percentage": density_stats["weekend_daytime"]["pct"],
-            "icon": "☀️",
+            "count": stats_old["weekend_daytime"]["count"],
+            "percentage": stats_old["weekend_daytime"]["pct"],
             "color": "bg-yellow-500",
             "description": "Weekend day hours"
         },
         {
             "name": "Weekend Evening",
             "time": "16:00–19:00",
-            "count": density_stats["weekend_early_evening"]["count"],
-            "percentage": density_stats["weekend_early_evening"]["pct"],
-            "icon": "🌆",
+            "count": stats_old["weekend_early_evening"]["count"],
+            "percentage": stats_old["weekend_early_evening"]["pct"],
             "color": "bg-pink-500",
             "description": "Weekend evenings"
+        }
+    ]
+
+    # New proposed time region definitions (current heatmap boundaries)
+    time_regions_new = [
+        {
+            "name": "Early Morning",
+            "time": "00:00–09:00",
+            "count": stats_new["early_morning"]["count"],
+            "percentage": stats_new["early_morning"]["pct"],
+            "color": "bg-blue-500",
+            "description": "Extended nighttime coverage"
+        },
+        {
+            "name": "Working Hours",
+            "time": "09:00–17:00, M–F",
+            "count": stats_new["working_hours"]["count"],
+            "percentage": stats_new["working_hours"]["pct"],
+            "color": "bg-green-500",
+            "description": "Proposed CPM coverage"
+        },
+        {
+            "name": "Early Evening",
+            "time": "17:00–19:00, M–F",
+            "count": stats_new["early_evening"]["count"],
+            "percentage": stats_new["early_evening"]["pct"],
+            "color": "bg-orange-500",
+            "description": "Extended evening coverage"
+        },
+        {
+            "name": "Late Evening",
+            "time": "19:00–00:00",
+            "count": stats_new["late_evening"]["count"],
+            "percentage": stats_new["late_evening"]["pct"],
+            "color": "bg-purple-500",
+            "description": "Late night hours"
+        },
+        {
+            "name": "Weekend Daytime",
+            "time": "09:00–17:00",
+            "count": stats_new["weekend_daytime"]["count"],
+            "percentage": stats_new["weekend_daytime"]["pct"],
+            "color": "bg-yellow-500",
+            "description": "Weekend coverage hours"
+        },
+        {
+            "name": "Weekend Evening",
+            "time": "17:00–19:00",
+            "count": stats_new["weekend_early_evening"]["count"],
+            "percentage": stats_new["weekend_early_evening"]["pct"],
+            "color": "bg-pink-500",
+            "description": "Weekend evening hours"
         }
     ]
 
@@ -342,15 +477,18 @@ def odreferrals_operations(request):
             "title": title,
             "description": description,
             "fig_density_map": fig_density_map,
-            "density_stats": density_stats,
-            "fig_time_region_bars": fig_time_region_bars,
-            "fig_od_hist_hourly": fig_od_hist_hourly,
-            "time_regions": time_regions,
+            "fig_hourly_breakdown": fig_hourly_breakdown,
+            "fig_day_of_week_totals": fig_day_of_week_totals,
+            "fig_shift_scenarios": fig_shift_scenarios,
+            "fig_cost_benefit_analysis": fig_cost_benefit_analysis,
+            "time_regions_old": json.dumps(time_regions_old),
+            "time_regions_new": json.dumps(time_regions_new),
+            "scenarios_data": json.dumps(scenarios_data) if scenarios_data else "{}",
             "theme": theme,
-            # Summary statistics
-            "current_coverage": density_stats["working_hours"]["pct"],
-            "missed_opportunities": round(100 - density_stats["working_hours"]["pct"], 1),
-            "proposed_coverage": round(density_stats["working_hours"]["pct"] + density_stats["early_evening"]["pct"], 1),
+            # Summary statistics - use old boundaries for current coverage
+            "current_coverage": stats_old["working_hours"]["pct"],
+            "missed_opportunities": round(100 - stats_old["working_hours"]["pct"], 1),
+            "proposed_coverage": round(stats_new["working_hours"]["pct"] + stats_new["early_evening"]["pct"], 1),
         },
     )
 
@@ -362,8 +500,8 @@ def odreferrals_response(request):
     description = "Key metrics - Emergency Response Metrics"
 
     # Emergency response metrics
-    fig_cpr_admin                   = build_chart_cpr_admin(theme="dark")
-    fig_call_disposition            = build_chart_call_disposition(theme="dark")
+    fig_cpr_admin                   = build_chart_cpr_admin(theme=theme)
+    fig_call_disposition            = build_chart_call_disposition(theme=theme)
 
     return render(
         request,
@@ -387,9 +525,9 @@ def odreferrals_cpm(request):
     description = "Key metrics - CPM Specific Metrics"
 
     # CPM specific metrics
-    fig_referral_delay      = build_chart_referral_delay(theme="dark")
-    fig_cpm_notification    = build_chart_cpm_notification(theme="dark")
-    fig_cpm_disposition     = build_chart_cpm_disposition(theme="dark")
+    fig_referral_delay      = build_chart_referral_delay(theme=theme)
+    fig_cpm_notification    = build_chart_cpm_notification(theme=theme)
+    fig_cpm_disposition     = build_chart_cpm_disposition(theme=theme)
     
     return render(
         request,
@@ -415,12 +553,12 @@ def odreferrals_socioeconomic(request):
     # od_counts = get_odreferral_counts()
 
     # General statistics
-    fig_od_age_race         = build_chart_od_age_race(theme="dark")
-    fig_od_age_sex          = build_chart_od_age_sex(theme="dark")
+    fig_od_age_race         = build_chart_od_age_race(theme=theme)
+    fig_od_age_sex          = build_chart_od_age_sex(theme=theme)
 
     # Socioeconomic factors
-    fig_od_living_sit       = build_chart_od_stack_livingsituation(theme="dark")
-    fig_od_insurance        = build_chart_od_stack_insurance(theme="dark")
+    fig_od_living_sit       = build_chart_od_stack_livingsituation(theme=theme)
+    fig_od_insurance        = build_chart_od_stack_insurance(theme=theme)
 
     return render(
         request,
@@ -437,3 +575,43 @@ def odreferrals_socioeconomic(request):
             "theme": theme,
         },
     )
+
+
+# HTMX Chart Update Views
+from django.http import HttpResponse
+
+def htmx_heatmap_chart(request):
+    """Return just the heatmap chart HTML for HTMX updates"""
+    theme = get_theme_from_request(request)
+    fig_density_map, _ = build_chart_od_density_heatmap(theme=theme)
+    return HttpResponse(fig_density_map)
+
+def htmx_time_region_bars_chart(request):
+    """Return just the time region bars chart HTML for HTMX updates"""
+    theme = get_theme_from_request(request)
+    fig_time_region_bars = build_chart_od_time_region_bars(theme=theme)
+    return HttpResponse(fig_time_region_bars)
+
+def htmx_hourly_breakdown_chart(request):
+    """Return just the hourly breakdown chart HTML for HTMX updates"""
+    theme = get_theme_from_request(request)
+    fig_hourly_breakdown = build_chart_od_hourly_breakdown(theme=theme)
+    return HttpResponse(fig_hourly_breakdown)
+
+def htmx_day_of_week_chart(request):
+    """Return just the day of week analysis chart HTML for HTMX updates"""
+    theme = get_theme_from_request(request)
+    fig_day_of_week_analysis = build_chart_day_of_week_analysis(theme=theme)
+    return HttpResponse(fig_day_of_week_analysis)
+
+def htmx_shift_scenarios_chart(request):
+    """Return just the shift scenarios chart HTML for HTMX updates"""
+    theme = get_theme_from_request(request)
+    fig_shift_scenarios = build_chart_shift_scenarios(theme=theme)
+    return HttpResponse(fig_shift_scenarios)
+
+def htmx_cost_benefit_chart(request):
+    """Return just the cost benefit analysis chart HTML for HTMX updates"""
+    theme = get_theme_from_request(request)
+    fig_cost_benefit_analysis = build_chart_cost_benefit_analysis(theme=theme)
+    return HttpResponse(fig_cost_benefit_analysis)

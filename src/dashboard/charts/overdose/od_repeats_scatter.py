@@ -139,7 +139,6 @@ def build_chart_repeats_scatter(theme):
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        export_filename="pafd_cpm_chart_repeats_scatter",
         scroll_zoom=False,
         margin=dict(t=0, l=35, r=20, b=65),
     )

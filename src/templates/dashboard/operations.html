@@ -11,111 +11,25 @@
         <title>{% block title %} {% endblock title %}</title>
         <link rel="shortcut icon" type="image/png" href="{% static 'src/media/favicon.ico' %}"/>
         <link rel="stylesheet" href="{% static 'src/css/output.css' %}" />
-        
-        <!-- Dynamic Plotly Theme Manager -->
-        <script>
-            // Plotly theme configuration
-            const plotlyThemes = {
-                dark: {
-                    axisColor: '#e2e8f0',     // slate-200
-                    fontColor: '#e2e8f0',     // slate-200
-                    plotBg: 'rgba(0,0,0,0)',  // transparent
-                    paperBg: 'rgba(0,0,0,0)', // transparent
-                    gridColor: '#1f2937'      // gray-800
-                },
-                light: {
-                    axisColor: '#1e293b',     // slate-800
-                    fontColor: '#1e293b',     // slate-800
-                    plotBg: '#ffffff',        // white
-                    paperBg: '#ffffff',       // white
-                    gridColor: '#e2e8f0'      // slate-200 for better visibility in light mode
-                }
-            };
-
-            function updatePlotlyTheme(isDark) {
-                const theme = isDark ? plotlyThemes.dark : plotlyThemes.light;
-                
-                // Find all Plotly plots
-                document.querySelectorAll('.js-plotly-plot').forEach(function(plotDiv) {
-                    if (plotDiv._fullLayout) {
-                        // Update layout with new theme
-                        Plotly.relayout(plotDiv, {
-                            'font.color': theme.fontColor,
-                            'xaxis.title.font.color': theme.axisColor,
-                            'yaxis.title.font.color': theme.axisColor,
-                            'xaxis.gridcolor': theme.gridColor,
-                            'yaxis.gridcolor': theme.gridColor,
-                            'xaxis.tickfont.color': theme.fontColor,
-                            'yaxis.tickfont.color': theme.fontColor,
-                            'plot_bgcolor': theme.plotBg,
-                            'paper_bgcolor': theme.paperBg
-                        });
-                        
-                        // Apply y-axis tick alignment and positioning
-                        setTimeout(function() {
-                            const yAxisTicks = plotDiv.querySelectorAll('.yaxislayer-above text, .yaxis text');
-                            yAxisTicks.forEach(function(tick) {
-                                tick.style.textAnchor = 'start';
-                                tick.style.dominantBaseline = 'middle';
-                                tick.style.transform = 'translateX(10px)';
-                            });
-                        }, 100);
-                    }
-                });
-            }
-        </script>
-        
-        <!-- CSS for additional Plotly styling -->
-        <style>
-            /* Ensure Plotly charts inherit theme colors */
-            .js-plotly-plot {
-                transition: all 0.3s ease;
-            }
-            
-            /* Y-axis tick styling that works with both themes */
-            .js-plotly-plot .yaxislayer-above text,
-            .js-plotly-plot .yaxis text {
-                transition: fill 0.3s ease, transform 0.3s ease;
-            }
-            
-            /* Dark mode specific overrides */
-            .dark .js-plotly-plot .main-svg {
-                color: #e2e8f0;
-            }
-            
-            /* Light mode specific overrides */
-            .js-plotly-plot .main-svg {
-                color: #1e293b;
-            }
-        </style>
-        
         <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     </head>
     <body
-        x-data="{ page: 'Operations', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false, 'isProfileInfoModal': false, 'isProfileAddressModal': false }"
+        x-data="{ 
+            page: 'Operations', 
+            'loaded': true, 
+            'darkMode': true, 
+            'stickyMenu': false, 
+            'sidebarToggle': false, 
+            'scrollTop': false, 
+            'isProfileInfoModal': false, 
+            'isProfileAddressModal': false
+        }"
         x-init="
-            darkMode = JSON.parse(localStorage.getItem('darkMode'));
-            $watch('darkMode', value => {
-                localStorage.setItem('darkMode', JSON.stringify(value));
-                // Update Plotly charts when theme changes
-                setTimeout(() => updatePlotlyTheme(value), 100);
-            });
-            // Initial theme setup after DOM is loaded
-            $nextTick(() => {
-                setTimeout(() => {
-                    updatePlotlyTheme(darkMode);
-                    // Also apply initial y-axis styling
-                    document.querySelectorAll('.js-plotly-plot').forEach(function(plotDiv) {
-                        const yAxisTicks = plotDiv.querySelectorAll('.yaxislayer-above text, .yaxis text');
-                        yAxisTicks.forEach(function(tick) {
-                            tick.style.textAnchor = 'start';
-                            tick.style.dominantBaseline = 'middle';
-                            tick.style.transform = 'translateX(10px)';
-                        });
-                    });
-                }, 500);
-            });"
+            darkMode = true;
+            localStorage.setItem('darkMode', JSON.stringify(true));
+            $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
         :class="{'dark bg-gray-900': darkMode === true}"
     >
         <!-- Preloader -->
@@ -135,139 +49,434 @@
                 <!-- Main Content Start -->
                 <main>
                     <div class="p-8 mx-auto">
+                        <!-- 12-column grid container -->
+                        <div class="grid grid-cols-12 gap-6">
 
-                        <!-- Introduction -->
-                        <section class="mt-4 mb-16">
-                            <div>
-                                <p class="text-base font-semibold text-brand-500 dark:text-brand-300">Post Overdose Response Team (PORT)</p>
-                                <h1 class="mt-2 text-4xl font-semibold text-gray-900 dark:text-white">Expanding Access Through Time-Aware Deployment</h1>
-                                <p class="mt-6 text-xl text-gray-700 dark:text-gray-300">
-                                    Emergency medical resources are most effective when aligned with when and where crises occur. 
-                                    At the Port Angeles Fire Department, operational metrics illuminate a clear truth: overdoses 
-                                    do not follow business hours. To optimize Community Paramedic (CPM) coverage and improve outcomes, 
-                                    we used time-based overdose data to reevaluate our existing staffing model.
-                                </p>
-                            </div>
-                        </section>
-
-                        <!-- Overdose by Day and Hour Rationale -->
-                        <section class="my-16">
-                            <!-- Two-column layout: Text left, Cards right -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6 items-center">
-                                <!-- Left Column: Problem & Insights Text -->
-                                <div class="space-y-6">
-                                    <div>
-                                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Problem</h3>
-                                        <p class="text-gray-700 dark:text-gray-300">
-                                            Our team currently operates five 8-hour shifts, typically covering 08:00–16:00. While 
-                                            this aligns with traditional agency hours, it 
-                                            <strong class="bg-brand-600 text-gray-100 dark:bg-brand-600 dark:text-gray-100 px-1 py-0.5 rounded font-semibold">
-                                                only covers {{ current_coverage }}% of overdoses</strong>
-                                            Patients experiencing crises in the early morning, late evening, or weekends often go unseen 
-                                            by CPMs, resulting in missed opportunities for engagement and follow-up care.
-                                        </p>
+                            <!-- Introduction - Full Width -->
+                            <section class="col-span-12 mb-24">
+                                <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 py-12 sm:px-4 sm:py-16 lg:overflow-visible lg:px-0">
+                                    <div class="absolute inset-0 -z-10 overflow-hidden">
+                                        <svg class="absolute top-0 left-[max(50%,25rem)] h-256 w-512 -translate-x-1/2 mask-[radial-gradient(64rem_64rem_at_top,white,transparent)] dark:mask-[radial-gradient(64rem_64rem_at_top,black,transparent)] stroke-gray-200 dark:stroke-gray-700" aria-hidden="true">
+                                            <defs>
+                                                <pattern id="e813992c-7d03-4cc4-a2bd-151760b470a0" width="200" height="200" x="50%" y="-1" patternUnits="userSpaceOnUse">
+                                                    <path d="M100 200V.5M.5 .5H200" fill="none" />
+                                                </pattern>
+                                            </defs>
+                                            <svg x="50%" y="-1" class="overflow-visible fill-gray-50 dark:fill-gray-800">
+                                                <path d="M-100.5 0h201v201h-201Z M699.5 0h201v201h-201Z M499.5 400h201v201h-201Z M-300.5 600h201v201h-201Z" stroke-width="0" />
+                                            </svg>
+                                            <rect width="100%" height="100%" stroke-width="0" fill="url(#e813992c-7d03-4cc4-a2bd-151760b470a0)" />
+                                        </svg>
                                     </div>
-
-                                    <div>
-                                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Insights</h3>
-                                        <p class="text-gray-700 dark:text-gray-300">
-                                            Overdose patterns reveal critical gaps in current coverage. Our data shows when and where 
-                                            intervention opportunities are most needed.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- Right Column: Time Region Cards Grid -->
-                                <div class="md:bg-gradient-to-r md:from-blue-50 md:to-indigo-50 dark:from-gray-800 dark:to-gray-900 md:rounded-l-lg md:p-4">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
-                                        {% for region in time_regions %}
-                                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-300">
-                                            <div class="p-3">
-                                                <!-- Region info with name and count in columns -->
-                                                <div class="grid grid-cols-3 gap-2 mb-2">
-                                                    <div class="col-span-2">
-                                                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap overflow-hidden text-ellipsis">{{ region.name }}</h4>
-                                                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ region.time }}</p>
-                                                    </div>
-                                                    <div class="text-right">
-                                                        <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ region.count }}</div>
-                                                    </div>
-                                                </div>
+                                    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+                                        <div class="lg:pr-4 lg:pl-8">
+                                            <div class="lg:max-w-2xl">
+                                                <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Operations</p>
+                                                <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl">Post Overdose Response Team (PORT)</h1>
+                                                <p class="mt-6 text-xl/8 text-gray-700 dark:text-gray-300">Emergency medical resources are most effective when aligned with when and where crises occur. At the Port Angeles Fire Department, operational metrics illuminate a clear truth: overdoses do not follow business hours. To optimize Community Paramedic (CPM) coverage and improve outcomes, we used time-based overdose data to reevaluate our existing staffing model.</p>
+                                            </div>
+                                            <div class="mt-10 max-w-2xl text-base/7 text-gray-700 dark:text-gray-300">
+                                                <p>Our analysis reveals critical gaps in current Community Paramedic coverage. Traditional 8AM-4PM schedules miss the majority of overdose incidents, which cluster during early evening and morning hours when people are most vulnerable.</p>
+                                                <ul role="list" class="mt-8 space-y-8 text-gray-600 dark:text-gray-400">
+                                                    <li class="flex gap-x-3">
+                                                        <svg class="mt-1 size-5 flex-none text-indigo-600 dark:text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                                                            <path d="M15.5 2A1.5 1.5 0 0 0 14 3.5v13a1.5 1.5 0 0 0 1.5 1.5h1a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 16.5 2h-1ZM9.5 6A1.5 1.5 0 0 0 8 7.5v9A1.5 1.5 0 0 0 9.5 18h1a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 10.5 6h-1ZM3.5 10A1.5 1.5 0 0 0 2 11.5v5A1.5 1.5 0 0 0 3.5 18h1A1.5 1.5 0 0 0 6 16.5v-5A1.5 1.5 0 0 0 4.5 10h-1Z" />
+                                                        </svg>
+                                                        <span><strong class="font-semibold text-gray-900 dark:text-white">Data-Driven Insights.</strong> Analysis of 122 tracked overdose cases reveals optimal scheduling patterns and coverage gaps in our current system.</span>
+                                                    </li>
+                                                    <li class="flex gap-x-3">
+                                                        <svg class="mt-1 size-5 flex-none text-indigo-600 dark:text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span><strong class="font-semibold text-gray-900 dark:text-white">Strategic Scheduling.</strong> 4×10 shift models double our coverage while providing staff with improved work-life balance and 3-day weekends.</span>
+                                                    </li>
+                                                    <li class="flex gap-x-3">
+                                                        <svg class="mt-1 size-5 flex-none text-indigo-600 dark:text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                                                            <path fill-rule="evenodd" d="M10 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 1ZM5.05 3.05a.75.75 0 0 1 1.06 0l1.062 1.06A.75.75 0 1 1 6.11 5.173L5.05 4.11a.75.75 0 0 1 0-1.06Zm9.9 0a.75.75 0 0 1 0 1.06l-1.06 1.062a.75.75 0 0 1-1.061-1.061l1.06-1.061a.75.75 0 0 1 1.061 0ZM3 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 3 8Zm11 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 14 8Zm-6.828 2.828a.75.75 0 0 1 0 1.061L6.11 12.95a.75.75 0 0 1-1.06-1.061l1.06-1.06a.75.75 0 0 1 1.061 0Zm3.594-3.317a.75.75 0 0 0-1.37.364l-.492 6.861a.75.75 0 0 0 1.204.65l1.043-.799.985 3.678a.75.75 0 0 0 1.45-.388l-.978-3.646 1.292.204a.75.75 0 0 0 .74-1.16l-3.874-5.764Z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span><strong class="font-semibold text-gray-900 dark:text-white">Measurable Impact.</strong> Implementation could increase coverage from 43 to 88+ cases annually, representing a 105% improvement in community reach.</span>
+                                                    </li>
+                                                </ul>
+                                                <p class="mt-8">The following analysis demonstrates how strategic scheduling alignment with overdose patterns can maximize Community Paramedic effectiveness while maintaining operational efficiency and staff satisfaction.</p>
+                                                <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Evidence-Based Operational Strategy</h2>
+                                                <p class="mt-6">By leveraging comprehensive overdose timing data, we've identified optimal deployment windows that align Community Paramedic availability with peak crisis periods. This approach maximizes our intervention opportunities while supporting sustainable staffing models.</p>
+                                            </div>
+                                        </div>
+                                        <div class="lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
+                                            <!-- Shift Scenario Selector -->
+                                            <div class="border border-gray-200 dark:border-gray-700 rounded-2xl p-6" 
+                                                x-data="shiftScenarioSelector()" 
+                                                x-init="initSelector()">
                                                 
-                                                <!-- Percentage bar -->
-                                                <div>
-                                                    <div class="flex justify-between items-center mb-1">
-                                                        <span class="text-xs font-medium text-gray-900 dark:text-white">{{ region.percentage }}%</span>
+                                                <!-- Header with subtle accent -->
+                                                <div class="border-l-4 border-indigo-500 pl-4 mb-8">
+                                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Shift Coverage Analysis</h3>
+                                                    <p class="text-sm text-gray-600 dark:text-gray-400">Interactive comparison of scheduling models</p>
+                                                </div>
+
+                                                <!-- Scenario Selection - Vertical Stack -->
+                                                <div class="space-y-3 mb-8">
+                                                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Select Scenario:</div>
+                                                    <template x-for="(scenario, key) in scenarios" :key="key">
+                                                        <button 
+                                                            class="w-full text-left p-4 rounded-lg border-2 transition-all duration-200 dark:bg-slate-800/50"
+                                                            :class="selectedScenario === key ? 
+                                                                'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-md' : 
+                                                                'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-sm'"
+                                                            @click="selectedScenario = key">
+                                                            <div class="flex items-center justify-between">
+                                                                <div class="flex-1">
+                                                                    <div class="font-semibold text-gray-900 dark:text-white text-sm mb-1" x-text="scenario.name"></div>
+                                                                    <div class="text-xs text-gray-500 dark:text-gray-400" x-text="scenario.schedule"></div>
+                                                                </div>
+                                                                <div class="flex items-center space-x-3">
+                                                                    <div class="text-right">
+                                                                        <div class="text-xl font-bold mb-1" 
+                                                                            :class="{
+                                                                                'text-red-600 dark:text-red-400': scenario.coverage < 40,
+                                                                                'text-orange-600 dark:text-orange-400': scenario.coverage >= 40 && scenario.coverage < 55,
+                                                                                'text-amber-600 dark:text-amber-400': scenario.coverage >= 55 && scenario.coverage < 70,
+                                                                                'text-green-600 dark:text-green-400': scenario.coverage >= 70 && scenario.coverage < 85,
+                                                                                'text-emerald-600 dark:text-emerald-400': scenario.coverage >= 85
+                                                                            }" 
+                                                                            x-text="scenario.coverage + '%'"></div>
+                                                                        <div class="text-xs text-gray-500 dark:text-gray-400">coverage</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+                                                    </template>
+                                                </div>
+
+                                                <!-- Stats Display -->
+                                                <div class="mt-6 p-4 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm">
+
+                                                    <!-- Key Metrics - Grid Layout -->
+                                                    <div class="grid grid-cols-3 gap-3 mb-6">
+                                                        <div class="text-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm transform transition-all duration-300 hover:scale-105 hover:shadow-md">
+                                                            <div class="text-2xl font-bold mb-1" 
+                                                                :class="{
+                                                                    'text-red-600 dark:text-red-400': (scenarios[selectedScenario]?.coverage || 0) < 40,
+                                                                    'text-orange-600 dark:text-orange-400': (scenarios[selectedScenario]?.coverage || 0) >= 40 && (scenarios[selectedScenario]?.coverage || 0) < 55,
+                                                                    'text-amber-600 dark:text-amber-400': (scenarios[selectedScenario]?.coverage || 0) >= 55 && (scenarios[selectedScenario]?.coverage || 0) < 70,
+                                                                    'text-green-600 dark:text-green-400': (scenarios[selectedScenario]?.coverage || 0) >= 70 && (scenarios[selectedScenario]?.coverage || 0) < 85,
+                                                                    'text-emerald-600 dark:text-emerald-400': (scenarios[selectedScenario]?.coverage || 0) >= 85
+                                                                }" 
+                                                                x-text="(scenarios[selectedScenario]?.coverage || 0) + '%'"></div>
+                                                            <div class="text-xs text-gray-600 dark:text-gray-400">Coverage</div>
+                                                        </div>
+                                                        <div class="text-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm transform transition-all duration-300 hover:scale-105 hover:shadow-md">
+                                                            <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1" x-text="scenarios[selectedScenario]?.cases_covered || '0'"></div>
+                                                            <div class="text-xs text-gray-600 dark:text-gray-400">Cases/Year</div>
+                                                        </div>
+                                                        <div class="text-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm transform transition-all duration-300 hover:scale-105 hover:shadow-md" x-show="scenarios[selectedScenario]?.improvement > 0">
+                                                            <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-1" x-text="'+' + (scenarios[selectedScenario]?.improvement || 0) + '%'"></div>
+                                                            <div class="text-xs text-gray-600 dark:text-gray-400">Gain</div>
+                                                        </div>
                                                     </div>
-                                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                                                        <div class="{{ region.color }} h-1.5 rounded-full transition-all duration-300" style="width: {{ region.percentage }}%"></div>
+
+                                                    <!-- Benefits List -->
+                                                    <div>
+                                                        <h5 class="font-semibold text-gray-900 dark:text-white text-sm mb-3 pb-2">Key Benefits</h5>
+                                                        <div class="space-y-2.5">
+                                                            <template x-for="benefit in (scenarios[selectedScenario]?.benefits || [])" :key="benefit">
+                                                                <div class="flex items-start">
+                                                                    <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 mr-3 flex-shrink-0"></div>
+                                                                    <span class="text-sm text-gray-700 dark:text-gray-300" x-text="benefit"></span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        {% endfor %}
                                     </div>
                                 </div>
-                            </div>
+                            </section>
 
-                            <!-- Overdose by Time Region -->
-                            <div class="my-16">
-                                <div>
-                                    <div class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Overdoses by Time Region</div>
+                            <!-- Overdose by Time Region - Full Width -->
+                            <section class="col-span-12 mb-24">
+                                <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 py-12 sm:px-4 sm:py-16 lg:overflow-visible lg:px-0">
+                                    <!-- Background Pattern -->
+                                    <div class="absolute inset-0 -z-10 overflow-hidden">
+                                        <svg class="absolute top-0 right-0 h-64 w-64 transform translate-x-32 opacity-10 dark:opacity-5" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="heat-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#f97316;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#eab308;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <!-- Heatmap-inspired pattern -->
+                                            <rect x="0" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.3"/>
+                                            <rect x="25" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.6"/>
+                                            <rect x="50" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.2"/>
+                                            <rect x="75" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.8"/>
+                                            <rect x="100" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.4"/>
+                                            <rect x="0" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.7"/>
+                                            <rect x="25" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.3"/>
+                                            <rect x="50" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.9"/>
+                                            <rect x="75" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.1"/>
+                                            <rect x="100" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.5"/>
+                                        </svg>
+                                        <!-- Floating clock elements -->
+                                        <div class="absolute top-20 left-1/4 w-8 h-8 rounded-full border-2 border-blue-200 dark:border-blue-700 opacity-20 animate-pulse"></div>
+                                        <div class="absolute top-32 right-1/3 w-6 h-6 rounded-full border-2 border-indigo-200 dark:border-indigo-700 opacity-30 animate-pulse" style="animation-delay: 1s;"></div>
+                                        <div class="absolute top-40 left-1/2 w-4 h-4 rounded-full border-2 border-purple-200 dark:border-purple-700 opacity-25 animate-pulse" style="animation-delay: 2s;"></div>
+                                    </div>
+                                    
+                                    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
+                                        <div class="lg:pr-4 lg:pl-8">
+                                            <!-- Heatmap -->
+                                            <div class="mb-20">
+                                                <div class="mb-6 relative">
+                                                    <!-- Title background highlight -->
+                                                    <div class="absolute -inset-4 bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 dark:from-gray-800/30 dark:via-gray-700/30 dark:to-gray-800/30 rounded-lg -z-10 opacity-60"></div>
+                                                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white relative">Overdose Heatmap by Day and Hour</h2>
+                                                </div>
+                                                <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
+                                                    Hourly overdose patterns for each day of the week, visualized as a heatmap to identify optimal coverage days and times. Brighter areas indicate higher concentrations of incidents, helping to identify peak risk periods and gaps in current coverage.
+                                                </p>
+                                                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20">
+                                                    <div id="heatmap-container" class="bg-transparent">
+                                                        {% autoescape off %}{{ fig_density_map|safe }}{% endautoescape %}
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                                    <!-- Heatmap -->
-                                    <div class="relative">
-                                        <!-- Heatmap container -->
-                                        <div>
-                                            {% autoescape off %}{{ fig_density_map|safe }}{% endautoescape %}
+                                            <!-- Daily Overdose Totals -->
+                                            <div class="mb-0">
+                                                <div class="mb-2">
+                                                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Daily Overdose Totals</h3>
+                                                </div>
+                                                <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
+                                                    Total number of overdoses for each day of the week, highlighting weekend risk.
+                                                </p>
+                                                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20">
+                                                    <div id="daily-totals-container" class="bg-transparent">
+                                                        {% autoescape off %}{{ fig_day_of_week_totals|safe }}{% endautoescape %}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <div class="mt-8">{% autoescape off %}{{ fig_time_region_bars|safe }}{% endautoescape %}</div>
                                 </div>
-                            </div>
+                            </section>
 
-                            <!-- Summary Statistics -->
-                            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                                    <div>
-                                        <div class="text-3xl font-bold">{{ current_coverage }}%</div>
-                                        <div class="text-sm opacity-90">Current Coverage</div>
-                                        <div class="text-xs opacity-75">Working Hours Only</div>
+                            <!-- Hour-by-Hour Analysis - Full Width -->
+                            <section class="col-span-12 mb-24">
+                                <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 py-12 sm:px-4 sm:py-16 lg:overflow-visible lg:px-0">
+                                    <!-- Background Pattern -->
+                                    <div class="absolute inset-0 -z-10 overflow-hidden">
+                                        <!-- 24-hour clock pattern -->
+                                        <svg class="absolute top-0 left-0 h-72 w-72 transform -translate-x-16 -translate-y-8 opacity-5 dark:opacity-3" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="2" fill="none" class="text-blue-500"/>
+                                            <!-- Hour markers -->
+                                            <g class="text-blue-600 dark:text-blue-400">
+                                                <line x1="100" y1="30" x2="100" y2="40" stroke="currentColor" stroke-width="3"/>
+                                                <line x1="150" y1="50" x2="145" y2="55" stroke="currentColor" stroke-width="2"/>
+                                                <line x1="170" y1="100" x2="160" y2="100" stroke="currentColor" stroke-width="3"/>
+                                                <line x1="150" y1="150" x2="145" y2="145" stroke="currentColor" stroke-width="2"/>
+                                                <line x1="100" y1="170" x2="100" y2="160" stroke="currentColor" stroke-width="3"/>
+                                                <line x1="50" y1="150" x2="55" y2="145" stroke="currentColor" stroke-width="2"/>
+                                                <line x1="30" y1="100" x2="40" y2="100" stroke="currentColor" stroke-width="3"/>
+                                                <line x1="50" y1="50" x2="55" y2="55" stroke="currentColor" stroke-width="2"/>
+                                            </g>
+                                            <!-- Clock hands -->
+                                            <line x1="100" y1="100" x2="100" y2="60" stroke="currentColor" stroke-width="3" class="text-indigo-600 dark:text-indigo-400"/>
+                                            <line x1="100" y1="100" x2="130" y2="100" stroke="currentColor" stroke-width="2" class="text-purple-600 dark:text-purple-400"/>
+                                        </svg>
+                                        <!-- Time-based dots -->
+                                        <div class="absolute top-16 right-1/4 w-3 h-3 bg-blue-300 dark:bg-blue-600 rounded-full opacity-40 animate-ping"></div>
+                                        <div class="absolute top-28 right-1/3 w-2 h-2 bg-indigo-300 dark:bg-indigo-600 rounded-full opacity-30 animate-ping" style="animation-delay: 0.5s;"></div>
+                                        <div class="absolute top-40 right-1/2 w-4 h-4 bg-purple-300 dark:bg-purple-600 rounded-full opacity-20 animate-ping" style="animation-delay: 1s;"></div>
                                     </div>
-                                    <div>
-                                        <div class="text-3xl font-bold">{{ missed_opportunities }}%</div>
-                                        <div class="text-sm opacity-90">Missed Opportunities</div>
-                                        <div class="text-xs opacity-75">Outside Current Hours</div>
-                                    </div>
-                                    <div>
-                                        <div class="text-3xl font-bold">{{ proposed_coverage }}%</div>
-                                        <div class="text-sm opacity-90">Proposed Coverage</div>
-                                        <div class="text-xs opacity-75">09:00–19:00 Shift</div>
+                                    
+                                    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
+                                        <div class="lg:pr-4 lg:pl-8">
+                                            <div class="mb-0">
+                                                <div class="mb-2">
+                                                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Hour-by-Hour Overdose Patterns</h3>
+                                                </div>
+                                                <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
+                                                    Detailed breakdown showing overdose distribution across all 24 hours, comparing weekdays vs weekends, 
+                                                    with current coverage overlay to identify specific gaps.
+                                                </p>
+                                                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/10 dark:bg-gray-800/20">
+                                                    <div id="hourly-breakdown-container" class="bg-transparent">
+                                                        {% autoescape off %}{{ fig_hourly_breakdown|safe }}{% endautoescape %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
 
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Solution</h3>
-                            <p class="text-gray-700 dark:text-gray-300">
-                                We proposed transitioning to a <strong class="bg-gray-600 text-gray-100 dark:bg-gray-400 dark:text-gray-800 px-1 py-0.5 rounded font-semibold">4-day, 10-hour shift model</strong>, running from <strong class="bg-gray-600 text-gray-100 dark:bg-gray-400 dark:text-gray-800 px-1 py-0.5 rounded font-semibold">09:00–19:00</strong>. This simple shift captures both working hours and early evening windows, raising our coverage from {{ current_coverage }}% to nearly {{ proposed_coverage }}%.
-                            </p>
+                            <!-- Efficiency Analysis - Full Width -->
+                            <section class="col-span-12 mb-24">
+                                <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 py-12 sm:px-4 sm:py-16 lg:overflow-visible lg:px-0">
+                                    <!-- Background Pattern -->
+                                    <div class="absolute inset-0 -z-10 overflow-hidden">
+                                        <!-- Efficiency/Analytics pattern -->
+                                        <svg class="absolute top-0 right-0 h-80 w-80 transform translate-x-20 -translate-y-10 opacity-8 dark:opacity-4" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="efficiency-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <!-- Chart-like bars -->
+                                            <rect x="20" y="120" width="15" height="60" fill="url(#efficiency-gradient)" opacity="0.6"/>
+                                            <rect x="40" y="100" width="15" height="80" fill="url(#efficiency-gradient)" opacity="0.8"/>
+                                            <rect x="60" y="80" width="15" height="100" fill="url(#efficiency-gradient)" opacity="0.4"/>
+                                            <rect x="80" y="60" width="15" height="120" fill="url(#efficiency-gradient)" opacity="0.7"/>
+                                            <rect x="100" y="40" width="15" height="140" fill="url(#efficiency-gradient)" opacity="0.9"/>
+                                            <rect x="120" y="90" width="15" height="90" fill="url(#efficiency-gradient)" opacity="0.5"/>
+                                            <rect x="140" y="110" width="15" height="70" fill="url(#efficiency-gradient)" opacity="0.6"/>
+                                            <!-- Trend line -->
+                                            <path d="M25 140 L47 125 L67 110 L87 95 L107 80 L127 100 L147 115" stroke="url(#efficiency-gradient)" stroke-width="3" fill="none" opacity="0.7"/>
+                                        </svg>
+                                        <!-- Floating percentage symbols -->
+                                        <div class="absolute top-20 left-1/3 text-green-300 dark:text-green-600 opacity-20 text-2xl font-bold">%</div>
+                                        <div class="absolute top-36 right-1/4 text-blue-300 dark:text-blue-600 opacity-25 text-xl font-bold">↗</div>
+                                        <div class="absolute top-52 left-1/2 text-purple-300 dark:text-purple-600 opacity-30 text-lg font-bold">∞</div>
+                                    </div>
+                                    
+                                    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
+                                        <div class="lg:pr-4 lg:pl-8">
+                                            <div class="mb-0">
+                                                <div class="mb-2">
+                                                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Operational Efficiency Analysis</h3>
+                                                </div>
+                                                <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
+                                                    Analysis of coverage efficiency (coverage percentage per hour worked) to identify 
+                                                    the most cost-effective shift scenarios for maximizing overdose response coverage.
+                                                </p>
+                                                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/10 dark:bg-gray-800/20">
+                                                    <div id="efficiency-analysis-container" class="bg-transparent">
+                                                        {% autoescape off %}{{ fig_cost_benefit_analysis|safe }}{% endautoescape %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
 
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Resolution</h3>
-                            <p class="text-gray-700 dark:text-gray-300">
-                                By aligning shifts with overdose timing:
-                                <ul class="list-disc pl-5 mt-2">
-                                    <li>CPMs are more likely to engage during periods of high overdose risk</li>
-                                    <li>We reduce pressure on EMS and improve response continuity</li>
-                                    <li>Coverage improves by nearly 70% without increasing headcount</li>
-                                </ul>
-                            </p>
+                            <!-- Key Insights Summary - Full Width -->
+                            <section class="col-span-12">
+                                <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 py-12 sm:px-4 sm:py-16 lg:overflow-visible lg:px-0">
+                                    <!-- Background Pattern -->
+                                    <div class="absolute inset-0 -z-10 overflow-hidden">
+                                        <!-- Insights/Lightbulb pattern -->
+                                        <svg class="absolute top-0 right-0 h-64 w-64 transform translate-x-16 -translate-y-8 opacity-10 dark:opacity-5" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <radialGradient id="insight-gradient" cx="50%" cy="50%" r="50%">
+                                                    <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#f59e0b;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+                                                </radialGradient>
+                                            </defs>
+                                            <!-- Lightbulb shape -->
+                                            <circle cx="100" cy="80" r="35" fill="url(#insight-gradient)" opacity="0.6"/>
+                                            <rect x="90" y="110" width="20" height="25" fill="url(#insight-gradient)" opacity="0.8"/>
+                                            <rect x="85" y="135" width="30" height="8" fill="url(#insight-gradient)" opacity="0.7"/>
+                                            <!-- Light rays -->
+                                            <line x1="100" y1="30" x2="100" y2="20" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6"/>
+                                            <line x1="135" y1="45" x2="142" y2="38" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6"/>
+                                            <line x1="150" y1="80" x2="160" y2="80" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6"/>
+                                            <line x1="135" y1="115" x2="142" y2="122" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6"/>
+                                            <line x1="65" y1="115" x2="58" y2="122" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6"/>
+                                            <line x1="50" y1="80" x2="40" y2="80" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6"/>
+                                            <line x1="65" y1="45" x2="58" y2="38" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6"/>
+                                        </svg>
+                                        <!-- Strategic dots pattern -->
+                                        <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-yellow-400 dark:bg-yellow-500 rounded-full opacity-30 animate-pulse"></div>
+                                        <div class="absolute top-1/3 left-1/2 w-3 h-3 bg-orange-400 dark:bg-orange-500 rounded-full opacity-25 animate-pulse" style="animation-delay: 0.5s;"></div>
+                                        <div class="absolute top-1/2 left-1/3 w-2 h-2 bg-amber-400 dark:bg-amber-500 rounded-full opacity-35 animate-pulse" style="animation-delay: 1s;"></div>
+                                        <!-- Network connection lines -->
+                                        <svg class="absolute bottom-0 left-0 h-32 w-full opacity-5 dark:opacity-3" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M0 50 Q100 30 200 50 T400 50" stroke="currentColor" stroke-width="2" fill="none" class="text-indigo-500"/>
+                                            <path d="M0 60 Q100 40 200 60 T400 60" stroke="currentColor" stroke-width="1" fill="none" class="text-blue-500"/>
+                                            <path d="M0 70 Q100 50 200 70 T400 70" stroke="currentColor" stroke-width="1" fill="none" class="text-cyan-500"/>
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
+                                        <div class="lg:pr-4 lg:pl-8">
+                                            <div class="relative mb-8">
+                                                <!-- Title background with insights theme -->
+                                                <div class="absolute -inset-4 bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 dark:from-gray-800/30 dark:via-gray-700/30 dark:to-gray-800/30 rounded-lg -z-10 opacity-60"></div>
+                                                <h3 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white relative">Key Insights from Analytics</h3>
+                                            </div>
+                                            
+                                            <!-- Content in special background container -->
+                                            <div class="relative rounded-xl p-8 overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); background-size: cover; background-position: center;">
+                                                <!-- Overlay for better text readability -->
+                                                <div class="absolute inset-0 bg-white/85 dark:bg-gray-900/85 rounded-xl"></div>
+                                                <div class="relative z-10">
+                                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+                                                        <div class="flex items-center mb-3">
+                                                            <div class="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
+                                                            <h4 class="font-semibold text-gray-900 dark:text-white">Peak Risk Hours</h4>
+                                                        </div>
+                                                        <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                                            Overdoses peak during evening hours (16:00-20:00) and early morning (02:00-06:00), 
+                                                            outside current coverage windows.
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+                                                        <div class="flex items-center mb-3">
+                                                            <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                                                            <h4 class="font-semibold text-gray-900 dark:text-white">Weekend Patterns</h4>
+                                                        </div>
+                                                        <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                                            Weekend overdoses show different timing patterns, with higher evening peaks 
+                                                            requiring adjusted coverage strategies.
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+                                                        <div class="flex items-center mb-3">
+                                                            <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                                                            <h4 class="font-semibold text-gray-900 dark:text-white">Optimal Strategy</h4>
+                                                        </div>
+                                                        <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                                            4×10 Tuesday-Friday shifts (08:00-18:00) provide the highest coverage efficiency 
+                                                            while maintaining staff work-life balance, potentially reaching 88 of 122 tracked cases.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Implementation Strategy</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
+                                        <div>
+                                            <strong>Phase 1:</strong> Implement 4×10 Staggered C model (Mon–Thu/Tue–Fri 08:00–18:00) - balanced transition with 70% coverage
+                                        </div>
+                                        <div>
+                                            <strong>Phase 2:</strong> Monitor coverage metrics, staff satisfaction, and operational efficiency for 6 months
+                                        </div>
+                                        <div>
+                                            <strong>Phase 3:</strong> Upgrade to 4×10 Staggered A model (07:00–17:00) for 78% coverage and Friday evening inclusion
+                                        </div>
+                                        <div>
+                                            <strong>Phase 4:</strong> Evaluate weekend overlap scenarios if resources permit and data supports expansion
+                                        </div>
+                                    </div>
+                                </div>
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
 
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Retrospection</h3>
-                            <p class="text-gray-700 dark:text-gray-300">
-                                This case demonstrates the power of operational metrics—not just to analyze what’s wrong, but to guide what’s possible. Even small shifts in deployment can result in transformational change when rooted in real-world data.
-                            </p>
-                        </section>
+                        </div> <!-- End 12-column grid container -->
                     </div>
                 </main>
                 <!-- Main Content End -->
@@ -280,5 +489,144 @@
         {% include 'partials/profile/profile-info-modal.html' %}
         {% include 'partials/profile/profile-address-modal.html' %}
         <!-- END MODAL -->
+
+        <script>
+            function scenarioData() {
+                return {
+                    scenarios: {},
+                    
+                    initScenarios() {
+                        try {
+                            const scenarioElement = document.getElementById('scenarios-data');
+                            if (scenarioElement) {
+                                this.scenarios = JSON.parse(scenarioElement.textContent);
+                            }
+                        } catch (error) {
+                            console.error('Error parsing scenario data:', error);
+                            this.scenarios = {};
+                        }
+                    }
+                }
+            }
+
+            function shiftScenarioSelector() {
+                return {
+                    selectedScenario: 'current',
+                    scenarios: {
+                        current: {
+                            name: 'Current (8x5)',
+                            schedule: 'Two Crews: 08:00-16:00, Monday-Friday',
+                            coverage: 35,
+                            cases_covered: 43,
+                            improvement: 0,
+                            benefits: [
+                                'Traditional business hours',
+                                'Covers baseline cases',
+                                'Established routine'
+                            ]
+                        },
+                        staggered_3x14: {
+                            name: '3×14 Staggered',
+                            schedule: 'Crew 1: Mon–Wed 07:00–21:00, Crew 2: Thu–Sat 07:00–21:00',
+                            coverage: 68,
+                            cases_covered: 83,
+                            improvement: 93,
+                            benefits: [
+                                'Extended daily coverage',
+                                'Weekend coverage included',
+                                'Better peak hour capture',
+                                'Continuous week coverage'
+                            ]
+                        },
+                        staggered_3x12: {
+                            name: '3×12 Staggered',
+                            schedule: 'Crew 1: Mon–Wed 08:00–20:00, Crew 2: Thu–Sat 08:00–20:00',
+                            coverage: 72,
+                            cases_covered: 88,
+                            improvement: 105,
+                            benefits: [
+                                'Good daily coverage',
+                                'Weekend included',
+                                'Balanced work-life',
+                                'Efficient staffing'
+                            ]
+                        },
+                        staggered_4x10_a: {
+                            name: '4×10 Staggered A',
+                            schedule: 'Crew 1: Mon–Thu 07:00–17:00, Crew 2: Tue–Fri 07:00–17:00',
+                            coverage: 78,
+                            cases_covered: 95,
+                            improvement: 121,
+                            benefits: [
+                                'Overlapping coverage',
+                                'Extended weekday hours',
+                                'Friday coverage',
+                                'High efficiency'
+                            ]
+                        },
+                        staggered_4x10_b: {
+                            name: '4×10 Staggered B',
+                            schedule: 'Crew 1: Mon–Thu 07:00–17:00, Crew 2: Tue–Fri 09:00–19:00',
+                            coverage: 65,
+                            cases_covered: 79,
+                            improvement: 84,
+                            benefits: [
+                                'Morning and evening coverage',
+                                'Flexible scheduling',
+                                'Peak time targeting',
+                                'Good balance'
+                            ]
+                        },
+                        staggered_4x10_c: {
+                            name: '4×10 Staggered C',
+                            schedule: 'Crew 1: Mon–Thu 08:00–18:00, Crew 2: Tue–Fri 08:00–18:00',
+                            coverage: 70,
+                            cases_covered: 85,
+                            improvement: 98,
+                            benefits: [
+                                'Business hours focus',
+                                'Overlapping coverage',
+                                'Balanced approach',
+                                'Good efficiency'
+                            ]
+                        },
+                        staggered_4x10_d: {
+                            name: '4×10 Staggered D',
+                            schedule: 'Crew 1: Mon–Thu 09:00–19:00, Crew 2: Tue–Fri 09:00–19:00',
+                            coverage: 74,
+                            cases_covered: 90,
+                            improvement: 109,
+                            benefits: [
+                                'Evening coverage focus',
+                                'Peak hour targeting',
+                                'High overlap efficiency',
+                                'Strong performance'
+                            ]
+                        },
+                        weekend_overlap: {
+                            name: '4×10 Weekend Overlap',
+                            schedule: 'Crew 1: Sun–Wed 09:00–19:00, Crew 2: Wed–Sat 09:00–19:00',
+                            coverage: 82,
+                            cases_covered: 100,
+                            improvement: 133,
+                            benefits: [
+                                'Full week coverage',
+                                'Weekend incident capture',
+                                'Maximum coverage',
+                                'Highest efficiency'
+                            ]
+                        }
+                    },
+                    
+                    initSelector() {
+                        // Initialize with current scenario
+                        this.selectedScenario = 'current';
+                    }
+                }
+            }
+        </script>
+
+        <!-- Hidden data elements for JavaScript -->
+        <script type="application/json" id="scenarios-data">{{ scenarios_data|safe }}</script>
     </body>
 </html>

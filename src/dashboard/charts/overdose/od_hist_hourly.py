@@ -68,7 +68,6 @@ def build_chart_od_hist_hourly(theme="light"):
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        export_filename="pafd_cpm_chart_hist_hourly",
         scroll_zoom=False,
         x_title="Hour of Day",
         y_title="Overdose Count",

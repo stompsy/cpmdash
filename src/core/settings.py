@@ -210,7 +210,15 @@ STORAGES = {
 }
 
 # Plotly theme settings
-PLOTLY_THEME = "light"  # or "dark"
+PLOTLY_THEME = config("PLOTLY_THEME", cast=str, default="dark")  # or "light"
+
+# Theme configuration
+THEME_SETTINGS = {
+    "DEFAULT_THEME": PLOTLY_THEME,
+    "ALLOW_USER_THEME_SELECTION": True,
+    "THEME_PERSISTENCE": "session",  # "session", "cookie", or "user_profile"
+    "THEME_COOKIE_MAX_AGE": 365 * 24 * 60 * 60,  # 1 year
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

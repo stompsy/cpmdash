@@ -2,14 +2,44 @@
 from dashboard.utils.tailwind_colors import TAILWIND_COLORS
 
 
+def get_theme_colors(theme="dark"):
+    """
+    Centralized theme color configuration for maximum contrast and readability
+    """
+    if theme == "dark":
+        return {
+            # Maximum contrast colors for dark mode
+            "axis_font_color": TAILWIND_COLORS["slate-50"],     # Near white for maximum contrast
+            "font_color": TAILWIND_COLORS["slate-50"],          # Near white for maximum contrast
+            "plot_bg": TAILWIND_COLORS["transparent"],
+            "paper_bg": TAILWIND_COLORS["transparent"],
+            "grid_color": TAILWIND_COLORS["gray-600"],          # More visible grid
+            "tick_color": TAILWIND_COLORS["slate-50"],          # Maximum contrast tick labels
+            "hover_bg": TAILWIND_COLORS["gray-800"],
+            "hover_border": TAILWIND_COLORS["gray-500"],        # More visible border
+            "hover_font": TAILWIND_COLORS["gray-50"],           # Maximum contrast for hover text
+        }
+    else:  # light theme
+        return {
+            # Maximum contrast colors for light mode
+            "axis_font_color": TAILWIND_COLORS["slate-950"],    # Near black for maximum contrast
+            "font_color": TAILWIND_COLORS["slate-950"],         # Near black for maximum contrast
+            "plot_bg": TAILWIND_COLORS["transparent"],
+            "paper_bg": TAILWIND_COLORS["transparent"],
+            "grid_color": TAILWIND_COLORS["gray-400"],          # More visible grid
+            "tick_color": TAILWIND_COLORS["slate-950"],         # Maximum contrast tick labels
+            "hover_bg": TAILWIND_COLORS["white"],
+            "hover_border": TAILWIND_COLORS["gray-500"],        # More visible border
+            "hover_font": TAILWIND_COLORS["gray-950"],          # Maximum contrast for hover text
+        }
+
+
 def style_plotly_layout(
     fig,
     theme="dark",
     hovermode_unified=False,
     axis_font_size=13,
     font_family="Roboto",
-    export_filename="pafd_cpm_chart",
-    enable_image_export=True,
     scroll_zoom=True,
     show_legend=False,
     show_modebar=True,
@@ -18,19 +48,12 @@ def style_plotly_layout(
     y_title=None,
     margin=None,
 ):
-
-    if theme == "dark":
-        axis_font_color =   TAILWIND_COLORS["slate-200"]
-        font_color =        TAILWIND_COLORS["slate-200"]
-        plot_bg =           TAILWIND_COLORS["transparent"]
-        paper_bg =          TAILWIND_COLORS["transparent"]
-        grid_color =        TAILWIND_COLORS["gray-800"]
-    else:
-        axis_font_color =   TAILWIND_COLORS["slate-800"]
-        font_color =        TAILWIND_COLORS["slate-800"]
-        plot_bg =           TAILWIND_COLORS["transparent"]  # Make both themes transparent for better blending
-        paper_bg =          TAILWIND_COLORS["transparent"]  # Make both themes transparent for better blending
-        grid_color =        TAILWIND_COLORS["slate-200"]   # Lighter grid for light mode
+    """
+    Enhanced Plotly layout styling with robust theme support
+    """
+    
+    # Get theme colors
+    colors = get_theme_colors(theme)
 
     # default margin if not supplied
     margin = margin or dict(t=40, l=20, r=20, b=20)
@@ -42,26 +65,28 @@ def style_plotly_layout(
     layout_updates = dict(
         title=None,
         showlegend=show_legend,
-        font=dict(family=font_family, size=axis_font_size, color=font_color),
+        font=dict(family=font_family, size=axis_font_size, color=colors["font_color"]),
         xaxis=dict(
             title=x_title if x_title else None,
-            title_font=dict(size=axis_font_size, color=axis_font_color),
+            title_font=dict(size=axis_font_size, color=colors["axis_font_color"]),
             showgrid=True,
-            gridcolor=grid_color,
+            gridcolor=colors["grid_color"],
             zeroline=False,
+            tickfont=dict(color=colors["tick_color"]),
         ),
         yaxis=dict(
             title=y_title if y_title else None,
-            title_font=dict(size=axis_font_size, color=axis_font_color),
+            title_font=dict(size=axis_font_size, color=colors["axis_font_color"]),
             showgrid=True,
-            gridcolor=grid_color,
+            gridcolor=colors["grid_color"],
             zeroline=False,
+            tickfont=dict(color=colors["tick_color"]),
         ),
         margin=margin,
         height=height,
         autosize=True,
-        plot_bgcolor=plot_bg,
-        paper_bgcolor=paper_bg,
+        plot_bgcolor=colors["plot_bg"],
+        paper_bgcolor=colors["paper_bg"],
         modebar={"orientation": "h",},
     )
     
@@ -69,12 +94,12 @@ def style_plotly_layout(
     if hovermode_unified:
         layout_updates["hovermode"] = "x unified"
         layout_updates["hoverlabel"] = {
-            "bgcolor": TAILWIND_COLORS["gray-800"],
-            "bordercolor": TAILWIND_COLORS["gray-600"],
+            "bgcolor": colors["hover_bg"],
+            "bordercolor": colors["hover_border"],
             "font": {
                 "family": font_family,
                 "size": axis_font_size,
-                "color": TAILWIND_COLORS["gray-50"],
+                "color": colors["hover_font"],
             }
         }
 
@@ -84,23 +109,68 @@ def style_plotly_layout(
         "responsive": True,
         "displaylogo": False,
         "scrollZoom": scroll_zoom,
-        "displayModeBar": show_modebar,     # ← respect the new flag
+        "displayModeBar": show_modebar,
+        "modeBarButtonsToRemove": [
+            "zoom", "pan", "lasso2d", "select2d",
+            "autoScale", "zoomIn", "zoomOut",
+        ],
     }
-
-    if enable_image_export:
-        config.update({
-            "toImageButtonOptions": {
-                "format": "svg",
-                "filename": export_filename,
-                "height": 500,
-                "width": 800,
-                "scale": 1,
-            },
-            "modeBarButtonsToRemove": [
-                "zoom", "pan", "lasso2d", "select2d",
-                "autoScale", "zoomIn", "zoomOut",
-            ],
-        })
     
     fig._config = config
     return fig
+
+
+def create_theme_aware_chart(chart_function, request, *args, **kwargs):
+    """
+    Helper function to create charts with automatic theme detection
+    
+    Usage:
+        fig_html = create_theme_aware_chart(build_chart_od_density_heatmap, request)
+    """
+    from .theme import get_theme_from_request
+    
+    theme = get_theme_from_request(request)
+    
+    # Call the chart building function with theme
+    if 'theme' not in kwargs:
+        kwargs['theme'] = theme
+    
+    return chart_function(*args, **kwargs)
+
+
+def get_plotly_theme(theme="dark"):
+    """
+    Get plotly theme configuration for backward compatibility
+    """
+    colors = get_theme_colors(theme)
+    return {
+        "font": {"color": colors["font_color"]},
+        "plot_bgcolor": colors["plot_bg"],
+        "paper_bgcolor": colors["paper_bg"],
+    }
+
+
+def get_color_palette(theme="dark"):
+    """
+    Get color palette for charts
+    """
+    from .tailwind_colors import TAILWIND_COLORS
+    
+    if theme == "dark":
+        return {
+            "primary": TAILWIND_COLORS["blue-500"],
+            "success": TAILWIND_COLORS["green-500"],
+            "warning": TAILWIND_COLORS["yellow-500"],
+            "danger": TAILWIND_COLORS["red-500"],
+            "info": TAILWIND_COLORS["cyan-500"],
+            "purple": TAILWIND_COLORS["purple-500"],
+        }
+    else:
+        return {
+            "primary": TAILWIND_COLORS["blue-600"],
+            "success": TAILWIND_COLORS["green-600"],
+            "warning": TAILWIND_COLORS["yellow-600"],
+            "danger": TAILWIND_COLORS["red-600"],
+            "info": TAILWIND_COLORS["cyan-600"],
+            "purple": TAILWIND_COLORS["purple-600"],
+        }
