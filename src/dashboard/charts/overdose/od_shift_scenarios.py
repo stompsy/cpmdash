@@ -5,13 +5,13 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from plotly.offline import plot
-from django.db.models import Count
 from ...models import ODReferrals
-from ...utils.plotly import get_plotly_theme, get_color_palette, style_plotly_layout
+from ...utils.plotly import get_color_palette, style_plotly_layout
 
 def calculate_coverage_scenarios():
     """
     Calculate coverage percentages for selected shift scenarios.
+    Properly handles annualization and crew overlap.
     """
 
     # Get all overdose data with timestamps
@@ -30,107 +30,182 @@ def calculate_coverage_scenarios():
     df = pd.DataFrame(data)
     if df.empty:
         return {}
+    
+    # Calculate total time span for annualization
+    min_date = df['datetime'].min()
+    max_date = df['datetime'].max()
+    total_days = (max_date - min_date).days + 1
+    total_years = total_days / 365.25
+    
     total_overdoses = len(df)
+    
     scenarios = {}
 
-    # Current scenario: 8x5 weekdays only
-    crew1_current_mask = (df['hour'] >= 8) & (df['hour'] < 16) & (~df['is_weekend'])
-    crew2_current_mask = (df['hour'] >= 8) & (df['hour'] < 16) & (~df['is_weekend'])
-    dual_crew_current_mask = crew1_current_mask | crew2_current_mask
-    scenarios['Current (8x5)'] = {
-        'coverage': len(df[dual_crew_current_mask]) / total_overdoses * 100,
-        'description': 'Crew 1: Mon-Fri: 08:00-16:00, Crew 2: Mon-Fri: 08:00-16:00',
-        'hours_per_week': 80,
-        'shifts': 'Crew 1: 5 days × 8 hours, Crew 2: 5 days × 8 hours',
+    def calculate_covered_hours_per_week(crew1_hours, crew2_hours):
+        """
+        Calculate total covered hours per week, avoiding double-counting overlaps.
+        crew1_hours and crew2_hours are lists of (day, start_hour, end_hour) tuples.
+        """
+        # Create a set to track all covered hour slots
+        covered_slots = set()
+        
+        # Add crew 1 hours
+        for day, start, end in crew1_hours:
+            for hour in range(start, end):
+                covered_slots.add((day, hour))
+        
+        # Add crew 2 hours (overlaps are automatically handled by set)
+        for day, start, end in crew2_hours:
+            for hour in range(start, end):
+                covered_slots.add((day, hour))
+        
+        return len(covered_slots)
+
+    def get_scenario_mask_and_hours(crew1_schedule, crew2_schedule):
+        """
+        Get both the coverage mask for cases and actual covered hours.
+        """
+        # Calculate crew masks for cases
+        crew1_mask = pd.Series(False, index=df.index)
+        crew2_mask = pd.Series(False, index=df.index)
+        
+        for day, start_hour, end_hour in crew1_schedule:
+            if day == 6:  # Sunday
+                mask = (df['hour'] >= start_hour) & (df['hour'] < end_hour) & (df['weekday'] == 6)
+            else:
+                mask = (df['hour'] >= start_hour) & (df['hour'] < end_hour) & (df['weekday'] == day)
+            crew1_mask |= mask
+            
+        for day, start_hour, end_hour in crew2_schedule:
+            if day == 6:  # Sunday
+                mask = (df['hour'] >= start_hour) & (df['hour'] < end_hour) & (df['weekday'] == 6)
+            else:
+                mask = (df['hour'] >= start_hour) & (df['hour'] < end_hour) & (df['weekday'] == day)
+            crew2_mask |= mask
+        
+        # Combined mask (any crew covering)
+        combined_mask = crew1_mask | crew2_mask
+        
+        # Calculate covered hours per week
+        covered_hours = calculate_covered_hours_per_week(crew1_schedule, crew2_schedule)
+        
+        return combined_mask, covered_hours
+
+    # Current scenario: 5x8 weekdays only (single crew working Mon-Fri 08:00-16:00)
+    crew1_current = [(0, 8, 16), (1, 8, 16), (2, 8, 16), (3, 8, 16), (4, 8, 16)]  # Mon-Fri
+    crew2_current = []  # No second crew in current scenario
+    current_mask, current_hours = get_scenario_mask_and_hours(crew1_current, crew2_current)
+    covered_cases = len(df[current_mask])
+    
+    scenarios['5x8 (Current)'] = {
+        'coverage': (covered_cases / total_overdoses) * 100,
+        'cases_per_year': (covered_cases / total_years),
+        'description': 'Single Crew: Mon-Fri 08:00-16:00',
+        'hours_per_week': current_hours,
+        'shifts': 'Single crew: 5 days × 8 hours',
         'color': 'primary'
     }
 
     # 3x14 Staggered: Crew 1 (Mon–Wed 07:00–21:00), Crew 2 (Thu–Sat 07:00–21:00)
-    crew1_3x14_mask = (df['hour'] >= 7) & (df['hour'] < 21) & (df['weekday'] >= 0) & (df['weekday'] <= 2)  # Mon–Wed
-    crew2_3x14_mask = (df['hour'] >= 7) & (df['hour'] < 21) & (df['weekday'] >= 3) & (df['weekday'] <= 5)  # Thu–Sat
-    dual_crew_3x14_mask = crew1_3x14_mask | crew2_3x14_mask
+    crew1_3x14 = [(0, 7, 21), (1, 7, 21), (2, 7, 21)]  # Mon-Wed
+    crew2_3x14 = [(3, 7, 21), (4, 7, 21), (5, 7, 21)]  # Thu-Sat
+    staggered_3x14_mask, staggered_3x14_hours = get_scenario_mask_and_hours(crew1_3x14, crew2_3x14)
+    covered_cases = len(df[staggered_3x14_mask])
     scenarios['3×14 Staggered'] = {
-        'coverage': len(df[dual_crew_3x14_mask]) / total_overdoses * 100,
+        'coverage': (covered_cases / total_overdoses) * 100,
+        'cases_per_year': (covered_cases / total_years),
         'description': 'Crew 1: Mon–Wed 07:00–21:00, Crew 2: Thu–Sat 07:00–21:00',
-        'hours_per_week': 84,  # 2 crews × 3×14h = 2×42
+        'hours_per_week': staggered_3x14_hours,
         'shifts': 'Crew 1: 3×14h (Mon–Wed), Crew 2: 3×14h (Thu–Sat)',
         'color': 'warning'
     }
 
     # 3x12 Staggered: Crew 1 (Mon–Wed 08:00–20:00), Crew 2 (Thu–Sat 08:00–20:00)
-    crew1_3x12_mask = (df['hour'] >= 8) & (df['hour'] < 20) & (df['weekday'] >= 0) & (df['weekday'] <= 2)  # Mon–Wed
-    crew2_3x12_mask = (df['hour'] >= 8) & (df['hour'] < 20) & (df['weekday'] >= 3) & (df['weekday'] <= 5)  # Thu–Sat
-    dual_crew_3x12_mask = crew1_3x12_mask | crew2_3x12_mask
+    crew1_3x12 = [(0, 8, 20), (1, 8, 20), (2, 8, 20)]  # Mon-Wed
+    crew2_3x12 = [(3, 8, 20), (4, 8, 20), (5, 8, 20)]  # Thu-Sat
+    staggered_3x12_mask, staggered_3x12_hours = get_scenario_mask_and_hours(crew1_3x12, crew2_3x12)
+    covered_cases = len(df[staggered_3x12_mask])
     scenarios['3×12 Staggered'] = {
-        'coverage': len(df[dual_crew_3x12_mask]) / total_overdoses * 100,
+        'coverage': (covered_cases / total_overdoses) * 100,
+        'cases_per_year': (covered_cases / total_years),
         'description': 'Crew 1: Mon–Wed 08:00–20:00, Crew 2: Thu–Sat 08:00–20:00',
-        'hours_per_week': 72,  # 2 crews × 3×12h = 2×36
+        'hours_per_week': staggered_3x12_hours,
         'shifts': 'Crew 1: 3×12h (Mon–Wed), Crew 2: 3×12h (Thu–Sat)',
         'color': 'info'
     }
 
     # 4x10 Staggered A: Crew 1 (Mon–Thu 07:00–17:00), Crew 2 (Tue–Fri 07:00–17:00)
-    crew1_4x10a_mask = (df['hour'] >= 7) & (df['hour'] < 17) & (df['weekday'] >= 0) & (df['weekday'] <= 3)  # Mon–Thu
-    crew2_4x10a_mask = (df['hour'] >= 7) & (df['hour'] < 17) & (df['weekday'] >= 1) & (df['weekday'] <= 4)  # Tue–Fri
-    dual_crew_4x10a_mask = crew1_4x10a_mask | crew2_4x10a_mask
+    crew1_4x10a = [(0, 7, 17), (1, 7, 17), (2, 7, 17), (3, 7, 17)]  # Mon-Thu
+    crew2_4x10a = [(1, 7, 17), (2, 7, 17), (3, 7, 17), (4, 7, 17)]  # Tue-Fri
+    staggered_4x10a_mask, staggered_4x10a_hours = get_scenario_mask_and_hours(crew1_4x10a, crew2_4x10a)
+    covered_cases = len(df[staggered_4x10a_mask])
     scenarios['4×10 Staggered A'] = {
-        'coverage': len(df[dual_crew_4x10a_mask]) / total_overdoses * 100,
+        'coverage': (covered_cases / total_overdoses) * 100,
+        'cases_per_year': (covered_cases / total_years),
         'description': 'Crew 1: Mon–Thu 07:00–17:00, Crew 2: Tue–Fri 07:00–17:00',
-        'hours_per_week': 80,  # 2 crews × 4×10h
+        'hours_per_week': staggered_4x10a_hours,
         'shifts': 'Crew 1: 4×10h (Mon–Thu), Crew 2: 4×10h (Tue–Fri)',
         'color': 'success'
     }
 
     # 4x10 Staggered B: Crew 1 (Mon–Thu 07:00–17:00), Crew 2 (Tue–Fri 09:00–19:00)
-    crew1_4x10b_mask = (df['hour'] >= 7) & (df['hour'] < 17) & (df['weekday'] >= 0) & (df['weekday'] <= 3)  # Mon–Thu
-    crew2_4x10b_mask = (df['hour'] >= 9) & (df['hour'] < 19) & (df['weekday'] >= 1) & (df['weekday'] <= 4)  # Tue–Fri
-    dual_crew_4x10b_mask = crew1_4x10b_mask | crew2_4x10b_mask
+    crew1_4x10b = [(0, 7, 17), (1, 7, 17), (2, 7, 17), (3, 7, 17)]  # Mon-Thu
+    crew2_4x10b = [(1, 9, 19), (2, 9, 19), (3, 9, 19), (4, 9, 19)]  # Tue-Fri
+    staggered_4x10b_mask, staggered_4x10b_hours = get_scenario_mask_and_hours(crew1_4x10b, crew2_4x10b)
+    covered_cases = len(df[staggered_4x10b_mask])
     scenarios['4×10 Staggered B'] = {
-        'coverage': len(df[dual_crew_4x10b_mask]) / total_overdoses * 100,
+        'coverage': (covered_cases / total_overdoses) * 100,
+        'cases_per_year': (covered_cases / total_years),
         'description': 'Crew 1: Mon–Thu 07:00–17:00, Crew 2: Tue–Fri 09:00–19:00',
-        'hours_per_week': 80,  # 2 crews × 4×10h
+        'hours_per_week': staggered_4x10b_hours,
         'shifts': 'Crew 1: 4×10h (Mon–Thu), Crew 2: 4×10h (Tue–Fri)',
         'color': 'success'
     }
 
     # 4x10 Staggered C: Crew 1 (Mon–Thu 08:00–18:00), Crew 2 (Tue–Fri 08:00–18:00)
-    crew1_4x10c_mask = (df['hour'] >= 8) & (df['hour'] < 18) & (df['weekday'] >= 0) & (df['weekday'] <= 3)  # Mon–Thu
-    crew2_4x10c_mask = (df['hour'] >= 8) & (df['hour'] < 18) & (df['weekday'] >= 1) & (df['weekday'] <= 4)  # Tue–Fri
-    dual_crew_4x10c_mask = crew1_4x10c_mask | crew2_4x10c_mask
+    crew1_4x10c = [(0, 8, 18), (1, 8, 18), (2, 8, 18), (3, 8, 18)]  # Mon-Thu
+    crew2_4x10c = [(1, 8, 18), (2, 8, 18), (3, 8, 18), (4, 8, 18)]  # Tue-Fri
+    staggered_4x10c_mask, staggered_4x10c_hours = get_scenario_mask_and_hours(crew1_4x10c, crew2_4x10c)
+    covered_cases = len(df[staggered_4x10c_mask])
     scenarios['4×10 Staggered C'] = {
-        'coverage': len(df[dual_crew_4x10c_mask]) / total_overdoses * 100,
+        'coverage': (covered_cases / total_overdoses) * 100,
+        'cases_per_year': (covered_cases / total_years),
         'description': 'Crew 1: Mon–Thu 08:00–18:00, Crew 2: Tue–Fri 08:00–18:00',
-        'hours_per_week': 80,  # 2 crews × 4×10h
+        'hours_per_week': staggered_4x10c_hours,
         'shifts': 'Crew 1: 4×10h (Mon–Thu), Crew 2: 4×10h (Tue–Fri)',
         'color': 'success'
     }
 
     # 4x10 Staggered D: Crew 1 (Mon–Thu 09:00–19:00), Crew 2 (Tue–Fri 09:00–19:00)
-    crew1_4x10d_mask = (df['hour'] >= 9) & (df['hour'] < 19) & (df['weekday'] >= 0) & (df['weekday'] <= 3)  # Mon–Thu
-    crew2_4x10d_mask = (df['hour'] >= 9) & (df['hour'] < 19) & (df['weekday'] >= 1) & (df['weekday'] <= 4)  # Tue–Fri
-    dual_crew_4x10d_mask = crew1_4x10d_mask | crew2_4x10d_mask
+    crew1_4x10d = [(0, 9, 19), (1, 9, 19), (2, 9, 19), (3, 9, 19)]  # Mon-Thu
+    crew2_4x10d = [(1, 9, 19), (2, 9, 19), (3, 9, 19), (4, 9, 19)]  # Tue-Fri
+    staggered_4x10d_mask, staggered_4x10d_hours = get_scenario_mask_and_hours(crew1_4x10d, crew2_4x10d)
+    covered_cases = len(df[staggered_4x10d_mask])
     scenarios['4×10 Staggered D'] = {
-        'coverage': len(df[dual_crew_4x10d_mask]) / total_overdoses * 100,
+        'coverage': (covered_cases / total_overdoses) * 100,
+        'cases_per_year': (covered_cases / total_years),
         'description': 'Crew 1: Mon–Thu 09:00–19:00, Crew 2: Tue–Fri 09:00–19:00',
-        'hours_per_week': 80,  # 2 crews × 4×10h
+        'hours_per_week': staggered_4x10d_hours,
         'shifts': 'Crew 1: 4×10h (Mon–Thu), Crew 2: 4×10h (Tue–Fri)',
         'color': 'success'
     }
 
     # 4x10 Weekend Overlap: Crew 1 (Sun–Wed 09:00–19:00), Crew 2 (Wed–Sat 09:00–19:00)
-    crew1_4x10e_mask = (df['hour'] >= 9) & (df['hour'] < 19) & ((df['weekday'] == 6) | (df['weekday'] <= 2))  # Sun–Wed
-    crew2_4x10e_mask = (df['hour'] >= 9) & (df['hour'] < 19) & (df['weekday'] >= 2) & (df['weekday'] <= 5)  # Wed–Sat
-    dual_crew_4x10e_mask = crew1_4x10e_mask | crew2_4x10e_mask
+    crew1_4x10e = [(6, 9, 19), (0, 9, 19), (1, 9, 19), (2, 9, 19)]  # Sun-Wed
+    crew2_4x10e = [(2, 9, 19), (3, 9, 19), (4, 9, 19), (5, 9, 19)]  # Wed-Sat
+    weekend_4x10_mask, weekend_4x10_hours = get_scenario_mask_and_hours(crew1_4x10e, crew2_4x10e)
+    covered_cases = len(df[weekend_4x10_mask])
     scenarios['4×10 Weekend Overlap'] = {
-        'coverage': len(df[dual_crew_4x10e_mask]) / total_overdoses * 100,
+        'coverage': (covered_cases / total_overdoses) * 100,
+        'cases_per_year': (covered_cases / total_years),
         'description': 'Crew 1: Sun–Wed 09:00–19:00, Crew 2: Wed–Sat 09:00–19:00',
-        'hours_per_week': 80,  # 2 crews × 4×10h
+        'hours_per_week': weekend_4x10_hours,
         'shifts': 'Crew 1: 4×10h (Sun–Wed), Crew 2: 4×10h (Wed–Sat)',
         'color': 'purple'
     }
 
     # When building scenarios, add a 'short_name' for each scenario
-    scenarios['Current (8x5)']['short_name'] = '8x5 Current'
+    scenarios['5x8 (Current)']['short_name'] = '5x8 (Current)'
     scenarios['3×14 Staggered']['short_name'] = '3x14 Staggered'
     scenarios['3×12 Staggered']['short_name'] = '3x12 Staggered'
     scenarios['4×10 Staggered A']['short_name'] = '4x10 Staggered A'
@@ -185,8 +260,8 @@ def build_chart_shift_scenarios(theme):
     scenario_names = list(scenarios.keys())
     short_names = [scenarios[name].get('short_name', name) for name in scenario_names]
     coverages = [scenarios[name]['coverage'] for name in scenario_names]
+    cases_per_year = [scenarios[name]['cases_per_year'] for name in scenario_names]
     hours_per_week = [scenarios[name]['hours_per_week'] for name in scenario_names]
-    descriptions = [scenarios[name]['description'] for name in scenario_names]
 
     # Color mapping
     color_map = {
@@ -217,8 +292,9 @@ def build_chart_shift_scenarios(theme):
             marker_color=bar_colors,
             text=[f'{c:.1f}%' for c in coverages],
             textposition='outside',
-            hovertemplate='<b>%{customdata}</b><br>Coverage: %{y:.1f}%<br>%{text}<extra></extra>',
-            customdata=scenario_names
+            hovertemplate='<b>%{customdata}</b><br>Coverage: %{y:.1f}%<br>Cases/Year: %{hovertext}<extra></extra>',
+            customdata=scenario_names,
+            hovertext=[f'{cpy:.1f}' for cpy in cases_per_year]
         ),
         row=1, col=1
     )
@@ -232,6 +308,7 @@ def build_chart_shift_scenarios(theme):
         hover_text = f"<b>{name}</b><br>"
         hover_text += f"Efficiency: {efficiency[i]:.3f} coverage % per hour<br>"
         hover_text += f"Coverage: {coverages[i]:.1f}%<br>"
+        hover_text += f"Cases/Year: {cases_per_year[i]:.1f}<br>"
         hover_text += f"Hours/Week: {hours_per_week[i]}"
         hover_texts.append(hover_text)
 
@@ -350,10 +427,7 @@ def build_chart_cost_benefit_analysis(theme):
         efficiency = data['coverage'] / data['hours_per_week'] if data['hours_per_week'] > 0 else 0
         efficiency_data.append({
             'scenario': name,
-            'coverage': data['coverage'],
-            'hours': data['hours_per_week'],
-            'efficiency': efficiency,
-            'description': data['description']
+            'efficiency': efficiency
         })
 
     # Sort by efficiency descending
@@ -364,12 +438,11 @@ def build_chart_cost_benefit_analysis(theme):
 
     scenario_names = [d['scenario'] for d in efficiency_data]
     efficiencies = [d['efficiency'] for d in efficiency_data]
-    descriptions = [d['description'] for d in efficiency_data]
 
     bar_colors = [
-        colors['primary'] if n == 'Current (8x5)' else
-        colors['warning'] if '3×14' in n else
-        colors['info'] if '3×12' in n else
+        colors['primary'] if n == '5x8 (Current)' else
+        '#9CA3AF' if '3×14' in n else  # Grey for legally restricted 14-hour shifts
+        '#9CA3AF' if '3×12' in n else  # Grey for legally restricted 12-hour shifts
         colors['success'] if '4×10' in n and 'Weekend' not in n else
         '#8B5CF6' if 'Weekend' in n else
         colors['primary']
@@ -382,8 +455,8 @@ def build_chart_cost_benefit_analysis(theme):
     # Create shorter, more readable labels for x-axis
     short_labels = []
     for name in scenario_names:
-        if name == 'Current (8x5)':
-            short_labels.append('Current\n(8x5)')
+        if name == '5x8 (Current)':
+            short_labels.append('5x8\n(Current)')
         elif name == '3×14 Staggered':
             short_labels.append('3×14\nStaggered')
         elif name == '3×12 Staggered':
@@ -402,61 +475,15 @@ def build_chart_cost_benefit_analysis(theme):
             # Fallback to first few words
             short_labels.append(name.split()[0] + '\n' + ' '.join(name.split()[1:3]))
 
-    # Create hover texts with proper crew information
+    # Create hover texts with scenario information
     hover_texts = []
     for i, name in enumerate(scenario_names):
         scenario = scenarios[name]
         short_name = scenario.get('short_name', name)
         hover_text = f"<b>{short_name}</b><br>"
-        
-        # Extract crew information from description
-        description = scenario['description']
-        
-        # Parse crew schedules based on scenario type
-        if 'Crew 1:' in description and 'Crew 2:' in description:
-            # Split the description to extract crew schedules
-            parts = description.split(', Crew 2:')
-            if len(parts) >= 2:
-                crew1_info = parts[0].replace('Crew 1: ', '').replace('Dual Crew Staggered: Crew 1 (', '').replace('Staggered: Crew 1 (', '').rstrip(')')
-                crew2_info = parts[1].rstrip(')')
-                hover_text += f"Crew 1: {crew1_info}<br>"
-                hover_text += f"Crew 2: {crew2_info}<br>"
-            else:
-                # Fallback if split fails
-                hover_text += f"Schedule: {description}<br>"
-                hover_text += f"<br>"
-        elif 'Both crews:' in description:
-            # Single schedule for both crews
-            schedule = description.replace('Both crews: ', '')
-            hover_text += f"Crew 1: {schedule}<br>"
-            hover_text += f"Crew 2: {schedule}<br>"
-        elif name == 'Current (8x5)':
-            # Single crew scenario
-            hover_text += f"Single Crew: {description}<br>"
-            hover_text += f"<br>"  # Empty line for Crew 2
-        elif '3×14 Extended' in name or '3×12' in name:
-            # Handle extended scenarios with staggered crews
-            if 'Staggered:' in description:
-                parts = description.replace('Staggered: ', '').split(', Crew 2 (')
-                if len(parts) >= 2:
-                    crew1_info = parts[0].replace('Crew 1 (', '').rstrip(')')
-                    crew2_info = parts[1].rstrip(')')
-                    hover_text += f"Crew 1: {crew1_info}<br>"
-                    hover_text += f"Crew 2: {crew2_info}<br>"
-                else:
-                    # Fallback if split fails
-                    hover_text += f"Schedule: {description}<br>"
-                    hover_text += f"<br>"
-            else:
-                # Single extended crew
-                hover_text += f"Extended Crew: {description}<br>"
-                hover_text += f"<br>"  # Empty line for Crew 2
-        else:
-            # Fallback for other scenarios
-            hover_text += f"Schedule: {description}<br>"
-            hover_text += f"<br>"  # Empty line for consistency
-        
-        hover_text += f"Efficiency: {efficiencies[i]:.3f} coverage % per hour"
+        hover_text += f"Schedule: {scenario['description']}<br>"
+        hover_text += f"Efficiency: {efficiencies[i]:.3f} coverage % per hour<br>"
+        hover_text += f"Cases/Year: {scenario['cases_per_year']:.1f}"
         hover_texts.append(hover_text)
 
     fig.add_trace(
@@ -493,7 +520,7 @@ def build_chart_cost_benefit_analysis(theme):
         tickfont=dict(size=14, family="Roboto"),  # Consistent font size and family
         ticklabelstandoff=10,  # Set specific standoff distance
         showgrid=True,  # Keep horizontal grid lines
-        range=[0, 0.8],  # Set y-axis range from 0 to 0.8
+        range=[0, 0.9],  # Set y-axis range from 0 to 0.8
         dtick=0.1,  # Show tick marks every 0.1
     )
 

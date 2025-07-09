@@ -15,8 +15,8 @@ def get_theme_colors(theme="dark"):
             "paper_bg": TAILWIND_COLORS["transparent"],
             "grid_color": TAILWIND_COLORS["gray-600"],          # More visible grid
             "tick_color": TAILWIND_COLORS["slate-50"],          # Maximum contrast tick labels
-            "hover_bg": TAILWIND_COLORS["gray-800"],
-            "hover_border": TAILWIND_COLORS["gray-500"],        # More visible border
+            "hover_bg": "rgba(31, 41, 55, 0.95)",              # Dark gray with transparency
+            "hover_border": "rgba(156, 163, 175, 0.8)",        # Light gray border
             "hover_font": TAILWIND_COLORS["gray-50"],           # Maximum contrast for hover text
         }
     else:  # light theme
@@ -28,8 +28,8 @@ def get_theme_colors(theme="dark"):
             "paper_bg": TAILWIND_COLORS["transparent"],
             "grid_color": TAILWIND_COLORS["gray-400"],          # More visible grid
             "tick_color": TAILWIND_COLORS["slate-950"],         # Maximum contrast tick labels
-            "hover_bg": TAILWIND_COLORS["white"],
-            "hover_border": TAILWIND_COLORS["gray-500"],        # More visible border
+            "hover_bg": "rgba(255, 255, 255, 0.95)",           # White with transparency
+            "hover_border": "rgba(107, 114, 128, 0.8)",        # Gray border
             "hover_font": TAILWIND_COLORS["gray-950"],          # Maximum contrast for hover text
         }
 
@@ -88,6 +88,18 @@ def style_plotly_layout(
         plot_bgcolor=colors["plot_bg"],
         paper_bgcolor=colors["paper_bg"],
         modebar={"orientation": "h",},
+        # Modern hover styling applied by default
+        hoverlabel=dict(
+            bgcolor=colors["hover_bg"],
+            bordercolor=colors["hover_border"],
+            font=dict(
+                family="Roboto, sans-serif",
+                size=14,
+                color=colors["hover_font"]
+            ),
+            namelength=-1,
+            align="left"
+        )
     )
     
     # add unified hovermode + styling if requested
