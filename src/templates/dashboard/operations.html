@@ -224,30 +224,69 @@
                                     
                                     <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
                                         <div class="lg:pr-4 lg:pl-8">
-                                            <!-- Heatmap -->
-                                            <div class="mb-0">
+                                            <div class="mb-12">
                                                 <div class="mb-6 relative">
                                                     <!-- Title background highlight -->
-                                                    <div class="absolute -inset-4 bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 dark:from-gray-800/30 dark:via-gray-700/30 dark:to-gray-800/30 rounded-lg -z-10 opacity-60"></div>
+                                                    <div class="absolute -inset-4 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 dark:from-blue-800/30 dark:via-blue-700/30 dark:to-blue-800/30 rounded-lg -z-10 opacity-60"></div>
                                                     <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white relative flex items-center">
                                                         <svg class="w-8 h-8 mr-4 mb-1 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                                         </svg>
-                                                        Overdose Heatmap by Day and Hour
+                                                        Overdose Heatmap by Day and Hour (Interactive)
                                                     </h2>
                                                 </div>
                                                 <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
-                                                    Hourly overdose patterns for each day of the week, visualized as a heatmap to identify optimal coverage days and times. Brighter areas indicate higher concentrations of incidents, helping to identify peak risk periods and gaps in current coverage.
+                                                    Interactive hourly overdose patterns for each day of the week with all numerical values displayed in each cell. Hover over any cell for detailed information including percentages. Highlighted periods show working hours (solid border) for optimal coverage analysis.
                                                 </p>
                                                 <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20">
-                                                    <div id="heatmap-container" class="bg-transparent">
-                                                        {% autoescape off %}{{ fig_density_map|safe }}{% endautoescape %}
+                                                    <div class="bg-transparent">
+                                                        {% autoescape off %}{{ fig_density_map_interactive_static|safe }}{% endautoescape %}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- ML Prediction: 1,000 Overdoses -->
+                                            <div class="mb-16">
+                                                <div class="mb-2">
+                                                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white flex items-center">
+                                                        <svg class="w-6 h-6 mr-3 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                                        </svg>
+                                                        ML Prediction: 1,000 Overdoses Annually
+                                                    </h3>
+                                                </div>
+                                                <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
+                                                    Machine learning prediction using ensemble methods to forecast overdose patterns at 1,000 annual cases. This model accounts for non-linear scaling effects, weekend amplification, stress patterns, and circadian rhythms based on epidemiological research.
+                                                </p>
+                                                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20">
+                                                    <div class="bg-transparent">
+                                                        {% autoescape off %}{{ fig_density_map_ml_1000|safe }}{% endautoescape %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- ML Prediction: 5,000 Overdoses -->
+                                            <div class="mb-16">
+                                                <div class="mb-2">
+                                                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white flex items-center">
+                                                        <svg class="w-6 h-6 mr-3 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                                        </svg>
+                                                        ML Prediction: 5,000 Overdoses Annually
+                                                    </h3>
+                                                </div>
+                                                <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
+                                                    High-volume scenario prediction showing potential patterns at 5,000 annual cases. The model incorporates saturation effects for workday patterns, amplified weekend risks, and stress-related escalation patterns observed in high-volume emergency response systems.
+                                                </p>
+                                                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20">
+                                                    <div class="bg-transparent">
+                                                        {% autoescape off %}{{ fig_density_map_ml_5000|safe }}{% endautoescape %}
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <!-- Daily Overdose Totals -->
-                                            <div class="mb-0">
+                                            <div class="mb-16">
                                                 <div class="mb-2">
                                                     <h3 class="text-2xl font-semibold text-gray-900 dark:text-white flex items-center">
                                                         <svg class="w-6 h-6 mr-3 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -260,7 +299,7 @@
                                                     Total number of overdoses for each day of the week, highlighting weekend risk.
                                                 </p>
                                                 <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20">
-                                                    <div id="daily-totals-container" class="bg-transparent">
+                                                    <div id="fig-container" class="bg-transparent">
                                                         {% autoescape off %}{{ fig_day_of_week_totals|safe }}{% endautoescape %}
                                                     </div>
                                                 </div>
@@ -301,7 +340,7 @@
                                     
                                     <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
                                         <div class="lg:pr-4 lg:pl-8">
-                                            <div class="mb-0">
+                                            <div class="mb-16">
                                                 <div class="mb-2">
                                                     <h3 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
                                                         <svg class="w-6 h-6 mr-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -315,7 +354,7 @@
                                                     with current coverage overlay to identify specific gaps.
                                                 </p>
                                                 <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/10 dark:bg-gray-800/20">
-                                                    <div id="hourly-breakdown-container" class="bg-transparent">
+                                                    <div id="fig-container" class="bg-transparent">
                                                         {% autoescape off %}{{ fig_hourly_breakdown|safe }}{% endautoescape %}
                                                     </div>
                                                 </div>
@@ -358,7 +397,7 @@
                                     
                                     <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
                                         <div class="lg:pr-4 lg:pl-8">
-                                            <div class="mb-0">
+                                            <div class="mb-16">
                                                 <div class="mb-2">
                                                     <h3 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
                                                         <svg class="w-6 h-6 mr-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -372,7 +411,7 @@
                                                     the most cost-effective shift scenarios for maximizing overdose response coverage.
                                                 </p>
                                                 <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/10 dark:bg-gray-800/20">
-                                                    <div id="efficiency-analysis-container" class="bg-transparent">
+                                                    <div id="fig-container" class="bg-transparent">
                                                         {% autoescape off %}{{ fig_cost_benefit_analysis|safe }}{% endautoescape %}
                                                     </div>
                                                 </div>
@@ -500,159 +539,65 @@
 
                             <!-- Technical Documentation - Full Width -->
                             <section class="col-span-12 mb-16">
-                                <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 py-12 sm:px-4 sm:py-16 lg:overflow-visible lg:px-0">
-                                    <!-- Background Pattern -->
-                                    <div class="absolute inset-0 -z-10 overflow-hidden">
-                                        <!-- Code/Terminal grid pattern -->
-                                        <svg class="absolute top-0 left-0 h-full w-full opacity-5 dark:opacity-3" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-                                            <defs>
-                                                <pattern id="tech-grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                                                    <rect width="40" height="40" fill="none" stroke="currentColor" stroke-width="0.5" class="text-blue-300 dark:text-blue-600"/>
-                                                    <circle cx="20" cy="20" r="1" fill="currentColor" class="text-blue-400 dark:text-blue-500" opacity="0.4"/>
-                                                </pattern>
-                                                <pattern id="binary-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-                                                    <text x="10" y="20" font-family="monospace" font-size="8" fill="currentColor" class="text-green-300 dark:text-green-600" opacity="0.3">01</text>
-                                                    <text x="35" y="40" font-family="monospace" font-size="8" fill="currentColor" class="text-blue-300 dark:text-blue-600" opacity="0.3">10</text>
-                                                    <text x="15" y="55" font-family="monospace" font-size="8" fill="currentColor" class="text-purple-300 dark:text-purple-600" opacity="0.3">11</text>
-                                                </pattern>
-                                            </defs>
-                                            <rect width="100%" height="100%" fill="url(#tech-grid)"/>
-                                            <rect width="100%" height="100%" fill="url(#binary-pattern)" opacity="0.4"/>
-                                        </svg>
-                                        
-                                        <!-- Floating terminal windows -->
-                                        <div class="absolute top-16 right-1/4 w-16 h-12 bg-gray-200 dark:bg-gray-700 rounded-sm opacity-10 transform rotate-12">
-                                            <div class="w-full h-3 bg-gray-300 dark:bg-gray-600 rounded-t-sm"></div>
-                                        </div>
-                                        <div class="absolute top-32 left-1/3 w-20 h-14 bg-gray-200 dark:bg-gray-700 rounded-sm opacity-15 transform -rotate-6">
-                                            <div class="w-full h-3 bg-gray-300 dark:bg-gray-600 rounded-t-sm"></div>
-                                        </div>
-                                        
-                                        <!-- Code brackets and symbols -->
-                                        <svg class="absolute top-20 right-1/3 h-32 w-32 transform translate-x-8 opacity-8 dark:opacity-4" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M20 30 L10 40 L20 50 M80 30 L90 40 L80 50" stroke="currentColor" stroke-width="2" fill="none" class="text-indigo-400 dark:text-indigo-600"/>
-                                            <path d="M35 25 L45 55 M55 25 L65 55" stroke="currentColor" stroke-width="1.5" fill="none" class="text-cyan-400 dark:text-cyan-600"/>
-                                        </svg>
-                                        
-                                        <!-- Mathematical symbols -->
-                                        <div class="absolute top-1/4 right-1/5 text-green-400 dark:text-green-600 opacity-20 text-2xl font-mono transform rotate-12">∑</div>
-                                        <div class="absolute top-1/3 left-1/4 text-blue-400 dark:text-blue-600 opacity-25 text-xl font-mono transform -rotate-6">∞</div>
-                                        <div class="absolute top-1/2 right-1/2 text-purple-400 dark:text-purple-600 opacity-30 text-lg font-mono">∴</div>
-                                        <div class="absolute bottom-1/3 left-1/6 text-cyan-400 dark:text-cyan-600 opacity-15 text-lg font-mono">√</div>
-                                        
-                                        <!-- Terminal cursor blinking animation -->
-                                        <div class="absolute top-1/3 right-1/6 w-2 h-4 bg-green-400 dark:bg-green-500 opacity-30">
-                                            <div class="w-full h-full animate-pulse"></div>
-                                        </div>
-                                        
-                                        <!-- Data flow lines -->
-                                        <svg class="absolute bottom-0 left-0 h-40 w-full opacity-5 dark:opacity-3" viewBox="0 0 800 150" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M0 75 Q200 50 400 75 T800 75" stroke="currentColor" stroke-width="2" fill="none" class="text-blue-500"/>
-                                            <path d="M0 85 Q200 60 400 85 T800 85" stroke="currentColor" stroke-width="1" fill="none" class="text-green-500"/>
-                                            <path d="M0 95 Q200 70 400 95 T800 95" stroke="currentColor" stroke-width="1" fill="none" class="text-purple-500"/>
-                                            <!-- Data points -->
-                                            <circle cx="100" cy="75" r="2" fill="currentColor" class="text-blue-400" opacity="0.6"/>
-                                            <circle cx="300" cy="75" r="2" fill="currentColor" class="text-green-400" opacity="0.6"/>
-                                            <circle cx="500" cy="75" r="2" fill="currentColor" class="text-purple-400" opacity="0.6"/>
-                                            <circle cx="700" cy="75" r="2" fill="currentColor" class="text-cyan-400" opacity="0.6"/>
-                                        </svg>
-                                    </div>
-                                    
-                                    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
-                                        <div class="lg:pr-4 lg:pl-8">
-                                            <div class="relative mb-8">
-                                                <!-- Title background with technical theme -->
-                                                <div class="absolute -inset-4 bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 dark:from-gray-800/30 dark:via-gray-700/30 dark:to-gray-800/30 rounded-lg -z-10 opacity-60"></div>
-                                                <h3 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white relative flex items-center">
-                                                    <svg class="w-8 h-8 mr-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                                    </svg>
-                                                    Technical Documentation
-                                                </h3>
+                                <div class="mx-auto max-w-4xl">
+                                    <!-- Documentation container with terminal-like styling -->
+                                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                        <!-- Terminal header -->
+                                        <div class="bg-gray-200 dark:bg-gray-800 px-4 py-3 border-b border-gray-300 dark:border-gray-600">
+                                            <div class="flex items-center space-x-2">
+                                                <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                                                <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                                                <span class="ml-4 text-sm font-mono text-gray-600 dark:text-gray-400">analytics_documentation.log</span>
                                             </div>
-                                            
-                                            <!-- Documentation container with terminal-like styling -->
-                                            <div class="bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                                                <!-- Terminal header -->
-                                                <div class="bg-gray-200 dark:bg-gray-800 px-4 py-3 border-b border-gray-300 dark:border-gray-600">
-                                                    <div class="flex items-center space-x-2">
-                                                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
-                                                        <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                                        <span class="ml-4 text-sm font-mono text-gray-600 dark:text-gray-400">analytics_documentation.log</span>
+                                        </div>
+                                        
+                                        <!-- Changelog content -->
+                                        <div class="p-6 space-y-6">
+                                            <div class="space-y-4">
+                                                <!-- Change entry 1 -->
+                                                <div class="border-l-2 border-blue-500 pl-4">
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">2025-07-10 • Dashboard Enhancement</div>
+                                                    <div class="text-gray-900 dark:text-white font-medium mb-2">Interactive Heatmap Implementation</div>
+                                                    <div class="text-gray-700 dark:text-gray-300 text-sm">
+                                                        Replaced static heatmap with interactive version showing all cell values. Enhanced hover tooltips with detailed timing and percentage information for improved data accessibility.
                                                     </div>
                                                 </div>
                                                 
-                                                <!-- Log content -->
-                                                <div class="p-6 font-mono text-sm space-y-4">
-                                                    <div class="text-gray-500 dark:text-gray-400">
-                                                        <span class="text-green-600 dark:text-green-400">[2025-07-08 22:30:15]</span> 
-                                                        <span class="text-blue-600 dark:text-blue-400">[INFO]</span> 
-                                                        Cases/Year Calculation Method
+                                                <!-- Change entry 2 -->
+                                                <div class="border-l-2 border-green-500 pl-4">
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">2025-07-10 • Machine Learning Integration</div>
+                                                    <div class="text-gray-900 dark:text-white font-medium mb-2">Predictive Heatmaps for High-Volume Scenarios</div>
+                                                    <div class="text-gray-700 dark:text-gray-300 text-sm mb-3">
+                                                        Implemented ML-based prediction models for 1,000 and 5,000 annual overdose scenarios using Ridge regression with polynomial features.
                                                     </div>
-                                                    
-                                                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                                                        <div class="text-gray-700 dark:text-gray-300 space-y-2">
-                                                            <div><span class="text-purple-600 dark:text-purple-400">Data Range:</span> March 18, 2024 → June 19, 2025</div>
-                                                            <div><span class="text-purple-600 dark:text-purple-400">Total Days:</span> 459 days</div>
-                                                            <div><span class="text-purple-600 dark:text-purple-400">Total Years:</span> 1.26 years (459 ÷ 365.25)</div>
-                                                            <div><span class="text-purple-600 dark:text-purple-400">Total Cases:</span> 122 overdose incidents</div>
-                                                        </div>
+                                                    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
+                                                        <div class="text-xs font-mono text-gray-600 dark:text-gray-400 mb-2">Model Features:</div>
+                                                        <ul class="text-xs text-gray-700 dark:text-gray-300 space-y-1">
+                                                            <li>• Ridge regression with polynomial feature engineering</li>
+                                                            <li>• Gaussian temporal smoothing for realistic density patterns</li>
+                                                            <li>• Proportional scaling with variance modeling</li>
+                                                            <li>• Day-of-week effect amplification</li>
+                                                            <li>• Weekend spillover pattern modeling</li>
+                                                        </ul>
                                                     </div>
-                                                    
-                                                    <div class="text-gray-500 dark:text-gray-400">
-                                                        <span class="text-green-600 dark:text-green-400">[2025-07-08 22:30:16]</span> 
-                                                        <span class="text-yellow-600 dark:text-yellow-400">[CALC]</span> 
-                                                        5x8 (Current) Scenario Analysis
+                                                </div>
+                                                
+                                                <!-- Change entry 3 -->
+                                                <div class="border-l-2 border-purple-500 pl-4">
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">2025-07-08 • Data Processing</div>
+                                                    <div class="text-gray-900 dark:text-white font-medium mb-2">Annualization Methodology</div>
+                                                    <div class="text-gray-700 dark:text-gray-300 text-sm">
+                                                        Implemented real-time projection based on 15.6-month data collection period (March 2024 - June 2025). Formula: Cases/Year = Covered Cases ÷ Total Years (1.26).
                                                     </div>
-                                                    
-                                                    <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg border-l-4 border-blue-500">
-                                                        <div class="text-gray-700 dark:text-gray-300 space-y-2">
-                                                            <div class="text-lg font-bold text-blue-600 dark:text-blue-400">Formula: Cases/Year = Covered Cases ÷ Total Years</div>
-                                                            <div>Covered Cases (Mon-Fri 08:00-16:00): <span class="text-green-600 dark:text-green-400 font-bold">33</span></div>
-                                                            <div>Total Years in Dataset: <span class="text-blue-600 dark:text-blue-400 font-bold">1.26</span></div>
-                                                            <div>Result: <span class="text-purple-600 dark:text-purple-400 font-bold">33 ÷ 1.26 = 26.3 cases/year</span></div>
-                                                            <div class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                                                                → Displayed as: <span class="text-green-600 dark:text-green-400 font-bold">26 cases/year</span> (rounded)
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="text-gray-500 dark:text-gray-400">
-                                                        <span class="text-green-600 dark:text-green-400">[2025-07-08 22:30:17]</span> 
-                                                        <span class="text-blue-600 dark:text-blue-400">[NOTE]</span> 
-                                                        Annualization Methodology
-                                                    </div>
-                                                    
-                                                    <div class="space-y-3 text-gray-700 dark:text-gray-300">
-                                                        <div class="flex items-start space-x-2">
-                                                            <span class="text-green-500 mt-1">✓</span>
-                                                            <span><strong>Real-time projection:</strong> Based on actual 15.6-month data collection period</span>
-                                                        </div>
-                                                        <div class="flex items-start space-x-2">
-                                                            <span class="text-green-500 mt-1">✓</span>
-                                                            <span><strong>Not calendar average:</strong> Avoids skewing from incomplete years</span>
-                                                        </div>
-                                                        <div class="flex items-start space-x-2">
-                                                            <span class="text-green-500 mt-1">✓</span>
-                                                            <span><strong>Pattern-based:</strong> Extrapolates current trends to full annual cycle</span>
-                                                        </div>
-                                                        <div class="flex items-start space-x-2">
-                                                            <span class="text-blue-500 mt-1">ℹ</span>
-                                                            <span><strong>Coverage rate:</strong> 26.3 ÷ 97.1 total = 27.0% of all annual cases</span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="text-gray-500 dark:text-gray-400">
-                                                        <span class="text-green-600 dark:text-green-400">[2025-07-08 22:30:18]</span> 
-                                                        <span class="text-green-600 dark:text-green-400">[SUCCESS]</span> 
-                                                        Calculation validated: Backend matches manual heatmap count (33 cases)
-                                                    </div>
-                                                    
-                                                    <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
-                                                        <div class="text-green-800 dark:text-green-300">
-                                                            <strong>Interpretation:</strong> The Port Angeles Fire Department can expect to reach approximately <strong>26 overdose cases annually</strong> with the current Monday-Friday 8AM-4PM coverage schedule, representing realistic operational capacity based on historical incident patterns.
-                                                        </div>
+                                                </div>
+                                                
+                                                <!-- Change entry 4 -->
+                                                <div class="border-l-2 border-orange-500 pl-4">
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">2025-07-08 • UI/UX Enhancement</div>
+                                                    <div class="text-gray-900 dark:text-white font-medium mb-2">Centralized Chart Styling & Hover System</div>
+                                                    <div class="text-gray-700 dark:text-gray-300 text-sm">
+                                                        Standardized Plotly chart hover tooltips across all visualizations using centralized utility functions. Improved readability and consistency for all dashboard interactions.
                                                     </div>
                                                 </div>
                                             </div>
@@ -660,7 +605,6 @@
                                     </div>
                                 </div>
                             </section>
-
                         </div> <!-- End 12-column grid container -->
                     </div>
                 </main>

@@ -272,6 +272,11 @@ def odreferrals_operations(request):
 
     # Charts for operations page
     fig_density_map, density_stats  = build_chart_od_density_heatmap(theme=theme)
+    fig_density_map_interactive_static = build_chart_od_density_heatmap_interactive_static(theme=theme)
+    
+    # ML-based predictions for different volumes
+    fig_density_map_ml_1000 = build_chart_od_density_heatmap_ml_predicted(theme=theme, target_volume=1000, method="ml_ensemble")
+    fig_density_map_ml_5000 = build_chart_od_density_heatmap_ml_predicted(theme=theme, target_volume=5000, method="ml_ensemble")
     
     # Build new detailed analytics
     fig_hourly_breakdown = build_chart_od_hourly_breakdown(theme=theme)
@@ -366,6 +371,9 @@ def odreferrals_operations(request):
             "title": title,
             "description": description,
             "fig_density_map": fig_density_map,
+            "fig_density_map_interactive_static": fig_density_map_interactive_static,
+            "fig_density_map_ml_1000": fig_density_map_ml_1000,
+            "fig_density_map_ml_5000": fig_density_map_ml_5000,
             "fig_hourly_breakdown": fig_hourly_breakdown,
             "fig_day_of_week_totals": fig_day_of_week_totals,
             "fig_shift_scenarios": fig_shift_scenarios,
