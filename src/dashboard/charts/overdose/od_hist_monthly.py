@@ -99,14 +99,38 @@ def build_chart_od_hist_monthly(theme):
         # xaxis_range=["2024-03-01", "2024-12-31"],
     )
 
+    # Apply theme styling
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        export_filename="pafd_cpm_chart_hist_monthly",
         scroll_zoom=False,
-        margin=dict(t=0, l=20, r=20, b=55),
         x_title="Date range selector",
-        # y_title="Count of Overdoses",
+        y_title=None,  # Remove y-axis title
+        margin=dict(t=0, l=20, r=20, b=55),  # Match daily totals style with space for custom elements
+        hovermode_unified=False,
     )
 
-    return plot(fig, output_type="div", config=fig._config)
+    # Override some styles to make it look more like matplotlib - no title
+    fig.update_layout(
+        title=None,  # Remove title
+        hovermode="closest",
+        plot_bgcolor="rgba(255,255,255,0.2)" if theme == "light" else "rgba(31,41,55,0.2)",  # Match container bg
+        paper_bgcolor="rgba(255,255,255,0.2)" if theme == "light" else "rgba(31,41,55,0.2)",  # Match container bg
+    )
+
+    chart_config = {
+        "responsive": True,
+        "displaylogo": False,
+        "displayModeBar": "hover",
+        "staticPlot": False,
+        "modeBarButtonsToRemove": ["pan2d", "lasso2d", "select2d"],
+        "toImageButtonOptions": {
+            "format": "png",
+            "filename": "overdose_histogram_monthly",
+            "height": 600,
+            "width": 1200,
+            "scale": 2
+        }
+    }
+
+    return plot(fig, output_type="div", config=chart_config)

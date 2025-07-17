@@ -1,83 +1,78 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
-    />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>{% block title %} {% endblock title %}</title>
-    <link rel="shortcut icon" type="image/png" href="{% static 'src/media/favicon.ico' %}"/>
-    <link rel="stylesheet" href="{% static 'src/css/output.css' %}" />
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  </head>
-  <body
-    x-data="{ page: 'Trends', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
-    x-init="
-      darkMode = JSON.parse(localStorage.getItem('darkMode'));
-      $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
-    :class="{'dark bg-gray-900': darkMode === true}"
-  >
-    <!-- ===== Preloader Start ===== -->
-    {% include 'partials/preloader.html' %}
-    <!-- ===== Preloader End ===== -->
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+        />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>{% block title %} {% endblock title %}</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'src/media/favicon.ico' %}"/>
+        <link rel="stylesheet" href="{% static 'src/css/output.css' %}" />
+        <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    </head>
+    <body
+        x-data="{ 
+            page: '{% block pageName %}{% endblock pageName %}', 
+            'loaded': true, 
+            'darkMode': true, 
+            'stickyMenu': false, 
+            'sidebarToggle': false, 
+            'scrollTop': false, 
+            'isProfileInfoModal': false, 
+            'isProfileAddressModal': false
+        }"
+        x-init="
+            darkMode = true;
+            localStorage.setItem('darkMode', JSON.stringify(true));
+            $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+        :class="{'dark bg-gray-900': darkMode === true}"
+    >
+        <!-- ===== Preloader Start ===== -->
+        {% include 'partials/preloader.html' %}
+        <!-- ===== Preloader End ===== -->
 
-    <!-- ===== Page Wrapper Start ===== -->
-    <div class="flex h-screen overflow-hidden">
-      <!-- ===== Sidebar Start ===== -->
-      {% include 'partials/sidebar.html' %}
-      <!-- ===== Sidebar End ===== -->
+        <!-- ===== Page Wrapper Start ===== -->
+        <div class="flex h-screen overflow-hidden">
+            <!-- ===== Sidebar Start ===== -->
+            {% include 'partials/sidebar.html' %}
+            <!-- ===== Sidebar End ===== -->
 
-      <!-- ===== Content Area Start ===== -->
-      <div
-        class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
-      >
-        <!-- Small Device Overlay Start -->
-        {% include 'partials/overlay.html' %}
-        <!-- Small Device Overlay End -->
+            <!-- ===== Content Area Start ===== -->
+            <div
+                class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+            >
+                <!-- Small Device Overlay Start -->
+                {% include 'partials/overlay.html' %}
+                <!-- Small Device Overlay End -->
 
-        <!-- ===== Header Start ===== -->
-        {% include 'partials/header.html' %}
-        <!-- ===== Header End ===== -->
+                <!-- ===== Header Start ===== -->
+                {% include 'partials/header.html' %}
+                <!-- ===== Header End ===== -->
 
-        <!-- ===== Main Content Start ===== -->
-        <main>
-          <div class="p-6 mx-auto">
-            <div class="grid grid-cols-12 gap-4 md:gap-6">
-
-              <div class="col-span-12 space-y-6 xl:col-span-12">
-                <!-- Metric Group One -->
-                {% block heading %} {% endblock heading %}
-                <!-- Metric Group One -->
-              </div>
-
-              <div class="col-span-12 space-y-6 xl:col-span-12">
-                <!-- Metric Group One -->
-                {% include 'partials/metric-group/metric-group-01.html' %}
-                <!-- Metric Group One -->
-              </div>
-
-              <div class="col-span-12 xl:col-span-12">
-                <!-- ====== Table One Start -->
-                {% block content %} {% endblock content %}
-                <!-- ====== Table One End -->
-              </div>
-
-              {% comment %} <div class="col-span-12 xl:col-span-12">
-                <!-- ====== Table One Start -->
-                {% include 'partials/table/table-01.html' %}
-                <!-- ====== Table One End -->
-              </div> {% endcomment %}
+                <!-- ===== Main Content Start ===== -->
+                <main>
+                    <div class="p-8 mx-auto">
+                        <!-- 12-column grid container -->
+                        <div class="grid grid-cols-12 gap-6">
+                            <!-- Content - Full Width -->
+                            {% block content %} {% endblock content %}
+                        </section>
+                        <!-- Page Title Section End -->
+                    </div>
+                </main>
+                <!-- ===== Main Content End ===== -->
             </div>
-          </div>
-        </main>
-        <!-- ===== Main Content End ===== -->
-      </div>
-      <!-- ===== Content Area End ===== -->
-    </div>
-    <!-- ===== Page Wrapper End ===== -->
-  </body>
+            <!-- ===== Content Area End ===== -->
+        </div>
+        <!-- ===== Page Wrapper End ===== -->
+
+        <!-- BEGIN MODAL -->
+        {% include 'partials/profile/profile-info-modal.html' %}
+        {% include 'partials/profile/profile-address-modal.html' %}
+        <!-- END MODAL -->
+    </body>
 </html>

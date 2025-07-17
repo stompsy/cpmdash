@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+        />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>{% block title %} {% endblock title %}</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'src/media/favicon.ico' %}"/>
+        <link rel="stylesheet" href="{% static 'src/css/output.css' %}" />
+        <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    </head>
+    <body
+        x-data="{ page: 'Repeats', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false, 'isProfileInfoModal': false, 'isProfileAddressModal': false }"
+        x-init="
+            darkMode = true;
+            localStorage.setItem('darkMode', JSON.stringify(true));
+            $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+        :class="{'dark bg-gray-900': darkMode === true}"
+    >
+        <!-- Preloader -->
+        {% include 'partials/preloader.html' %}
+        <!-- Page Wrapper Start ===== -->
+        <div class="flex h-screen overflow-hidden">
+            <!-- Sidebar -->
+            {% include 'partials/sidebar.html' %}
+            <!-- Content Area Start -->
+            <div
+                class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+            >
+                <!-- Small Device Overlay -->
+                {% include 'partials/overlay.html' %}
+                <!-- Header -->
+                {% include 'partials/header.html' %}
+                <!-- Main Content Start -->
+                <main>
+                    <div
+                        class="p-8 mx-auto"
+                    >
+
+                        <!-- Section 5: Repeat Overdose Rationale -->
+                        <section class="mt-16">
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Why Track Repeat Overdoses?</h2>
+                            <p class="mt-4 text-gray-700 dark:text-gray-300">Repeat overdoses signal critical gaps in care. Each recurrence offers insight into systemic failures, from lack of follow-up to incarceration or treatment disruptions.</p>
+                            <p class="mt-2 italic text-gray-600 dark:text-gray-400">Case data often show that long gaps between overdoses may reflect periods of incarceration or stabilization in treatment—not necessarily improved safety.</p>
+                            <ul class="mt-4 list-disc list-inside text-gray-700 dark:text-gray-300">
+                                <li>Only 3% of overdose survivors linked to services when CPMs didn’t respond—versus 78% when they did.</li>
+                                <li>CPMs act as a critical bridge for survivors during moments of readiness for change.</li>
+                                <li>Tracking recurrence helps predict which individuals may need intense case management.</li>
+                                <li>Visualizing overdose intervals can indicate jail releases or post-discharge instability.</li>
+                            </ul>
+
+                            <!-- Year-over-Year Comparison Table -->
+                            <div class="mt-10">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Year-over-Year Comparison</h3>
+                                <div class="overflow-x-auto rounded-lg shadow ring-1 ring-black ring-opacity-5">
+                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead class="bg-gray-50 dark:bg-gray-800">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Repeat Overdoses</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Patients</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">% of Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                            {% for item in repeat_stats_by_year %}
+                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ item.year }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ item.repeat_overdoses }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ item.repeat_patients }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ item.percent_repeat }}%</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Scatter Plot of Repeat Overdoses by Case -->
+                            <div class="mt-10 text-white">
+                                <div class="text-lg font-semibold text-gray-900 dark:text-white">Repeat overdoses by Case</div>
+                                {% autoescape off %}{{ fig_repeats_scatter|safe }}{% endautoescape %}
+                            </div>
+                        </section>
+                    </div>
+                </main>
+                <!-- Main Content End -->
+            </div>
+            <!-- Content Area End -->
+        </div>
+        <!-- Page Wrapper End -->
+
+        <!-- BEGIN MODAL -->
+        {% include 'partials/profile/profile-info-modal.html' %}
+        {% include 'partials/profile/profile-address-modal.html' %}
+        <!-- END MODAL -->
+    </body>
+</html>

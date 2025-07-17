@@ -364,7 +364,7 @@ def build_chart_shift_scenarios(theme):
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=800,
+        height=500,
         scroll_zoom=False,
         x_title=None,
         y_title=None,
@@ -520,7 +520,7 @@ def build_chart_cost_benefit_analysis(theme):
         tickfont=dict(size=14, family="Roboto"),  # Consistent font size and family
         ticklabelstandoff=10,  # Set specific standoff distance
         showgrid=True,  # Keep horizontal grid lines
-        range=[0, 0.9],  # Set y-axis range from 0 to 0.8
+        range=[0, 1],  # Set y-axis range from 0 to 0.8
         dtick=0.1,  # Show tick marks every 0.1
     )
 
@@ -528,7 +528,7 @@ def build_chart_cost_benefit_analysis(theme):
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=640,
+        height=400,
         scroll_zoom=False,
         x_title=None,
         y_title=None,
