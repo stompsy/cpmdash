@@ -3,8 +3,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import plot
 
-from dashboard.utils.plotly import style_plotly_layout
-from dashboard.utils.tailwind_colors import TAILWIND_COLORS
+from utils.plotly import style_plotly_layout
+from utils.tailwind_colors import TAILWIND_COLORS
 from dashboard.models import ODReferrals
 
 # daily counts

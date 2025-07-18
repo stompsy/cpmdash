@@ -1,13 +1,16 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+import json
+import pandas as pd
 
-# MOVE UTILS up a level
-from dashboard.utils.theme import get_theme_from_request
+from dashboard.models import ODReferrals
 
-# MOVE CHARTS up a level
-from dashboard.charts.overdose.od_density_heatmap import *
-from dashboard.charts.overdose.od_shift_scenarios import *
-from dashboard.charts.overdose.od_hourly_breakdown import *
+from utils.theme import get_theme_from_request
+
+from charts.overdose.od_density_heatmap import *
+from charts.overdose.od_shift_scenarios import *
+from charts.overdose.od_hourly_breakdown import *
+from charts.overdose.od_repeats_scatter import *
 
 
 def cases(request):
@@ -25,7 +28,6 @@ def opshieldinghope(request):
 
 
 def shiftcoverage(request):
-
     theme = get_theme_from_request(request)
     title = "PORT Referrals"
     description = "Case Studies - Shift Coverage Analysis"
@@ -135,6 +137,48 @@ def shiftcoverage(request):
             "theme": theme,
         },
     )
+
+
+def repeatods(request):
+    theme = get_theme_from_request(request)
+    
+    # Get the repeat overdoses chart
+    fig_repeats_scatter = build_chart_repeats_scatter(theme=theme)
+    
+    # Calculate repeat overdose statistics
+    odreferrals = ODReferrals.objects.all()
+    df = pd.DataFrame.from_records(odreferrals.values("disposition", "od_date", "patient_id"))
+    df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
+    df = df.dropna(subset=["od_date"])
+    
+    # Calculate year-over-year statistics
+    repeat_stats_by_year = []
+    
+    for year in sorted(df["od_date"].dt.year.unique()):
+        year_df = df[df["od_date"].dt.year == year]
+        
+        # Count repeat patients (patients with more than one overdose in this year)
+        year_repeat_counts = year_df["patient_id"].value_counts()
+        repeat_patients = len(year_repeat_counts[year_repeat_counts > 1])
+        repeat_overdoses = year_repeat_counts[year_repeat_counts > 1].sum()
+        total_overdoses_year = len(year_df)
+        
+        percent_repeat = round((repeat_overdoses / total_overdoses_year) * 100, 1) if total_overdoses_year > 0 else 0
+        
+        repeat_stats_by_year.append({
+            'year': int(year),
+            'repeat_overdoses': int(repeat_overdoses),
+            'repeat_patients': int(repeat_patients),
+            'percent_repeat': percent_repeat
+        })
+    
+    context = {
+        "fig_repeats_scatter": fig_repeats_scatter,
+        "repeat_stats_by_year": repeat_stats_by_year,
+        "theme": theme,
+    }
+    
+    return render(request, "cases/repeatods.html", context)
 
 
 # HTMX Chart Update Views

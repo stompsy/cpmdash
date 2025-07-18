@@ -6,8 +6,8 @@ import plotly.graph_objects as go
 from plotly.offline import plot
 from plotly.subplots import make_subplots
 from django.db.models import Count
-from ...models import ODReferrals
-from ...utils.plotly import get_plotly_theme, get_color_palette, style_plotly_layout, get_theme_colors
+from dashboard.models import ODReferrals
+from utils.plotly import get_plotly_theme, get_color_palette, style_plotly_layout, get_theme_colors
 
 def build_chart_od_hourly_breakdown(theme):
     """

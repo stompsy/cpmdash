@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 from plotly.offline import plot
 
-from dashboard.utils.plotly import style_plotly_layout
+from utils.plotly import style_plotly_layout
 
 
 def build_chart_od_time_region_bars(theme):

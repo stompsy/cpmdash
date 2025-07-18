@@ -1,9 +1,9 @@
 import pandas as pd
 import plotly.express as px
 
-from ...utils.plotly import style_plotly_layout
+from utils.plotly import style_plotly_layout
 
-from ...models import ODReferrals
+from dashboard.models import ODReferrals
 
 
 def _prepare_overdose_data():

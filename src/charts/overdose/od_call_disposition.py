@@ -2,27 +2,27 @@ import pandas as pd
 import plotly.express as px
 from plotly.offline import plot
 
-from ...utils.plotly import style_plotly_layout
+from utils.plotly import style_plotly_layout
 
-from ...models import ODReferrals
+from dashboard.models import ODReferrals
 
 
-def build_chart_cpm_disposition(theme):
+def build_chart_call_disposition(theme):
     odreferrals = ODReferrals.objects.all()
-    df = pd.DataFrame.from_records(odreferrals.values("cpm_disposition"))
+    df = pd.DataFrame.from_records(odreferrals.values("disposition"))
 
     fig = px.histogram(
         df,
-        x="cpm_disposition",
+        x="disposition",
         nbins=30,
         title=None,
-        labels={"cpm_disposition": "CPM Disposition"},
+        labels={"disposition": "Call Disposition"},
     )
 
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        export_filename="pafd_cpm_chart_disposition",
+        export_filename="pafd_cpm_chart_call_disposition",
         scroll_zoom=False,
     )
 

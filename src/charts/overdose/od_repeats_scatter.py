@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 from plotly.offline import plot
 from datetime import datetime
 
-from ...utils.plotly import style_plotly_layout
+from utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
 
 

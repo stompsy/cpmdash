@@ -5,8 +5,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from plotly.offline import plot
-from ...models import ODReferrals
-from ...utils.plotly import get_color_palette, style_plotly_layout
+from dashboard.models import ODReferrals
+from utils.plotly import get_color_palette, style_plotly_layout
 
 def calculate_coverage_scenarios():
     """

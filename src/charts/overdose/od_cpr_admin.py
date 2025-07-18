@@ -2,9 +2,9 @@ import pandas as pd
 import plotly.express as px
 from plotly.offline import plot
 
-from ...utils.plotly import style_plotly_layout
+from utils.plotly import style_plotly_layout
 
-from ...models import ODReferrals
+from dashboard.models import ODReferrals
 
 
 def build_chart_cpr_admin(theme="light"):

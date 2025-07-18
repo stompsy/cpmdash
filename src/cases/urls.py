@@ -4,9 +4,9 @@ from . import views
 
 urlpatterns = [
     path("cases/", views.cases, name="odreferrals"),
-    path("cases/repeats/", views.cases, name="repeatods"),
-    path("cases/shiftcoverage/", views.shiftcoverage, name="shiftcoverage"),
-    path("cases/opshieldinghope/", views.opshieldinghope, name="opshieldinghope"),
+    path("repeats/", views.repeatods, name="repeatods"),
+    path("shiftcoverage/", views.shiftcoverage, name="shiftcoverage"),
+    path("opshieldinghope/", views.opshieldinghope, name="opshieldinghope"),
 
     # HTMX Chart Update Endpoints
     path("charts/heatmap/", views.htmx_heatmap_chart, name="htmx_heatmap"),

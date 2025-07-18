@@ -5,7 +5,7 @@ import json
 import os
 from django.conf import settings
 
-from ...utils.plotly import style_plotly_layout
+from utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
 
 

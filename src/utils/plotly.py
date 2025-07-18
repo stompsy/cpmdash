@@ -1,5 +1,5 @@
 # dashboard/utils/plotly.py
-from dashboard.utils.tailwind_colors import TAILWIND_COLORS
+from utils.tailwind_colors import TAILWIND_COLORS
 
 
 def get_theme_colors(theme="dark"):

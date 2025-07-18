@@ -3,7 +3,7 @@ import numpy as np
 import plotly.express as px
 from plotly.offline import plot
 
-from ...utils.plotly import style_plotly_layout
+from utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
 
 
