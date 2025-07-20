@@ -7,19 +7,21 @@ from utils.plotly import style_plotly_layout
 from utils.tailwind_colors import TAILWIND_COLORS
 from dashboard.models import ODReferrals
 
-# daily counts
-odreferrals = ODReferrals.objects.all()
-df = pd.DataFrame.from_records(odreferrals.values("disposition", "od_date"))
-df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
-df["overdose_outcome"] = df["disposition"].apply(
-    lambda x: "Fatal" if x in ["CPR attempted", "DOA"] else "Non-Fatal"
-)
-daily_counts = (
-    df.groupby(["od_date", "overdose_outcome"])
-        .size().reset_index(name="count")
-)
 
 def build_chart_od_hist_monthly(theme):
+    
+    # daily counts
+    odreferrals = ODReferrals.objects.all()
+    df = pd.DataFrame.from_records(odreferrals.values("disposition", "od_date"))
+    df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
+    df["overdose_outcome"] = df["disposition"].apply(
+        lambda x: "Fatal" if x in ["CPR attempted", "DOA"] else "Non-Fatal"
+    )
+    daily_counts = (
+        df.groupby(["od_date", "overdose_outcome"])
+            .size().reset_index(name="count")
+    )
+
     # stacked monthly histogram
     fig = px.histogram(
         df,

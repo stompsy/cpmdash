@@ -9,32 +9,32 @@ from utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
 
 
-# Dataframe
-odreferrals = ODReferrals.objects.all()
-df = pd.DataFrame.from_records(
-    odreferrals.values(
-        "disposition",
-        "od_date",
-        "long",
-        "lat",
-    )
-)
-
-# Classify overdoses as Fatal or Non-Fatal
-fatal_conditions = ["CPR attempted", "DOA"]
-df["overdose_outcome"] = df["disposition"].apply(
-    lambda x: "Fatal" if x in fatal_conditions else "Non-Fatal"
-)
-
-df["count"] = 1  # each row = 1 overdose case
-
-# Aggregate data to adjust bubble size for repeated locations
-location_counts = (
-    df.groupby(["lat", "long", "overdose_outcome"]).size().reset_index(name="count")
-)
-
-
 def build_chart_od_map(theme):
+    
+    # Dataframe
+    odreferrals = ODReferrals.objects.all()
+    df = pd.DataFrame.from_records(
+        odreferrals.values(
+            "disposition",
+            "od_date",
+            "long",
+            "lat",
+        )
+    )
+
+    # Classify overdoses as Fatal or Non-Fatal
+    fatal_conditions = ["CPR attempted", "DOA"]
+    df["overdose_outcome"] = df["disposition"].apply(
+        lambda x: "Fatal" if x in fatal_conditions else "Non-Fatal"
+    )
+
+    df["count"] = 1  # each row = 1 overdose case
+
+    # Aggregate data to adjust bubble size for repeated locations
+    location_counts = (
+        df.groupby(["lat", "long", "overdose_outcome"]).size().reset_index(name="count")
+    )
+
     fig = px.scatter_mapbox(
         location_counts,
         lat="lat",

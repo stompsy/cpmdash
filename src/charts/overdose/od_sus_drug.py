@@ -7,21 +7,21 @@ from utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
 
 
-qs = (
-        ODReferrals.objects
-        .values('suspected_drug')
-        .annotate(count=Count('ID'))
-        .order_by('count').reverse()  # smallest → largest
+def build_chart_sus_drug(theme):
+
+    qs = (
+            ODReferrals.objects
+            .values('suspected_drug')
+            .annotate(count=Count('ID'))
+            .order_by('count').reverse()  # smallest → largest
+        )
+
+    df = pd.DataFrame(qs).fillna({'suspected_drug': 'Unknown'})
+
+    df['drug_group'] = df['suspected_drug'].apply(
+        lambda d: 'Fentanyl-related' if 'fentanyl' in d.lower() else 'Other'
     )
 
-df = pd.DataFrame(qs).fillna({'suspected_drug': 'Unknown'})
-
-df['drug_group'] = df['suspected_drug'].apply(
-    lambda d: 'Fentanyl-related' if 'fentanyl' in d.lower() else 'Other'
-)
-
-def build_chart_sus_drug(theme):
-    
     fent_first = (
         df[df['drug_group'] == 'Fentanyl-related']['suspected_drug']
         .to_list()

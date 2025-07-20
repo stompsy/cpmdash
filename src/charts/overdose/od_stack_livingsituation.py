@@ -6,35 +6,38 @@ from utils.plotly import style_plotly_layout
 from dashboard.models import ODReferrals
 
 
-# Dataframe
-odreferrals = ODReferrals.objects.all()
-df = pd.DataFrame.from_records(
-    odreferrals.values(
-        "disposition",
-        "living_situation",
-    )
-)
-
-# Convert to datetime and classify fatal vs non-fatal
-fatal_conditions = ["CPR attempted", "DOA"]
-df["overdose_outcome"] = df["disposition"].apply(
-    lambda x: "Fatal" if x in fatal_conditions else "Non-Fatal"
-)
-
-# Group by insurance type and outcome
-grouped = (
-    df.groupby(["living_situation", "overdose_outcome"])
-    .size()
-    .reset_index(name="count")
-    .dropna(subset=["living_situation"])
-    .sort_values("count", ascending=False)
-)
-
-
 def build_chart_od_stack_livingsituation(theme):
     """
     Build a stacked bar chart comparing fatal and non-fatal overdoses by insurance type.
     """
+    # Dataframe
+    odreferrals = ODReferrals.objects.all()
+    df = pd.DataFrame.from_records(
+        odreferrals.values(
+            "disposition",
+            "living_situation",
+        )
+    )
+
+    # If the dataframe is empty, return a message
+    if df.empty:
+        return "No overdose data available to display."
+
+    # Convert to datetime and classify fatal vs non-fatal
+    fatal_conditions = ["CPR attempted", "DOA"]
+    df["overdose_outcome"] = df["disposition"].apply(
+        lambda x: "Fatal" if x in fatal_conditions else "Non-Fatal"
+    )
+
+    # Group by insurance type and outcome
+    grouped = (
+        df.groupby(["living_situation", "overdose_outcome"])
+        .size()
+        .reset_index(name="count")
+        .dropna(subset=["living_situation"])
+        .sort_values("count", ascending=False)
+    )
+
     fig = px.bar(
         grouped,
         x="living_situation",
