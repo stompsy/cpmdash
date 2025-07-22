@@ -33,11 +33,16 @@ def build_chart_repeats_scatter(theme):
 
     # Classify outcome
     df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
-    df = df[df["od_date"] != "2000-01-01"]
+    df = df[df["od_date"] != pd.Timestamp("2000-01-01")]
     fatal_conditions = ["CPR attempted", "DOA"]
     df["overdose_outcome"] = df["disposition"].apply(
         lambda x: "Fatal" if str(x).strip().lower() in fatal_conditions else "Non-Fatal"
     )
+
+    # Convert jail date columns to datetime and filter out '2000-01-01' in main df
+    for col in ["jail_start_1", "jail_end_1", "jail_start_2", "jail_end_2"]:
+        df[col] = pd.to_datetime(df[col], errors="coerce")
+        df.loc[df[col] == pd.Timestamp("2000-01-01"), col] = pd.NaT
 
     # Filter for repeat patients
     repeat_ids = df["patient_id"].value_counts()
@@ -51,18 +56,23 @@ def build_chart_repeats_scatter(theme):
     jail_df.dropna(subset=["jail_start_1", "jail_start_2"], how="all", inplace=True)
     jail_df.drop_duplicates(inplace=True)
 
+    # Ensure jail_df columns are datetime and filter out '2000-01-01' as pd.NaT
+    for col in ["jail_start_1", "jail_end_1", "jail_start_2", "jail_end_2"]:
+        jail_df[col] = pd.to_datetime(jail_df[col], errors="coerce")
+        jail_df.loc[jail_df[col] == pd.Timestamp("2000-01-01"), col] = pd.NaT
+
     jail_periods = []
     today = datetime.now()
 
     for _, row in jail_df.iterrows():
         patient_id = row["patient_id"]
         if pd.notna(row["jail_start_1"]):
-            start = pd.to_datetime(row["jail_start_1"])
-            end = pd.to_datetime(row["jail_end_1"]) if pd.notna(row["jail_end_1"]) else today
+            start = row["jail_start_1"]
+            end = row["jail_end_1"] if pd.notna(row["jail_end_1"]) else today
             jail_periods.append({"patient_id": patient_id, "start": start, "end": end})
         if pd.notna(row["jail_start_2"]):
-            start = pd.to_datetime(row["jail_start_2"])
-            end = pd.to_datetime(row["jail_end_2"]) if pd.notna(row["jail_end_2"]) else today
+            start = row["jail_start_2"]
+            end = row["jail_end_2"] if pd.notna(row["jail_end_2"]) else today
             jail_periods.append({"patient_id": patient_id, "start": start, "end": end})
 
     jail_periods_df = pd.DataFrame(jail_periods)

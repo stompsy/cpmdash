@@ -7,7 +7,7 @@ urlpatterns = [
     path("repeats/", views.repeatods, name="repeatods"),
     path("shiftcoverage/", views.shiftcoverage, name="shiftcoverage"),
     path("opshieldinghope/", views.opshieldinghope, name="opshieldinghope"),
-    path("cost-savings/", views.costsavings, name="costSavings"),
+    path("costsavings/", views.costsavings, name="costsavings"),
 
     # HTMX Chart Update Endpoints
     path("charts/heatmap/", views.htmx_heatmap_chart, name="htmx_heatmap"),
