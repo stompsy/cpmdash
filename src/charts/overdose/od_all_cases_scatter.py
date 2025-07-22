@@ -34,6 +34,8 @@ def build_chart_all_cases_scatter(theme):
 
     # Classify outcome
     df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
+    # Remove placeholder fake date
+    df = df[df["od_date"] != pd.Timestamp("2000-01-01")]
     # Ensure od_date is timezone-naive
     if df["od_date"].dt.tz is not None:
         df["od_date"] = df["od_date"].dt.tz_localize(None)

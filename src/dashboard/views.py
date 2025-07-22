@@ -108,7 +108,15 @@ def odreferrals_monthly(request):
     percent_repeat = round((repeat_overdoses / total_overdoses) * 100, 1) if total_overdoses > 0 else 0
     
     # Calculate referral success rate based on 'referral_to_sud_agency', excluding 'Other' cases.
-    referral_success_rate = df["referral_to_sud_agency"].sum()
+    # Filter out cases where referral_source is 'Other'
+    referral_df = df[df["referral_source"] != "Other"]
+    
+    if len(referral_df) > 0:
+        successful_referrals = referral_df["referral_to_sud_agency"].sum()  # This works for boolean True values
+        total_eligible_referrals = len(referral_df)
+        referral_success_rate = round((successful_referrals / total_eligible_referrals) * 100, 1)
+    else:
+        referral_success_rate = 0.0
 
     # Calculate density stats for time regions
     def calculate_density_stats():

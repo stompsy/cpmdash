@@ -131,7 +131,7 @@
                             </li>
                             <li>
                                 <span>
-                                    <strong class="font-semibold text-gray-900 dark:text-white">Real-Time Public Health Response.</strong> CPMs are not tied to the next 911 dispatch, enabling them to establish trusted relationships and provide point-of-care support, which in turn strengthens grant applications and informs public health strategy.
+                                    <strong class="font-semibold text-gray-900 dark:text-white">Real-Time Public Health Response.</strong> CPMs are not tied to the next 911 dispatch, enabling them to establish trusted relationships and provide point-of-care support.
                                 </span>
                             </li>
                         </ul>
@@ -184,42 +184,6 @@
                     <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20">
                         <div class="bg-transparent">
                             {% autoescape off %}{{ od_monthly|safe }}{% endautoescape %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Time Region Analysis -->
-<section class="col-span-12 mb-16">
-    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 sm:px-4 lg:overflow-visible lg:px-0">
-        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
-            <div class="lg:pr-4 lg:pl-8">
-                <div class="mb-12">
-                    <div class="mb-6 relative">
-                        <!-- Title background highlight -->
-                        <div class="absolute -inset-4 bg-gradient-to-r from-amber-50 via-amber-100 to-amber-50 dark:from-amber-800/30 dark:via-amber-700/30 dark:to-amber-800/30 rounded-lg -z-10 opacity-60"></div>
-                        <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white relative flex items-center">
-                            <svg class="w-8 h-8 mr-4 mb-1 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            Overdoses by Time of Day
-                        </h2>
-                    </div>
-                    <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
-                        Analyzing the time of day when overdoses occur helps allocate resources and schedule interventions more effectively. This breakdown reveals peak overdose times, enabling proactive measures.
-                    </p>
-                    <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20 p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {% for time_period, count in time_of_day.items %}
-                            <div class="bg-white dark:bg-gray-700 p-4 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm">
-                                <h4 class="font-medium text-gray-900 dark:text-white">{{ time_period }}</h4>
-                                <p class="text-xl font-bold text-amber-600 dark:text-amber-400">{{ count }}</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ density_stats.late_evening.pct }}% of total</p>
-                            </div>
-                            {% endfor %}
                         </div>
                     </div>
                 </div>

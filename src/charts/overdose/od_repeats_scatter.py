@@ -33,6 +33,7 @@ def build_chart_repeats_scatter(theme):
 
     # Classify outcome
     df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
+    df = df[df["od_date"] != "2000-01-01"]
     fatal_conditions = ["CPR attempted", "DOA"]
     df["overdose_outcome"] = df["disposition"].apply(
         lambda x: "Fatal" if str(x).strip().lower() in fatal_conditions else "Non-Fatal"

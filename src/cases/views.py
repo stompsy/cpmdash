@@ -180,6 +180,13 @@ def repeatods(request):
     
     return render(request, "cases/repeatods.html", context)
 
+def costsavings(request):
+    """Render the Cost Savings Analysis page"""
+    title = "Cost Savings Analysis"
+    description = "Financial impact of Community Paramedic interventions"
+    context = {"title": title, "description": description}
+    return render(request, "cases/costsavings.html", context)
+
 
 # HTMX Chart Update Views
 

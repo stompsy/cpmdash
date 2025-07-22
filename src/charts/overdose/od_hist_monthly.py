@@ -10,13 +10,24 @@ from dashboard.models import ODReferrals
 
 def build_chart_od_hist_monthly(theme):
     
-    # daily counts
+    # Get data including suspected drug information
     odreferrals = ODReferrals.objects.all()
-    df = pd.DataFrame.from_records(odreferrals.values("disposition", "od_date"))
+    df = pd.DataFrame.from_records(odreferrals.values("disposition", "od_date", "suspected_drug"))
     df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
+    df = df.dropna(subset=["od_date"])
+    
     df["overdose_outcome"] = df["disposition"].apply(
         lambda x: "Fatal" if x in ["CPR attempted", "DOA"] else "Non-Fatal"
     )
+    
+    # Create monthly aggregations
+    df["month"] = df["od_date"].dt.to_period("M")
+    monthly_totals = df.groupby("month").size()
+    
+    # Get drug type data by month
+    drug_counts = df.groupby(["month", "suspected_drug"]).size().reset_index(name="count")
+    drug_counts["month_date"] = drug_counts["month"].dt.to_timestamp()
+    
     daily_counts = (
         df.groupby(["od_date", "overdose_outcome"])
             .size().reset_index(name="count")
@@ -45,10 +56,76 @@ def build_chart_od_hist_monthly(theme):
         textangle=0,   # prevent automatic rotation
     )
 
-    # add daily markers
+    # Add drug type indicators as vertical lines (mini bar charts)
+    # First, find the top 3 most common drugs across all data
+    top_drugs = df["suspected_drug"].value_counts().head(3).index.tolist()
+    
+    # Use more distinct, vibrant colors for better visibility
+    drug_colors = {
+        "Fentanyl": TAILWIND_COLORS["purple-600"],
+        "Heroin": TAILWIND_COLORS["orange-600"], 
+        "Cocaine": TAILWIND_COLORS["emerald-600"],
+        "Methamphetamine": TAILWIND_COLORS["blue-600"],
+        "Opiate/opioid (Unknown)": TAILWIND_COLORS["pink-600"],
+        "Fentanyl, Stimulant (Unknown)": TAILWIND_COLORS["cyan-600"],
+        "Other": TAILWIND_COLORS["amber-600"],
+        "Unknown": TAILWIND_COLORS["violet-600"],
+    }
+    
+    # Create vertical line charts above each month's bar
+    drug_list = top_drugs[:3]  # Use only top 3 drugs
+    bar_width_days = 15  # Approximate width of monthly bar in days
+    line_width = bar_width_days / 3  # Each line gets 1/3 of the bar width
+    
+    for i, drug in enumerate(drug_list):
+        drug_data = drug_counts[drug_counts["suspected_drug"] == drug]
+        if not drug_data.empty:
+            x_positions = []
+            y_starts = []
+            hover_data = []
+            
+            for _, row in drug_data.iterrows():
+                month_total = monthly_totals.get(row["month"], 0)
+                drug_count = row["count"]
+                
+                # Calculate proportional line height (max 20% of month total)
+                max_line_height = max(month_total * 0.2, 3)  # At least 3 units tall
+                line_height = (drug_count / month_total) * max_line_height if month_total > 0 else 1
+                
+                # Position line horizontally within the month (centered, with equal spacing)
+                # Create 3 equal sections across the bar width, shifted right to center over month
+                section_start = -bar_width_days / 2  # Start from left edge
+                x_offset = section_start + (i * line_width) + (line_width / 2)  # Center within section
+                # Add offset to shift right and better center over the monthly bar
+                x_pos = row["month_date"] + pd.Timedelta(days=x_offset + 15)  # Shift 15 days right
+
+                y_start = month_total + 1  # Start just above the bar
+                y_end = y_start + line_height
+                
+                x_positions.extend([x_pos, x_pos, None])  # None creates line break
+                y_starts.extend([y_start, y_end, None])
+                hover_data.append(drug_count)
+            
+            # Add vertical lines as a single trace
+            fig.add_trace(go.Scatter(
+                x=x_positions,
+                y=y_starts,
+                mode="lines",
+                name=f"{drug}",
+                line=dict(
+                    color=drug_colors.get(drug, TAILWIND_COLORS["amber-600"]),  # More distinct fallback
+                    width=10  # Thicker lines to better fill the sections
+                ),
+                hovertemplate=f"Drug: <b>{drug}</b><br>Month: %{{x|%m/%Y}}<br>Cases: %{{customdata}}<extra></extra>",
+                customdata=[val for val in hover_data for _ in range(3)],  # Repeat for line segments
+                showlegend=True,
+                connectgaps=False,
+            ))
+
+    # add daily markers (existing code)
     colors = {
         "Fatal": TAILWIND_COLORS["red-500"],
-        "Non-Fatal": TAILWIND_COLORS["indigo-600"]
+        "Non-Fatal": TAILWIND_COLORS["indigo-900"]
     }
     offsets = {
         "Fatal": 0.5,
@@ -73,7 +150,7 @@ def build_chart_od_hist_monthly(theme):
                 "Count: %{y}<extra></extra>"
             ),
             customdata=df_o[["overdose_outcome"]].values,
-            showlegend=False,
+            showlegend=True,  # Show in legend
         ))
 
     # style x-axis & rangeselector
@@ -105,10 +182,11 @@ def build_chart_od_hist_monthly(theme):
     fig = style_plotly_layout(
         fig,
         theme=theme,
+        height=600,
         scroll_zoom=False,
         x_title="Date range selector",
         y_title=None,  # Remove y-axis title
-        margin=dict(t=0, l=20, r=20, b=55),  # Match daily totals style with space for custom elements
+        margin=dict(t=30, l=20, r=30, b=55),  # Match daily totals style with space for custom elements
         hovermode_unified=False,
     )
 
@@ -116,8 +194,8 @@ def build_chart_od_hist_monthly(theme):
     fig.update_layout(
         title=None,  # Remove title
         hovermode="closest",
-        plot_bgcolor="rgba(255,255,255,0.2)" if theme == "light" else "rgba(31,41,55,0.2)",  # Match container bg
-        paper_bgcolor="rgba(255,255,255,0.2)" if theme == "light" else "rgba(31,41,55,0.2)",  # Match container bg
+        plot_bgcolor="rgba(255,255,255,0.2)" if theme == "light" else TAILWIND_COLORS["slate-800"],  # Match container bg
+        paper_bgcolor="rgba(255,255,255,0.2)" if theme == "light" else TAILWIND_COLORS["slate-800"],  # Match container bg
     )
 
     chart_config = {
