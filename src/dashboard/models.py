@@ -115,16 +115,16 @@ class ODReferrals(models.Model):
     bup_admin = models.IntegerField(null=True, blank=True)
     client_agrees_to_mat = models.IntegerField(null=True, blank=True)
     overdose_recent = models.CharField(max_length=30, null=True, blank=True)
-    jail_start_1 = models.DateTimeField(
+    jail_start_1 = models.DateField(
         auto_now=False, auto_now_add=False, null=True, default=None
     )
-    jail_end_1 = models.DateTimeField(
+    jail_end_1 = models.DateField(
         auto_now=False, auto_now_add=False, null=True, default=None
     )
-    jail_start_2 = models.DateTimeField(
+    jail_start_2 = models.DateField(
         auto_now=False, auto_now_add=False, null=True, default=None
     )
-    jail_end_2 = models.DateTimeField(
+    jail_end_2 = models.DateField(
         auto_now=False, auto_now_add=False, null=True, default=None
     )
 
