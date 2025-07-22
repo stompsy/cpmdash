@@ -67,7 +67,7 @@ class ODReferrals(models.Model):
     patient_zipcode = models.CharField(max_length=20, null=True, blank=True)
     patient_insurance = models.CharField(max_length=50, null=True, blank=True)
     living_situation = models.CharField(max_length=20, null=True, blank=True)
-    od_date = models.DateField(
+    od_date = models.DateTimeField(
         auto_now=False, auto_now_add=False, null=True, default=None
     )
     delay_in_referral = models.CharField(max_length=50, null=True, blank=True)
@@ -116,16 +116,16 @@ class ODReferrals(models.Model):
     client_agrees_to_mat = models.IntegerField(null=True, blank=True)
     overdose_recent = models.CharField(max_length=30, null=True, blank=True)
     jail_start_1 = models.DateField(
-        auto_now=False, auto_now_add=False, null=True, default=None, blank=True
+        auto_now=False, auto_now_add=False, null=True, default=None
     )
     jail_end_1 = models.DateField(
-        auto_now=False, auto_now_add=False, null=True, default=None, blank=True
+        auto_now=False, auto_now_add=False, null=True, default=None
     )
     jail_start_2 = models.DateField(
-        auto_now=False, auto_now_add=False, null=True, default=None, blank=True
+        auto_now=False, auto_now_add=False, null=True, default=None
     )
     jail_end_2 = models.DateField(
-        auto_now=False, auto_now_add=False, null=True, default=None, blank=True
+        auto_now=False, auto_now_add=False, null=True, default=None
     )
 
     def __str__(self):
