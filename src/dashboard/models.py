@@ -67,7 +67,7 @@ class ODReferrals(models.Model):
     patient_zipcode = models.CharField(max_length=20, null=True, blank=True)
     patient_insurance = models.CharField(max_length=50, null=True, blank=True)
     living_situation = models.CharField(max_length=20, null=True, blank=True)
-    od_date = models.DateTimeField(
+    od_date = models.DateField(
         auto_now=False, auto_now_add=False, null=True, default=None
     )
     delay_in_referral = models.CharField(max_length=50, null=True, blank=True)
