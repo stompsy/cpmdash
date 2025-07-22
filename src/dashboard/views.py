@@ -37,6 +37,9 @@ from charts.overdose.od_call_disposition import *
 # Referrals
 from charts.referral.od_agency_treemap import build_chart_od_agency_treemap
 
+# Overdoses by Case
+from charts.overdose.od_all_cases_scatter import build_chart_all_cases_scatter
+
 
 def overview(request):
     return render(request, "dashboard/overview.html")
@@ -57,6 +60,15 @@ def odreferrals(request):
     return render(request, "dashboard/odreferrals.html")
 
 
+def overdoses_by_case(request):
+    theme = get_theme_from_request(request)
+    all_cases_scatter_plot = build_chart_all_cases_scatter(theme=theme)
+    context = {
+        "all_cases_scatter_plot": all_cases_scatter_plot,
+    }
+    return render(request, "dashboard/overdoses_by_case.html", context)
+
+
 def odreferrals_monthly(request):
     theme = get_theme_from_request(request)
     
@@ -64,25 +76,40 @@ def odreferrals_monthly(request):
     od_monthly = build_chart_od_hist_monthly(theme=theme)
     
     odreferrals = ODReferrals.objects.all()
-    df = pd.DataFrame.from_records(odreferrals.values("disposition", "od_date", "patient_id"))
-    df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
+    df = pd.DataFrame.from_records(
+        odreferrals.values(
+            "disposition", 
+            "od_date", 
+            "patient_id", 
+            "narcan_given", 
+            "suspected_drug", 
+            "living_situation",
+            "cpm_disposition",
+            "referral_to_sud_agency",
+            "referral_source"
+        )
+    )
+    df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce").dt.tz_localize(None)
     df = df.dropna(subset=["od_date"])
     
     # Total overdoses
     total_overdoses = len(df)
+
+    # Set month for trend calculations
+    df["month"] = df["od_date"].dt.to_period("M")
     
-    # Fatal overdoses
+    # Fatality Rate
     fatal_overdoses = len(df[df["disposition"].isin(["CPR attempted", "DOA"])])
-    
+
     # Repeat overdoses (patients with more than one overdose)
     repeat_counts = df["patient_id"].value_counts()
     repeat_patients = len(repeat_counts[repeat_counts > 1])
     repeat_overdoses = repeat_counts[repeat_counts > 1].sum()
     percent_repeat = round((repeat_overdoses / total_overdoses) * 100, 1) if total_overdoses > 0 else 0
     
-    # Calculate referral success rate (placeholder - adjust based on your data model)
-    referral_success_rate = 78  # Based on the template content
-    
+    # Calculate referral success rate based on 'referral_to_sud_agency', excluding 'Other' cases.
+    referral_success_rate = df["referral_to_sud_agency"].sum()
+
     # Calculate density stats for time regions
     def calculate_density_stats():
         early_morning_mask = df["od_date"].dt.hour < 8  # 00:00-07:59

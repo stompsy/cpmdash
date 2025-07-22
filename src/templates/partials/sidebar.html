@@ -304,6 +304,15 @@
                     Overdoses by Month
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="{% url 'overdoses_by_case' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'overdoses_by_case' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Overdoses by Case
+                  </a>
+                </li>
               </ul>
             </div>
             <!-- End Dropdown Menu -->

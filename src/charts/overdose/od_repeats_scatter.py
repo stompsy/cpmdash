@@ -20,8 +20,16 @@ def build_chart_repeats_scatter(theme):
             "patient_sex",
             "narcan_doses_prior_to_ems",
             "narcan_prior_to_ems_dosage",
+            "jail_start_1",
+            "jail_end_1",
+            "jail_start_2",
+            "jail_end_2",
         )
     )
+
+    # If the dataframe is empty, return a message
+    if df.empty:
+        return "No overdose data available to display."
 
     # Classify outcome
     df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
@@ -34,6 +42,29 @@ def build_chart_repeats_scatter(theme):
     repeat_ids = df["patient_id"].value_counts()
     repeat_ids = repeat_ids[repeat_ids > 1].index
     df = df[df["patient_id"].isin(repeat_ids)].copy()
+
+    # Process jail times
+    jail_df = df[df["patient_id"].isin(repeat_ids)][
+        ["patient_id", "jail_start_1", "jail_end_1", "jail_start_2", "jail_end_2"]
+    ].copy()
+    jail_df.dropna(subset=["jail_start_1", "jail_start_2"], how="all", inplace=True)
+    jail_df.drop_duplicates(inplace=True)
+
+    jail_periods = []
+    today = datetime.now()
+
+    for _, row in jail_df.iterrows():
+        patient_id = row["patient_id"]
+        if pd.notna(row["jail_start_1"]):
+            start = pd.to_datetime(row["jail_start_1"])
+            end = pd.to_datetime(row["jail_end_1"]) if pd.notna(row["jail_end_1"]) else today
+            jail_periods.append({"patient_id": patient_id, "start": start, "end": end})
+        if pd.notna(row["jail_start_2"]):
+            start = pd.to_datetime(row["jail_start_2"])
+            end = pd.to_datetime(row["jail_end_2"]) if pd.notna(row["jail_end_2"]) else today
+            jail_periods.append({"patient_id": patient_id, "start": start, "end": end})
+
+    jail_periods_df = pd.DataFrame(jail_periods)
 
     # Map patient age and short sex
     age_map = df.groupby("patient_id", observed=False)["patient_age"].min()
@@ -74,7 +105,25 @@ def build_chart_repeats_scatter(theme):
 
     # Build the line chart
     fig = go.Figure()
-    
+
+    # Add jail time traces first to be in the background
+    if not jail_periods_df.empty:
+        jail_periods_df["merged_label"] = jail_periods_df["patient_id"].map(
+            lambda pid: f"{age_map.get(pid, 'N/A')} {sex_map.get(pid, 'N/A')}"
+        )
+        for _, row in jail_periods_df.iterrows():
+            fig.add_trace(
+                go.Scatter(
+                    x=[row["start"], row["end"]],
+                    y=[row["merged_label"], row["merged_label"]],
+                    mode="lines",
+                    line=dict(color="rgba(255, 0, 0, 0.5)", width=6),
+                    hoverinfo="text",
+                    text=f"Incarcerated<br>Start: {row['start'].strftime('%Y-%m-%d')}<br>End: {row['end'].strftime('%Y-%m-%d')}",
+                    showlegend=False,
+                )
+            )
+
     # Find range of years
     years = sorted(df["od_date"].dt.year.dropna().unique())
 
@@ -99,47 +148,43 @@ def build_chart_repeats_scatter(theme):
             line=dict(width=0),
             layer="below"
         )
-    
-    for label in unique_labels:
-        patient_df = df[df["merged_label"] == label]
+
+    # Add scatter plot for ODs
+    for label in df["merged_label"].cat.categories:
+        df_label = df[df["merged_label"] == label]
         fig.add_trace(
             go.Scatter(
-                x=patient_df["od_date"],
-                y=[label] * len(patient_df),
-                mode="lines+markers",
-                name=label,
-                line=dict(color=color_map[label], width=2),
+                x=df_label["od_date"],
+                y=df_label["merged_label"],
+                mode="markers+lines",
                 marker=dict(
-                    color=[
-                        "red" if o == "Fatal" else color_map[label]
-                        for o in patient_df["overdose_outcome"]
-                    ],
-                    symbol=[
-                        "diamond" if o == "Fatal" else "circle"
-                        for o in patient_df["overdose_outcome"]
-                    ],
+                    color=color_map[label],
                     size=10,
+                    symbol=df_label["overdose_outcome"].map(
+                        {"Fatal": "x", "Non-Fatal": "circle"}
+                    ),
                 ),
-                customdata=patient_df[
-                    ["merged_label", "od_date", "days_since_last_od"]
+                line=dict(color=color_map[label], width=1),
+                name=label,
+                hoverlabel=dict(namelength=-1),
+                hovertemplate="<b>Patient: %{y}</b><br>"
+                + "OD Date: %{x|%Y-%m-%d}<br>"
+                + "Outcome: %{customdata[0]}<br>"
+                + "Days Since Last OD: %{customdata[1]}<br>"
+                + "<extra></extra>",
+                customdata=df_label[
+                    ["overdose_outcome", "days_since_last_od"]
                 ],
-                hovertemplate=(
-                    "Patient: %{customdata[0]}<br>"
-                    "OD Date: %{customdata[1]|%b %d, %Y}<br>"
-                    "Days Since Last OD: %{customdata[2]}<extra></extra>"
-                ),
-                showlegend=False,
             )
         )
-    
-    # Update x-axis: show every month, abbreviated year
-    fig.update_xaxes(
-        tickformat="%b ’%y", dtick="M1", ticklabelmode="period"  # e.g., Jan ’24
-    )
+
+    # Style the layout
     fig = style_plotly_layout(
         fig,
-        theme=theme,
         scroll_zoom=False,
-        margin=dict(t=0, l=35, r=20, b=65),
+        x_title="Date",
+        y_title="Patient (Age Sex)",
+        margin=dict(t=0, l=50, r=20, b=20),
     )
+
     return plot(fig, output_type="div", config=fig._config)
