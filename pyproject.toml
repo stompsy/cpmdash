@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cpmdash"
+version = "0.1.0"
+description = "Community Paramedicine analytics app"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "django>=5,<6",
+  "djangorestframework",
+  "django-filter",
+  "pydantic-settings>=2",
+  "python-dotenv",
+  "psycopg[binary]>=3",
+  "whitenoise",
+  "gunicorn",
+  "uvicorn[standard]",
+  "drf-spectacular",
+  "django-cors-headers"
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff",
+  "mypy",
+  "django-stubs",
+  "pytest",
+  "pytest-django",
+  "pytest-cov",
+  "model-bakery",
+  "faker",
+  "freezegun",
+  "djlint",
+  "bandit",
+  "pip-audit",
+  "pre-commit"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cpmdash", "src/apps"]
+
+[tool.hatch.build.targets.sdist]
+include = ["pyproject.toml", "README.md", "src/**"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations"]
+lint.select = ["E","F","I","UP","B","SIM","C90","DJ","PYI"]
+lint.ignore = ["E501"]  # optional; wrap lines yourself like an adult
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main"]
+mypy_path = "src"
+ignore_missing_imports = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+
+[tool.django-stubs]
+django_settings_module = "cpmdash.settings"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "cpmdash.settings"
+pythonpath = ["src"]
+testpaths = ["src"]
+addopts = "-q --maxfail=1 --cov=src --cov-report=term-missing"
+
+[tool.djlint]
+profile = "django"
+indent = 2
+
+[dependency-groups]
+dev = [
+    "bandit>=1.8.6",
+    "django-stubs>=5.2.2",
+    "djlint>=1.36.4",
+    "mypy>=1.17.1",
+    "pip-audit>=2.9.0",
+    "pre-commit>=4.3.0",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-django>=4.11.1",
+    "ruff>=0.12.8",
+]
+
+[tool.semantic_release]
+version_variable = "src/cpmdash/__init__.py:__version__"
+branch = "main"
+build_command = "uv build"
+upload_to_pypi = false

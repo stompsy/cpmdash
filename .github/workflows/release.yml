@@ -1,0 +1,21 @@
+name: Release
+on:
+    push:
+        branches: [main]
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with: { fetch-depth: 0 }
+            - uses: actions/setup-python@v5
+              with: { python-version: "3.12" }
+            - name: Install uv & semantic-release
+              run: |
+                  curl -LsSf https://astral.sh/uv/install.sh | sh && echo "$HOME/.local/bin" >> $GITHUB_PATH
+                  uv tool install python-semantic-release
+            - name: Semantic release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: semantic-release version
