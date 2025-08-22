@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block pageName %}operationShieldingHope{% endblock pageName %}
+{% block title %} Operation Shielding Hope {% endblock title %}
+
+{% block content %}
+<!-- Introduction - Full Width -->
+<section class="col-span-12 mb-16">
+    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 py-12 sm:px-4 sm:py-16 lg:overflow-visible lg:px-0">
+        <div class="absolute inset-0 -z-10 overflow-hidden">
+            <svg class="absolute top-0 left-[max(50%,25rem)] h-256 w-512 -translate-x-1/2 mask-[radial-gradient(64rem_64rem_at_top,white,transparent)] dark:mask-[radial-gradient(64rem_64rem_at_top,black,transparent)] stroke-gray-200 dark:stroke-gray-700" aria-hidden="true">
+                <defs>
+                    <pattern id="e813992c-7d03-4cc4-a2bd-151760b470a0" width="200" height="200" x="50%" y="-1" patternUnits="userSpaceOnUse">
+                        <path d="M100 200V.5M.5 .5H200" fill="none" />
+                    </pattern>
+                </defs>
+                <svg x="50%" y="-1" class="overflow-visible fill-gray-50 dark:fill-gray-800">
+                    <path d="M-100.5 0h201v201h-201Z M699.5 0h201v201h-201Z M499.5 400h201v201h-201Z M-300.5 600h201v201h-201Z" stroke-width="0" />
+                </svg>
+                <rect width="100%" height="100%" stroke-width="0" fill="url(#e813992c-7d03-4cc4-a2bd-151760b470a0)" />
+            </svg>
+        </div>
+        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+                <div class="lg:pr-4">
+                    <div class="lg:max-w-2xl">
+                        <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Post Overdose Response Team (PORT)</p>
+                        <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl">
+                            Operation Shielding Hope
+                        </h1>
+                        <p class="mt-6 text-xl/8 text-gray-700 dark:text-gray-300">
+                            Community Paramedics in Port Angeles are leading a groundbreaking initiative to reduce opioid overdoses and provide compassionate, in-field care. By responding directly to overdose scenes, offering medication-assisted treatment, and linking survivors to long-term recovery services, they’re transforming crisis moments into pathways toward hope and healing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
+                <img class="w-full max-w-none rounded-xl bg-gray-900 shadow-xl ring-1 ring-gray-400/10"
+                    src="{% static 'media/pafd_cpm.jpg' %}"
+                    alt="Community Paramedic Response Team"
+                    width="600"
+                    height="400" />
+            </div>
+
+            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+                <div class="lg:pr-4">
+                    <div class="lg:max-w-2xl text-base/7 text-gray-700 dark:text-gray-300">
+                        <p>
+                            In the first months of implementation, Community Medics responded to 23 overdoses. 78% of those individuals were linked to substance use disorder services. When CPMs are not present, that linkage rate drops to just 3%.
+                        </p>
+
+                        <ul role="list" class="mt-8 space-y-8 text-gray-600 dark:text-gray-400 list-disc pl-5">
+                            <li>
+                                <span>
+                                    <strong class="font-semibold text-gray-900 dark:text-white">Timely Intervention.</strong> Field-based follow-ups within 72 hours help build trust and reduce repeat overdoses.
+                                </span>
+                            </li>
+                            <li>
+                                <span>
+                                    <strong class="font-semibold text-gray-900 dark:text-white">Integrated Care.</strong> CPMs provide buprenorphine in the field, reducing withdrawal symptoms that can lead to treatment refusal.
+                                </span>
+                            </li>
+                            <li>
+                                <span>
+                                    <strong class="font-semibold text-gray-900 dark:text-white">Community Impact.</strong> Overdose fatality rate in Clallam County fell 63% between March 2024 and March 2025.
+                                </span>
+                            </li>
+                        </ul>
+
+                        <p class="mt-8">
+                            Through trusted partnerships with PAPD, ReDiscovery, Reflections Counseling, and others, CPMs coordinate services that save lives and relieve pressure on emergency units. Their work exemplifies how public safety-led outreach can turn a moment of crisis into a turning point toward recovery.
+                        </p>
+
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-6 h-6 mr-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            Redefining the Response
+                        </h2>
+                        <p class="mt-6">
+                            Operation Shielding Hope represents a shift in how our city responds to addiction. It’s a model rooted in empathy, connection, and evidence-based care—and it’s working. With your continued support, Port Angeles is not only confronting the opioid crisis, but leading the way with a public health-driven solution.
+                        </p>
+
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-6 h-6 mr-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Opioid Settlement Funds
+                        </h2>
+                        <p class="mt-6">
+                            In May of 2022, Attorney General Bob Ferguson announced a $518 million settlement with several major opioid distributors aimed at resolving opioid-related claims. Following City Council approval on July 5, 2023, approximately $1.8M of these funds will be allocated to the City of Port Angeles over the next 18 years to address the opioid crisis, including substance use treatment, access to overdose-reversal drugs, and services to assist with those struggling with addition.
+                        </p>
+
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-6 h-6 mr-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                            </svg>
+                            Goals and Scope
+                        </h2>
+                        <p class="mt-6">
+                            The City's goal when distributing these funds is to reduce the impact to public safety services, healthcare facilities, local businesses, and our City residents and visitors through effective and strategic measures, such as treatment, prevention, and education on opioid use and abuse.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

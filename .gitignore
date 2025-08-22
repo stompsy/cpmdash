@@ -10,15 +10,14 @@ __pycache__/
 # Virtual envs / tools
 .venv/
 .env
-.env.*
 *.env
 
 # Django
 *.sqlite3
 staticfiles/
-media/
+/media/
 
-# Node (if you ever add frontend)
+# Node
 node_modules/
 
 # Editors/OS
@@ -33,3 +32,7 @@ htmlcov/
 
 # Docker
 *.log
+
+# Dev
+assets/css/input.css
+src/static/css/output.css.old

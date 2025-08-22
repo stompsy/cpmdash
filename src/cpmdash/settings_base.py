@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from pydantic_settings import BaseSettings, SettingsConfigDict  # ← use SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parents[2]
+SRC_DIR = BASE_DIR / "src"
 
 
 class AppSettings(BaseSettings):

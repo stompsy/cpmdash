@@ -1,5 +1,7 @@
 # src/cpmdash/settings.py
-from .settings_base import settings
+import importlib.util
+
+from .settings_base import BASE_DIR, SRC_DIR, settings
 
 SECRET_KEY = settings.SECRET_KEY
 DEBUG = settings.DEBUG
@@ -19,6 +21,8 @@ INSTALLED_APPS = [
     "corsheaders",
     # local
     "apps.core",
+    "apps.dashboard",
+    "apps.cases",
 ]
 
 MIDDLEWARE = [
@@ -38,7 +42,8 @@ ROOT_URLCONF = "cpmdash.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        # Project-level template directory
+        "DIRS": [BASE_DIR / "src" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -56,8 +61,23 @@ ASGI_APPLICATION = "cpmdash.asgi.application"
 
 DATABASES = {"default": settings.database_dict()}
 
-STATIC_URL = "static/"
-STATIC_ROOT = settings.STATIC_ROOT
+# Static files (CSS, JS, images)
+STATIC_URL = "/static/"
+
+# Where collectstatic dumps the final files for production
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Additional places Django looks for static files at runtime (dev) and for collectstatic (prod)
+STATICFILES_DIRS = [
+    SRC_DIR / "static",  # project-wide assets
+]
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Media (user uploads) — optional but you’ll want it eventually
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
@@ -67,3 +87,22 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {"TITLE": "cpmdash API", "VERSION": settings.VERSION}
 
 CORS_ALLOW_ALL_ORIGINS = settings.CORS_ALLOW_ALL_ORIGINS
+
+if DEBUG and importlib.util.find_spec("django_browser_reload"):
+    if "django_browser_reload" not in INSTALLED_APPS:
+        INSTALLED_APPS.append("django_browser_reload")
+    if "django_browser_reload.middleware.BrowserReloadMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
+
+# Production hardening (Railway, etc.)
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+    # Use whitenoise to serve immutable manifest files
+    WHITENOISE_MAX_AGE = 31536000

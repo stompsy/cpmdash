@@ -21,6 +21,9 @@ ENV PATH="/app/.venv/bin:${PATH}"
 COPY src ./src
 ENV DJANGO_SETTINGS_MODULE=cpmdash.settings
 RUN python src/manage.py collectstatic --noinput
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 USER appuser
 EXPOSE 8000
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "cpmdash.asgi:application", "--bind", "0.0.0.0:8000"]
+ENV PORT=8000 WEB_CONCURRENCY=4
+ENTRYPOINT ["/entrypoint.sh"]

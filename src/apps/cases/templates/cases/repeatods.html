@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block pageName %}repeatOds{% endblock pageName %}
+{% block title %} Case Study - Repeat Overdose {% endblock title %}
+
+{% block content %}
+<!-- Introduction - Full Width -->
+<section class="col-span-12 mb-16">
+    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 py-12 sm:px-4 sm:py-16 lg:overflow-visible lg:px-0">
+        <div class="absolute inset-0 -z-10 overflow-hidden">
+            <svg class="absolute top-0 left-[max(50%,25rem)] h-256 w-512 -translate-x-1/2 mask-[radial-gradient(64rem_64rem_at_top,white,transparent)] dark:mask-[radial-gradient(64rem_64rem_at_top,black,transparent)] stroke-gray-200 dark:stroke-gray-700" aria-hidden="true">
+                <defs>
+                    <pattern id="e813992c-7d03-4cc4-a2bd-151760b470a0" width="200" height="200" x="50%" y="-1" patternUnits="userSpaceOnUse">
+                        <path d="M100 200V.5M.5 .5H200" fill="none" />
+                    </pattern>
+                </defs>
+                <svg x="50%" y="-1" class="overflow-visible fill-gray-50 dark:fill-gray-800">
+                    <path d="M-100.5 0h201v201h-201Z M699.5 0h201v201h-201Z M499.5 400h201v201h-201Z M-300.5 600h201v201h-201Z" stroke-width="0" />
+                </svg>
+                <rect width="100%" height="100%" stroke-width="0" fill="url(#e813992c-7d03-4cc4-a2bd-151760b470a0)" />
+            </svg>
+        </div>
+        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+                <div class="lg:pr-4">
+                    <div class="lg:max-w-2xl">
+                        <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Post Overdose Response Team (PORT)</p>
+                        <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl">
+                            Repeat Overdose Analysis
+                        </h1>
+                        <p class="mt-6 text-xl/8 text-gray-700 dark:text-gray-300">
+                            Repeat overdoses signal critical gaps in care. Each recurrence offers insight into systemic failures,
+                            from lack of follow-up to incarceration or treatment disruptions. Understanding these patterns helps
+                            identify high-risk individuals and optimize intervention timing for maximum impact.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
+                <!-- Year-over-Year Stats Table -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Year-over-Year Comparison</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year</th>
+                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Repeats</th>
+                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Patients</th>
+                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">% Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                                {% for item in repeat_stats_by_year %}
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ item.year }}</td>
+                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-orange-600 dark:text-orange-400 font-semibold">{{ item.repeat_overdoses }}</td>
+                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ item.repeat_patients }}</td>
+                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-red-600 dark:text-red-400 font-semibold">{{ item.percent_repeat }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+                <div class="lg:pr-4">
+                    <div class="lg:max-w-2xl text-base/7 text-gray-700 dark:text-gray-300">
+                        <p class="mt-6 text-gray-700 dark:text-gray-300">
+                            Case data often show that long gaps between overdoses may reflect periods of incarceration or stabilization in treatment—not necessarily improved safety.
+                        </p>
+
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-6 h-6 mr-3 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            Why Track Repeat Overdoses?
+                        </h2>
+                        <p class="mt-6">
+                            Repeat overdoses signal critical gaps in care and provide crucial insights into intervention effectiveness and patient vulnerability patterns.
+                        </p>
+                        <ul role="list" class="mt-8 space-y-8 text-gray-600 dark:text-gray-400 list-disc pl-5">
+                            <li>
+                                <span>
+                                    <strong class="font-semibold text-gray-900 dark:text-white">Critical Intervention Gap.</strong> Only 3% of overdose survivors linked to services when CPMs didn't respond—versus 78% when they did.
+                                </span>
+                            </li>
+                            <li>
+                                <span>
+                                    <strong class="font-semibold text-gray-900 dark:text-white">Bridge to Recovery.</strong> CPMs act as a critical bridge for survivors during moments of readiness for change.
+                                </span>
+                            </li>
+                            <li>
+                                <span>
+                                    <strong class="font-semibold text-gray-900 dark:text-white">Predictive Analytics.</strong> Tracking recurrence helps predict which individuals may need intense case management.
+                                </span>
+                            </li>
+                            <li>
+                                <span>
+                                    <strong class="font-semibold text-gray-900 dark:text-white">System Indicators.</strong> Visualizing overdose intervals can indicate jail releases or post-discharge instability.
+                                </span>
+                            </li>
+                        </ul>
+
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-6 h-6 mr-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Pattern Recognition
+                        </h2>
+                        <p class="mt-6">
+                            Understanding repeat overdose patterns allows for targeted interventions, resource allocation, and identification of high-risk periods that may correlate with external factors like incarceration cycles or treatment disruptions.
+                        </p>
+
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-6 h-6 mr-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            Case Management Strategy
+                        </h2>
+                        <p class="mt-6">
+                            By analyzing repeat overdose timelines, Community Paramedics can develop personalized intervention strategies, optimize follow-up schedules, and coordinate with partner agencies to provide continuous support during vulnerable periods.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Repeat Overdose Scatter Plot Section -->
+<section class="col-span-12 mb-16">
+    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+        <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+            <div class="lg:pr-4 lg:col-span-2">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Repeat Overdoses by Patient Timeline</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            Interactive timeline showing repeat overdose patterns for each patient. Red diamonds indicate fatal outcomes.
+                            Colored backgrounds represent different years for temporal context.
+                        </p>
+                    </div>
+                    <div class="chart-container">
+                        {% autoescape off %}{{ fig_repeats_scatter|safe }}{% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Additional Insights Section -->
+<section class="col-span-12 mb-16">
+    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+        <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+            <div class="lg:pr-4 lg:col-span-2">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Key Insights from Repeat Overdose Analysis</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <div class="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">High-Risk Patterns</h4>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                Patients with shorter intervals between overdoses often represent higher acuity cases requiring immediate, intensive intervention and continuous monitoring.
+                            </p>
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">System Gaps</h4>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                Long gaps between overdoses may indicate periods of incarceration, hospitalization, or successful treatment—requiring different follow-up strategies upon return.
+                            </p>
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Intervention Timing</h4>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                Understanding individual patient patterns enables CPMs to time interventions strategically, particularly during vulnerable transition periods.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
