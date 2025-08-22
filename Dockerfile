@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM python:3.12-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential curl && rm -rf /var/lib/apt/lists/*
@@ -9,8 +10,9 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 # Copy source so hatch can build the editable project
 COPY src ./src
-# Cache uv’s wheel/artifact dir to speed rebuilds
-RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev
+# Cache uv’s wheel/artifact dir to speed rebuilds (BuildKit cache mount)
+RUN --mount=type=cache,id=uv-cache,target=/root/.cache/uv uv sync --frozen --no-dev || \
+	(echo "Falling back to non-cached install" && uv sync --frozen --no-dev)
 
 FROM base AS runtime
 RUN useradd -m appuser
