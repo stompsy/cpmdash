@@ -10,9 +10,6 @@ COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
 
 FROM base AS runtime
-WORKDIR /app
-COPY --from=base /app/.venv /app/.venv
-ENV PATH="/app/.venv/bin:${PATH}"
 COPY src ./src
 ENV DJANGO_SETTINGS_MODULE=cpmdash.settings
 RUN python src/manage.py collectstatic --noinput
