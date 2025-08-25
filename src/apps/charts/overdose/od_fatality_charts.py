@@ -3,7 +3,7 @@ import plotly.express as px
 
 from utils.plotly import style_plotly_layout
 
-from dashboard.models import ODReferrals
+from ...core.models import ODReferrals
 
 
 def _prepare_overdose_data():
@@ -60,7 +60,6 @@ def _build_fatality_chart(df, column, theme="light"):
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        export_filename="pafd_cpm_chart_fatality",
         scroll_zoom=False,
         margin=dict(t=0, l=75, r=20, b=65),
     )

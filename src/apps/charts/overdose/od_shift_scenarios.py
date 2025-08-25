@@ -12,7 +12,7 @@ from utils.plotly import get_color_palette, style_plotly_layout
 from ...core.models import ODReferrals
 
 
-def calculate_coverage_scenarios():  # noqa: C901
+def calculate_coverage_scenarios() -> dict[str, dict]:  # noqa: C901
     """
     Calculate coverage percentages for selected shift scenarios.
     Properly handles annualization and crew overlap.
@@ -47,7 +47,7 @@ def calculate_coverage_scenarios():  # noqa: C901
 
     scenarios = {}
 
-    def calculate_covered_hours_per_week(crew1_hours, crew2_hours):
+    def calculate_covered_hours_per_week(crew1_hours, crew2_hours) -> int:
         """
         Calculate total covered hours per week, avoiding double-counting overlaps.
         crew1_hours and crew2_hours are lists of (day, start_hour, end_hour) tuples.
@@ -67,7 +67,7 @@ def calculate_coverage_scenarios():  # noqa: C901
 
         return len(covered_slots)
 
-    def get_scenario_mask_and_hours(crew1_schedule, crew2_schedule):
+    def get_scenario_mask_and_hours(crew1_schedule, crew2_schedule) -> tuple[pd.Series, int]:
         """
         Get both the coverage mask for cases and actual covered hours.
         """
@@ -231,7 +231,7 @@ def calculate_coverage_scenarios():  # noqa: C901
     return scenarios
 
 
-def build_chart_shift_scenarios(theme):
+def build_chart_shift_scenarios(theme) -> str:
     """
     Build shift scenario comparison chart
     """
@@ -408,7 +408,7 @@ def build_chart_shift_scenarios(theme):
     return plot(fig, output_type="div", config=chart_config)
 
 
-def build_chart_cost_benefit_analysis(theme):  # noqa: C901
+def build_chart_cost_benefit_analysis(theme) -> str:  # noqa: C901
     """
     Build cost-benefit analysis chart for different scenarios
     """

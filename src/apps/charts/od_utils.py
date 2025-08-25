@@ -4,7 +4,7 @@ from django.db.models import Q
 from ..core.models import ODReferrals
 
 
-def get_odreferral_counts():
+def get_odreferral_counts() -> dict:
     total = ODReferrals.objects.count()
     dates = ODReferrals.objects.values_list("od_date", flat=True)
     df = pd.DataFrame({"od_date": dates}).dropna(subset=["od_date"])

@@ -15,8 +15,8 @@ from .views import (
 app_name = "cases"
 
 urlpatterns = [
-    path("opshield/", opshield, name="opshield"),
-    path("cases/", cases, name="odreferrals"),
+    path("opshield/", opshield, name="index"),
+    path("", cases, name="odreferrals"),
     path("repeats/", repeatods, name="repeatods"),
     path("shiftcoverage/", shiftcoverage, name="shiftcoverage"),
     path("costsavings/", costsavings, name="costsavings"),

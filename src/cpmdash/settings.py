@@ -4,7 +4,7 @@ import importlib.util
 from .settings_base import BASE_DIR, SRC_DIR, settings
 
 SECRET_KEY = settings.SECRET_KEY
-DEBUG = settings.DEBUG
+DEBUG = bool(settings.DEBUG)
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
 INSTALLED_APPS = [

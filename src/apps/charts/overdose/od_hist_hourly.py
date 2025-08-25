@@ -1,10 +1,11 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import plotly.express as px
 from plotly.offline import plot
 
 from utils.plotly import style_plotly_layout
-from dashboard.models import ODReferrals
+
+from ...core.models import ODReferrals
 
 
 def build_chart_od_hist_hourly(theme="light"):

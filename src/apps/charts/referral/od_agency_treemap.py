@@ -8,13 +8,11 @@ from utils.tailwind_colors import TAILWIND_COLORS
 from ...core.models import Referrals
 
 
-def build_chart_od_agency_treemap(theme):
-    referrals = Referrals.objects.all()
-    df = pd.DataFrame.from_records(
-        referrals.values(
-            "referral_agency",
-        )
-    )
+def build_chart_od_agency_treemap(theme: str) -> str:
+    # Get referral data - split to avoid mypy internal error
+    qs = Referrals.objects.all()  # type: ignore[misc]
+    data = list(qs.values("referral_agency"))  # type: ignore[misc]
+    df = pd.DataFrame.from_records(data)  # type: ignore[misc]
 
     families = [
         "red",
@@ -40,7 +38,12 @@ def build_chart_od_agency_treemap(theme):
         "neutral",
         "stone",
     ]
-    tokens = [f"{hue}-{shade}" for hue in families for shade in (600, 500, 400, 300)]
+    # Split the complex list comprehension to avoid mypy internal error
+    shades = (600, 500, 400, 300)
+    tokens: list[str] = []
+    for hue in families:
+        for shade in shades:
+            tokens.append(f"{hue}-{shade}")
     color_sequence = [TAILWIND_COLORS[token] for token in tokens]
 
     top100 = df["referral_agency"].dropna().value_counts().nlargest(100).reset_index()

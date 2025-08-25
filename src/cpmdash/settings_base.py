@@ -1,27 +1,33 @@
 # src/cpmdash/settings_base.py
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlparse
 
+from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict  # ← use SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 SRC_DIR = BASE_DIR / "src"
+ENV_FILE_PATH = Path(__file__).resolve().parent / ".env"
 
 
 class AppSettings(BaseSettings):
-    model_config = SettingsConfigDict(  # ← replaces class Config
-        env_file=".env",
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
         env_file_encoding="utf-8",
     )
 
-    SECRET_KEY: str = "dev-insecure-key"
-    DEBUG: bool = True
+    ENVIRONMENT: Literal["development", "production"] = "development"
+    SECRET_KEY: str = "SECRET_KEY"
     ALLOWED_HOSTS: list[str] = ["*"]
     DATABASE_URL: str = "sqlite:///db.sqlite3"
     STATIC_ROOT: str = "staticfiles"
     VERSION: str = "0.1.0"
     CORS_ALLOW_ALL_ORIGINS: bool = True
+
+    @computed_field
+    def DEBUG(self) -> bool:
+        return self.ENVIRONMENT.lower() == "development"
 
     def database_dict(self) -> dict[str, Any]:
         url = urlparse(self.DATABASE_URL)

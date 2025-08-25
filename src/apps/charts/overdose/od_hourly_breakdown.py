@@ -78,8 +78,8 @@ def build_chart_od_hourly_breakdown(theme):
 
     # Create hourly breakdown data
     hourly_all = df["hour"].value_counts().sort_index()
-    hourly_weekday = df[df["is_weekend"] == False]["hour"].value_counts().sort_index()
-    hourly_weekend = df[df["is_weekend"] == True]["hour"].value_counts().sort_index()
+    hourly_weekday = df[~df["is_weekend"]]["hour"].value_counts().sort_index()
+    hourly_weekend = df[df["is_weekend"]]["hour"].value_counts().sort_index()
 
     # Ensure all hours are represented (0-23)
     all_hours = range(24)

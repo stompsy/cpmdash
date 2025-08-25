@@ -106,7 +106,7 @@ def style_plotly_layout(
     # add unified hovermode + styling if requested
     if hovermode_unified:
         layout_updates["hovermode"] = "x unified"
-        layout_updates["hoverlabel"] = {
+        layout_updates["hoverlabel"] = {  # type: ignore[assignment]
             "bgcolor": colors["hover_bg"],
             "bordercolor": colors["hover_border"],
             "font": {
@@ -135,7 +135,7 @@ def style_plotly_layout(
     }
 
     # Plotly Figure objects allow attaching a _config attribute; ignore for static typing
-    fig._config = config  # type: ignore[attr-defined]
+    fig._config = config
     return fig
 
 
