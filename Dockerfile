@@ -11,8 +11,7 @@ COPY src ./src
 
 FROM base AS runtime
 COPY src ./src
-ENV DJANGO_SETTINGS_MODULE=cpmdash.settings
-RUN python src/manage.py collectstatic --noinput
+ENV DJANGO_SETTINGS_MODULE=cpmdash.settingss
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 EXPOSE 8000
