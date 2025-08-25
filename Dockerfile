@@ -10,7 +10,6 @@ COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
 
 FROM base AS runtime
-RUN useradd -m appuser
 WORKDIR /app
 COPY --from=base /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:${PATH}"
@@ -19,7 +18,6 @@ ENV DJANGO_SETTINGS_MODULE=cpmdash.settings
 RUN python src/manage.py collectstatic --noinput
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-USER appuser
 EXPOSE 8000
 ENV PORT=8000 WEB_CONCURRENCY=4
 ENTRYPOINT ["/entrypoint.sh"]
