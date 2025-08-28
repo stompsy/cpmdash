@@ -18,9 +18,8 @@ repos:
             - django-filter
             - drf-spectacular
             - django-cors-headers
-            - pydantic-settings>=2
+            - django-environ>=0.12.0
             - whitenoise
-            - python-dotenv
             - psycopg[binary]>=3
             - django-browser-reload>=1.18.0
   - repo: https://github.com/Riverside-Healthcare/djLint

@@ -1,11 +1,17 @@
 # src/cpmdash/settings.py
 import importlib.util
 
-from .settings_base import BASE_DIR, SRC_DIR, settings
+from .settings_base import (
+    BASE_DIR,
+    DJANGO_DEBUG,
+    DJANGO_SECRET_KEY,
+    SRC_DIR,
+    get_database_config,
+)
 
-SECRET_KEY = settings.SECRET_KEY
-DEBUG = bool(settings.DEBUG)
-ALLOWED_HOSTS = settings.ALLOWED_HOSTS
+# Django settings - these need to be at module level
+DJANGO_SECRET_KEY = DJANGO_SECRET_KEY
+DJANGO_DEBUG = DJANGO_DEBUG
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -59,7 +65,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "cpmdash.wsgi.application"
 ASGI_APPLICATION = "cpmdash.asgi.application"
 
-DATABASES = {"default": settings.database_dict()}
+DATABASES = {"default": get_database_config()}
 
 # Static files (CSS, JS, images)
 STATIC_URL = "/static/"
@@ -84,18 +90,16 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-SPECTACULAR_SETTINGS = {"TITLE": "cpmdash API", "VERSION": settings.VERSION}
+SPECTACULAR_SETTINGS = {"TITLE": "cpmdash API"}
 
-CORS_ALLOW_ALL_ORIGINS = settings.CORS_ALLOW_ALL_ORIGINS
-
-if DEBUG and importlib.util.find_spec("django_browser_reload"):
+if DJANGO_DEBUG and importlib.util.find_spec("django_browser_reload"):
     if "django_browser_reload" not in INSTALLED_APPS:
         INSTALLED_APPS.append("django_browser_reload")
     if "django_browser_reload.middleware.BrowserReloadMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
 
 # Production hardening (Railway, etc.)
-if not DEBUG:
+if not DJANGO_DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
