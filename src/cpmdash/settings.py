@@ -2,6 +2,7 @@
 import importlib.util
 from pathlib import Path
 
+import dj_database_url
 from environ import Env
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -10,7 +11,7 @@ SRC_DIR = BASE_DIR / "src"
 env = Env()
 Env.read_env(BASE_DIR / "src" / "cpmdash" / ".env")
 
-ENVIRONMENT = env.str("ENVIRONMENT", default="production")
+ENVIRONMENT = env("ENVIRONMENT", default="production")
 DEBUG = ENVIRONMENT == "development"
 SECRET_KEY = env("SECRET_KEY")
 
@@ -88,6 +89,8 @@ DATABASES = {
     "default": env.db(),
 }
 
+if ENVIRONMENT == "production":
+    DATABASES["default"] = dj_database_url.parse(env("DATABASE_URL"))
 
 # --- Password validation ---
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
