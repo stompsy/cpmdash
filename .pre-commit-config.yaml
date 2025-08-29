@@ -22,6 +22,7 @@ repos:
             - whitenoise
             - psycopg[binary]>=3
             - django-browser-reload>=1.18.0
+            - dj_database_url>=3
   - repo: https://github.com/Riverside-Healthcare/djLint
     rev: v1.35.2
     hooks:

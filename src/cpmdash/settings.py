@@ -2,30 +2,24 @@
 import importlib.util
 from pathlib import Path
 
-import environ
+import dj_database_url
+from environ import Env
 
-# --- Core Paths ---
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parents[2]
 SRC_DIR = BASE_DIR / "src"
 
-# --- django-environ Setup ---
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False)
-)
+env = Env()
+Env.read_env(BASE_DIR / "src" / "cpmdash" / ".env")
 
-# For local development, read .env file. In production, Railway's variables are used.
-environ.Env.read_env(BASE_DIR / "src" / "cpmdash" / ".env")
+ENVIRONMENT = env("ENVIRONMENT", default="production")
+DEBUG = ENVIRONMENT == "development"
+SECRET_KEY = env("SECRET_KEY")
 
-# --- Core Django Settings ---
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY", default="dummy-secret-key-for-type-checking")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DEBUG")
-
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+ALLOWED_HOSTS = ["*"]
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost:8000",
+]
 
 # --- Application Definition ---
 INSTALLED_APPS = [
@@ -40,6 +34,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "corsheaders",
+    "dj_database_url",
     # local
     "apps.core",
     "apps.dashboard",
@@ -94,6 +89,10 @@ DATABASES = {
     "default": env.db(),
 }
 
+POSTGRES_LOCALLY = False
+if ENVIRONMENT == "production" or POSTGRES_LOCALLY:
+    DATABASES["default"] = dj_database_url.parse(env("DATABASE_URL"))
+
 # --- Password validation ---
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -112,33 +111,14 @@ USE_TZ = True
 
 # --- Static files (CSS, JavaScript, Images) ---
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = "static/"
 STATICFILES_DIRS = [SRC_DIR / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # --- Media files (User Uploads) ---
-MEDIA_URL = "/media/"
+MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # --- Default primary key field type ---
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# --- Third-Party App Settings ---
-REST_FRAMEWORK = {"DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"}
-SPECTACULAR_SETTINGS = {"TITLE": "cpmdash API", "VERSION": "0.1.0"}
-CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=True)
-
-# --- Production Security Settings ---
-# These settings are only active when DEBUG is False.
-if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    # Trust the CSRF token from your frontend domain
-    CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])

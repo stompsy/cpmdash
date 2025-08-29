@@ -14,11 +14,13 @@ __pycache__/
 
 # Django
 *.sqlite3
-staticfiles/
+static/
 /media/
 
 # Node
 node_modules/
+package-lock.json
+package.json
 
 # Editors/OS
 .vscode/
@@ -36,4 +38,5 @@ htmlcov/
 *.log
 
 # Dev
-assets/css/input.css
+assets/
+db.sqlite3
