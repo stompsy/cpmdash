@@ -2,23 +2,22 @@
 import importlib.util
 from pathlib import Path
 
-from environ import Env
+import environ
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 SRC_DIR = BASE_DIR / "src"
 
-env = Env()
-Env.read_env(BASE_DIR / "src" / "cpmdash" / ".env")
+env = environ.Env()
 
-ENVIRONMENT = env("ENVIRONMENT", default="production")
-DEBUG = ENVIRONMENT == "development"
+# Correctly point to the .env file inside the 'cpmdash' directory
+environ.Env.read_env(SRC_DIR / ".env")
+
+# Use env.bool() to handle boolean casting and provide a safe default
+DEBUG = env.bool("DEBUG", default=False)
 SECRET_KEY = env("SECRET_KEY")
+ENVIRONMENT = env("ENVIRONMENT")
 
 ALLOWED_HOSTS = ["*"]
-INTERNAL_IPS = [
-    "127.0.0.1",
-    "localhost:8000",
-]
 
 # --- Application Definition ---
 INSTALLED_APPS = [
@@ -80,9 +79,8 @@ TEMPLATES = [
 WSGI_APPLICATION = "cpmdash.wsgi.application"
 ASGI_APPLICATION = "cpmdash.asgi.application"
 
-# --- Database ---
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-# Uses dj-database-url format: https://github.com/un-esports/dj-database-url
+# Database
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     "default": env.db(),
 }
