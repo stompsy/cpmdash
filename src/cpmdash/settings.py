@@ -2,7 +2,6 @@
 import importlib.util
 from pathlib import Path
 
-import dj_database_url
 from environ import Env
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -34,7 +33,6 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "corsheaders",
-    "dj_database_url",
     # local
     "apps.core",
     "apps.dashboard",
@@ -88,9 +86,6 @@ ASGI_APPLICATION = "cpmdash.asgi.application"
 DATABASES = {
     "default": env.db(),
 }
-
-if ENVIRONMENT == "production":
-    DATABASES["default"] = dj_database_url.parse(env("DATABASE_URL"))
 
 # --- Password validation ---
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
