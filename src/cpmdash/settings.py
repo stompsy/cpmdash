@@ -18,7 +18,8 @@ DEBUG = env.bool("DEBUG", default=False)
 SECRET_KEY = env("SECRET_KEY", default="dummy-key-for-pre-commit-checks")
 ENVIRONMENT = env("ENVIRONMENT")
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
 # --- Application Definition ---
 INSTALLED_APPS = [
