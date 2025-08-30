@@ -10,12 +10,12 @@ SRC_DIR = BASE_DIR / "src"
 env = environ.Env()
 
 # Correctly point to the .env file inside the 'cpmdash' directory
-environ.Env.read_env(SRC_DIR / ".env")
+environ.Env.read_env(BASE_DIR / ".env")
 
 # Use env.bool() to handle boolean casting and provide a safe default
 DEBUG = env.bool("DEBUG", default=False)
 
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY", default="dummy-key-for-pre-commit-checks")
 ENVIRONMENT = env("ENVIRONMENT")
 
 ALLOWED_HOSTS = ["*"]
