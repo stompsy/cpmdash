@@ -14,6 +14,7 @@ environ.Env.read_env(SRC_DIR / ".env")
 
 # Use env.bool() to handle boolean casting and provide a safe default
 DEBUG = env.bool("DEBUG", default=False)
+
 SECRET_KEY = env("SECRET_KEY")
 ENVIRONMENT = env("ENVIRONMENT")
 
@@ -82,7 +83,9 @@ ASGI_APPLICATION = "cpmdash.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
-    "default": env.db(),
+    # When DATABASE_URL is not available (like in the build phase),
+    # it will default to a local sqlite db.
+    "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3"),
 }
 
 # --- Password validation ---
