@@ -93,11 +93,11 @@ if ENVIRONMENT == "production":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "<PGDATABASE>",
-            "USER": "<PGUSER>",
-            "PASSWORD": "<PGPASSWORD>",
-            "HOST": "<PGHOST>",
-            "PORT": "<PGPORT>",
+            "NAME": "PGDATABASE",
+            "USER": "PGUSER",
+            "PASSWORD": "PGPASSWORD",
+            "HOST": "PGHOST",
+            "PORT": "PGPORT",
         }
     }
 else:
