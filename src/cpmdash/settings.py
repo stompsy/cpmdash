@@ -87,13 +87,24 @@ TEMPLATES = [
 WSGI_APPLICATION = "cpmdash.wsgi.application"
 ASGI_APPLICATION = "cpmdash.asgi.application"
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-DATABASES = {
-    # When DATABASE_URL is not available (like in the build phase),
-    # it will default to a local sqlite db.
-    "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3"),
-}
+if ENVIRONMENT == "production":
+    # Database
+    # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "<PGDATABASE>",
+            "USER": "<PGUSER>",
+            "PASSWORD": "<PGPASSWORD>",
+            "HOST": "<PGHOST>",
+            "PORT": "<PGPORT>",
+        }
+    }
+else:
+    # This is the only database configuration you need in settings.py
+    DATABASES = {
+        "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3"),
+    }
 
 # --- Password validation ---
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -103,6 +114,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # --- Internationalization ---
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
