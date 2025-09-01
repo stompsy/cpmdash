@@ -237,6 +237,7 @@ dependencies = [
     { name = "pandas" },
     { name = "plotly" },
     { name = "psycopg", extra = ["binary"] },
+    { name = "psycopg-binary" },
     { name = "uvicorn", extra = ["standard"] },
     { name = "whitenoise" },
 ]
@@ -295,6 +296,7 @@ requires-dist = [
     { name = "plotly", specifier = ">=6.3.0" },
     { name = "pre-commit", marker = "extra == 'dev'" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3" },
+    { name = "psycopg-binary", specifier = ">=3.1.18" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "pytest-django", marker = "extra == 'dev'" },
