@@ -84,7 +84,9 @@
         {% include "partials/profile/profile-address-modal.html" %}
         <!-- END MODAL -->
 
-        {% comment %} {% load django_browser_reload %}
-        {% django_browser_reload_script %} {% endcomment %}
+        {% if debug %}
+        {% load django_browser_reload %}
+        {% django_browser_reload_script %}
+        {% endif %}
     </body>
 </html>

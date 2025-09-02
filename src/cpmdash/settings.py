@@ -1,4 +1,5 @@
 # src/cpmdash/settings.py
+import importlib.util
 import os
 from pathlib import Path
 
@@ -7,9 +8,6 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 SRC_DIR = BASE_DIR / "src"
-
-print("base dir path", BASE_DIR)
-print("src dir path", SRC_DIR)
 
 # Load .env file
 load_dotenv(BASE_DIR / ".env")
@@ -24,13 +22,6 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
-
-
-# if ENVIRONMENT == "production":
-#     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-#     SECURE_SSL_REDIRECT = True
-#     SESSION_COOKIE_SECURE = True
-#     CSRF_COOKIE_SECURE = True
 
 # --- Application Definition ---
 INSTALLED_APPS = [
@@ -53,8 +44,8 @@ INSTALLED_APPS = [
 ]
 
 # Add django-browser-reload in development only
-# if DEBUG:
-#     INSTALLED_APPS.append("django_browser_reload")
+if DEBUG and importlib.util.find_spec("django_browser_reload"):
+    INSTALLED_APPS.append("django_browser_reload")
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -69,8 +60,8 @@ MIDDLEWARE = [
 ]
 
 # Add django-browser-reload middleware in development only
-# if DEBUG:
-#     MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
+if DEBUG and importlib.util.find_spec("django_browser_reload"):
+    MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
 
 ROOT_URLCONF = "cpmdash.urls"
 
