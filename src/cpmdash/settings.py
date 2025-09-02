@@ -8,28 +8,29 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parents[2]
 SRC_DIR = BASE_DIR / "src"
 
+print("base dir path", BASE_DIR)
+print("src dir path", SRC_DIR)
+
 # Load .env file
 load_dotenv(BASE_DIR / ".env")
 
 
-DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t")
+DEBUG = os.environ.get("DEBUG", "False")
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "dummy-key-for-pre-commit-checks")
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
 # Read comma-separated string from env and split into a list
-allowed_hosts_str = os.environ.get("ALLOWED_HOSTS", "")
-ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",")]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
-csrf_trusted_origins_str = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_trusted_origins_str.split(",") if origin]
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 
-if ENVIRONMENT == "production":
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+# if ENVIRONMENT == "production":
+#     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+#     SECURE_SSL_REDIRECT = True
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
 
 # --- Application Definition ---
 INSTALLED_APPS = [
@@ -52,8 +53,8 @@ INSTALLED_APPS = [
 ]
 
 # Add django-browser-reload in development only
-if DEBUG:
-    INSTALLED_APPS.append("django_browser_reload")
+# if DEBUG:
+#     INSTALLED_APPS.append("django_browser_reload")
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -68,8 +69,8 @@ MIDDLEWARE = [
 ]
 
 # Add django-browser-reload middleware in development only
-if DEBUG:
-    MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
+# if DEBUG:
+#     MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
 
 ROOT_URLCONF = "cpmdash.urls"
 

@@ -1,4 +1,4 @@
-from django.conf import settings
+# from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -12,5 +12,5 @@ urlpatterns = [
     path("", include("apps.cases.urls")),
 ]
 
-if settings.DEBUG:
-    urlpatterns += [path("__reload__/", include("django_browser_reload.urls"))]
+# if settings.DEBUG:
+#     urlpatterns += [path("__reload__/", include("django_browser_reload.urls"))]
