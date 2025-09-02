@@ -87,24 +87,11 @@ TEMPLATES = [
 WSGI_APPLICATION = "cpmdash.wsgi.application"
 ASGI_APPLICATION = "cpmdash.asgi.application"
 
-if ENVIRONMENT == "production":
-    # Database
-    # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": "PGDATABASE",
-            "USER": "PGUSER",
-            "PASSWORD": "PGPASSWORD",
-            "HOST": "PGHOST",
-            "PORT": "PGPORT",
-        }
-    }
-else:
-    # This is the only database configuration you need in settings.py
-    DATABASES = {
-        "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3"),
-    }
+# This is the only database configuration you need in settings.py
+DATABASES = {
+    "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3"),
+}
+
 
 # --- Password validation ---
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
