@@ -13,9 +13,12 @@ attrs==25.3.0
     #   referencing
 click==8.2.1
     # via uvicorn
+dj-database-url==3.0.1
+    # via cpmdash (pyproject.toml)
 django==5.2.5
     # via
     #   cpmdash (pyproject.toml)
+    #   dj-database-url
     #   django-browser-reload
     #   django-cors-headers
     #   django-filter
@@ -24,8 +27,6 @@ django==5.2.5
 django-browser-reload==1.18.0
     # via cpmdash (pyproject.toml)
 django-cors-headers==4.7.0
-    # via cpmdash (pyproject.toml)
-django-environ==0.12.0
     # via cpmdash (pyproject.toml)
 django-filter==25.1
     # via cpmdash (pyproject.toml)
@@ -68,7 +69,9 @@ psycopg-binary==3.2.9
 python-dateutil==2.9.0.post0
     # via pandas
 python-dotenv==1.1.1
-    # via uvicorn
+    # via
+    #   cpmdash (pyproject.toml)
+    #   uvicorn
 pytz==2025.2
     # via pandas
 pyyaml==6.0.2
