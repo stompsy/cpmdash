@@ -1,23 +1,29 @@
 # src/cpmdash/settings.py
-import importlib.util
+import os
 from pathlib import Path
 
-import environ
+import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 SRC_DIR = BASE_DIR / "src"
 
-env = environ.Env()
+# Load .env file
+load_dotenv(BASE_DIR / ".env")
 
-environ.Env.read_env(BASE_DIR / ".env")
 
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t")
 
-SECRET_KEY = env("SECRET_KEY", default="dummy-key-for-pre-commit-checks")
-ENVIRONMENT = "development"
+SECRET_KEY = os.environ.get("SECRET_KEY", "dummy-key-for-pre-commit-checks")
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost,127.0.0.1"])
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+# Read comma-separated string from env and split into a list
+allowed_hosts_str = os.environ.get("ALLOWED_HOSTS", "cpmdash-production.up.railway.app")
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",")]
+
+csrf_trusted_origins_str = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_trusted_origins_str.split(",") if origin]
+
 
 if ENVIRONMENT == "production":
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -27,25 +33,26 @@ if ENVIRONMENT == "production":
 
 # --- Application Definition ---
 INSTALLED_APPS = [
+    # Contrib
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # third-party
+    # Project apps
+    "apps.core",
+    "apps.dashboard",
+    "apps.cases",
+    # Third-party
     "rest_framework",
     "django_filters",
     "drf_spectacular",
     "corsheaders",
-    # local
-    "apps.core",
-    "apps.dashboard",
-    "apps.cases",
 ]
 
 # Add django-browser-reload in development only
-if DEBUG and importlib.util.find_spec("django_browser_reload"):
+if DEBUG:
     INSTALLED_APPS.append("django_browser_reload")
 
 MIDDLEWARE = [
@@ -61,7 +68,7 @@ MIDDLEWARE = [
 ]
 
 # Add django-browser-reload middleware in development only
-if DEBUG and importlib.util.find_spec("django_browser_reload"):
+if DEBUG:
     MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
 
 ROOT_URLCONF = "cpmdash.urls"
@@ -87,9 +94,7 @@ ASGI_APPLICATION = "cpmdash.asgi.application"
 
 
 # --- Database ---
-DATABASES = {
-    "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3"),
-}
+DATABASES = {"default": dj_database_url.config(default="sqlite:///db.sqlite3", conn_max_age=600)}
 
 
 # --- Password validation ---
