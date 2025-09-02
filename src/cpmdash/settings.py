@@ -9,16 +9,14 @@ SRC_DIR = BASE_DIR / "src"
 
 env = environ.Env()
 
-# Correctly point to the .env file inside the 'cpmdash' directory
 environ.Env.read_env(BASE_DIR / ".env")
 
-# Use env.bool() to handle boolean casting and provide a safe default
 DEBUG = env.bool("DEBUG", default=False)
 
 SECRET_KEY = env("SECRET_KEY", default="dummy-key-for-pre-commit-checks")
-ENVIRONMENT = env("ENVIRONMENT")
+ENVIRONMENT = "development"
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost,127.0.0.1"])
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 if ENVIRONMENT == "production":
@@ -62,7 +60,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Add django-browser-reload middleware in development
+# Add django-browser-reload middleware in development only
 if DEBUG and importlib.util.find_spec("django_browser_reload"):
     MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
 
@@ -87,7 +85,8 @@ TEMPLATES = [
 WSGI_APPLICATION = "cpmdash.wsgi.application"
 ASGI_APPLICATION = "cpmdash.asgi.application"
 
-# This is the only database configuration you need in settings.py
+
+# --- Database ---
 DATABASES = {
     "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3"),
 }
@@ -106,14 +105,12 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # --- Internationalization ---
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
 # --- Static files (CSS, JavaScript, Images) ---
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
 STATIC_URL = "static/"
 STATICFILES_DIRS = [SRC_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -123,5 +120,4 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # --- Default primary key field type ---
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
