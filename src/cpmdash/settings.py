@@ -18,7 +18,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "dummy-key-for-pre-commit-checks")
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
 # Read comma-separated string from env and split into a list
-allowed_hosts_str = os.environ.get("ALLOWED_HOSTS", "cpmdash-production.up.railway.app")
+allowed_hosts_str = os.environ.get("ALLOWED_HOSTS", "")
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",")]
 
 csrf_trusted_origins_str = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
