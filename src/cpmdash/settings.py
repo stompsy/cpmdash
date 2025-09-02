@@ -11,7 +11,7 @@ env = environ.Env()
 
 environ.Env.read_env(BASE_DIR / ".env")
 
-DEBUG = env.bool("DEBUG", default=False)
+DEBUG = True
 
 SECRET_KEY = env("SECRET_KEY", default="dummy-key-for-pre-commit-checks")
 ENVIRONMENT = "development"
