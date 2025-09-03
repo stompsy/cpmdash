@@ -1,5 +1,4 @@
 # src/cpmdash/settings.py
-import importlib.util
 import os
 from pathlib import Path
 
@@ -44,7 +43,7 @@ INSTALLED_APPS = [
 ]
 
 # Add django-browser-reload in development only
-if DEBUG and importlib.util.find_spec("django_browser_reload"):
+if DEBUG == True:  # noqa: E712
     INSTALLED_APPS.append("django_browser_reload")
 
 MIDDLEWARE = [
@@ -60,7 +59,7 @@ MIDDLEWARE = [
 ]
 
 # Add django-browser-reload middleware in development only
-if DEBUG and importlib.util.find_spec("django_browser_reload"):
+if DEBUG == True:  # noqa: E712
     MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
 
 ROOT_URLCONF = "cpmdash.urls"
