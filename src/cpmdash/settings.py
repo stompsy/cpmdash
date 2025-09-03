@@ -1,4 +1,5 @@
 # src/cpmdash/settings.py
+import importlib.util
 import os
 from pathlib import Path
 
@@ -12,7 +13,7 @@ SRC_DIR = BASE_DIR / "src"
 load_dotenv(BASE_DIR / ".env")
 
 
-DEBUG = os.environ.get("DEBUG", "False")
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t")
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "dummy-key-for-pre-commit-checks")
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
@@ -42,8 +43,8 @@ INSTALLED_APPS = [
     "corsheaders",
 ]
 
-# Add django-browser-reload in development only
-if DEBUG == True:  # noqa: E712
+# Dynamically add django-browser-reload only in DEBUG mode
+if DEBUG and importlib.util.find_spec("django_browser_reload"):
     INSTALLED_APPS.append("django_browser_reload")
 
 MIDDLEWARE = [
@@ -58,8 +59,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Add django-browser-reload middleware in development only
-if DEBUG == True:  # noqa: E712
+# Dynamically add django-browser-reload middleware only in DEBUG mode
+if DEBUG and importlib.util.find_spec("django_browser_reload"):
     MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
 
 ROOT_URLCONF = "cpmdash.urls"
