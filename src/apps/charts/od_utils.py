@@ -49,6 +49,114 @@ def get_od_metrics(year: int, population: int = 20_000) -> dict:
     }
 
 
+def get_cost_savings_metrics() -> dict:
+    """
+    Calculate aggregated cost savings metrics from all years of data using patient-based methodology.
+    Returns metrics for 911 calls prevented, transports averted, ED visits avoided, and total savings.
+    """
+    # STATIC authoritative patient counts provided (do not trust historical created_date)
+    static_patient_counts = {2021: 419, 2022: 748, 2023: 396, 2024: 411, 2025: 298}
+
+    # Derive ordered years present in static mapping (filter to those <= current year if needed)
+    years = sorted(static_patient_counts.keys())
+
+    # Build a lightweight iterable mimicking the old structure
+    patients_by_year = [{"year": y, "total_patients": static_patient_counts[y]} for y in years]
+
+    total_calls_prevented = 0
+    total_transports_averted = 0
+    total_ed_visits_avoided = 0
+    total_savings = 0
+    yearly_breakdown: list[dict] = []
+
+    # Process each year
+    for year_data in patients_by_year:
+        total_patients = year_data["total_patients"]
+
+        # 911 Services Usage Calculation
+        patients_used_911 = int(total_patients * 0.42)  # 42% of patients used 911 services
+        patients_reduced_911 = int(patients_used_911 * 0.71)  # 71% had reduction in 911 usage
+        calls_prevented_year = (
+            patients_reduced_911  # Total calls prevented = patients with reduction
+        )
+
+        # Transport Calculations
+        transports_prevented_year = int(
+            calls_prevented_year * 0.56
+        )  # 56% of 911 calls result in transport
+        non_transport_calls = calls_prevented_year - transports_prevented_year
+
+        # Cost Calculations
+        savings_transports = transports_prevented_year * 3800  # $3,800 per transport averted
+        savings_911_non_transport = (
+            non_transport_calls * 1900
+        )  # $1,900 per 911 call without transport
+
+        # ED Visits Calculations
+        patients_used_ed = int(total_patients * 0.51)  # 51% of patients used ED
+        ed_visits_avoided_year = int(patients_used_ed * 0.69)  # 69% had reduction in ED usage
+        savings_ed_visits = ed_visits_avoided_year * 1146  # $1,146 per ED visit avoided
+
+        # Total yearly savings
+        yearly_savings = savings_transports + savings_911_non_transport + savings_ed_visits
+
+        # Accumulate totals
+        total_calls_prevented += calls_prevented_year
+        total_transports_averted += transports_prevented_year
+        total_ed_visits_avoided += ed_visits_avoided_year
+        total_savings += yearly_savings
+
+        # Append per-year details for template table
+        yearly_breakdown.append(
+            {
+                "year": year_data["year"],
+                "patients": total_patients,
+                "calls_prevented": calls_prevented_year,
+                "transports_averted": transports_prevented_year,
+                "ed_visits_avoided": ed_visits_avoided_year,
+                "total_savings": yearly_savings,
+            }
+        )
+
+    # Compute year-over-year percentage change on total_savings
+    prev_total = None
+    for row in yearly_breakdown:
+        if prev_total is None:
+            row["pct_change_savings"] = None
+        else:
+            row["pct_change_savings"] = (
+                ((row["total_savings"] - prev_total) / prev_total) * 100 if prev_total > 0 else None
+            )
+        prev_total = row["total_savings"]
+
+    return {
+        "calls_prevented": total_calls_prevented,
+        "transports_averted": total_transports_averted,
+        "ed_visits_avoided": total_ed_visits_avoided,
+        "total_savings": total_savings,
+        "savings_breakdown": {
+            "transports": total_transports_averted * 3800,
+            "911_non_transport": (total_calls_prevented - total_transports_averted) * 1900,
+            "ed_visits": total_ed_visits_avoided * 1146,
+        },
+        "total_patients": sum(year_data["total_patients"] for year_data in patients_by_year),
+        "years_calculated": len(patients_by_year),
+        "yearly_breakdown": yearly_breakdown,
+        # Calculated per-patient metrics for template
+        "transport_savings_per_patient": (total_transports_averted * 3800)
+        / sum(year_data["total_patients"] for year_data in patients_by_year)
+        if sum(year_data["total_patients"] for year_data in patients_by_year) > 0
+        else 0,
+        "prevention_success_rate": (
+            total_calls_prevented
+            / sum(year_data["total_patients"] for year_data in patients_by_year)
+        )
+        * 100
+        if sum(year_data["total_patients"] for year_data in patients_by_year) > 0
+        else 0,
+    }
+
+
 def get_od_fatality_rate_year(
     year: int, fatal_dispositions: list[str], copa_population: int = 20_000
 ) -> float:

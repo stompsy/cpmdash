@@ -40,3 +40,4 @@ htmlcov/
 # Dev
 assets/
 db.sqlite3
+notes.txt

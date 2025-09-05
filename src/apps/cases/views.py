@@ -231,9 +231,24 @@ def repeatods(request):
 
 def costsavings(request):
     """Render the Cost Savings Analysis page"""
+    from ..charts.od_utils import get_cost_savings_metrics
+
     title = "Cost Savings Analysis"
     description = "Financial impact of Community Paramedic interventions"
-    context = {"title": title, "description": description}
+
+    # Get dynamic cost savings metrics
+    cost_metrics = get_cost_savings_metrics()
+
+    # Calculate rounded total savings to nearest $500,000 for grant justification
+    total_savings = cost_metrics["total_savings"]
+    rounded_savings = round(total_savings / 500000) * 500000
+
+    context = {
+        "title": title,
+        "description": description,
+        "cost_metrics": cost_metrics,
+        "rounded_total_savings": rounded_savings,
+    }
     return render(request, "cases/costsavings.html", context)
 
 

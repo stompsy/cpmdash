@@ -21,7 +21,7 @@ def build_chart_od_hist_monthly(theme):
     )
 
     # Create monthly aggregations
-    df["month"] = df["od_date"].dt.to_period("M")
+    df["month"] = df["od_date"].dt.tz_localize(None).dt.to_period("M")
     monthly_totals = df.groupby("month").size()
 
     # Get drug type data by month

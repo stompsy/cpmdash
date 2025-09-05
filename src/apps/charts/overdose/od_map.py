@@ -59,7 +59,7 @@ def build_chart_od_map(theme):
     )
 
     fig.update_traces(
-        hovertemplate=("Location: %{lat:.2f}, %{lon:.2f}<br>" "Overdose Count: %{marker.size}<br>")
+        hovertemplate=("Location: %{lat:.2f}, %{lon:.2f}<br>Overdose Count: %{marker.size}<br>")
     )
 
     # TODO: Check and see if City of Port Angeles boundary matches?

@@ -9,21 +9,15 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parents[2]
 SRC_DIR = BASE_DIR / "src"
 
-# Load .env file
 load_dotenv(BASE_DIR / ".env")
 
-
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t")
-
-SECRET_KEY = os.environ.get("SECRET_KEY", "dummy-key-for-pre-commit-checks")
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
-# Read comma-separated string from env and split into a list
+SECRET_KEY = os.environ.get("SECRET_KEY", "dummy-key-for-pre-commit-checks")
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
-
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
 
-# --- Application Definition ---
 INSTALLED_APPS = [
     # Contrib
     "django.contrib.admin",
@@ -32,10 +26,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     # Project apps
     "apps.core",
     "apps.dashboard",
     "apps.cases",
+    "apps.partials_viewer",
     # Third-party
     "rest_framework",
     "django_filters",
