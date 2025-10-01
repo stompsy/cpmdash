@@ -1,0 +1,75 @@
+<aside class="toc-wrapper hidden lg:block lg:w-72 xl:w-80">
+  <div class="sticky top-28 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur-lg dark:border-white/10">
+    <div class="flex items-center justify-between">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-200">On this page</h2>
+      <button type="button" class="text-xs font-medium text-brand-200/70 hover:text-brand-200 transition" data-toc-collapse aria-expanded="true">
+        Collapse
+      </button>
+    </div>
+    <nav id="generated-toc" class="mt-5 space-y-2 text-sm text-gray-300" aria-label="Table of contents"></nav>
+  </div>
+</aside>
+<script>
+  (function () {
+    if (window.__blogTocInitialized) return;
+    window.__blogTocInitialized = true;
+    const article = document.querySelector("[data-article-root]");
+    const toc = document.getElementById("generated-toc");
+    if (!article || !toc) return;
+    const headings = Array.from(article.querySelectorAll("h2, h3"));
+    const collapseBtn = document.querySelector("[data-toc-collapse]");
+    if (!headings.length) {
+      toc.innerHTML = '<p class="text-xs text-gray-500">No sections available.</p>';
+      if (collapseBtn) {
+        collapseBtn.classList.add("hidden");
+      }
+      return;
+    }
+    const slugify = (text) =>
+      text
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/\s+/g, "-");
+    const fragment = document.createDocumentFragment();
+    headings.forEach((heading) => {
+      if (!heading.id) {
+        heading.id = slugify(heading.textContent || "section");
+      }
+      heading.classList.add("scroll-mt-28");
+      const link = document.createElement("a");
+      link.href = `#${heading.id}`;
+      link.textContent = heading.textContent || heading.id;
+      link.className = `group flex items-start gap-2 rounded-lg px-3 py-2 transition ${heading.tagName === "H3" ? "pl-6 text-[13px]" : "text-sm"}`;
+      const bullet = document.createElement("span");
+      bullet.setAttribute("aria-hidden", "true");
+      bullet.className = "mt-1 h-1.5 w-1.5 rounded-full bg-brand-400/50 group-hover:bg-brand-300";
+      if (heading.tagName === "H3") {
+        bullet.classList.add("opacity-60");
+      }
+      link.prepend(bullet);
+      fragment.appendChild(link);
+    });
+    toc.appendChild(fragment);
+    toc.addEventListener("click", (event) => {
+      const target = event.target.closest("a");
+      if (!target) return;
+      event.preventDefault();
+      const el = document.getElementById(target.hash.slice(1));
+      if (!el) {
+        window.location.hash = target.hash;
+        return;
+      }
+      window.history.replaceState(null, "", target.hash);
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    if (collapseBtn) {
+      collapseBtn.setAttribute("aria-expanded", "true");
+      collapseBtn.addEventListener("click", () => {
+        const hidden = toc.classList.toggle("hidden");
+        collapseBtn.setAttribute("aria-expanded", hidden ? "false" : "true");
+        collapseBtn.textContent = hidden ? "Expand" : "Collapse";
+      });
+    }
+  })();
+</script>

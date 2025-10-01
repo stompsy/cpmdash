@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Community public health monitoring & overdose response dashboard." />
+        <meta name="keywords" content="public health, overdose, dashboard, analytics" />
+        <title>{% block auth_title %}CPM Dash{% endblock auth_title %}</title>
+        <link rel="stylesheet" href="{% static 'css/output.css' %}" />
+    </head>
+    <body class="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+        <div class="absolute inset-0">
+            <img
+                src="{% block background_image %}{% static 'media/jacob-grishey-j8iPllhcWWg-unsplash.jpg' %}{% endblock background_image %}"
+                alt="{% block background_alt %}Scenic Olympic Peninsula landscape{% endblock background_alt %}"
+                class="h-full w-full object-cover"
+                loading="lazy"
+                width="1920"
+                height="1080"
+            />
+            <div class="absolute inset-0 bg-slate-950/70"></div>
+        </div>
+        <div class="relative flex min-h-screen w-full items-center justify-center px-6 py-12 sm:px-10 lg:justify-end lg:px-16">
+            <div class="w-full max-w-lg lg:w-1/2 lg:max-w-xl">
+                {% comment %} {% block auth_logo %}
+                    <div class="flex justify-center lg:justify-end">
+                        <img
+                            src="{% static 'media/pafd_cpm.jpg' %}"
+                            alt="CPM Dash"
+                            class="h-12 w-auto"
+                            height="48"
+                            width="auto"
+                        />
+                    </div>
+                {% endblock auth_logo %} {% endcomment %}
+                {% block auth_intro %}{% endblock auth_intro %}
+                <div class="mt-10 rounded-3xl border border-white/10 bg-slate-900/65 p-8 shadow-xl backdrop-blur">
+                    {% block form_body %}{% endblock form_body %}
+                </div>
+                {% block auth_footer %}{% endblock auth_footer %}
+            </div>
+        </div>
+    </body>
+</html>

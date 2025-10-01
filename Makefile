@@ -7,7 +7,7 @@ lint:
 fmt:
 	uv run ruff format
 type:
-	uv run mypy
+	uv run mypy src
 test:
 	uv run pytest -q
 run:

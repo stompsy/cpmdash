@@ -79,10 +79,10 @@
               href="{% url 'dashboard:patients' %}"
               @click.prevent="selected = (selected === 'Patients' ? '':'Patients')"
               class="menu-item group"
-              :class=" (selected === 'Patients') || (page === 'patientsExample') ? 'menu-item-active' : 'menu-item-inactive'"
+              :class=" (selected === 'Patients') || (page === 'patientsOverview') ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Patients') || (page === 'patientsExample') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                :class="(selected === 'Patients') || (page === 'patientsOverview') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 stroke-width="1.5"
@@ -138,9 +138,9 @@
                   <a
                     href="{% url 'dashboard:patients' %}"
                     class="menu-dropdown-item group"
-                    :class="page === 'patientsExample' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                    :class="page === 'patientsOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
-                    Patients Example
+                    Overview
                   </a>
                 </li>
               </ul>
@@ -156,10 +156,10 @@
               href="{% url 'dashboard:referrals' %}"
               @click.prevent="selected = (selected === 'Referrals' ? '':'Referrals')"
               class="menu-item group"
-              :class=" (selected === 'Referrals') || (page === 'referralsExample' || page === 'OD Referrals' || page === 'Encounters') ? 'menu-item-active' : 'menu-item-inactive'"
+              :class=" (selected === 'Referrals') || (page === 'referralsOverview' || page === 'OD Referrals' || page === 'Encounters') ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Referrals') || (page === 'referralsExample' || page === 'OD Referrals' || page === 'Encounters') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                :class="(selected === 'Referrals') || (page === 'referralsOverview' || page === 'OD Referrals' || page === 'Encounters') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -214,7 +214,7 @@
                   <a
                     href="{% url 'dashboard:referrals' %}"
                     class="menu-dropdown-item group"
-                    :class="page === 'referralsExample' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                    :class="page === 'referralsOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
                     Overview
                   </a>
@@ -293,15 +293,6 @@
                     :class="page === 'odreferralsMonthly' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
                     Overdoses by Month
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'dashboard:overdoses_by_case' %}"
-                    class="menu-dropdown-item group"
-                    :class="page === 'overdoses_by_case' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Overdoses by Case
                   </a>
                 </li>
               </ul>
@@ -501,6 +492,107 @@
           <!-- End Menu Item OD Referrals -->
         </ul>
       </div>
+
+      <!-- Menu Group About & Mission -->
+      <div>
+        <h3 class="mb-4 text-xs uppercase leading-[20px] text-gray-400">
+          <span class="menu-group-title" :class="sidebarToggle ? 'lg:hidden' : ''">About & Mission</span>
+          <svg :class="sidebarToggle ? 'lg:block hidden' : 'hidden'" class="mx-auto fill-current menu-group-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M5.99915 10.2451C6.96564 10.2451 7.74915 11.0286 7.74915 11.9951V12.0051C7.74915 12.9716 6.96564 13.7551 5.99915 13.7551C5.03265 13.7551 4.24915 12.9716 4.24915 12.0051V11.9951C4.24915 11.0286 5.03265 10.2451 5.99915 10.2451ZM17.9991 10.2451C18.9656 10.2451 19.7491 11.0286 19.7491 11.9951V12.0051C19.7491 12.9716 18.9656 13.7551 17.9991 13.7551C17.0326 13.7551 16.2491 12.9716 16.2491 12.0051V11.9951C16.2491 11.0286 17.0326 10.2451 17.9991 10.2451ZM13.7491 11.9951C13.7491 11.0286 12.9656 10.2451 11.9991 10.2451C11.0326 10.2451 10.2491 11.0286 10.2491 11.9951V12.0051C10.2491 12.9716 11.0326 13.7551 11.9991 13.7551C12.9656 13.7551 13.7491 12.9716 13.7491 12.0051V11.9951Z" fill="" />
+          </svg>
+        </h3>
+
+        <ul class="flex flex-col gap-4 mb-6">
+          <!-- Menu Item About (dropdown only; no direct navigation) -->
+          <li>
+            <a
+              href="#"
+              @click.prevent="selected = (selected === 'About & Mission' ? '':'About & Mission')"
+              class="menu-item group"
+              :class=" (selected === 'About & Mission') || (page === 'aboutLanding' || page === 'aboutMission' || page === 'aboutGoals' || page === 'aboutContact') ? 'menu-item-active' : 'menu-item-inactive'"
+            >
+              <svg
+                :class="(selected === 'About & Mission') || (page === 'aboutLanding' || page === 'aboutMission' || page === 'aboutGoals' || page === 'aboutContact') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 0 1 .75.75v3.75h3.75a.75.75 0 0 1 0 1.5H12.75v3.75a.75.75 0 0 1-1.5 0V12.75H7.5a.75.75 0 0 1 0-1.5h3.75V7.5a.75.75 0 0 1 .75-.75Z" />
+              </svg>
+
+              <span
+                class="menu-item-text"
+                :class="sidebarToggle ? 'lg:hidden' : ''"
+              >
+                About
+              </span>
+
+              <svg
+                class="menu-item-arrow"
+                :class="[(selected === 'About & Mission') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585"
+                  stroke=""
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+
+            <!-- Dropdown Menu: Contact, Mission, Goals -->
+            <div
+              class="overflow-hidden transform translate"
+              :class="(selected === 'About & Mission') ? 'block' :'hidden'"
+            >
+              <ul
+                :class="sidebarToggle ? 'lg:hidden' : 'flex'"
+                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
+              >
+                <li>
+                  <a
+                    href="{% url 'about:contact' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'aboutContact' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Contact
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{% url 'about:mission' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'aboutMission' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Mission Statement
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{% url 'about:goals' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'aboutGoals' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Program Goals
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <!-- End Dropdown Menu -->
+          </li>
+          <!-- End Menu Item About -->
+        </ul>
+      </div>
+      <!-- End Menu Group About & Mission -->
 
       <!-- Others Group -->
       <div>

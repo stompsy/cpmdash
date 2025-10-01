@@ -1,0 +1,28 @@
+<div id="reading-progress" class="pointer-events-none fixed inset-x-0 top-0 z-50 h-1 bg-transparent" aria-hidden="true">
+  <div id="reading-progress-bar" class="h-full w-0 bg-brand-400/90 transition-[width] duration-150 ease-linear" role="presentation"></div>
+</div>
+<script>
+  (function () {
+    if (window.__blogProgressInitialized) return;
+    window.__blogProgressInitialized = true;
+    const progress = document.getElementById("reading-progress");
+    const bar = document.getElementById("reading-progress-bar");
+    if (!progress || !bar) return;
+    const update = () => {
+      const article = document.querySelector("[data-article-root]");
+      if (!article) {
+        bar.style.width = "0%";
+        return;
+      }
+      const rect = article.getBoundingClientRect();
+      const total = article.scrollHeight - window.innerHeight;
+      const scrolled = window.scrollY - (article.offsetTop - 16);
+      const ratio = total > 0 ? Math.min(Math.max(scrolled / total, 0), 1) : 0;
+      bar.style.width = `${ratio * 100}%`;
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    document.addEventListener("DOMContentLoaded", update);
+    update();
+  })();
+</script>

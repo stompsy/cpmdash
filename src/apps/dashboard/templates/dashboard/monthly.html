@@ -1,13 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block pageName %}odreferralsMonthly{% endblock pageName %}
-{% block title %} OD Referrals - Monthly Trends {% endblock title %}
-
+{% block title %}OD Referrals - Monthly Trends{% endblock title %}
 {% block content %}
 <!-- Introduction - Full Width -->
-<section class="col-span-12 mb-16">
-    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 py-12 sm:px-4 sm:py-16 lg:overflow-visible lg:px-0">
+<section class="col-span-12">
+    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 sm:px-4 lg:px-12 py-20 lg:overflow-visible">
         <div class="absolute inset-0 -z-10 overflow-hidden">
             <svg class="absolute top-0 left-[max(50%,25rem)] h-256 w-512 -translate-x-1/2 mask-[radial-gradient(64rem_64rem_at_top,white,transparent)] dark:mask-[radial-gradient(64rem_64rem_at_top,black,transparent)] stroke-gray-200 dark:stroke-gray-700" aria-hidden="true">
                 <defs>
@@ -40,48 +38,41 @@
 
             <div class="lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
                 <!-- Data Cards -->
-                <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 bg-white/80 dark:bg-gray-900/80 p-4 rounded-xl shadow ring-1 ring-inset ring-gray-200 dark:ring-gray-800">
+                <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 p-3 sm:p-4 rounded-2xl bg-white/70 dark:bg-gray-900/70 ring-1 ring-inset ring-gray-200 dark:ring-gray-800 shadow-sm">
                     <!-- Total Overdoses -->
-                    <div class="flex items-center rounded-lg p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <dt class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Overdoses</dt>
-                            <dd class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ total_overdoses }}</dd>
-                        </div>
+                    <div class="rounded-xl p-4 bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm h-24 flex flex-col justify-between">
+                        <dt class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">Total Overdoses</dt>
+                        <dd class="text-3xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tabular-nums leading-none">{{ total_overdoses }}</dd>
                     </div>
 
                     <!-- Fatal Overdoses -->
-                    <div class="flex items-center rounded-lg p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <dt class="text-sm font-medium text-gray-700 dark:text-gray-300">Fatal Overdoses</dt>
-                            <dd class="mt-1 text-2xl font-bold text-red-700 dark:text-red-300">{{ fatal_overdoses }}</dd>
-                        </div>
+                    <div class="rounded-xl p-4 bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm h-24 flex flex-col justify-between">
+                        <dt class="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">Fatal Overdoses</dt>
+                        <dd class="text-3xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tabular-nums leading-none">{{ fatal_overdoses }}</dd>
                     </div>
 
                     <!-- Repeat Overdoses -->
-                    <div class="flex items-center rounded-lg p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <dt class="text-sm font-medium text-gray-700 dark:text-gray-300">Repeat Overdoses</dt>
-                            <div class="flex justify-between items-baseline">
-                                <dd class="mt-1 text-2xl font-bold text-orange-700 dark:text-orange-300">{{ repeat_overdoses }}</dd>
-                                <span class="ml-3 text-sm font-bold text-gray-600 dark:text-gray-400 align-middle">{{ repeat_patients }} patients • {{ percent_repeat }}%</span>
-                            </div>
-
+                    <div class="rounded-xl p-4 bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm h-24 flex flex-col justify-between">
+                        <dt class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">Repeat Overdoses</dt>
+                        <div class="flex items-baseline justify-between gap-3">
+                            <dd class="text-3xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tabular-nums leading-none">{{ repeat_overdoses }}</dd>
+                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ repeat_patients }} patients • {{ percent_repeat }}% repeat</span>
                         </div>
                     </div>
 
                     <!-- Referral Success Rate -->
-                    <div class="flex items-center rounded-lg p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <dt class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
-                                Referral Success
-                                <span class="group relative ml-2">
-                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 w-48 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                        Excludes 21 cases initiated internally, not from direct referrals.
-                                    </span>
+                    <div class="rounded-xl p-4 bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 shadow-sm h-24 flex flex-col justify-between">
+                        <dt class="text-sm font-semibold tracking-wide text-gray-600 dark:text-gray-400 flex items-center">
+                            <span class="uppercase">Referral Success</span>
+                            <span class="group relative ml-2">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 w-64 sm:w-72 md:w-80 p-2 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none normal-case text-left">
+                                    Excludes 21 cases initiated internally, not from direct referrals.
                                 </span>
-                            </dt>
-                            <dd class="mt-1 text-2xl font-bold text-green-700 dark:text-green-300">{{ referral_success_rate }}%</dd>
+                            </span>
+                        </dt>
+                        <div class="flex items-baseline justify-between gap-3">
+                            <dd class="text-3xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tabular-nums leading-none">{{ referral_success_rate }}%</dd>
                         </div>
                     </div>
                 </div>
@@ -91,8 +82,8 @@
             <div class="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
                 <div class="lg:pr-4">
                     <div class="lg:max-w-2xl text-base/7 text-gray-700 dark:text-gray-300">
-                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-start sm:items-center">
+                            <svg class="hidden md:block w-6 h-6 mr-3 flex-shrink-0 self-start md:self-auto text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                             </svg>
                             Why Track Fatal and Non-Fatal Overdoses Over Time?
@@ -123,8 +114,8 @@
                             </li>
                         </ul>
 
-                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-start sm:items-center">
+                            <svg class="hidden md:block w-6 h-6 mr-3 flex-shrink-0 self-start md:self-auto text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             Time-Based Analysis Benefits
@@ -133,8 +124,8 @@
                             Monthly trend analysis helps predict resource needs and enables proactive intervention. By understanding when overdoses occur most frequently, the program can optimize scheduling for Community Paramedics, who are not tied to the next 911 dispatch. This ensures that line staff firefighters remain available for high-acuity emergencies while CPMs handle specialized overdose response and follow-up.
                         </p>
 
-                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-start sm:items-center">
+                            <svg class="hidden md:block w-6 h-6 mr-3 flex-shrink-0 self-start md:self-auto text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                             Focus on Monthly Trends
@@ -150,21 +141,15 @@
 </section>
 
 <!-- Monthly Overdose Chart Section -->
-<section class="col-span-12 mb-16">
-    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 sm:px-4 lg:overflow-visible lg:px-0">
+<section class="col-span-12">
+    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 sm:px-4 lg:px-12 py-20 lg:overflow-visible">
         <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
             <div class="lg:pr-4 lg:pl-8">
                 <div class="mb-12">
-                    <div class="mb-6 relative">
-                        <!-- Title background highlight -->
-                        <div class="absolute -inset-4 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 dark:from-blue-800/30 dark:via-blue-700/30 dark:to-blue-800/30 rounded-lg -z-10 opacity-60"></div>
-                        <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white relative flex items-center">
-                            <svg class="w-8 h-8 mr-4 mb-1 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                            </svg>
-                            Overdoses by Year and Month
-                        </h2>
-                    </div>
+                    <header class="text-left mb-6">
+                        <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Overdoses by Year and Month</p>
+                        <h2 class="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white">Overdoses by year and month</h2>
+                    </header>
                     <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
                         Stacked view showing fatal vs non-fatal overdoses over time with interactive monthly breakdowns and trend analysis. Hover over any bar for detailed monthly statistics and percentage breakdowns.
                     </p>

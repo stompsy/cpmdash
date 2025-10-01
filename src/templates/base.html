@@ -21,6 +21,7 @@
         <title>{% block title %} {% endblock title %}</title>
         <link rel="shortcut icon" type="image/png" href="{% static 'media/favicon.ico' %}"/>
         <link rel="stylesheet" href="{% static 'css/output.css' %}" />
+        <script defer src="{% static 'js/htmx.min.js' %}"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     </head>
@@ -66,6 +67,42 @@
                 <!-- ===== Main Content Start ===== -->
                 <main>
                     <div class="p-8 mx-auto">
+                        {% if messages %}
+                            <div class="mb-6 space-y-3">
+                                {% for message in messages %}
+                                    <div
+                                        x-data="{
+                                            open: true,
+                                            timer: null,
+                                            scheduleHide(delay = 6000) {
+                                                if (this.timer) clearTimeout(this.timer);
+                                                this.timer = setTimeout(() => this.open = false, delay);
+                                            }
+                                        }"
+                                        x-init="scheduleHide()"
+                                        x-show="open"
+                                        x-transition.opacity.duration.250ms
+                                        @mouseenter="if (timer) clearTimeout(timer)"
+                                        @mouseleave="scheduleHide(3000)"
+                                        role="alert"
+                                        aria-live="assertive"
+                                        class="relative flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm text-slate-100 shadow-lg backdrop-blur {% if 'error' in message.tags %}!border-rose-500/50 !bg-rose-500/15 !text-rose-100{% elif 'success' in message.tags %}!border-emerald-400/40 !bg-emerald-400/15 !text-emerald-100{% endif %}"
+                                    >
+                                        <span class="flex-1 leading-relaxed">{{ message }}</span>
+                                        <button
+                                            type="button"
+                                            class="shrink-0 rounded-full p-1 text-slate-200/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                                            @click="open = false"
+                                            aria-label="Dismiss notification"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 0 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                         <!-- 12-column grid container -->
                         <div class="grid grid-cols-12 gap-6">
                             {% block content %} {% endblock content %}
@@ -83,5 +120,22 @@
         {% include "partials/profile/profile-info-modal.html" %}
         {% include "partials/profile/profile-address-modal.html" %}
         <!-- END MODAL -->
+
+        <script>
+            // Ensure HTMX requests include CSRF token
+            (function() {
+                function getCookie(name) {
+                    const value = `; ${document.cookie}`;
+                    const parts = value.split(`; ${name}=`);
+                    if (parts.length === 2) return parts.pop().split(';').shift();
+                }
+                document.body && document.body.addEventListener('htmx:configRequest', function(evt) {
+                    const token = getCookie('csrftoken');
+                    if (token) {
+                        evt.detail.headers['X-CSRFToken'] = token;
+                    }
+                });
+            })();
+        </script>
     </body>
 </html>

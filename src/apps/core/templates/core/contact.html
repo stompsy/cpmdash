@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Contact — CPM Dash{% endblock title %}
+{% block pageName %}aboutContact{% endblock pageName %}
+
+{% block content %}
+{% include "partials/about_quicknav.html" with active="aboutContact" %}
+<section class="col-span-12 mb-16 mt-4">
+  <div class="bg-white dark:bg-gray-900 px-6 py-12 sm:px-8 lg:px-12 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+    <div class="mx-auto max-w-3xl">
+      <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Get in touch</p>
+      <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Contact the Community Paramedic Program</h1>
+  <p class="mt-3 text-gray-600 dark:text-gray-400">We’re here to help. Reach out by phone or email, or visit us during office hours.</p>
+
+      <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div class="rounded-lg border border-gray-200 dark:border-gray-800 p-5">
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Phone</h2>
+          <p class="mt-1 text-gray-700 dark:text-gray-300">(360) 417-4668</p>
+        </div>
+        <div class="rounded-lg border border-gray-200 dark:border-gray-800 p-5">
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Email</h2>
+          <p class="mt-1 text-indigo-600 dark:text-indigo-400">pafdcpm@cityofpa.us</p>
+        </div>
+        <div class="rounded-lg border border-gray-200 dark:border-gray-800 p-5">
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Address</h2>
+          <p class="mt-1 text-gray-700 dark:text-gray-300">Port Angeles Fire Department<br/>102 E 5th St<br/>Port Angeles, WA 98362</p>
+        </div>
+        <div class="rounded-lg border border-gray-200 dark:border-gray-800 p-5">
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Hours</h2>
+          <p class="mt-1 text-gray-700 dark:text-gray-300">Monday – Friday, 9am – 5pm</p>
+        </div>
+      </div>
+
+      <div class="mt-10">
+        <p class="text-sm text-gray-500">For emergencies, call 911.</p>
+      </div>
+    </div>
+  </div>
+  </section>
+{% endblock content %}

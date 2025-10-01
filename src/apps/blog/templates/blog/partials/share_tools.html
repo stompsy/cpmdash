@@ -1,0 +1,85 @@
+<section class="rounded-3xl border border-white/10 bg-black/30 p-6 text-sm text-gray-300 shadow-lg backdrop-blur">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h2 class="text-base font-semibold text-white">Share this case study</h2>
+      <p class="text-xs text-gray-400">Spread the insight with your team or partners.</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2" data-share-root>
+      <button type="button" class="inline-flex items-center gap-2 rounded-full bg-brand-500/15 px-4 py-2 font-semibold text-brand-200 ring-1 ring-brand-500/30 transition hover:bg-brand-500/25" data-share="copy">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 8h12v12H8z"/><path d="M4 4h12v12H4z"/></svg>
+        Copy link
+      </button>
+      <a target="_blank" rel="noopener" href="#" class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 font-semibold text-white transition hover:bg-white/20" data-share="x">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 3h3.308l-7.227 8.26 8.502 9.74H16.91l-5.098-6.014L5.86 20.999H2.55l7.73-8.849L1.999 3h6.227l4.62 5.455L18.244 3z"/></svg>
+        Post to X
+      </a>
+      <a target="_blank" rel="noopener" href="#" class="inline-flex items-center gap-2 rounded-full bg-[#0077b5]/90 px-4 py-2 font-semibold text-white transition hover:bg-[#0a66c2]" data-share="linkedin">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4.984 3.5C4.984 4.881 3.88 6 2.5 6S0 4.881 0 3.5 1.12 1 2.5 1s2.484 1.119 2.484 2.5zM.254 7.781h4.492V24H.254zM8.508 7.781h4.307v2.215h.062c.6-1.136 2.07-2.338 4.262-2.338 4.558 0 5.397 3.002 5.397 6.908V24h-4.49v-8.482c0-2.024-.04-4.63-2.829-4.63-2.828 0-3.262 2.215-3.262 4.486V24H8.508z"/></svg>
+        LinkedIn
+      </a>
+      <button type="button" class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 font-semibold text-white transition hover:bg-white/20" data-share="email">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="m4 4 8 8 8-8"/></svg>
+        Email
+      </button>
+    </div>
+  </div>
+  <p class="mt-4 hidden text-xs text-brand-200" role="status" aria-live="polite" data-share-feedback>Copied link!</p>
+</section>
+<script>
+  (function () {
+    if (window.__blogShareInitialized) return;
+    window.__blogShareInitialized = true;
+    const root = document.querySelector("[data-share-root]");
+    if (!root) return;
+    const locationHref = window.location.href;
+    const pageTitle = document.querySelector("meta[property='og:title']")?.content || document.title;
+    const twitterBase = "https://twitter.com/intent/tweet";
+    const linkedinBase = "https://www.linkedin.com/sharing/share-offsite/";
+    root.querySelector("[data-share='x']")?.setAttribute("href", `${twitterBase}?text=${encodeURIComponent(pageTitle)}&url=${encodeURIComponent(locationHref)}`);
+    root.querySelector("[data-share='linkedin']")?.setAttribute("href", `${linkedinBase}?url=${encodeURIComponent(locationHref)}`);
+    root.querySelector("[data-share='email']")?.addEventListener("click", () => {
+      window.location.href = `mailto:?subject=${encodeURIComponent(pageTitle)}&body=${encodeURIComponent(locationHref)}`;
+    });
+    const feedback = document.querySelector("[data-share-feedback]");
+    const copy = root.querySelector("[data-share='copy']");
+    copy?.addEventListener("click", async () => {
+      try {
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(locationHref);
+        } else {
+          const temp = document.createElement("textarea");
+          temp.value = locationHref;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand("copy");
+          document.body.removeChild(temp);
+        }
+        if (feedback) {
+          feedback.textContent = "Link copied to clipboard.";
+          feedback.classList.remove("hidden");
+          setTimeout(() => feedback.classList.add("hidden"), 3000);
+        }
+      } catch (err) {
+        if (feedback) {
+          feedback.textContent = "Copy failed. Try again.";
+          feedback.classList.remove("hidden");
+          setTimeout(() => feedback.classList.add("hidden"), 3000);
+        }
+      }
+    });
+    if (navigator.share) {
+      const shareBtn = document.createElement("button");
+      shareBtn.type = "button";
+      shareBtn.className = "inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 font-semibold text-gray-900 transition hover:bg-gray-100";
+      shareBtn.innerHTML = '<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Quick share';
+      shareBtn.addEventListener("click", async () => {
+        try {
+          await navigator.share({ title: pageTitle, url: locationHref });
+        } catch (err) {
+          // ignore
+        }
+      });
+      root.appendChild(shareBtn);
+    }
+  })();
+</script>

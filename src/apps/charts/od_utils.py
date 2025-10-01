@@ -175,3 +175,56 @@ def get_od_fatality_rate_year(
     fatal_count = ODReferrals.objects.filter(od_date__year=year).filter(q_filter).count()
 
     return (fatal_count / copa_population) * 100_000
+
+
+def get_quarterly_patient_counts() -> dict:
+    """Static quarterly patient counts supplied by domain expert.
+
+    Returns dict with:
+      - mapping: original mapping of "YYYY QX" -> count
+      - df: tidy DataFrame with columns [year, quarter, count]
+    """
+    data = {
+        "2021 Q1": 47,
+        "2021 Q2": 121,
+        "2021 Q3": 141,
+        "2021 Q4": 110,
+        "2022 Q1": 166,
+        "2022 Q2": 225,
+        "2022 Q3": 172,
+        "2022 Q4": 185,
+        "2023 Q1": 110,
+        "2023 Q2": 54,
+        "2023 Q3": 106,
+        "2023 Q4": 126,
+        "2024 Q1": 91,
+        "2024 Q2": 117,
+        "2024 Q3": 104,
+        "2024 Q4": 99,
+        "2025 Q1": 165,
+        "2025 Q2": 133,
+        "2025 Q3": 0,
+        "2025 Q4": 0,
+    }
+
+    # Build tidy DataFrame
+    rows: list[dict] = []
+    for k, v in data.items():
+        parts = k.split()
+        if len(parts) != 2:
+            continue
+        year_str, quarter = parts
+        try:
+            year = int(year_str)
+        except ValueError:
+            continue
+        rows.append({"year": year, "quarter": quarter, "count": int(v)})
+
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        # Ensure sorting by year then quarter order Q1..Q4
+        quarter_order = ["Q1", "Q2", "Q3", "Q4"]
+        df["quarter"] = pd.Categorical(df["quarter"], categories=quarter_order, ordered=True)
+        df = df.sort_values(["year", "quarter"]).reset_index(drop=True)
+
+    return {"mapping": data, "df": df}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Delete Case Study{% endblock title %}
+{% block content %}
+    <section class="col-span-12">
+        <div class="mx-auto max-w-4xl">
+            <div class="relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-[linear-gradient(135deg,#101a2c_0%,#111f30_52%,#0b1826_100%)] p-10 shadow-[0_24px_60px_rgba(8,47,73,0.36)]">
+                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,0.16),transparent_62%)]"></div>
+                <div class="relative space-y-8">
+                    <header class="space-y-4">
+                        <p class="inline-flex items-center gap-2 rounded-full bg-rose-500/15 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-rose-200/90">
+                            Remove clinical case record
+                        </p>
+                        <h1 class="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                            Confirm deletion of “{{ object.title }}”
+                        </h1>
+                        <p class="max-w-3xl text-base leading-relaxed text-slate-300">
+                            This action permanently deletes the case study and removes it from the public registry. Associated focus areas remain available. You can archive a draft instead by toggling the published state in the editor.
+                        </p>
+                    </header>
+                    <form method="post" class="space-y-6">
+                        {% csrf_token %}
+                        <div class="rounded-2xl border border-rose-500/40 bg-rose-500/10 px-6 py-4 text-sm text-rose-100">
+                            <p>Deleting this case study cannot be undone. Consider unpublishing it instead if you may need the record later.</p>
+                        </div>
+                        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                            <a href="{{ object.get_absolute_url }}" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-300/60 hover:bg-slate-800/60 hover:text-white">Cancel</a>
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-rose-500/70 px-6 py-2.5 text-sm font-semibold text-rose-950 shadow transition hover:bg-rose-400">
+                                Permanently delete
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

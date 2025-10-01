@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+{% load blog_extras %}
+{% block title %}{{ case_study.title }}{% endblock title %}
+{% block content %}
+    <section class="col-span-12 space-y-20">
+        {% include "blog/partials/reading_progress.html" %}
+
+        <div class="relative overflow-hidden rounded-[2.75rem] border border-white/5 bg-[linear-gradient(135deg,#101a2c_0%,#111f30_52%,#0b1826_100%)] px-6 py-16 sm:px-10 lg:px-16">
+            <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(94,234,212,0.14),transparent_60%)]"></div>
+            <div class="pointer-events-none absolute right-[-14%] top-[-28%] h-[28rem] w-[28rem] rounded-full bg-brand-400/16 blur-[140px]"></div>
+            <div class="relative mx-auto max-w-3xl lg:max-w-7xl">
+                <div class="space-y-8">
+                    <nav class="text-[10px] font-semibold uppercase tracking-[0.45em] text-slate-400" aria-label="Breadcrumb">
+                        <ol class="flex flex-wrap items-center gap-3">
+                            <li><a href="{% url 'cases:index' %}" class="transition hover:text-white/80">Home</a></li>
+                            <li class="text-slate-600">/</li>
+                            <li><a href="{% url 'blog:list' %}" class="transition hover:text-white/80">Case Studies</a></li>
+                            <li class="text-slate-600">/</li>
+                            <li class="text-slate-200">{{ case_study.title }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="text-pretty text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.4rem]">{{ case_study.title }}</h1>
+                    {% if case_study.excerpt %}
+                        <p class="max-w-2xl text-base leading-relaxed text-slate-200/90 sm:text-lg">{{ case_study.excerpt }}</p>
+                    {% endif %}
+
+                    <div class="flex flex-wrap items-center gap-4 text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                        {% if case_study.published_at %}
+                            <span class="inline-flex items-center gap-2">
+                                <svg class="h-4 w-4 text-brand-200/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 2v3"/><path d="M17 2v3"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M7 12h10"/></svg>
+                                <time datetime="{{ case_study.published_at|date:'c' }}">{{ case_study.published_at|date:"F j, Y" }}</time>
+                            </span>
+                            <span aria-hidden="true">•</span>
+                            <span class="inline-flex items-center gap-2" title="{{ case_study.content|word_count }} words">
+                                <svg class="h-4 w-4 text-brand-200/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M12 4h9"/><rect width="4" height="16" x="3" y="4" rx="1"/></svg>
+                                {{ case_study.content|reading_time }} read
+                            </span>
+                        {% endif %}
+                        {% if case_study.author %}
+                            <span aria-hidden="true">•</span>
+                            <span class="inline-flex items-center gap-2 tracking-[0.2em]">
+                                {% if case_study.author.avatar %}
+                                    <img src="{{ case_study.author.avatar.url }}" alt="{{ case_study.author.username }} avatar" width="32" height="32" class="h-8 w-8 rounded-full object-cover ring-2 ring-white/10" loading="lazy" />
+                                {% endif %}
+                                <span class="text-slate-200 tracking-[0.1em]">{{ case_study.author.get_full_name|default:case_study.author.username }}</span>
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    {% if case_study.tags.all %}
+                        <div class="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-brand-200/90">
+                            {% for tag in case_study.tags.all %}
+                                <a href="{{ tag.get_absolute_url }}" class="inline-flex items-center gap-1 rounded-full bg-brand-500/15 px-3 py-1 ring-1 ring-brand-400/40 transition hover:bg-brand-500/25">#{{ tag.name }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if request.user.is_authenticated %}
+                        {% if perms.blog.change_casestudy or perms.blog.delete_casestudy %}
+                            <div class="mt-8 flex flex-wrap gap-3 text-xs font-semibold">
+                                {% if perms.blog.change_casestudy %}
+                                    <a href="{% url 'blog:update' slug=case_study.slug %}"
+                                       class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-slate-200 transition hover:border-brand-400/60 hover:bg-brand-500/15 hover:text-white">
+                                        Edit case study
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+                                    </a>
+                                {% endif %}
+                                {% if perms.blog.delete_casestudy %}
+                                    <a href="{% url 'blog:delete' slug=case_study.slug %}"
+                                       class="inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/15 px-4 py-2 text-rose-100 transition hover:bg-rose-500/30 hover:text-white">
+                                        Delete case study
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 6 3 18h12l3-18"/><path d="M2 6h20"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if case_study.hero_image %}
+            <figure class="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] border border-white/8 bg-[linear-gradient(150deg,rgba(17,27,44,0.9),rgba(17,32,51,0.78))] shadow-[0_24px_60px_rgba(8,47,73,0.32)]">
+                <div class="relative aspect-[16/9] w-full">
+                    <img src="{{ case_study.hero_image.url }}" alt="{{ case_study.title }} hero image" width="1600" height="900" class="h-full w-full object-cover transition duration-700 hover:scale-[1.04]" loading="lazy" />
+                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent"></div>
+                </div>
+            </figure>
+        {% endif %}
+
+        <div class="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.75fr)] lg:gap-16">
+            <article data-article-root class="space-y-12">
+                <div class="prose prose-lg dark:prose-invert prose-headings:font-semibold prose-headings:text-white prose-a:text-brand-300 hover:prose-a:text-brand-200 prose-strong:text-white prose-em:text-slate-200 prose-blockquote:border-l-4 prose-blockquote:border-brand-400 prose-blockquote:bg-white/5 prose-blockquote:p-5 prose-hr:border-slate-800 prose-code:text-pink-300 prose-pre:bg-slate-950 prose-pre:text-slate-100 prose-img:rounded-3xl max-w-none">
+                    <div class="content-body space-y-7 js-article-content">{{ case_study.content|markdown|safe }}</div>
+                </div>
+
+                {% include "blog/partials/share_tools.html" %}
+
+                <div class="rounded-[2.5rem] border border-white/8 bg-[linear-gradient(155deg,rgba(17,27,44,0.88),rgba(17,32,51,0.78))] p-8 text-sm text-slate-200 shadow-[0_20px_56px_rgba(8,47,73,0.3)]">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <a href="{% url 'blog:list' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-200 transition hover:text-brand-100">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+                            Back to all case studies
+                        </a>
+                        <div class="flex flex-wrap items-center gap-2">
+                            {% for tag in case_study.tags.all %}
+                                <a href="{{ tag.get_absolute_url }}" class="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-200 ring-1 ring-white/20 transition hover:bg-white/20">#{{ tag.name }}</a>
+                            {% empty %}
+                                <span class="text-slate-500">No tags yet</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {% if case_study.author and case_study.author.bio %}
+                        <div class="mt-8 flex flex-col gap-5 rounded-2xl border border-white/8 bg-slate-900/55 p-6 md:flex-row md:items-center">
+                            {% if case_study.author.avatar %}
+                                <img src="{{ case_study.author.avatar.url }}" alt="{{ case_study.author.username }} avatar" width="64" height="64" class="h-16 w-16 rounded-full object-cover ring-2 ring-white/10" loading="lazy" />
+                            {% endif %}
+                            <div class="space-y-1">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">About the author</div>
+                                <div class="text-base font-semibold text-white">{{ case_study.author.get_full_name|default:case_study.author.username }}</div>
+                                <p class="text-sm text-slate-200/90">{{ case_study.author.bio }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="mt-10 grid gap-4 md:grid-cols-2">
+                        <div class="group rounded-2xl border border-white/8 bg-slate-900/55 p-6 transition hover:border-brand-400/55 hover:bg-slate-800/60">
+                            {% if prev_post %}
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">Previous</div>
+                                <a href="{{ prev_post.get_absolute_url }}" class="mt-3 flex items-center justify-between gap-3 text-left text-white transition group-hover:text-brand-200">
+                                    <div>
+                                        <p class="text-sm font-semibold">{{ prev_post.title }}</p>
+                                        {% if prev_post.published_at %}
+                                            <time class="text-xs text-slate-400" datetime="{{ prev_post.published_at|date:'c' }}">{{ prev_post.published_at|date:"M j, Y" }}</time>
+                                        {% endif %}
+                                    </div>
+                                    <svg class="h-5 w-5 text-brand-300 transition group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+                                </a>
+                            {% else %}
+                                <p class="text-sm text-slate-500">This is the first case study.</p>
+                            {% endif %}
+                        </div>
+                        <div class="group rounded-2xl border border-white/8 bg-slate-900/55 p-6 text-right transition hover:border-brand-400/55 hover:bg-slate-800/60">
+                            {% if next_post %}
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">Next</div>
+                                <a href="{{ next_post.get_absolute_url }}" class="mt-3 flex items-center justify-between gap-3 text-white transition group-hover:text-brand-200">
+                                    <svg class="h-5 w-5 text-brand-300 transition group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 6l6 6-6 6"/></svg>
+                                    <div class="text-right">
+                                        <p class="text-sm font-semibold">{{ next_post.title }}</p>
+                                        {% if next_post.published_at %}
+                                            <time class="text-xs text-slate-400" datetime="{{ next_post.published_at|date:'c' }}">{{ next_post.published_at|date:"M j, Y" }}</time>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            {% else %}
+                                <p class="text-sm text-slate-500">More case studies coming soon.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <aside>{% include "blog/partials/table_of_contents.html" %}</aside>
+        </div>
+    </section>
+{% endblock content %}

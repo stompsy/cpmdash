@@ -1,4 +1,4 @@
-# src/cpmdash/settings.py
+# src/config/settings.py
 import importlib.util
 import os
 from pathlib import Path
@@ -29,14 +29,21 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     # Project apps
     "apps.core",
+    "apps.accounts",
     "apps.dashboard",
     "apps.cases",
     "apps.partials_viewer",
+    "apps.blog",
     # Third-party
     "rest_framework",
     "django_filters",
     "drf_spectacular",
     "corsheaders",
+    # Auth
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
 ]
 
 # Dynamically add django-browser-reload only in DEBUG mode
@@ -51,6 +58,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -59,7 +67,7 @@ MIDDLEWARE = [
 if DEBUG and importlib.util.find_spec("django_browser_reload"):
     MIDDLEWARE.insert(0, "django_browser_reload.middleware.BrowserReloadMiddleware")
 
-ROOT_URLCONF = "cpmdash.urls"
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
@@ -77,8 +85,11 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "cpmdash.wsgi.application"
-ASGI_APPLICATION = "cpmdash.asgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
+
+# Sites framework (required by allauth)
+SITE_ID = 1
 
 
 # --- Database ---
@@ -114,3 +125,37 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # --- Default primary key field type ---
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# Use custom user model
+AUTH_USER_MODEL = "accounts.User"
+
+# --- Public site content: configurable stats ---
+# Figures shown on About/Mission/Program Goals pages. Keep conservative and sourced.
+ABOUT_STATS = {
+    "overdose_drop_pct": os.environ.get("ABOUT_OVERDOSE_DROP_PCT", "63%"),
+    "linkage_pct": os.environ.get("ABOUT_LINKAGE_PCT", "78%"),
+    "savings": os.environ.get("ABOUT_SAVINGS", "$1.9M+"),
+    "units": os.environ.get("ABOUT_UNITS", "2"),
+    # Optional timeline label
+    "timeline_range": os.environ.get("ABOUT_TIMELINE_RANGE", "2018 → 2024"),
+}
+
+# --- Authentication UX ---
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/dashboard/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
+SESSION_COOKIE_SAMESITE = "Lax"
+
+# django-allauth configuration (email optional, no 2FA)
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
+ACCOUNT_EMAIL_VERIFICATION = "optional"  # can switch to 'mandatory' later
+ACCOUNT_SIGNUP_FIELDS = ["username*", "email", "password1*", "password2*"]
+ACCOUNT_RATE_LIMITS = {"login_failed": "5/5m"}
+ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
+
+# Optional: require login for dashboard pages. Enable to gate /dashboard/* behind auth.
+LOGIN_REQUIRED = False
+# To enable, also add "apps.core.middleware.LoginRequiredForDashboardMiddleware" to MIDDLEWARE.

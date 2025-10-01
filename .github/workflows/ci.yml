@@ -20,7 +20,7 @@ jobs:
                     --health-interval=10s --health-timeout=5s --health-retries=5
         env:
             DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cpmdash_test
-            DJANGO_SETTINGS_MODULE: cpmdash.settings
+            DJANGO_SETTINGS_MODULE: config.settings
             SECRET_KEY: test-secret
         steps:
             - uses: actions/checkout@v4

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Tag: {{ tag.name }}{% endblock title %}
+{% block content %}
+<section class="col-span-12 mb-28">
+  <div class="relative isolate overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-gray-900/90 to-black px-4 py-24 shadow-2xl sm:px-8 lg:px-16">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.35),transparent_60%)] opacity-60"></div>
+    <div class="relative mx-auto max-w-5xl text-center lg:text-left">
+      <a href="{% url 'blog:tag-list' %}" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-brand-200 hover:text-brand-100">
+        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+        All tags
+      </a>
+      <h1 class="mt-6 text-pretty text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">#{{ tag.name }}</h1>
+      <p class="mt-6 text-base text-gray-300 sm:text-lg">{{ case_count }} case{{ case_count|pluralize }} exploring <span class="font-semibold text-brand-200">{{ tag.name|title }}</span> themes across community paramedicine.</p>
+      {% if related_tags %}
+        <div class="mt-8 flex flex-wrap items-center gap-3 text-xs">
+          <span class="mr-2 font-semibold uppercase tracking-[0.3em] text-gray-500">Related</span>
+          {% for related in related_tags %}
+            <a href="{{ related.get_absolute_url }}" class="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 font-semibold text-white/80 ring-1 ring-white/10 hover:bg-white/20">#{{ related.name }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="mt-16">
+    <div class="mx-auto max-w-6xl">
+      {% include "blog/_cards.html" %}
+      {% if is_paginated %}
+        <div id="load-more-container" class="mt-16 flex items-center justify-center">
+          {% if page_obj.has_next %}
+          <button
+            id="load-more"
+            class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-5 py-2.5 text-sm font-semibold text-gray-200 transition hover:border-brand-400/60 hover:bg-black/60 hover:text-white"
+            hx-get="?page={{ page_obj.next_page_number }}"
+            hx-target="#cards-grid"
+            hx-select="#cards-grid > *"
+            hx-swap="beforeend"
+            hx-indicator="#load-more"
+          >
+            Load more
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+          </button>
+          {% else %}
+            <span class="text-sm text-gray-500">End of results</span>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock content %}

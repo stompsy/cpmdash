@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mission — CPM Dash{% endblock title %}
+{% block pageName %}aboutMission{% endblock pageName %}
+
+{% block content %}
+{% include "partials/about_quicknav.html" with active="aboutMission" %}
+<!-- Hero -->
+<section class="col-span-12">
+  <div class="relative isolate overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-14 sm:px-10">
+    <div class="absolute inset-x-0 -top-24 -z-10 transform-gpu overflow-hidden blur-3xl">
+      <div class="relative left-1/2 -z-10 aspect-[1155/678] w-[36rem] max-w-none -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-500 to-emerald-400 opacity-20 dark:opacity-25"></div>
+    </div>
+    <div class="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div class="lg:col-span-7">
+        <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">City of Port Angeles Fire Department</p>
+        <h1 class="mt-2 text-4xl sm:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">Our Mission & Purpose</h1>
+        <p class="mt-4 text-lg text-gray-700 dark:text-gray-300">We protect life, property, and the environment through compassionate service and community partnership. The Community Paramedic Program extends that mission beyond 911—bringing skilled care, harm reduction, and coordinated support directly to people where they live.</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="{% url 'about:goals' %}" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400">Explore Program Goals</a>
+          <a href="{% url 'about:contact' %}" class="inline-flex items-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800">Contact Us</a>
+        </div>
+      </div>
+      <div class="lg:col-span-5">
+        <img class="w-full rounded-xl bg-gray-900 shadow-lg ring-1 ring-gray-400/10" src="{% static 'media/pafd_cpm.jpg' %}" width="720" height="480" alt="Community Paramedicine in Port Angeles" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Stats -->
+<section class="col-span-12 mt-8">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center">
+  <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ about_stats.overdose_drop_pct }}</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400">Drop in overdose fatalities (12 months)</p>
+    </div>
+    <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center">
+  <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ about_stats.linkage_pct }}</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400">Linkage to SUD when CPMs respond</p>
+    </div>
+    <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center">
+  <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ about_stats.savings }}</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400">Conservative cost savings (2021–2024)</p>
+    </div>
+    <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-center">
+  <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ about_stats.units }}</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400">Autonomous response units</p>
+    </div>
+  </div>
+  <p class="mt-2 text-xs text-gray-500">Figures based on program materials and city presentations; methodology is conservative.</p>
+</section>
+
+<!-- Value Pillars -->
+<section class="col-span-12 mt-10">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex size-10 items-center justify-center rounded-lg bg-indigo-600/10 text-indigo-600 dark:text-indigo-400">✦</span>
+        <h3 class="font-semibold text-gray-900 dark:text-white">Compassionate Care</h3>
+      </div>
+      <p class="mt-3 text-gray-700 dark:text-gray-300">Meet people where they are with dignity, respect, and trust-building outreach.</p>
+    </div>
+    <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex size-10 items-center justify-center rounded-lg bg-emerald-600/10 text-emerald-600">✔</span>
+        <h3 class="font-semibold text-gray-900 dark:text-white">Harm Reduction</h3>
+      </div>
+      <p class="mt-3 text-gray-700 dark:text-gray-300">Timely intervention, education, and supplies that reduce overdose harms.</p>
+    </div>
+    <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex size-10 items-center justify-center rounded-lg bg-blue-600/10 text-blue-600">∞</span>
+        <h3 class="font-semibold text-gray-900 dark:text-white">Connected System</h3>
+      </div>
+      <p class="mt-3 text-gray-700 dark:text-gray-300">Warm handoffs and coordination with hospitals, clinics, behavioral health, and housing.</p>
+    </div>
+    <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex size-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">▣</span>
+        <h3 class="font-semibold text-gray-900 dark:text-white">Data-Informed</h3>
+      </div>
+      <p class="mt-3 text-gray-700 dark:text-gray-300">Dashboards and metrics guide interventions and demonstrate outcomes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Mission Detail -->
+<section class="col-span-12 mt-10">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="lg:col-span-7">
+      <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Why Community Paramedicine</h2>
+      <p class="mt-4 text-gray-700 dark:text-gray-300">Community Paramedicine bridges gaps in the healthcare system—especially for individuals facing behavioral health needs, substance use disorders, chronic conditions, and barriers to accessing care. Our team reduces preventable 911 calls and ED visits, provides post-overdose follow-up, and creates warm handoffs to treatment partners.</p>
+      <ul class="mt-6 list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-300">
+        <li>Field-based support and recovery pathways (including MOUD referrals).</li>
+        <li>Home and outreach visits that reduce stigma and increase acceptance of services.</li>
+        <li>Preserving frontline units for high-acuity emergencies through targeted follow-up and navigation.</li>
+      </ul>
+    </div>
+    <div class="lg:col-span-5">
+      <blockquote class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+        <p class="text-lg text-gray-900 dark:text-white">“Protecting life and strengthening community isn’t just our purpose—it’s our daily practice. Community Paramedics bring the fire department’s mission into homes, streets, and encampments with compassion and skill.”</p>
+        <footer class="mt-3 text-sm text-gray-600 dark:text-gray-400">— Port Angeles Fire Department</footer>
+      </blockquote>
+    </div>
+  </div>
+  <div class="mt-8">
+    <a href="{% url 'about:goals' %}" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400">See our Program Goals</a>
+  </div>
+</section>
+{% endblock content %}

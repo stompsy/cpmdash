@@ -16,6 +16,8 @@ app_name = "cases"
 
 urlpatterns = [
     path("", opshield, name="index"),
+    # Alias for tests and backward-compatibility
+    path("opshield/", opshield, name="opshield"),
     path("cases/", cases, name="odreferrals"),
     path("repeats/", repeatods, name="repeatods"),
     path("shiftcoverage/", shiftcoverage, name="shiftcoverage"),

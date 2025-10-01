@@ -9,41 +9,45 @@ description = "Community Paramedicine analytics app"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-  "django>=5,<6",
-  "djangorestframework",
-  "django-filter",
-  "python-dotenv",
-  "dj-database-url",
-  "psycopg[binary]>=3",
-  "whitenoise",
-  "gunicorn",
-  "uvicorn[standard]",
-  "drf-spectacular",
-  "django-cors-headers",
-  "django-browser-reload>=1.18.0",
-  "pandas>=2.3.1",
-  "plotly>=6.3.0",
+    "django>=5.2.6,<6",
+    "djangorestframework",
+    "django-filter",
+    "django-allauth>=65",
+    "python-dotenv",
+    "dj-database-url",
+    "psycopg[binary]>=3",
+    "whitenoise",
+    "gunicorn",
+    "uvicorn[standard]",
+    "drf-spectacular",
+    "django-cors-headers",
+    "django-browser-reload>=1.18.0",
+    "pandas>=2.3.1",
+    "plotly>=6.3.0",
+    "Pillow>=10.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "ruff",
-  "mypy",
-  "django-stubs",
-  "pytest",
-  "pytest-django",
-  "pytest-cov",
-  "model-bakery",
-  "faker",
-  "freezegun",
-  "djlint",
-  "bandit",
-  "pip-audit",
-  "pre-commit"
+    "ruff",
+    "mypy",
+    "django-stubs",
+    "django-stubs-ext",
+    "pytest",
+    "pytest-django",
+    "pytest-cov",
+    "model-bakery",
+    "faker",
+    "freezegun",
+    "djlint",
+    "bandit",
+    "pip-audit",
+    "pre-commit",
+    "types-Markdown"
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/cpmdash", "src/apps"]
+packages = ["src/config", "src/apps"]
 
 [tool.hatch.build.targets.sdist]
 include = ["pyproject.toml", "README.md", "src/**"]
@@ -74,15 +78,16 @@ module = [
     "apps.charts.*",
     "apps.cases.views",
     "apps.dashboard.views",
+    "apps.accounts.models",
     "apps.*.tests.*"
 ]
 ignore_errors = true
 
 [tool.django-stubs]
-django_settings_module = "cpmdash.settings"
+django_settings_module = "config.settings"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "cpmdash.settings"
+DJANGO_SETTINGS_MODULE = "config.settings"
 pythonpath = ["src"]
 testpaths = ["src"]
 addopts = "-q --maxfail=1 --cov=src --cov-report=term-missing"
@@ -95,6 +100,7 @@ indent = 2
 dev = [
     "bandit>=1.8.6",
     "django-stubs>=5.2.2",
+    "django-stubs-ext>=5.1.0",
     "djlint>=1.36.4",
     "mypy>=1.17.1",
     "pip-audit>=2.9.0",
@@ -103,11 +109,25 @@ dev = [
     "pytest-cov>=6.2.1",
     "pytest-django>=4.11.1",
     "ruff>=0.12.8",
+    "types-Markdown>=3.7.2.20240814",
     "watchdog>=6.0.0",
 ]
 
 [tool.semantic_release]
-version_variable = "src/cpmdash/__init__.py:__version__"
+version_variable = "src/config/__init__.py:__version__"
 branch = "main"
 build_command = "uv build"
 upload_to_pypi = false
+changelog_file = "CHANGELOG.md"
+tag_format = "v{version}"
+commit_message = "chore(release): {version}"
+
+# Map commit types to release levels
+# - feat -> minor
+# - fix, refactor, perf -> patch
+# - BREAKING CHANGE or ! -> major
+minor_types = ["feat"]
+patch_types = ["fix", "refactor", "perf"]
+
+# Treat exclamation-mark commits as breaking; also respect BREAKING CHANGE: footer
+major_on_zero = false

@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -50,33 +48,33 @@ def build_chart_repeats_scatter(theme):  # noqa: C901
     repeat_ids = repeat_ids[repeat_ids > 1].index
     df = df[df["patient_id"].isin(repeat_ids)].copy()
 
-    # Process jail times
-    jail_df = df[df["patient_id"].isin(repeat_ids)][
-        ["patient_id", "jail_start_1", "jail_end_1", "jail_start_2", "jail_end_2"]
-    ].copy()
-    jail_df.dropna(subset=["jail_start_1", "jail_start_2"], how="all", inplace=True)
-    jail_df.drop_duplicates(inplace=True)
-
-    # Ensure jail_df columns are datetime and filter out '2000-01-01' as pd.NaT
-    for col in ["jail_start_1", "jail_end_1", "jail_start_2", "jail_end_2"]:
-        jail_df[col] = pd.to_datetime(jail_df[col], errors="coerce")
-        jail_df.loc[jail_df[col] == pd.Timestamp("2000-01-01"), col] = pd.NaT
-
-    jail_periods = []
-    today = datetime.now()
-
-    for _, row in jail_df.iterrows():
-        patient_id = row["patient_id"]
-        if pd.notna(row["jail_start_1"]):
-            start = row["jail_start_1"]
-            end = row["jail_end_1"] if pd.notna(row["jail_end_1"]) else today
-            jail_periods.append({"patient_id": patient_id, "start": start, "end": end})
-        if pd.notna(row["jail_start_2"]):
-            start = row["jail_start_2"]
-            end = row["jail_end_2"] if pd.notna(row["jail_end_2"]) else today
-            jail_periods.append({"patient_id": patient_id, "start": start, "end": end})
-
-    jail_periods_df = pd.DataFrame(jail_periods)
+    # JAIL PROCESSING DISABLED — insufficient data to plot reliably
+    # jail_df = df[df["patient_id"].isin(repeat_ids)][
+    #     ["patient_id", "jail_start_1", "jail_end_1", "jail_start_2", "jail_end_2"]
+    # ].copy()
+    # jail_df.dropna(subset=["jail_start_1", "jail_start_2"], how="all", inplace=True)
+    # jail_df.drop_duplicates(inplace=True)
+    #
+    # # Ensure jail_df columns are datetime and filter out sentinel dates
+    # for col in ["jail_start_1", "jail_end_1", "jail_start_2", "jail_end_2"]:
+    #     jail_df[col] = pd.to_datetime(jail_df[col], errors="coerce")
+    #     jail_df.loc[jail_df[col] == pd.Timestamp("2000-01-01"), col] = pd.NaT
+    #
+    # jail_periods = []
+    # today = datetime.now()
+    #
+    # for _, row in jail_df.iterrows():
+    #     patient_id = row["patient_id"]
+    #     if pd.notna(row["jail_start_1"]):
+    #         start = row["jail_start_1"]
+    #         end = row["jail_end_1"] if pd.notna(row["jail_end_1"]) else today
+    #         jail_periods.append({"patient_id": patient_id, "start": start, "end": end})
+    #     if pd.notna(row["jail_start_2"]):
+    #         start = row["jail_start_2"]
+    #         end = row["jail_end_2"] if pd.notna(row["jail_end_2"]) else today
+    #         jail_periods.append({"patient_id": patient_id, "start": start, "end": end})
+    #
+    # jail_periods_df = pd.DataFrame(jail_periods)
 
     # Map patient age and short sex
     age_map = df.groupby("patient_id", observed=False)["patient_age"].min()
@@ -107,48 +105,23 @@ def build_chart_repeats_scatter(theme):  # noqa: C901
     # Build the line chart
     fig = go.Figure()
 
-    # Add jail time traces first to be in the background
-    if not jail_periods_df.empty:
-        jail_periods_df["merged_label"] = jail_periods_df["patient_id"].map(
-            lambda pid: f"{age_map.get(pid, 'N/A')} {sex_map.get(pid, 'N/A')}"
-        )
-        for _, row in jail_periods_df.iterrows():
-            fig.add_trace(
-                go.Scatter(
-                    x=[row["start"], row["end"]],
-                    y=[row["merged_label"], row["merged_label"]],
-                    mode="lines",
-                    line=dict(color="rgba(255, 0, 0, 0.5)", width=6),
-                    hoverinfo="text",
-                    text=f"Incarcerated<br>Start: {row['start'].strftime('%Y-%m-%d')}<br>End: {row['end'].strftime('%Y-%m-%d')}",
-                    showlegend=False,
-                )
-            )
-
-    # Find range of years
-    years = sorted(df["od_date"].dt.year.dropna().unique())
-
-    # Add transparent vertical bands for each year
-    year_colors = {
-        2021: "rgba(100, 149, 237, 0.07)",
-        2022: "rgba(34, 139, 34, 0.07)",
-        2023: "rgba(255, 165, 0, 0.07)",
-        2024: "rgba(220, 20, 60, 0.03)",
-    }
-
-    for year in years:
-        fig.add_shape(
-            type="rect",
-            xref="x",
-            yref="paper",
-            x0=f"{year}-01-01",
-            x1=f"{year}-12-31",
-            y0=0,
-            y1=1,
-            fillcolor=year_colors.get(year, "rgba(0,0,0,0.05)"),
-            line=dict(width=0),
-            layer="below",
-        )
+    # Jail time traces disabled
+    # if not jail_periods_df.empty:
+    #     jail_periods_df["merged_label"] = jail_periods_df["patient_id"].map(
+    #         lambda pid: f"{age_map.get(pid, 'N/A')} {sex_map.get(pid, 'N/A')}"
+    #     )
+    #     for _, row in jail_periods_df.iterrows():
+    #         fig.add_trace(
+    #             go.Scatter(
+    #                 x=[row["start"], row["end"]],
+    #                 y=[row["merged_label"], row["merged_label"]],
+    #                 mode="lines",
+    #                 line=dict(color="rgba(255, 0, 0, 0.5)", width=6),
+    #                 hoverinfo="text",
+    #                 text=f"Incarcerated<br>Start: {row['start'].strftime('%Y-%m-%d')}<br>End: {row['end'].strftime('%Y-%m-%d')}",
+    #                 showlegend=False,
+    #             )
+    #         )
 
     # Add scatter plot for ODs
     for label in df["merged_label"].cat.categories:
