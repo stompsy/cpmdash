@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from django import forms
 
 from .models import User
@@ -44,3 +46,20 @@ class ProfileForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             return self.instance.email
         return self.cleaned_data.get("email", "").strip()
+
+    def clean_avatar(self) -> Any:
+        avatar = self.cleaned_data.get("avatar")
+        if not avatar:
+            return avatar
+        # Validate content type
+        valid_content_types = {"image/jpeg", "image/png", "image/gif", "image/webp"}
+        content_type = getattr(avatar, "content_type", None)
+        if content_type and content_type not in valid_content_types:
+            raise forms.ValidationError(
+                "Unsupported image type. Please upload JPEG, PNG, GIF, or WEBP."
+            )
+        # Validate file size (e.g., 5MB max)
+        max_bytes = 5 * 1024 * 1024
+        if getattr(avatar, "size", 0) > max_bytes:
+            raise forms.ValidationError("Avatar file is too large (max 5 MB).")
+        return avatar

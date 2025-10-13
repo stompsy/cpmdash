@@ -703,7 +703,7 @@ def _build_patient_insight_sections(enriched: pd.DataFrame) -> list[dict[str, ob
                 ),
                 "details": [
                     f"Average total touchpoints: {round(float(od_linked_df['total_touchpoints'].mean()), 1)}",
-                    f"Referrals accompany PORT work in { _pct(int((od_linked_df['referrals'] > 0).sum()), int(od_linked_df.shape[0])) }% of these cases.",
+                    f"Referrals accompany PORT work in {_pct(int((od_linked_df['referrals'] > 0).sum()), int(od_linked_df.shape[0]))}% of these cases.",
                 ],
                 "examples": _patient_examples(od_linked_df),
             }

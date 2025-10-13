@@ -21,7 +21,7 @@
                                 My Profile
                             </p>
                             <h1 class="mt-8 text-4xl text-center md:text-left font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
-                                {{ profile_user.get_full_name|default:profile_user.username }}
+                                {{ request.user.get_full_name|default:request.user.username }}
                             </h1>
                             {% if profile_user.bio %}
                                 <p class="mt-8 max-w-2xl text-base text-center md:text-left leading-relaxed text-slate-300 sm:text-lg">
@@ -47,7 +47,11 @@
                         <div class="lg:col-span-4 xl:self-center lg:px-6 xl:px-8">
                             <div class="flex flex-col items-center lg:items-center lg:w-fit lg:mx-auto">
                                 <div class="h-28 w-28 lg:h-32 lg:w-32 xl:h-36 xl:w-36 2xl:h-40 2xl:w-40 overflow-hidden rounded-full border-4 border-white/10 ring-1 ring-white/10 shadow-xl">
-                                    <img src="{% static 'media/user/user-bgerdes.png' %}" alt="User avatar" height="160" width="160" class="h-full w-full object-cover" />
+                                    {% if profile_user.avatar %}
+                                        <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.get_full_name|default:profile_user.username }}" height="160" width="160" class="h-full w-full object-cover" />
+                                    {% else %}
+                                        <img src="{% static 'media/user/user-bgerdes.png' %}" alt="{{ profile_user.get_full_name|default:profile_user.username }}" height="160" width="160" class="h-full w-full object-cover" />
+                                    {% endif %}
                                 </div>
                                 <div class="mt-4 flex items-center justify-center gap-3">
                                     <button class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 shadow-sm transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300" aria-label="Share on Facebook">
@@ -75,7 +79,7 @@
                     Profile overview
                 </h2>
                 <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div class="text-sm text-slate-200"><p class="font-medium text-slate-400">Name</p><p class="mt-1">{{ profile_user.get_full_name|default:profile_user.username }}</p></div>
+                    <div class="text-sm text-slate-200"><p class="font-medium text-slate-400">Name</p><p class="mt-1">{{ request.user.get_full_name|default:request.user.username }}</p></div>
                     <div class="text-sm text-slate-200"><p class="font-medium text-slate-400">Username</p><p class="mt-1">{{ profile_user.username }}</p></div>
                     <div class="text-sm text-slate-200"><p class="font-medium text-slate-400">Email</p><p class="mt-1"><a class="text-brand-200 hover:text-brand-100 underline/30 hover:underline" href="mailto:{{ profile_user.email }}">{{ profile_user.email|default:"—" }}</a></p></div>
                     <div class="text-sm text-slate-200 sm:col-span-2"><p class="font-medium text-slate-400">Bio</p><p class="mt-1">{{ profile_user.bio|default:"—"|truncatechars:160 }}</p></div>
@@ -93,7 +97,6 @@
                     <div class="text-sm text-slate-200"><p class="font-medium text-slate-400">Country</p><p class="mt-1">United States</p></div>
                     <div class="text-sm text-slate-200"><p class="font-medium text-slate-400">City/State</p><p class="mt-1">Washington</p></div>
                     <div class="text-sm text-slate-200"><p class="font-medium text-slate-400">Postal Code</p><p class="mt-1">98382</p></div>
-                    <div class="text-sm text-slate-200"><p class="font-medium text-slate-400">TAX ID</p><p class="mt-1">AS4568384</p></div>
                 </div>
             </div>
 

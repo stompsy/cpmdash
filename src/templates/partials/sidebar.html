@@ -606,6 +606,31 @@
               <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">My Profile</span>
             </a>
           </li>
+          <li>
+            <a
+              href="{% url 'tasks:list' %}"
+              @click="selected = 'Administration'"
+              class="menu-item group"
+              :class="page === 'tasks' ? 'menu-item-active' : 'menu-item-inactive'"
+            >
+              <svg
+                :class="page === 'tasks' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M3.75 6A2.25 2.25 0 0 1 6 3.75h12A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6Z" />
+              </svg>
+
+              <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">Tasks
+                {% include "tasks/_tasks_badge.html" with element_id="tasks-badge" %}
+              </span>
+            </a>
+          </li>
         </ul>
       </div>
       <!-- End Menu Group Administration -->

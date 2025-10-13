@@ -1,0 +1,86 @@
+{% load static %}
+<li id="task-{{ task.pk }}" class="py-4 grid grid-cols-12 items-center gap-4">
+  <!-- Toggle complete (accessible checkbox, POST + HTMX) -->
+  <div class="col-span-1 flex justify-center">
+    {% if request.user.is_staff or request.user.pk == task.user_id or request.user.pk == task.assignee_id %}
+      <form
+        action="{% url 'tasks:toggle' task.pk %}"
+        method="post"
+        hx-post="{% url 'tasks:toggle' task.pk %}"
+        hx-target="#task-{{ task.pk }}"
+        hx-swap="outerHTML"
+        class="inline-flex"
+      >
+        {% csrf_token %}
+        <label class="inline-flex items-center gap-2 cursor-pointer" aria-label="Toggle completion for {{ task.title }}">
+          <input
+            type="checkbox"
+            name="is_completed"
+            {% if task.is_completed %}checked{% endif %}
+            class="h-4 w-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-2 focus:ring-emerald-400/60"
+            hx-trigger="change"
+          />
+          <span class="sr-only">Completed</span>
+        </label>
+      </form>
+    {% else %}
+      <input
+        type="checkbox"
+        {% if task.is_completed %}checked{% endif %}
+        disabled
+        class="h-4 w-4 rounded border-white/20 bg-white/5 text-emerald-500 opacity-60"
+      />
+    {% endif %}
+  </div>
+
+  <!-- Title/description/timestamps -->
+  <div class="col-span-8">
+    <p class="text-slate-100 font-medium {% if task.is_completed %}line-through text-slate-400{% endif %}">{{ task.title }}</p>
+    {% if task.description %}
+    <p class="mt-1 text-sm text-slate-400 {% if task.is_completed %}line-through text-slate-500{% endif %}">{{ task.description }}</p>
+    {% endif %}
+    <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+      <span class="inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-slate-300">Priority: {{ task.get_priority_display }}</span>
+      {% if task.due_date %}<span class="inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-slate-300">Due: {{ task.due_date }}</span>{% endif %}
+      <span class="inline-flex items-center text-slate-500">Added {{ task.created_at|date:"M d, Y g:i A" }}{% if task.is_completed and task.completed_at %} • Completed {{ task.completed_at|date:"M d, Y g:i A" }}{% endif %}</span>
+    </div>
+  </div>
+
+  <!-- User + actions -->
+  <div class="col-span-3 flex items-center justify-end gap-3">
+    <div class="flex items-center gap-2">
+      {% if task.user.avatar %}
+        <img src="{{ task.user.avatar.url }}" alt="{{ task.user.get_full_name|default:task.user.username }}" width="28" height="28" class="h-7 w-7 rounded-full object-cover ring-1 ring-white/10" />
+      {% else %}
+        <img src="{% static 'media/user/user-01.jpg' %}" alt="{{ task.user.get_full_name|default:task.user.username }}" width="28" height="28" class="h-7 w-7 rounded-full object-cover ring-1 ring-white/10" />
+      {% endif %}
+      <span class="text-sm text-slate-300">{{ task.user.get_full_name|default:task.user.username }}</span>
+      {% if task.assignee %}
+        <span class="text-xs text-slate-500">→</span>
+        <span class="text-sm text-slate-200">{{ task.assignee.get_full_name|default:task.assignee.username }}</span>
+      {% endif %}
+    </div>
+    {% if request.user.is_staff or request.user.pk == task.user_id or request.user.pk == task.assignee_id %}
+      <button
+        class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-white/10"
+        hx-get="{% url 'tasks:row_edit' task.pk %}"
+        hx-target="#task-{{ task.pk }}"
+        hx-swap="outerHTML"
+      >Edit</button>
+    {% endif %}
+
+    <!-- HTMX quick delete button (POST) -->
+    {% if request.user.is_staff or request.user.pk == task.user_id or request.user.pk == task.assignee_id %}
+    <form
+      action="{% url 'tasks:delete_htmx' task.pk %}"
+      method="post"
+      hx-post="{% url 'tasks:delete_htmx' task.pk %}"
+      hx-target="#tasks-list > ul"
+      hx-swap="outerHTML"
+    >
+      {% csrf_token %}
+      <button type="submit" class="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-200 hover:bg-rose-500/20" aria-label="Delete task {{ task.title }}">Delete</button>
+    </form>
+    {% endif %}
+  </div>
+</li>

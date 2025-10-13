@@ -630,10 +630,14 @@
             @click.prevent="dropdownOpen = ! dropdownOpen"
           >
             <span class="mr-3 h-11 w-11 overflow-hidden rounded-full">
-              <img src="{% static 'media/user/user-bgerdes.png' %}" alt="User" height="44" width="44" />
+              {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}" height="44" width="44" class="h-full w-full object-cover" />
+              {% else %}
+                <img src="{% static 'media/user/user-bgerdes.png' %}" alt="{{ user.get_full_name|default:user.username }}" height="44" width="44" class="h-full w-full object-cover" />
+              {% endif %}
             </span>
 
-            <span class="text-theme-sm mr-1 block font-medium"> Brian </span>
+            <span class="text-theme-sm mr-1 block font-medium"> {{ user.get_full_name|default:user.username }} </span>
 
             <svg
               :class="dropdownOpen && 'rotate-180'"
@@ -663,12 +667,12 @@
               <span
                 class="text-theme-sm block font-medium text-gray-700 dark:text-gray-400"
               >
-                Brian Gerdes
+                {{ user.get_full_name|default:user.username }}
               </span>
               <span
                 class="text-theme-xs mt-0.5 block text-gray-500 dark:text-gray-400"
               >
-                bgerdes@cityofpa.us
+                {{ user.email }}
               </span>
             </div>
 

@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.cases",
     "apps.partials_viewer",
     "apps.blog",
+    "apps.tasks",
     # Third-party
     "rest_framework",
     "django_filters",
@@ -80,6 +81,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.tasks.context_processors.tasks_badge",
             ],
         },
     },

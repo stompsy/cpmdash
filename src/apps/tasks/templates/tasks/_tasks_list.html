@@ -1,0 +1,7 @@
+<ul class="mt-5 divide-y divide-white/5">
+  {% for task in tasks %}
+    {% include "tasks/_task_item.html" with task=task %}
+  {% empty %}
+    <li class="py-2 text-slate-400">No tasks yet. Add your first task above.</li>
+  {% endfor %}
+</ul>

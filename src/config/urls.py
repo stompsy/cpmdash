@@ -15,6 +15,7 @@ urlpatterns = [
     path("dashboard/", include("apps.dashboard.urls")),
     path("partials/", include("apps.partials_viewer.urls")),
     path("blog/", include("apps.blog.urls")),
+    path("tasks/", include("apps.tasks.urls")),
     path("", core_overview, name="home"),
     path("cases/", include("apps.cases.urls")),
 ]

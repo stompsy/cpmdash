@@ -1,0 +1,22 @@
+<form
+  method="post"
+  action=""
+  hx-post=""
+  hx-target="#tasks-list > ul"
+  hx-swap="afterbegin"
+  class="flex flex-col gap-3"
+  x-data="{ expanded: false }"
+>
+  {% csrf_token %}
+  <div class="flex items-center gap-3">
+    <div class="grow">{{ form.title }}</div>
+    <button class="shrink-0 inline-flex items-center gap-2 rounded-full bg-brand-500 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-brand-500/30 transition hover:bg-brand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-300">Add</button>
+  </div>
+  <div class="grid grid-cols-12 gap-3">
+    <div class="col-span-3">{{ form.priority }}</div>
+    <div class="col-span-3">{{ form.due_date }}</div>
+    <div class="col-span-6">{{ form.assignee }}</div>
+  </div>
+  <div x-show="expanded" x-collapse class="w-full">{{ form.description }}</div>
+  <button type="button" @click="expanded = !expanded" class="self-start text-xs text-brand-200/90 hover:text-brand-100" x-text="expanded ? 'Hide details' : 'Add details'"></button>
+</form>

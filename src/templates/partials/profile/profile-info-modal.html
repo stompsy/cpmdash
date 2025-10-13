@@ -38,7 +38,7 @@
         Update your details to keep your profile up-to-date.
       </p>
     </div>
-    <form method="post" action="{% url 'dashboard:user_profile' %}" enctype="multipart/form-data" class="flex flex-col">
+  <form method="post" action="{% url 'dashboard:user_profile' %}" enctype="multipart/form-data" class="flex flex-col" x-data="{ previewUrl: {% if request.user.avatar %}'{{ request.user.avatar.url }}'{% else %}''{% endif %} }">
       {% csrf_token %}
       <div class="custom-scrollbar h-[450px] overflow-y-auto px-2">
         <div>
@@ -192,12 +192,18 @@
 
             <div class="col-span-2">
               <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Avatar</label>
-              <input
-                type="file"
-                name="avatar"
-                accept="image/*"
-                class="file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-500 file:text-white hover:file:bg-brand-600 dark:file:bg-brand-600 dark:hover:file:bg-brand-700 dark:bg-gray-900 dark:text-white/90 block w-full text-sm text-gray-800 border border-gray-300 rounded-lg cursor-pointer bg-transparent focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700"
-              />
+              <div class="flex items-center gap-4">
+                <div class="h-16 w-16 overflow-hidden rounded-full ring-1 ring-white/10 bg-gray-200 dark:bg-gray-800">
+                  <img x-show="previewUrl" :src="previewUrl" alt="Avatar preview" height="64" width="64" class="h-full w-full object-cover" />
+                </div>
+                <input
+                  type="file"
+                  name="avatar"
+                  accept="image/*"
+                  @change="const f = $event.target.files[0]; if (f) { const reader = new FileReader(); reader.onload = e => { previewUrl = e.target.result }; reader.readAsDataURL(f); }"
+                  class="file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-500 file:text-white hover:file:bg-brand-600 dark:file:bg-brand-600 dark:hover:file:bg-brand-700 dark:bg-gray-900 dark:text-white/90 block w-full text-sm text-gray-800 border border-gray-300 rounded-lg cursor-pointer bg-transparent focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700"
+                />
+              </div>
             </div>
           </div>
         </div>
