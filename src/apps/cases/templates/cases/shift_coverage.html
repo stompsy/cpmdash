@@ -3,6 +3,8 @@
 {% block pageName %}shiftCoverage{% endblock pageName %}
 {% block title %}Shift Coverage{% endblock title %}
 {% block content %}
+    {% include "dashboard/odreferrals_shift_coverage.html" %}
+{% comment %}
     <!-- Introduction - Full Width -->
     <section class="col-span-12">
         <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 sm:px-4 lg:px-12 py-20 lg:overflow-visible">
@@ -564,4 +566,5 @@
             stop-opacity: 1;
         }
     </style>
+{% endcomment %}
 {% endblock content %}

@@ -28,7 +28,9 @@ class User(AbstractUser):
 
     # Profile fields
     bio = models.TextField(blank=True, default="")
-    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+    # Save uploaded avatars under MEDIA_ROOT/user so they are served via MEDIA_URL.
+    # Fallback avatars remain in the static pipeline under static/media/user.
+    avatar = models.ImageField(upload_to="user/", blank=True, null=True)
 
     def __str__(self) -> str:  # pragma: no cover - trivial
         return self.get_username()

@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from apps.core.urls import about_urlpatterns
+from apps.core.views import overview as core_overview
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -12,11 +12,11 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
     path("api/", include("apps.core.urls")),
-    path("about/", include((about_urlpatterns, "about"), namespace="about")),
     path("dashboard/", include("apps.dashboard.urls")),
     path("partials/", include("apps.partials_viewer.urls")),
     path("blog/", include("apps.blog.urls")),
-    path("", include("apps.cases.urls")),
+    path("", core_overview, name="home"),
+    path("cases/", include("apps.cases.urls")),
 ]
 
 if settings.DEBUG:

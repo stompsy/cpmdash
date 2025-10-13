@@ -10,6 +10,7 @@ from .views import (
     opshield,
     repeatods,
     shiftcoverage,
+    timeline,
 )
 
 app_name = "cases"
@@ -22,6 +23,7 @@ urlpatterns = [
     path("repeats/", repeatods, name="repeatods"),
     path("shiftcoverage/", shiftcoverage, name="shiftcoverage"),
     path("costsavings/", costsavings, name="costsavings"),
+    path("timeline/", timeline, name="timeline"),
     # HTMX Chart Update Endpoints
     path("charts/heatmap/", htmx_heatmap_chart, name="htmx_heatmap"),
     path("charts/hourly-breakdown/", htmx_hourly_breakdown_chart, name="htmx_hourly_breakdown"),

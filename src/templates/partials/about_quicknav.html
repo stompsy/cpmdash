@@ -1,14 +1,1 @@
-{% comment %}
-Small quick navigation for About section pages. Expects `pageName` in template blocks.
-Active states: aboutContact, aboutMission, aboutGoals.
-{% endcomment %}
-<nav class="col-span-12 -mb-2">
-  <div class="inline-flex flex-wrap gap-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-1">
-    <a href="{% url 'about:contact' %}"
-       class="px-3 py-1.5 text-sm rounded-lg {% if active == 'aboutContact' %}bg-indigo-600 text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800{% endif %}">Contact</a>
-    <a href="{% url 'about:mission' %}"
-       class="px-3 py-1.5 text-sm rounded-lg {% if active == 'aboutMission' %}bg-indigo-600 text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800{% endif %}">Mission</a>
-    <a href="{% url 'about:goals' %}"
-       class="px-3 py-1.5 text-sm rounded-lg {% if active == 'aboutGoals' %}bg-indigo-600 text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800{% endif %}">Program Goals</a>
-  </div>
-  </nav>
+{% comment %}Legacy About quicknav removed. Intentional placeholder during cleanup; template no longer used.{% endcomment %}

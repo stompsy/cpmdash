@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pytest
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
 
@@ -21,6 +22,10 @@ def test_basic_dashboard_pages(client):
         "dashboard:authentication",
     ]
     for name in names:
+        if name == "dashboard:user_profile":
+            User = get_user_model()
+            user = User.objects.create(username="testuser", email="test@example.com")
+            client.force_login(user)
         resp = client.get(reverse(name))
         assert resp.status_code == 200, name
 

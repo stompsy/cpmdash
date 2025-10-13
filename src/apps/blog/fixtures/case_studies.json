@@ -1,462 +1,560 @@
 [
-  {
-    "model": "blog.tag",
-    "pk": 1,
-    "fields": {
-      "name": "Impact",
-      "slug": "impact"
+    {
+        "model": "blog.tag",
+        "pk": 1,
+        "fields": {
+            "name": "Impact",
+            "slug": "impact"
+        }
+    },
+    {
+        "model": "blog.tag",
+        "pk": 2,
+        "fields": {
+            "name": "Community Partnerships",
+            "slug": "community-partnerships"
+        }
+    },
+    {
+        "model": "blog.tag",
+        "pk": 3,
+        "fields": {
+            "name": "Data Insights",
+            "slug": "data-insights"
+        }
+    },
+    {
+        "model": "blog.tag",
+        "pk": 4,
+        "fields": {
+            "name": "Harm Reduction",
+            "slug": "harm-reduction"
+        }
+    },
+    {
+        "model": "blog.tag",
+        "pk": 5,
+        "fields": {
+            "name": "Behavioral Health",
+            "slug": "behavioral-health"
+        }
+    },
+    {
+        "model": "blog.tag",
+        "pk": 6,
+        "fields": {
+            "name": "Rural Access",
+            "slug": "rural-access"
+        }
+    },
+    {
+        "model": "blog.tag",
+        "pk": 7,
+        "fields": {
+            "name": "Technology",
+            "slug": "technology"
+        }
+    },
+    {
+        "model": "blog.tag",
+        "pk": 8,
+        "fields": {
+            "name": "Training & QA",
+            "slug": "training-qa"
+        }
+    },
+    {
+        "model": "blog.tag",
+        "pk": 9,
+        "fields": {
+            "name": "Resource Navigation",
+            "slug": "resource-navigation"
+        }
+    },
+    {
+        "model": "blog.tag",
+        "pk": 10,
+        "fields": {
+            "name": "Outreach Strategy",
+            "slug": "outreach-strategy"
+        }
+    },
+    {
+        "model": "accounts.user",
+        "pk": 1,
+        "fields": {
+            "username": "brian.gerdes",
+            "first_name": "Brian",
+            "last_name": "Gerdes",
+            "email": "bgerdes@example.com",
+            "password": "!",
+            "is_superuser": false,
+            "is_staff": true,
+            "is_active": true,
+            "last_login": null,
+            "date_joined": "2025-08-23T00:00:00Z",
+            "bio": "Community paramedicine analyst and writer. Focused on overdose response, care coordination, and data storytelling.",
+            "avatar": ""
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 1,
+        "fields": {
+            "title": "Bridging Care After Overdoses",
+            "slug": "bridging-care-after-overdoses",
+            "excerpt": "How our crews close the loop within 48 hours of an overdose to re-engage patients in care.",
+            "content": "### Stabilizing the first 48 hours\n\nWithin two hours of an overdose notification, a community paramedic calls the patient and family to review what happened, reinforce safety planning, and schedule a home visit.\n\nDuring the visit, the field clinician screens for withdrawal risk, connects the patient to medication-assisted treatment partners, and leaves a harm-reduction bundle with naloxone, fentanyl test strips, and safe-use education.\n\n### Results in the first quarter\n\n* 78% of participants reconnected with primary care within 14 days.\n* Repeat 911 calls dropped by 42% for enrolled patients.\n* Families reported higher confidence managing relapse warning signs.",
+            "hero_image": "",
+            "published_at": "2024-01-05T10:00:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": true,
+            "featured_rank": 1,
+            "created_at": "2024-01-05T09:45:00Z",
+            "updated_at": "2024-01-05T09:45:00Z",
+            "tags": [
+                1,
+                4,
+                9
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 2,
+        "fields": {
+            "title": "Mobile Crisis Co-Response Pilot",
+            "slug": "mobile-crisis-co-response-pilot",
+            "excerpt": "Pairing paramedics with behavioral health clinicians reduced involuntary transports across the county.",
+            "content": "### Building a shared response\n\nOur task force designed a two-car response that pairs a CPM paramedic with a behavioral health clinician on peak call days. Dispatch triages mental health calls to the team, who use a script emphasizing voluntary services and de-escalation.\n\n### What changed\n\n* 63% of encounters diverted from emergency departments.\n* Law enforcement requests for backup fell by 38%.\n* Follow-up survey scores showed improved client trust and feelings of safety.",
+            "hero_image": "",
+            "published_at": "2024-01-12T14:30:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": true,
+            "featured_rank": 2,
+            "created_at": "2024-01-12T13:55:00Z",
+            "updated_at": "2024-01-12T13:55:00Z",
+            "tags": [
+                2,
+                5,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 3,
+        "fields": {
+            "title": "Rural Wellness Check Program",
+            "slug": "rural-wellness-check-program",
+            "excerpt": "A monthly driving loop brings preventative care, vaccines, and social work consults to remote households.",
+            "content": "### A loop that meets residents where they live\n\nWe mapped the farthest census blocks with limited broadband and designed a reliable schedule, texting reminders through the sheriff's alert system and posting flyers at the co-op. The team carries point-of-care testing, vaccine coolers, and broadband hotspots.\n\n### Outcomes to date\n\n* 94 unique residents established care plans with the team.\n* Hypertension detection doubled compared to prior quarters.\n* Local churches now host quarterly resource fairs alongside the visits.",
+            "hero_image": "",
+            "published_at": "2024-01-19T09:15:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": true,
+            "featured_rank": 3,
+            "created_at": "2024-01-19T08:40:00Z",
+            "updated_at": "2024-01-19T08:40:00Z",
+            "tags": [
+                1,
+                2,
+                6
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 4,
+        "fields": {
+            "title": "Data Sharing With Local Hospitals",
+            "slug": "data-sharing-with-local-hospitals",
+            "excerpt": "Real-time dashboards align inpatient discharge planning with field follow-up, closing the communication gap.",
+            "content": "### Unlocking the discharge gap\n\nMemorandums of understanding allowed CPM analysts to receive same-day discharge notifications for high-risk patients. We built an automated integration from the hospital ADT feed to our case management platform.\n\n### Impact after six weeks\n\n* Average follow-up visit scheduled 18 hours sooner.\n* Missed medication reconciliations dropped by 57%.\n* Hospital partners now reference CPM engagement in their readmission reports.",
+            "hero_image": "",
+            "published_at": "2024-01-26T16:00:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": true,
+            "featured_rank": 4,
+            "created_at": "2024-01-26T15:10:00Z",
+            "updated_at": "2024-01-26T15:10:00Z",
+            "tags": [
+                2,
+                3,
+                7
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 5,
+        "fields": {
+            "title": "Naloxone Leave-Behind Expansion",
+            "slug": "naloxone-leave-behind-expansion",
+            "excerpt": "Scaling leave-behind kits required inventory systems, peer messaging, and careful follow-up scheduling.",
+            "content": "### Scaling distribution responsibly\n\nWe trained every field provider on a brief script that covers overdose prevention, stigma reduction, and safe storage. Inventory is tracked in our ePCR so resupply happens automatically when stock dips below five kits in any district cache.\n\n### Early signal\n\n* 612 kits distributed in the first two months.\n* 41 documented community reversals reported through our callback hotline.\n* EMS crews report higher comfort discussing substance use with families.",
+            "hero_image": "",
+            "published_at": "2024-02-02T11:05:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-02-02T10:30:00Z",
+            "updated_at": "2024-02-02T10:30:00Z",
+            "tags": [
+                1,
+                4,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 6,
+        "fields": {
+            "title": "Stabilizing Housing Transitions",
+            "slug": "stabilizing-housing-transitions",
+            "excerpt": "How CPM teams partner with housing navigators to keep medically fragile clients from falling through the cracks.",
+            "content": "### The problem we saw\n\nClients leaving respite hotels often lost contact information, missed medication drops, and skipped wound care appointments. CPM liaisons now attend weekly housing case conferences and share a joint tracking sheet.\n\n### Lessons learned\n\n* Warm handoffs within 24 hours kept 82% of clients connected to services.\n* Transitional phone kits and charging banks proved more useful than grocery vouchers.\n* The housing agency now includes CPM staff in its landlord onboarding trainings.",
+            "hero_image": "",
+            "published_at": "2024-02-06T17:20:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-02-06T16:45:00Z",
+            "updated_at": "2024-02-06T16:45:00Z",
+            "tags": [
+                2,
+                9,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 7,
+        "fields": {
+            "title": "Behavioral Health Telehealth Visits",
+            "slug": "behavioral-health-telehealth-visits",
+            "excerpt": "Tablets and encrypted hotspots now bring therapy sessions directly into living rooms after a crisis call.",
+            "content": "### Building the workflow\n\nTelehealth carts ride with two CPM units daily. After medical clearance, clinicians introduce a remote therapist via video, with the paramedic supporting grounding techniques and ensuring consent.\n\n### Why it matters\n\n* 71% of clients attended a follow-up telehealth appointment within seven days.\n* Crisis recidivism for the cohort fell by one-third.\n* The behavioral health agency is expanding the model to their peer specialist teams.",
+            "hero_image": "",
+            "published_at": "2024-02-09T13:40:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-02-09T13:05:00Z",
+            "updated_at": "2024-02-09T13:05:00Z",
+            "tags": [
+                5,
+                7,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 8,
+        "fields": {
+            "title": "Community Paramedicine for Seniors",
+            "slug": "community-paramedicine-for-seniors",
+            "excerpt": "Fall-risk screening, med reconciliation, and caregiver coaching helped seniors age safely in place.",
+            "content": "### Designing the visit\n\nEvery senior enrolled receives a comprehensive medication review, home safety scan, and fall strength assessment. Findings sync to our analytics dashboards so area aging partners see trends.\n\n### Impact\n\n* EMS lift-assist calls down 29% among enrollees.\n* 54% of seniors adopted balance exercises recommended by our physical therapist partners.\n* Caregivers noted improved confidence managing chronic conditions.",
+            "hero_image": "",
+            "published_at": "2024-02-13T15:25:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-02-13T14:50:00Z",
+            "updated_at": "2024-02-13T14:50:00Z",
+            "tags": [
+                1,
+                6,
+                9
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 9,
+        "fields": {
+            "title": "Post-Discharge Coaching Calls",
+            "slug": "post-discharge-coaching-calls",
+            "excerpt": "A five-call sequence helps patients navigate medication changes and appointments after leaving the hospital.",
+            "content": "### Five touchpoints that matter\n\nDay 1 focuses on confirming medications and transportation. Day 3 aligns specialty follow-ups, Day 7 checks symptom management, and Day 21 brings in social work consults. A final call at Day 45 reviews future care goals.\n\n### Results\n\n* Appointment adherence improved by 24 percentage points.\n* Only 12% of participants required unplanned ED care within 30 days.\n* Clinicians reported better insight into social barriers like food and utilities.",
+            "hero_image": "",
+            "published_at": "2024-02-16T10:10:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-02-16T09:35:00Z",
+            "updated_at": "2024-02-16T09:35:00Z",
+            "tags": [
+                1,
+                3,
+                9
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 10,
+        "fields": {
+            "title": "Neighborhood Resource Pop-Ups",
+            "slug": "neighborhood-resource-pop-ups",
+            "excerpt": "Pop-up stations in library parking lots delivered screenings, vaccinations, and navigation assistance.",
+            "content": "### How pop-ups worked\n\nWe staged events in parking lots adjacent to frequent 911 hotspots. Each pop-up included CPM staff, nurses, benefits specialists, and peer navigators. Residents could walk up, get a health screening, and leave with an action plan.\n\n### Community response\n\n* Average attendance hit 74 residents per pop-up.\n* 46% scheduled a follow-up with our resource navigators.\n* Local schools now request joint pop-ups during parent nights.",
+            "hero_image": "",
+            "published_at": "2024-02-20T18:55:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-02-20T18:10:00Z",
+            "updated_at": "2024-02-20T18:10:00Z",
+            "tags": [
+                2,
+                9,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 11,
+        "fields": {
+            "title": "Outreach in Encampments",
+            "slug": "outreach-in-encampments",
+            "excerpt": "Weekly rounds with outreach teams emphasized wound care, hydration, and rapid connection to MAT partners.",
+            "content": "### Reaching unsheltered neighbors\n\nCPM medics partnered with harm reduction peers to visit encampments at consistent hours. We built trust through wound care clinics, hydration kits, and rapid referrals to low-barrier clinics.\n\n### Early wins\n\n* 37 residents initiated medication-assisted treatment after encampment outreach.\n* EMS calls from the pilot area decreased by 18%.\n* Peer navigators now co-lead health education mini-sessions each week.",
+            "hero_image": "",
+            "published_at": "2024-02-23T11:45:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-02-23T11:05:00Z",
+            "updated_at": "2024-02-23T11:05:00Z",
+            "tags": [
+                4,
+                9,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 12,
+        "fields": {
+            "title": "High Utilizer Collaborative",
+            "slug": "high-utilizer-collaborative",
+            "excerpt": "A multi-agency task force aligned care plans for the 25 most frequent EMS callers.",
+            "content": "### Coordinated case conferencing\n\nMonthly meetings bring together hospitalists, behavioral health, housing, and justice partners. CPM staff present data visualizations highlighting call patterns, social determinants, and progress on shared goals.\n\n### Impact\n\n* Combined EMS calls dropped 36% in three months.\n* 12 individuals transitioned into supportive housing.\n* Partners now share a unified progress note in the CPM care platform.",
+            "hero_image": "",
+            "published_at": "2024-02-27T09:20:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-02-27T08:45:00Z",
+            "updated_at": "2024-02-27T08:45:00Z",
+            "tags": [
+                1,
+                2,
+                3
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 13,
+        "fields": {
+            "title": "Medication Reconciliation Blitz",
+            "slug": "medication-reconciliation-blitz",
+            "excerpt": "A 10-day surge targeted polypharmacy risks for cardiac and COPD patients recently discharged.",
+            "content": "### Why a blitz\n\nCardiology flagged repeated readmissions tied to medication confusion. CPM teams conducted home visits for every high-risk patient, reconciling prescriptions, checking pill organizers, and updating providers.\n\n### Key outcomes\n\n* 89% of medication lists were corrected on the spot.\n* Patients reported fewer side effects and improved adherence.\n* Cardiology added CPM reconciliation to its standard discharge checklist.",
+            "hero_image": "",
+            "published_at": "2024-03-01T12:35:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-03-01T12:00:00Z",
+            "updated_at": "2024-03-01T12:00:00Z",
+            "tags": [
+                1,
+                3,
+                9
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 14,
+        "fields": {
+            "title": "Safe Sleep Education Initiative",
+            "slug": "safe-sleep-education-initiative",
+            "excerpt": "Community paramedics partnered with doulas to deliver safe sleep coaching and supplies to new parents.",
+            "content": "### What the visits include\n\nCPM clinicians visit within the first week after birth, demonstrating safe sleep setups, checking smoke alarms, and providing wearable blankets. Families receive magnet cards with our nurse advice line.\n\n### Outcomes\n\n* 96 families completed the education pathway in the first quarter.\n* Pediatricians report fewer unsafe sleep observations at well-child checks.\n* Doulas co-facilitate group sessions hosted at neighborhood hubs.",
+            "hero_image": "",
+            "published_at": "2024-03-05T14:00:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-03-05T13:15:00Z",
+            "updated_at": "2024-03-05T13:15:00Z",
+            "tags": [
+                2,
+                9,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 15,
+        "fields": {
+            "title": "Transportation Bridge Vouchers",
+            "slug": "transportation-bridge-vouchers",
+            "excerpt": "Emergency ride vouchers filled the gap before Medicaid transportation approvals kicked in.",
+            "content": "### Bridging the gap\n\nCPM social workers created a micro-voucher program for urgent appointments. Paramedics can activate a ride in under two minutes through a dedicated app. Riders get text confirmations and can request a return trip.\n\n### Early data\n\n* 211 bridge rides completed in 45 days.\n* 87% of recipients made it to specialty appointments on time.\n* The Medicaid broker is now piloting an expedited authorization flow with CPM support.",
+            "hero_image": "",
+            "published_at": "2024-03-08T19:30:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-03-08T18:55:00Z",
+            "updated_at": "2024-03-08T18:55:00Z",
+            "tags": [
+                1,
+                9,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 16,
+        "fields": {
+            "title": "On-Scene MOUD Initiation",
+            "slug": "on-scene-moud-initiation",
+            "excerpt": "Paramedics now offer buprenorphine induction on scene with telehealth prescriber backup.",
+            "content": "### The protocol\n\nAfter assessing withdrawal, CPM medics connect with an on-call addiction provider through secure video. The provider confirms eligibility, co-signs the induction, and schedules rapid follow-up at the bridge clinic.\n\n### Impact\n\n* 58 individuals started buprenorphine in the first eight weeks.\n* 72% attended their bridge clinic appointment within 72 hours.\n* Law enforcement partners report fewer repeat overdose responses for these patients.",
+            "hero_image": "",
+            "published_at": "2024-03-12T11:50:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-03-12T11:10:00Z",
+            "updated_at": "2024-03-12T11:10:00Z",
+            "tags": [
+                4,
+                5,
+                7
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 17,
+        "fields": {
+            "title": "Peer Navigator Shadowing",
+            "slug": "peer-navigator-shadowing",
+            "excerpt": "Embedding peers in CPM ride-alongs deepened trust and created new referral pathways.",
+            "content": "### How shadowing works\n\nPeer navigators join CPM shifts twice a week, introducing themselves during low-acuity calls and offering follow-up support. After the call, peers document insights in a shared note visible to both teams.\n\n### What we learned\n\n* Clients frequently accept peer call-backs when introduced in person.\n* Peers identified resource gaps faster than our clinical team alone.\n* The practice improved CPM understanding of lived experience perspectives.",
+            "hero_image": "",
+            "published_at": "2024-03-15T16:40:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-03-15T16:00:00Z",
+            "updated_at": "2024-03-15T16:00:00Z",
+            "tags": [
+                2,
+                4,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 18,
+        "fields": {
+            "title": "Summer Cooling Support Teams",
+            "slug": "summer-cooling-support-teams",
+            "excerpt": "During heat waves, CPM units distributed cooling kits and coordinated shelter transportation.",
+            "content": "### Rapid response in extreme heat\n\nHeat alerts trigger a surge schedule with cooling supply drops, hydration checks, and transport coordination to cooling centers. Data analysts map hotspot blocks so teams stage proactively.\n\n### Results\n\n* 540 residents received cooling kits in the first heat advisory.\n* Heat-related EMS transports in target zones dropped 33%.\n* Community partners now host joint preparedness workshops with CPM teams.",
+            "hero_image": "",
+            "published_at": "2024-03-19T13:05:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-03-19T12:20:00Z",
+            "updated_at": "2024-03-19T12:20:00Z",
+            "tags": [
+                1,
+                6,
+                10
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 19,
+        "fields": {
+            "title": "EMS-Police Joint Dashboard",
+            "slug": "ems-police-joint-dashboard",
+            "excerpt": "A shared analytics view improved situational awareness and highlighted hotspots for proactive outreach.",
+            "content": "### Integrating data streams\n\nThe CPM analytics team combined CAD data from EMS and law enforcement to visualize overlapping calls, response times, and outcomes. Weekly briefings now include both agencies reviewing hotspots and co-designing outreach.\n\n### Benefits\n\n* Response duplication decreased by 21%.\n* Outreach teams prioritize blocks with rising behavioral health calls.\n* Leadership now approves joint grants with stronger data backing.",
+            "hero_image": "",
+            "published_at": "2024-03-22T09:55:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-03-22T09:15:00Z",
+            "updated_at": "2024-03-22T09:15:00Z",
+            "tags": [
+                2,
+                3,
+                7
+            ]
+        }
+    },
+    {
+        "model": "blog.casestudy",
+        "pk": 20,
+        "fields": {
+            "title": "Resilience Workshops for Caregivers",
+            "slug": "resilience-workshops-for-caregivers",
+            "excerpt": "Monthly workshops give caregivers stress management skills and direct access to CPM nurses and social workers.",
+            "content": "### Designing supportive sessions\n\nSessions blend stress management coaching, resource navigation, and peer storytelling. Caregivers leave with a written plan, phone list, and scheduled check-in call from our CPM nurse.\n\n### Impact to date\n\n* 148 caregivers attended in the first quarter.\n* Reported caregiver burnout scores improved by 27%.\n* Referrals to respite services doubled compared to last year.",
+            "hero_image": "",
+            "published_at": "2024-03-26T17:10:00Z",
+            "is_published": true,
+            "author": 1,
+            "featured": false,
+            "featured_rank": 0,
+            "created_at": "2024-03-26T16:35:00Z",
+            "updated_at": "2024-03-26T16:35:00Z",
+            "tags": [
+                1,
+                9,
+                10
+            ]
+        }
     }
-  },
-  {
-    "model": "blog.tag",
-    "pk": 2,
-    "fields": {
-      "name": "Community Partnerships",
-      "slug": "community-partnerships"
-    }
-  },
-  {
-    "model": "blog.tag",
-    "pk": 3,
-    "fields": {
-      "name": "Data Insights",
-      "slug": "data-insights"
-    }
-  },
-  {
-    "model": "blog.tag",
-    "pk": 4,
-    "fields": {
-      "name": "Harm Reduction",
-      "slug": "harm-reduction"
-    }
-  },
-  {
-    "model": "blog.tag",
-    "pk": 5,
-    "fields": {
-      "name": "Behavioral Health",
-      "slug": "behavioral-health"
-    }
-  },
-  {
-    "model": "blog.tag",
-    "pk": 6,
-    "fields": {
-      "name": "Rural Access",
-      "slug": "rural-access"
-    }
-  },
-  {
-    "model": "blog.tag",
-    "pk": 7,
-    "fields": {
-      "name": "Technology",
-      "slug": "technology"
-    }
-  },
-  {
-    "model": "blog.tag",
-    "pk": 8,
-    "fields": {
-      "name": "Training & QA",
-      "slug": "training-qa"
-    }
-  },
-  {
-    "model": "blog.tag",
-    "pk": 9,
-    "fields": {
-      "name": "Resource Navigation",
-      "slug": "resource-navigation"
-    }
-  },
-  {
-    "model": "blog.tag",
-    "pk": 10,
-    "fields": {
-      "name": "Outreach Strategy",
-      "slug": "outreach-strategy"
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 1,
-    "fields": {
-      "title": "Bridging Care After Overdoses",
-      "slug": "bridging-care-after-overdoses",
-      "excerpt": "How our crews close the loop within 48 hours of an overdose to re-engage patients in care.",
-      "content": "### Stabilizing the first 48 hours\n\nWithin two hours of an overdose notification, a community paramedic calls the patient and family to review what happened, reinforce safety planning, and schedule a home visit.\n\nDuring the visit, the field clinician screens for withdrawal risk, connects the patient to medication-assisted treatment partners, and leaves a harm-reduction bundle with naloxone, fentanyl test strips, and safe-use education.\n\n### Results in the first quarter\n\n* 78% of participants reconnected with primary care within 14 days.\n* Repeat 911 calls dropped by 42% for enrolled patients.\n* Families reported higher confidence managing relapse warning signs.",
-      "hero_image": "",
-      "published_at": "2024-01-05T10:00:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": true,
-      "featured_rank": 1,
-      "created_at": "2024-01-05T09:45:00Z",
-      "updated_at": "2024-01-05T09:45:00Z",
-      "tags": [1, 4, 9]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 2,
-    "fields": {
-      "title": "Mobile Crisis Co-Response Pilot",
-      "slug": "mobile-crisis-co-response-pilot",
-      "excerpt": "Pairing paramedics with behavioral health clinicians reduced involuntary transports across the county.",
-      "content": "### Building a shared response\n\nOur task force designed a two-car response that pairs a CPM paramedic with a behavioral health clinician on peak call days. Dispatch triages mental health calls to the team, who use a script emphasizing voluntary services and de-escalation.\n\n### What changed\n\n* 63% of encounters diverted from emergency departments.\n* Law enforcement requests for backup fell by 38%.\n* Follow-up survey scores showed improved client trust and feelings of safety.",
-      "hero_image": "",
-      "published_at": "2024-01-12T14:30:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": true,
-      "featured_rank": 2,
-      "created_at": "2024-01-12T13:55:00Z",
-      "updated_at": "2024-01-12T13:55:00Z",
-      "tags": [2, 5, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 3,
-    "fields": {
-      "title": "Rural Wellness Check Program",
-      "slug": "rural-wellness-check-program",
-      "excerpt": "A monthly driving loop brings preventative care, vaccines, and social work consults to remote households.",
-      "content": "### A loop that meets residents where they live\n\nWe mapped the farthest census blocks with limited broadband and designed a reliable schedule, texting reminders through the sheriff's alert system and posting flyers at the co-op. The team carries point-of-care testing, vaccine coolers, and broadband hotspots.\n\n### Outcomes to date\n\n* 94 unique residents established care plans with the team.\n* Hypertension detection doubled compared to prior quarters.\n* Local churches now host quarterly resource fairs alongside the visits.",
-      "hero_image": "",
-      "published_at": "2024-01-19T09:15:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": true,
-      "featured_rank": 3,
-      "created_at": "2024-01-19T08:40:00Z",
-      "updated_at": "2024-01-19T08:40:00Z",
-      "tags": [1, 2, 6]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 4,
-    "fields": {
-      "title": "Data Sharing With Local Hospitals",
-      "slug": "data-sharing-with-local-hospitals",
-      "excerpt": "Real-time dashboards align inpatient discharge planning with field follow-up, closing the communication gap.",
-      "content": "### Unlocking the discharge gap\n\nMemorandums of understanding allowed CPM analysts to receive same-day discharge notifications for high-risk patients. We built an automated integration from the hospital ADT feed to our case management platform.\n\n### Impact after six weeks\n\n* Average follow-up visit scheduled 18 hours sooner.\n* Missed medication reconciliations dropped by 57%.\n* Hospital partners now reference CPM engagement in their readmission reports.",
-      "hero_image": "",
-      "published_at": "2024-01-26T16:00:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": true,
-      "featured_rank": 4,
-      "created_at": "2024-01-26T15:10:00Z",
-      "updated_at": "2024-01-26T15:10:00Z",
-      "tags": [2, 3, 7]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 5,
-    "fields": {
-      "title": "Naloxone Leave-Behind Expansion",
-      "slug": "naloxone-leave-behind-expansion",
-      "excerpt": "Scaling leave-behind kits required inventory systems, peer messaging, and careful follow-up scheduling.",
-      "content": "### Scaling distribution responsibly\n\nWe trained every field provider on a brief script that covers overdose prevention, stigma reduction, and safe storage. Inventory is tracked in our ePCR so resupply happens automatically when stock dips below five kits in any district cache.\n\n### Early signal\n\n* 612 kits distributed in the first two months.\n* 41 documented community reversals reported through our callback hotline.\n* EMS crews report higher comfort discussing substance use with families.",
-      "hero_image": "",
-      "published_at": "2024-02-02T11:05:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-02-02T10:30:00Z",
-      "updated_at": "2024-02-02T10:30:00Z",
-      "tags": [1, 4, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 6,
-    "fields": {
-      "title": "Stabilizing Housing Transitions",
-      "slug": "stabilizing-housing-transitions",
-      "excerpt": "How CPM teams partner with housing navigators to keep medically fragile clients from falling through the cracks.",
-      "content": "### The problem we saw\n\nClients leaving respite hotels often lost contact information, missed medication drops, and skipped wound care appointments. CPM liaisons now attend weekly housing case conferences and share a joint tracking sheet.\n\n### Lessons learned\n\n* Warm handoffs within 24 hours kept 82% of clients connected to services.\n* Transitional phone kits and charging banks proved more useful than grocery vouchers.\n* The housing agency now includes CPM staff in its landlord onboarding trainings.",
-      "hero_image": "",
-      "published_at": "2024-02-06T17:20:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-02-06T16:45:00Z",
-      "updated_at": "2024-02-06T16:45:00Z",
-      "tags": [2, 9, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 7,
-    "fields": {
-      "title": "Behavioral Health Telehealth Visits",
-      "slug": "behavioral-health-telehealth-visits",
-      "excerpt": "Tablets and encrypted hotspots now bring therapy sessions directly into living rooms after a crisis call.",
-      "content": "### Building the workflow\n\nTelehealth carts ride with two CPM units daily. After medical clearance, clinicians introduce a remote therapist via video, with the paramedic supporting grounding techniques and ensuring consent.\n\n### Why it matters\n\n* 71% of clients attended a follow-up telehealth appointment within seven days.\n* Crisis recidivism for the cohort fell by one-third.\n* The behavioral health agency is expanding the model to their peer specialist teams.",
-      "hero_image": "",
-      "published_at": "2024-02-09T13:40:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-02-09T13:05:00Z",
-      "updated_at": "2024-02-09T13:05:00Z",
-      "tags": [5, 7, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 8,
-    "fields": {
-      "title": "Community Paramedicine for Seniors",
-      "slug": "community-paramedicine-for-seniors",
-      "excerpt": "Fall-risk screening, med reconciliation, and caregiver coaching helped seniors age safely in place.",
-      "content": "### Designing the visit\n\nEvery senior enrolled receives a comprehensive medication review, home safety scan, and fall strength assessment. Findings sync to our analytics dashboards so area aging partners see trends.\n\n### Impact\n\n* EMS lift-assist calls down 29% among enrollees.\n* 54% of seniors adopted balance exercises recommended by our physical therapist partners.\n* Caregivers noted improved confidence managing chronic conditions.",
-      "hero_image": "",
-      "published_at": "2024-02-13T15:25:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-02-13T14:50:00Z",
-      "updated_at": "2024-02-13T14:50:00Z",
-      "tags": [1, 6, 9]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 9,
-    "fields": {
-      "title": "Post-Discharge Coaching Calls",
-      "slug": "post-discharge-coaching-calls",
-      "excerpt": "A five-call sequence helps patients navigate medication changes and appointments after leaving the hospital.",
-      "content": "### Five touchpoints that matter\n\nDay 1 focuses on confirming medications and transportation. Day 3 aligns specialty follow-ups, Day 7 checks symptom management, and Day 21 brings in social work consults. A final call at Day 45 reviews future care goals.\n\n### Results\n\n* Appointment adherence improved by 24 percentage points.\n* Only 12% of participants required unplanned ED care within 30 days.\n* Clinicians reported better insight into social barriers like food and utilities.",
-      "hero_image": "",
-      "published_at": "2024-02-16T10:10:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-02-16T09:35:00Z",
-      "updated_at": "2024-02-16T09:35:00Z",
-      "tags": [1, 3, 9]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 10,
-    "fields": {
-      "title": "Neighborhood Resource Pop-Ups",
-      "slug": "neighborhood-resource-pop-ups",
-      "excerpt": "Pop-up stations in library parking lots delivered screenings, vaccinations, and navigation assistance.",
-      "content": "### How pop-ups worked\n\nWe staged events in parking lots adjacent to frequent 911 hotspots. Each pop-up included CPM staff, nurses, benefits specialists, and peer navigators. Residents could walk up, get a health screening, and leave with an action plan.\n\n### Community response\n\n* Average attendance hit 74 residents per pop-up.\n* 46% scheduled a follow-up with our resource navigators.\n* Local schools now request joint pop-ups during parent nights.",
-      "hero_image": "",
-      "published_at": "2024-02-20T18:55:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-02-20T18:10:00Z",
-      "updated_at": "2024-02-20T18:10:00Z",
-      "tags": [2, 9, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 11,
-    "fields": {
-      "title": "Outreach in Encampments",
-      "slug": "outreach-in-encampments",
-      "excerpt": "Weekly rounds with outreach teams emphasized wound care, hydration, and rapid connection to MAT partners.",
-      "content": "### Reaching unsheltered neighbors\n\nCPM medics partnered with harm reduction peers to visit encampments at consistent hours. We built trust through wound care clinics, hydration kits, and rapid referrals to low-barrier clinics.\n\n### Early wins\n\n* 37 residents initiated medication-assisted treatment after encampment outreach.\n* EMS calls from the pilot area decreased by 18%.\n* Peer navigators now co-lead health education mini-sessions each week.",
-      "hero_image": "",
-      "published_at": "2024-02-23T11:45:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-02-23T11:05:00Z",
-      "updated_at": "2024-02-23T11:05:00Z",
-      "tags": [4, 9, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 12,
-    "fields": {
-      "title": "High Utilizer Collaborative",
-      "slug": "high-utilizer-collaborative",
-      "excerpt": "A multi-agency task force aligned care plans for the 25 most frequent EMS callers.",
-      "content": "### Coordinated case conferencing\n\nMonthly meetings bring together hospitalists, behavioral health, housing, and justice partners. CPM staff present data visualizations highlighting call patterns, social determinants, and progress on shared goals.\n\n### Impact\n\n* Combined EMS calls dropped 36% in three months.\n* 12 individuals transitioned into supportive housing.\n* Partners now share a unified progress note in the CPM care platform.",
-      "hero_image": "",
-      "published_at": "2024-02-27T09:20:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-02-27T08:45:00Z",
-      "updated_at": "2024-02-27T08:45:00Z",
-      "tags": [1, 2, 3]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 13,
-    "fields": {
-      "title": "Medication Reconciliation Blitz",
-      "slug": "medication-reconciliation-blitz",
-      "excerpt": "A 10-day surge targeted polypharmacy risks for cardiac and COPD patients recently discharged.",
-      "content": "### Why a blitz\n\nCardiology flagged repeated readmissions tied to medication confusion. CPM teams conducted home visits for every high-risk patient, reconciling prescriptions, checking pill organizers, and updating providers.\n\n### Key outcomes\n\n* 89% of medication lists were corrected on the spot.\n* Patients reported fewer side effects and improved adherence.\n* Cardiology added CPM reconciliation to its standard discharge checklist.",
-      "hero_image": "",
-      "published_at": "2024-03-01T12:35:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-03-01T12:00:00Z",
-      "updated_at": "2024-03-01T12:00:00Z",
-      "tags": [1, 3, 9]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 14,
-    "fields": {
-      "title": "Safe Sleep Education Initiative",
-      "slug": "safe-sleep-education-initiative",
-      "excerpt": "Community paramedics partnered with doulas to deliver safe sleep coaching and supplies to new parents.",
-      "content": "### What the visits include\n\nCPM clinicians visit within the first week after birth, demonstrating safe sleep setups, checking smoke alarms, and providing wearable blankets. Families receive magnet cards with our nurse advice line.\n\n### Outcomes\n\n* 96 families completed the education pathway in the first quarter.\n* Pediatricians report fewer unsafe sleep observations at well-child checks.\n* Doulas co-facilitate group sessions hosted at neighborhood hubs.",
-      "hero_image": "",
-      "published_at": "2024-03-05T14:00:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-03-05T13:15:00Z",
-      "updated_at": "2024-03-05T13:15:00Z",
-      "tags": [2, 9, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 15,
-    "fields": {
-      "title": "Transportation Bridge Vouchers",
-      "slug": "transportation-bridge-vouchers",
-      "excerpt": "Emergency ride vouchers filled the gap before Medicaid transportation approvals kicked in.",
-      "content": "### Bridging the gap\n\nCPM social workers created a micro-voucher program for urgent appointments. Paramedics can activate a ride in under two minutes through a dedicated app. Riders get text confirmations and can request a return trip.\n\n### Early data\n\n* 211 bridge rides completed in 45 days.\n* 87% of recipients made it to specialty appointments on time.\n* The Medicaid broker is now piloting an expedited authorization flow with CPM support.",
-      "hero_image": "",
-      "published_at": "2024-03-08T19:30:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-03-08T18:55:00Z",
-      "updated_at": "2024-03-08T18:55:00Z",
-      "tags": [1, 9, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 16,
-    "fields": {
-      "title": "On-Scene MOUD Initiation",
-      "slug": "on-scene-moud-initiation",
-      "excerpt": "Paramedics now offer buprenorphine induction on scene with telehealth prescriber backup.",
-      "content": "### The protocol\n\nAfter assessing withdrawal, CPM medics connect with an on-call addiction provider through secure video. The provider confirms eligibility, co-signs the induction, and schedules rapid follow-up at the bridge clinic.\n\n### Impact\n\n* 58 individuals started buprenorphine in the first eight weeks.\n* 72% attended their bridge clinic appointment within 72 hours.\n* Law enforcement partners report fewer repeat overdose responses for these patients.",
-      "hero_image": "",
-      "published_at": "2024-03-12T11:50:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-03-12T11:10:00Z",
-      "updated_at": "2024-03-12T11:10:00Z",
-      "tags": [4, 5, 7]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 17,
-    "fields": {
-      "title": "Peer Navigator Shadowing",
-      "slug": "peer-navigator-shadowing",
-      "excerpt": "Embedding peers in CPM ride-alongs deepened trust and created new referral pathways.",
-      "content": "### How shadowing works\n\nPeer navigators join CPM shifts twice a week, introducing themselves during low-acuity calls and offering follow-up support. After the call, peers document insights in a shared note visible to both teams.\n\n### What we learned\n\n* Clients frequently accept peer call-backs when introduced in person.\n* Peers identified resource gaps faster than our clinical team alone.\n* The practice improved CPM understanding of lived experience perspectives.",
-      "hero_image": "",
-      "published_at": "2024-03-15T16:40:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-03-15T16:00:00Z",
-      "updated_at": "2024-03-15T16:00:00Z",
-      "tags": [2, 4, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 18,
-    "fields": {
-      "title": "Summer Cooling Support Teams",
-      "slug": "summer-cooling-support-teams",
-      "excerpt": "During heat waves, CPM units distributed cooling kits and coordinated shelter transportation.",
-      "content": "### Rapid response in extreme heat\n\nHeat alerts trigger a surge schedule with cooling supply drops, hydration checks, and transport coordination to cooling centers. Data analysts map hotspot blocks so teams stage proactively.\n\n### Results\n\n* 540 residents received cooling kits in the first heat advisory.\n* Heat-related EMS transports in target zones dropped 33%.\n* Community partners now host joint preparedness workshops with CPM teams.",
-      "hero_image": "",
-      "published_at": "2024-03-19T13:05:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-03-19T12:20:00Z",
-      "updated_at": "2024-03-19T12:20:00Z",
-      "tags": [1, 6, 10]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 19,
-    "fields": {
-      "title": "EMS-Police Joint Dashboard",
-      "slug": "ems-police-joint-dashboard",
-      "excerpt": "A shared analytics view improved situational awareness and highlighted hotspots for proactive outreach.",
-      "content": "### Integrating data streams\n\nThe CPM analytics team combined CAD data from EMS and law enforcement to visualize overlapping calls, response times, and outcomes. Weekly briefings now include both agencies reviewing hotspots and co-designing outreach.\n\n### Benefits\n\n* Response duplication decreased by 21%.\n* Outreach teams prioritize blocks with rising behavioral health calls.\n* Leadership now approves joint grants with stronger data backing.",
-      "hero_image": "",
-      "published_at": "2024-03-22T09:55:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-03-22T09:15:00Z",
-      "updated_at": "2024-03-22T09:15:00Z",
-      "tags": [2, 3, 7]
-    }
-  },
-  {
-    "model": "blog.casestudy",
-    "pk": 20,
-    "fields": {
-      "title": "Resilience Workshops for Caregivers",
-      "slug": "resilience-workshops-for-caregivers",
-      "excerpt": "Monthly workshops give caregivers stress management skills and direct access to CPM nurses and social workers.",
-      "content": "### Designing supportive sessions\n\nSessions blend stress management coaching, resource navigation, and peer storytelling. Caregivers leave with a written plan, phone list, and scheduled check-in call from our CPM nurse.\n\n### Impact to date\n\n* 148 caregivers attended in the first quarter.\n* Reported caregiver burnout scores improved by 27%.\n* Referrals to respite services doubled compared to last year.",
-      "hero_image": "",
-      "published_at": "2024-03-26T17:10:00Z",
-      "is_published": true,
-      "author": null,
-      "featured": false,
-      "featured_rank": 0,
-      "created_at": "2024-03-26T16:35:00Z",
-      "updated_at": "2024-03-26T16:35:00Z",
-      "tags": [1, 9, 10]
-    }
-  }
 ]

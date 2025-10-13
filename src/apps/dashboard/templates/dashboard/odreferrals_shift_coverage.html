@@ -1,0 +1,569 @@
+{% extends "base.html" %}
+{% load static %}
+{% block pageName %}od-referrals-shift-coverage{% endblock pageName %}
+{% block title %}OD Referrals — Shift Coverage{% endblock title %}
+{% block content %}
+    <!-- Introduction - Full Width -->
+    <section class="col-span-12">
+        <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 sm:px-4 lg:px-12 py-20 lg:overflow-visible">
+            <div class="absolute inset-0 -z-10 overflow-hidden">
+                <svg class="absolute top-0 left-[max(50%,25rem)] h-256 w-512 -translate-x-1/2 mask-[radial-gradient(64rem_64rem_at_top,white,transparent)] dark:mask-[radial-gradient(64rem_64rem_at_top,black,transparent)] stroke-gray-200 dark:stroke-gray-700"
+                     aria-hidden="true">
+                    <defs>
+                    <pattern id="e813992c-7d03-4cc4-a2bd-151760b470a0" width="200" height="200" x="50%" y="-1" patternUnits="userSpaceOnUse">
+                    <path d="M100 200V.5M.5 .5H200" fill="none" />
+                    </pattern>
+                    </defs>
+                    <svg x="50%"
+                         y="-1"
+                         class="overflow-visible fill-gray-50 dark:fill-gray-800">
+                        <path d="M-100.5 0h201v201h-201Z M699.5 0h201v201h-201Z M499.5 400h201v201h-201Z M-300.5 600h201v201h-201Z" stroke-width="0" />
+                    </svg>
+                    <rect width="100%" height="100%" stroke-width="0" fill="url(#e813992c-7d03-4cc4-a2bd-151760b470a0)" />
+                </svg>
+            </div>
+            <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+                <!-- Introduction - Left Column -->
+                <div class="lg:px-8">
+                    <div>
+                        <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Post Overdose Response Team (PORT)</p>
+                        <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl">
+                            Shift Coverage
+                        </h1>
+                        <p class="mt-6 text-xl/8 text-gray-700 dark:text-gray-300">
+                            Emergency medical resources are most effective when aligned with when and where crises occur. At the Port Angeles Fire Department, operational metrics illuminate a clear truth: overdoses do not follow business hours. To optimize Community Paramedic (CPM) coverage and improve outcomes, we used time-based overdose data to reevaluate our existing staffing model.
+                        </p>
+                    </div>
+                    <div class="mt-10 text-base/7 text-gray-700 dark:text-gray-300">
+                        <p>
+                            Data-driven analysis of our 15.6-month overdose dataset reveals opportunities to optimize Community Paramedic coverage. The current 5x8 schedule (Monday-Friday 08:00-16:00) covers 27% of incidents, while strategic scheduling adjustments can significantly enhance our community reach.
+                        </p>
+                        <ul role="list" class="mt-8 space-y-8 text-gray-600 dark:text-gray-400">
+                            <li class="flex gap-x-3">
+                                <svg class="mt-1 size-5 flex-none text-indigo-600 dark:text-indigo-400"
+                                     viewBox="0 0 20 20"
+                                     fill="currentColor"
+                                     aria-hidden="true"
+                                     data-slot="icon">
+                                    <path d="M15.5 2A1.5 1.5 0 0 0 14 3.5v13a1.5 1.5 0 0 0 1.5 1.5h1a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 16.5 2h-1ZM9.5 6A1.5 1.5 0 0 0 8 7.5v9A1.5 1.5 0 0 0 9.5 18h1a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 10.5 6h-1ZM3.5 10A1.5 1.5 0 0 0 2 11.5v5A1.5 1.5 0 0 0 3.5 18h1A1.5 1.5 0 0 0 6 16.5v-5A1.5 1.5 0 0 0 4.5 10h-1Z" />
+                                </svg>
+                                <span><strong class="font-semibold text-gray-900 dark:text-white">Data-Driven Insights.</strong> Analysis of 122 overdose cases across 15.6 months reveals optimal scheduling patterns and coverage opportunities in our current system.</span>
+                            </li>
+                            <li class="flex gap-x-3">
+                                <svg class="mt-1 size-5 flex-none text-indigo-600 dark:text-indigo-400"
+                                     viewBox="0 0 20 20"
+                                     fill="currentColor"
+                                     aria-hidden="true"
+                                     data-slot="icon">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z" clip-rule="evenodd" />
+                                </svg>
+                                <span><strong class="font-semibold text-gray-900 dark:text-white">Strategic Scheduling.</strong> 4×10 staggered shift models can more than double coverage efficiency while providing staff with improved work-life balance and 3-day weekends.</span>
+                            </li>
+                            <li class="flex gap-x-3">
+                                <svg class="mt-1 size-5 flex-none text-indigo-600 dark:text-indigo-400"
+                                     viewBox="0 0 20 20"
+                                     fill="currentColor"
+                                     aria-hidden="true"
+                                     data-slot="icon">
+                                    <path fill-rule="evenodd" d="M10 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 1ZM5.05 3.05a.75.75 0 0 1 1.06 0l1.062 1.06A.75.75 0 1 1 6.11 5.173L5.05 4.11a.75.75 0 0 1 0-1.06Zm9.9 0a.75.75 0 0 1 0 1.06l-1.06 1.062a.75.75 0 0 1-1.061-1.061l1.06-1.061a.75.75 0 0 1 1.061 0ZM3 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 3 8Zm11 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 14 8Zm-6.828 2.828a.75.75 0 0 1 0 1.061L6.11 12.95a.75.75 0 0 1-1.06-1.061l1.06-1.06a.75.75 0 0 1 1.061 0Zm3.594-3.317a.75.75 0 0 0-1.37.364l-.492 6.861a.75.75 0 0 0 1.204.65l1.043-.799.985 3.678a.75.75 0 0 0 1.45-.388l-.978-3.646 1.292.204a.75.75 0 0 0 .74-1.16l-3.874-5.764Z" clip-rule="evenodd" />
+                                </svg>
+                                <span><strong class="font-semibold text-gray-900 dark:text-white">Measurable Impact.</strong> Optimized scheduling could increase annual coverage from 26 to 60+ cases per year, representing meaningful improvement in community intervention capacity.</span>
+                            </li>
+                        </ul>
+                        <p class="mt-8">
+                            The following analysis demonstrates how strategic scheduling alignment with overdose timing patterns can optimize Community Paramedic effectiveness while maintaining operational efficiency and staff satisfaction. All metrics are annualized based on our 15.6-month data collection period.
+                        </p>
+                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-6 h-6 mr-3 text-blue-600 dark:text-blue-400"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                                </path>
+                            </svg>
+                            Evidence-Based Operational Strategy
+                        </h2>
+                        <p class="mt-6">
+                            By leveraging comprehensive overdose timing data collected over 15.6 months, we've identified optimal deployment windows that align Community Paramedic availability with peak crisis periods. This evidence-based approach maximizes intervention opportunities while supporting sustainable staffing models and improved staff work-life balance.
+                        </p>
+                    </div>
+                </div>
+                <!-- Introduction Right Column -->
+                <div class="lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden lg:px-8">
+                    <!-- Shift Scenario Selector -->
+                    <div x-data="shiftScenarioSelector()" x-init="initSelector()">
+                        <!-- Header with subtle accent -->
+                        <div class="border-l-4 border-indigo-500 pl-4 mb-8">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Shift Coverage Analysis</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Interactive comparison of scheduling models</p>
+                        </div>
+                        <!-- Scenario Selection - 2x Grid Layout -->
+                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Select Scenario:</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <template x-for="(scenario, key) in scenarios" :key="key">
+                                <button class="w-full text-left p-4 rounded-lg border-2 transition-all duration-200 dark:bg-slate-800/50"
+                                        :class="selectedScenario === key ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-md' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-sm'"
+                                        @click="selectedScenario = key">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="font-semibold text-gray-900 dark:text-white text-sm mb-1 truncate"
+                                                 x-text="scenario.name"></div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2"
+                                                 x-text="scenario.schedule"></div>
+                                        </div>
+                                        <div class="flex items-center space-x-2 ml-2">
+                                            <div class="text-right">
+                                                <div class="text-lg font-bold mb-1"
+                                                     :class="scenario.coverageColor || 'text-gray-600 dark:text-gray-400'"
+                                                     x-text="scenario.coverage + '%'">
+                                                </div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">coverage</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </template>
+                        </div>
+                        <!-- Stats Display -->
+                        <div class="mt-6 p-4 bg-white dark:bg-gray-700/5 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm">
+                            <!-- Key Metrics - Grid Layout -->
+                            <div class="grid grid-cols-3 gap-3 mb-6">
+                                <div class="text-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm transform transition-all duration-300 hover:scale-105 hover:shadow-md">
+                                    <div class="text-2xl font-bold mb-1"
+                                         :class="scenarios[selectedScenario]?.coverageColor || 'text-gray-600 dark:text-gray-400'"
+                                         x-text="(scenarios[selectedScenario]?.coverage || 0) + '%'">
+                                    </div>
+                                    <div class="text-xs text-gray-600 dark:text-gray-400">Coverage</div>
+                                </div>
+                                <div class="text-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm transform transition-all duration-300 hover:scale-105 hover:shadow-md">
+                                    <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1"
+                                         x-text="scenarios[selectedScenario]?.cases_covered || '0'"></div>
+                                    <div class="text-xs text-gray-600 dark:text-gray-400">Cases/Year</div>
+                                </div>
+                                <div class="text-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm transform transition-all duration-300 hover:scale-105 hover:shadow-md"
+                                     x-show="scenarios[selectedScenario]?.improvement > 0">
+                                    <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-1"
+                                         x-text="'+' + (scenarios[selectedScenario]?.improvement || 0) + '%'"></div>
+                                    <div class="text-xs text-gray-600 dark:text-gray-400">Gain</div>
+                                </div>
+                            </div>
+                            <!-- Benefits List -->
+                            <div>
+                                <h5 class="font-semibold text-gray-900 dark:text-white text-sm mb-3 pb-2">Key Benefits</h5>
+                                <div class="space-y-2.5">
+                                    <template x-for="benefit in (scenarios[selectedScenario]?.benefits || [])"
+                                              :key="benefit">
+                                        <div class="flex items-start">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 mr-3 flex-shrink-0"></div>
+                                            <span class="text-sm text-gray-700 dark:text-gray-300" x-text="benefit"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Overdose by Time Region - Full Width -->
+    <section class="col-span-12 mb-16">
+        <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 sm:px-4 lg:px-12 py-20 rounded-2xl shadow-md lg:overflow-visible">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 -z-10 overflow-hidden">
+                <svg class="absolute top-0 right-0 h-64 w-64 transform translate-x-32 opacity-10 dark:opacity-5"
+                     viewBox="0 0 200 200"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                    <linearGradient id="heat-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ef4444" stop-opacity="1" />
+                    <stop offset="50%" stop-color="#f97316" stop-opacity="1" />
+                    <stop offset="100%" stop-color="#eab308" stop-opacity="1" />
+                    </linearGradient>
+                    </defs>
+                    <!-- Heatmap-inspired pattern -->
+                    <rect x="0" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.3" />
+                    <rect x="25" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.6" />
+                    <rect x="50" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.2" />
+                    <rect x="75" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.8" />
+                    <rect x="100" y="0" width="20" height="20" fill="url(#heat-gradient)" opacity="0.4" />
+                    <rect x="0" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.7" />
+                    <rect x="25" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.3" />
+                    <rect x="50" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.9" />
+                    <rect x="75" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.1" />
+                    <rect x="100" y="25" width="20" height="20" fill="url(#heat-gradient)" opacity="0.5" />
+                </svg>
+                <!-- Floating clock elements -->
+                <div class="absolute top-20 left-1/4 w-8 h-8 rounded-full border-2 border-blue-200 dark:border-blue-700 opacity-20 animate-pulse">
+                </div>
+                <div class="absolute top-32 right-1/3 w-6 h-6 rounded-full border-2 border-indigo-200 dark:border-indigo-700 opacity-30 animate-pulse delay-1000">
+                </div>
+                <div class="absolute top-40 left-1/2 w-4 h-4 rounded-full border-2 border-purple-200 dark:border-purple-700 opacity-25 animate-pulse delay-2000">
+                </div>
+            </div>
+            <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
+                <div class="lg:px-8">
+                    <div class="mb-12">
+                        <header class="text-left mb-6">
+                            <p class="text-base/7 font-semibold text-gray-900 dark:text-white">Overdose by Time</p>
+                            <h2 class="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-indigo-600 dark:text-indigo-400">
+                                Overdose heatmap by day and hour
+                            </h2>
+                        </header>
+                        <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
+                            Interactive hourly overdose patterns for each day of the week, highlighting weekend risk.
+                        </p>
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20">
+                            <div class="bg-transparent">
+                                {% autoescape off %}
+                                    {{ fig_density_map|safe }}
+                                {% endautoescape %}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Daily Overdose Totals -->
+                    <div>
+                        <h3 class="mb-2 text-2xl font-semibold text-gray-900 dark:text-white flex items-center">Daily Overdose Totals</h3>
+                        <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
+                            Total number of overdoses for each day of the week, highlighting weekend risk.
+                        </p>
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/20 dark:bg-gray-800/20">
+                            <div id="fig-container" class="bg-transparent">
+                                {% autoescape off %}
+                                    {{ fig_day_of_week_totals|safe }}
+                                {% endautoescape %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Hour-by-Hour Analysis - Full Width -->
+    <section class="col-span-12 mb-24">
+        <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 sm:px-4 lg:overflow-visible lg:px-12">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 -z-10 overflow-hidden">
+                <!-- 24-hour clock pattern -->
+                <svg class="absolute top-0 left-0 h-72 w-72 transform -translate-x-16 -translate-y-8 opacity-5 dark:opacity-3"
+                     viewBox="0 0 200 200"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="2" fill="none" class="text-blue-500" />
+                    <!-- Hour markers -->
+                    <g class="text-blue-600 dark:text-blue-400">
+                    <line x1="100" y1="30" x2="100" y2="40" stroke="currentColor" stroke-width="3" />
+                    <line x1="150" y1="50" x2="145" y2="55" stroke="currentColor" stroke-width="2" />
+                    <line x1="170" y1="100" x2="160" y2="100" stroke="currentColor" stroke-width="3" />
+                    <line x1="150" y1="150" x2="145" y2="145" stroke="currentColor" stroke-width="2" />
+                    <line x1="100" y1="170" x2="100" y2="160" stroke="currentColor" stroke-width="3" />
+                    <line x1="50" y1="150" x2="55" y2="145" stroke="currentColor" stroke-width="2" />
+                    <line x1="30" y1="100" x2="40" y2="100" stroke="currentColor" stroke-width="3" />
+                    <line x1="50" y1="50" x2="55" y2="55" stroke="currentColor" stroke-width="2" />
+                    </g>
+                    <!-- Clock hands -->
+                    <line x1="100" y1="100" x2="100" y2="60" stroke="currentColor" stroke-width="3" class="text-indigo-600 dark:text-indigo-400" />
+                    <line x1="100" y1="100" x2="130" y2="100" stroke="currentColor" stroke-width="2" class="text-purple-600 dark:text-purple-400" />
+                </svg>
+                <!-- Time-based dots -->
+                <div class="absolute top-16 right-1/4 w-3 h-3 bg-blue-300 dark:bg-blue-600 rounded-full opacity-40 animate-ping"></div>
+                <div class="absolute top-28 right-1/3 w-2 h-2 bg-indigo-300 dark:bg-indigo-600 rounded-full opacity-30 animate-ping delay-500">
+                </div>
+                <div class="absolute top-40 right-1/2 w-4 h-4 bg-purple-300 dark:bg-purple-600 rounded-full opacity-20 animate-ping delay-1000">
+                </div>
+            </div>
+            <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start lg:gap-y-10">
+                <div class="lg:pr-4 lg:pl-8">
+                    <div>
+                        <header class="text-left mb-6">
+                            <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Hour-by-Hour Analysis</p>
+                            <h2 class="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                                Hourly overdose patterns
+                            </h2>
+                        </header>
+                        <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-8">
+                            Detailed breakdown showing overdose distribution across all 24 hours, comparing weekdays vs weekends,
+                            with current coverage overlay to identify specific gaps.
+                        </p>
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/10 dark:bg-gray-800/20">
+                            <div id="fig-container" class="bg-transparent">
+                                {% autoescape off %}
+                                    {{ fig_hourly_breakdown|safe }}
+                                {% endautoescape %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Key Insights Summary - Full Width -->
+    <section class="col-span-12 mb-24">
+        <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-2 sm:px-4 lg:overflow-visible lg:px-12">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 -z-10 overflow-hidden">
+                <!-- Insights/Lightbulb pattern -->
+                <svg class="absolute top-0 right-0 h-64 w-64 transform translate-x-16 -translate-y-8 opacity-10 dark:opacity-5"
+                     viewBox="0 0 200 200"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                    <radialGradient id="insight-gradient" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" class="insight-stop-0" />
+                    <stop offset="50%" class="insight-stop-50" />
+                    <stop offset="100%" class="insight-stop-100" />
+                    </radialGradient>
+                    </defs>
+                    <!-- Lightbulb shape -->
+                    <circle cx="100" cy="80" r="35" fill="url(#insight-gradient)" opacity="0.6" />
+                    <rect x="90" y="110" width="20" height="25" fill="url(#insight-gradient)" opacity="0.8" />
+                    <rect x="85" y="135" width="30" height="8" fill="url(#insight-gradient)" opacity="0.7" />
+                    <!-- Light rays -->
+                    <line x1="100" y1="30" x2="100" y2="20" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6" />
+                    <line x1="135" y1="45" x2="142" y2="38" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6" />
+                    <line x1="150" y1="80" x2="160" y2="80" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6" />
+                    <line x1="135" y1="115" x2="142" y2="122" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6" />
+                    <line x1="65" y1="115" x2="58" y2="122" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6" />
+                    <line x1="50" y1="80" x2="40" y2="80" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6" />
+                    <line x1="65" y1="45" x2="58" y2="38" stroke="url(#insight-gradient)" stroke-width="3" opacity="0.6" />
+                </svg>
+                <!-- Strategic dots pattern -->
+                <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-yellow-400 dark:bg-yellow-500 rounded-full opacity-30 animate-pulse">
+                </div>
+                <div class="absolute top-1/3 left-1/2 w-3 h-3 bg-orange-400 dark:bg-orange-500 rounded-full opacity-25 animate-pulse delay-500">
+                </div>
+                <div class="absolute top-1/2 left-1/3 w-2 h-2 bg-amber-400 dark:bg-amber-500 rounded-full opacity-35 animate-pulse delay-1000">
+                </div>
+                <!-- Network connection lines -->
+                <svg class="absolute bottom-0 left-0 h-32 w-full opacity-5 dark:opacity-3"
+                     viewBox="0 0 400 100"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 50 Q100 30 200 50 T400 50" stroke="currentColor" stroke-width="2" fill="none" class="text-indigo-500" />
+                    <path d="M0 60 Q100 40 200 60 T400 60" stroke="currentColor" stroke-width="1" fill="none" class="text-blue-500" />
+                    <path d="M0 70 Q100 50 200 70 T400 70" stroke="currentColor" stroke-width="1" fill="none" class="text-cyan-500" />
+                </svg>
+            </div>
+            <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 lg:mx-0 lg:max-w-none lg:grid-cols-1 lg:items-start">
+                <div class="lg:pr-4 lg:pl-8">
+                    <div class="mb-8">
+                        <header class="text-left">
+                            <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Key Insights Summary</p>
+                            <h2 class="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                                Key insights from analytics
+                            </h2>
+                        </header>
+                    </div>
+                    <!-- Content in special background container -->
+                    <div class="relative rounded-xl p-8 overflow-hidden bg-key-insights-image">
+                        <!-- Overlay for better text readability -->
+                        <div class="absolute inset-0 bg-white/85 dark:bg-gray-900/85 rounded-xl"></div>
+                        <div class="relative z-10">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
+                                        <h4 class="font-semibold text-gray-900 dark:text-white">Peak Risk Hours</h4>
+                                    </div>
+                                    <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                        Peak overdose incidents occur during evening hours (16:00-20:00) and early morning (02:00-06:00),
+                                        with current 08:00-16:00 coverage missing 73% of community crises.
+                                    </p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+                                    <div class="flex items=center mb-3">
+                                        <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                                        <h4 class="font-semibold text-gray-900 dark:text-white">Weekend Patterns</h4>
+                                    </div>
+                                    <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                        Weekend patterns show increased evening activity, with Friday and Saturday nights
+                                        representing high-risk periods currently outside operational coverage.
+                                    </p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                                        <h4 class="font-semibold text-gray-900 dark:text-white">Optimal Strategy</h4>
+                                    </div>
+                                    <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                        4×10 Staggered shift models (particularly 08:00-18:00 configurations) have the potential to reach
+                                        70-78% coverage efficiency while maintaining work-life balance with 3-day weekends.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Implementation Strategy</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
+                                    <div>
+                                        <strong>Phase 1:</strong> Implement 4×10 Staggered C model (08:00–18:00 overlap) - balanced transition with enhanced evening coverage
+                                    </div>
+                                    <div>
+                                        <strong>Phase 2:</strong> Monitor coverage metrics, staff satisfaction, and operational efficiency over 6-month evaluation period
+                                    </div>
+                                    <div>
+                                        <strong>Phase 3:</strong> Consider upgrade to 4×10 Staggered A model (07:00–17:00) for expanded morning and Friday evening coverage
+                                    </div>
+                                    <div>
+                                        <strong>Phase 4:</strong> Evaluate weekend coverage expansion if resources permit and incident data supports extended operations
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        function scenarioData() {
+            return {
+                scenarios: {},
+
+                initScenarios() {
+                    try {
+                        const scenarioElement = document.getElementById('scenarios-data');
+                        if (scenarioElement) {
+                            this.scenarios = JSON.parse(scenarioElement.textContent);
+                        }
+                    } catch (error) {
+                        console.error('Error parsing scenario data:', error);
+                        this.scenarios = {};
+                    }
+                }
+            }
+        }
+
+        function shiftScenarioSelector() {
+            return {
+                selectedScenario: '5x8 (Current)',
+                scenarios: {},
+
+                initSelector() {
+                    // Load scenarios from backend data
+                    try {
+                        const scenarioElement = document.getElementById('scenarios-data');
+                        if (scenarioElement) {
+                            const backendData = JSON.parse(scenarioElement.textContent);
+
+                            // Transform backend data to frontend format
+                            this.scenarios = {};
+
+                            // Filter out restricted scenarios for color scale calculation
+                            const validScenarios = Object.entries(backendData).filter(([key, data]) =>
+                                !key.includes('3×14') && !key.includes('3×12')
+                            );
+                            const coverageValues = validScenarios.map(([key, data]) => data.coverage);
+                            const minCoverage = Math.min(...coverageValues);
+                            const maxCoverage = Math.max(...coverageValues);
+
+                            for (const [key, data] of Object.entries(backendData)) {
+                                this.scenarios[key] = {
+                                    name: key,
+                                    schedule: data.description,
+                                    coverage: Math.round(data.coverage),
+                                    cases_covered: Math.round(data.cases_per_year),
+                                    improvement: key === '5x8 (Current)' ? 0 : Math.round(((data.coverage - backendData['5x8 (Current)']?.coverage || 0) / (backendData['5x8 (Current)']?.coverage || 1)) * 100),
+                                    benefits: this.getBenefitsForScenario(key, data),
+                                    coverageColor: this.getCoverageColor(data.coverage, minCoverage, maxCoverage, key)
+                                };
+                            }
+
+                            // Set default selection
+                            this.selectedScenario = '5x8 (Current)';
+                        }
+                    } catch (error) {
+                        console.error('Error loading scenario data:', error);
+                        // Fallback to hardcoded current scenario
+                        this.scenarios = {
+                            '5x8 (Current)': {
+                                name: '5x8 (Current)',
+                                schedule: 'Single Crew: Mon-Fri 08:00-16:00',
+                                coverage: 35,
+                                cases_covered: 43,
+                                improvement: 0,
+                                benefits: ['Traditional business hours', 'Covers baseline cases', 'Established routine'],
+                                coverageColor: 'text-red-600 dark:text-red-400'
+                            }
+                        };
+                        this.selectedScenario = '5x8 (Current)';
+                    }
+                },
+
+                getCoverageColor(coverage, minCoverage, maxCoverage, scenarioName) {
+                    // Check if this is a legally restricted scenario
+                    if (scenarioName && (scenarioName.includes('3×14') || scenarioName.includes('3×12'))) {
+                        return 'text-gray-500 dark:text-gray-500';  // Gray out legally restricted scenarios
+                    }
+
+                    // For valid scenarios, create a relative color scale from lowest to highest performance
+                    const range = maxCoverage - minCoverage;
+                    const normalizedPosition = range > 0 ? (coverage - minCoverage) / range : 0;
+
+                    if (normalizedPosition <= 0.2) {
+                        return 'text-red-600 dark:text-red-400';           // Lowest 20%
+                    } else if (normalizedPosition <= 0.4) {
+                        return 'text-orange-600 dark:text-orange-400';     // 20-40%
+                    } else if (normalizedPosition <= 0.6) {
+                        return 'text-amber-600 dark:text-amber-400';       // 40-60%
+                    } else if (normalizedPosition <= 0.8) {
+                        return 'text-yellow-600 dark:text-yellow-400';     // 60-80%
+                    } else {
+                        return 'text-green-600 dark:text-green-400';       // Top 20%
+                    }
+                },
+
+                getBenefitsForScenario(name, data) {
+                    const benefits = [];
+
+                    if (name === '5x8 (Current)') {
+                        return ['Traditional business hours', 'Covers baseline cases', 'Established routine'];
+                    }
+
+                    // Add note for legally restricted scenarios
+                    if (name.includes('3×14') || name.includes('3×12')) {
+                        benefits.push('⚠️ Not legally compliant - Reference only');
+                    }
+
+                    if (data.coverage > 60) benefits.push('High coverage percentage');
+                    if (name.includes('Weekend')) benefits.push('Weekend coverage included');
+                    if (name.includes('Staggered')) benefits.push('Overlapping crew coverage');
+                    if (name.includes('3×14')) benefits.push('Extended daily hours');
+                    if (name.includes('3×12')) benefits.push('Balanced work schedule');
+                    if (name.includes('4×10')) benefits.push('Optimized weekly schedule');
+                    if (data.hours_per_week <= 80) benefits.push('Efficient resource usage');
+
+                    return benefits.length > 0 ? benefits : ['Improved coverage strategy'];
+                }
+            }
+        }
+    </script>
+    <!-- Hidden data elements for JavaScript -->
+    <script type="application/json" id="scenarios-data">{{ scenarios_data|safe }}</script>
+    <style>
+        .delay-1000 {
+            animation-delay: 1s !important;
+        }
+        .delay-500 {
+            animation-delay: 0.5s !important;
+        }
+        .delay-2000 {
+            animation-delay: 2s !important;
+        }
+        .bg-key-insights-image {
+            background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        /* SVG gradient stops for insight-gradient */
+        .insight-stop-0 {
+            stop-color: #fbbf24;
+            stop-opacity: 1;
+        }
+        .insight-stop-50 {
+            stop-color: #f59e0b;
+            stop-opacity: 1;
+        }
+        .insight-stop-100 {
+            stop-color: #d97706;
+            stop-opacity: 1;
+        }
+    </style>
+{% endblock content %}

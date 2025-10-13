@@ -5,6 +5,8 @@
 {% block title %} Case Study - Repeat Overdoses {% endblock title %}
 
 {% block content %}
+    {% include "dashboard/odreferrals_repeat_overdoses.html" %}
+{% comment %}
 <!-- Stats Page Section With Background Image -->
 <section class="col-span-12 mb-16">
     <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-12 sm:px-12 md:px-20 py-20 rounded-2xl shadow-md lg:overflow-visible">
@@ -141,4 +143,5 @@
     </div>
     </div>
 </section>
+{% endcomment %}
 {% endblock content %}

@@ -29,80 +29,16 @@ def test_opshield_page(client):
     assert b"Operation Shielding Hope" in resp.content
 
 
-def test_shiftcoverage_page(client, monkeypatch):
-    from apps.cases import views
-
-    monkeypatch.setattr(
-        views,
-        "build_chart_od_density_heatmap",
-        lambda theme=None: ("<div id='density'></div>", None),
-    )
-    monkeypatch.setattr(
-        views, "build_chart_od_hourly_breakdown", lambda theme=None: "<div id='hourly'></div>"
-    )
-    monkeypatch.setattr(
-        views, "build_chart_day_of_week_totals", lambda theme=None: "<div id='dow'></div>"
-    )
-    monkeypatch.setattr(
-        views, "build_chart_shift_scenarios", lambda theme=None: "<div id='scenarios'></div>"
-    )
-    monkeypatch.setattr(
-        views, "build_chart_cost_benefit_analysis", lambda theme=None: "<div id='cost'></div>"
-    )
-    monkeypatch.setattr(
-        views, "calculate_coverage_scenarios", lambda: {"scenario": {"coverage": 10}}
-    )
+def test_shiftcoverage_redirects_to_dashboard(client):
     resp = client.get(reverse("cases:shiftcoverage"))
-    assert resp.status_code == 200
-    assert b"density" in resp.content
-    assert b"hourly" in resp.content
+    assert resp.status_code == 302
+    assert resp.url == reverse("dashboard:odreferrals_shift_coverage")
 
 
-def test_shiftcoverage_zero_data(client, monkeypatch, db):
-    from apps.cases import views
-
-    ODReferrals.objects.all().delete()  # zero data path
-    monkeypatch.setattr(
-        views,
-        "build_chart_od_density_heatmap",
-        lambda theme=None: ("<div id='density'></div>", None),
-    )
-    monkeypatch.setattr(
-        views, "build_chart_od_hourly_breakdown", lambda theme=None: "<div id='hourly'></div>"
-    )
-    monkeypatch.setattr(
-        views, "build_chart_day_of_week_totals", lambda theme=None: "<div id='dow'></div>"
-    )
-    monkeypatch.setattr(
-        views, "build_chart_shift_scenarios", lambda theme=None: "<div id='scenarios'></div>"
-    )
-    monkeypatch.setattr(
-        views, "build_chart_cost_benefit_analysis", lambda theme=None: "<div id='cost'></div>"
-    )
-    monkeypatch.setattr(views, "calculate_coverage_scenarios", lambda: {})
-    resp = client.get(reverse("cases:shiftcoverage"))
-    assert resp.status_code == 200
-    # Should still render even if no data
-    assert b"shift_coverage" not in resp.content  # placeholder sanity check
-
-
-def test_repeatods_page_multiple_years(client, monkeypatch, odreferral_factory):
-    from apps.cases import views
-
-    monkeypatch.setattr(
-        views, "build_chart_repeats_scatter", lambda theme=None: "<div id='repeats'></div>"
-    )
-    # Create repeats across two years
-    base = timezone.now()
-    for year_offset in [0, 1]:
-        for _ in range(2):  # two events for same patient to count as repeat
-            odreferral_factory(
-                patient_id=100 + year_offset,
-                od_date=base.replace(year=base.year - year_offset),
-            )
+def test_repeatods_redirects_to_dashboard(client):
     resp = client.get(reverse("cases:repeatods"))
-    assert resp.status_code == 200
-    assert b"repeats" in resp.content
+    assert resp.status_code == 302
+    assert resp.url == reverse("dashboard:odreferrals_repeat_overdoses")
 
 
 def test_costsavings_page(client):

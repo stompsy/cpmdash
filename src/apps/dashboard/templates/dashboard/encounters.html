@@ -1,13 +1,90 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block pageName %}encountersExample{% endblock pageName %}
-{% block title %} Dashboard - Patients {% endblock title %}
+{% block pageName %}encountersOverview{% endblock pageName %}
+{% block title %}Encounters — Operational Insights{% endblock title %}
 
 {% block content %}
-<!-- Introduction - Full Width -->
-<section>
-    <h1 class="text-3xl font-bold dark:text-gray-200">Encounters</h1>
-    <p class="mt-2 text-gray-600 dark:text-gray-400">Manage your encounters effectively.</p>
+<!-- Intro hero to mirror Patients/Referrals pages -->
+<section class="col-span-12 mb-16">
+    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-6 sm:px-12 md:px-20 py-20 rounded-2xl shadow-md lg:overflow-visible">
+        <div class="absolute inset-0 -z-20 bg-center bg-cover bg-no-repeat rounded-2xl"
+             style="background-image: url('{% static 'media/pafd_cpm.jpg' %}'); filter: contrast(1.25) brightness(0.85) saturate(1.1);"></div>
+        <div class="absolute inset-0 -z-10 bg-black opacity-75 rounded-2xl"></div>
+        <div class="mx-auto">
+            <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Community Paramedic Program</p>
+            <h1 class="mt-2 text-4xl sm:text-5xl font-semibold tracking-tight text-pretty text-white">
+                Encounter Activity Overview
+            </h1>
+            <p class="mt-6 text-lg sm:text-xl text-gray-200 max-w-prose">
+                Track encounter cadence, day-of-week patterns, and dominant encounter types to fine-tune staffing,
+                outreach, and partner coordination. Everything below uses the <code>Encounters</code> model so you get an immediate
+                pulse on operational workload.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Charts grid -->
+<section class="col-span-12 mb-16">
+    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-6 sm:px-12 md:px-20 py-20 rounded-2xl shadow-md lg:overflow-visible">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% if charts_list %}
+                {% for item in charts_list %}
+                <article class="group bg-white dark:bg-gray-900 shadow-sm overflow-hidden transition-shadow md:col-span-{% if item.field == 'pcp_agency' or item.field == 'encounter_type_cat1' or item.field == 'encounter_type_cat2' or item.field == 'encounter_type_cat3' %}1{% else %}2{% endif %}">
+                    <!-- Card header -->
+                    <div class="py-4 sm:py-4 flex items-start justify-between gap-3">
+                        <div>
+                            <p class="text-[11px] font-semibold tracking-wide text-indigo-600 dark:text-indigo-400 uppercase">Encounters</p>
+                            <h3 class="mt-1 mb-2 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{{ item.label }}</h3>
+                        </div>
+                        <div class="text-gray-400 dark:text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M3.75 3A.75.75 0 0 1 4.5 2.25h15a.75.75 0 0 1 0 1.5H4.5A.75.75 0 0 1 3.75 3Zm2 3A.75.75 0 0 1 6.5 5.25h11a.75.75 0 0 1 0 1.5h-11A.75.75 0 0 1 5.75 6Zm-2 12a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v2a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-2Zm6-6a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v8a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-8Zm6-4a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v12a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75V8.25Z"/></svg>
+                        </div>
+                    </div>
+
+                    <!-- Card body -->
+                    <div>
+                        <div class="rounded-2xl p-4 bg-white/70 dark:bg-gray-800/50">
+                            {% autoescape off %}{{ item.chart|safe }}{% endautoescape %}
+                        </div>
+                    </div>
+
+                    <!-- Card footer -->
+                    <div class="py-3 sm:py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                        {% if item.insights %}
+                            <div>
+                                <p class="font-medium text-gray-800 dark:text-gray-200">Insights</p>
+                                <ul class="mt-1 list-disc pl-5 space-y-1">
+                                    {% for tip in item.insights %}
+                                        {% if tip.label and tip.value is not None %}
+                                            <li><span class="font-medium text-gray-800 dark:text-gray-200">{{ tip.label }}:</span> {{ tip.value }}</li>
+                                        {% else %}
+                                            <li>{{ tip }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                                {% if item.rationale %}
+                                  <p class="mt-2 text-gray-700 dark:text-gray-300">{{ item.rationale }}</p>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="flex items-center justify-between">
+                                <p>Hover to explore encounter volumes.</p>
+                                <p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-500">Updated {% now "M j, Y" %}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-1 md:col-span-2 xl:col-span-3">
+                    <div class="p-6 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">
+                        No encounter data available.
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </section>
 {% endblock content %}

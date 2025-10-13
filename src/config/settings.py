@@ -128,17 +128,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Use custom user model
 AUTH_USER_MODEL = "accounts.User"
 
-# --- Public site content: configurable stats ---
-# Figures shown on About/Mission/Program Goals pages. Keep conservative and sourced.
-ABOUT_STATS = {
-    "overdose_drop_pct": os.environ.get("ABOUT_OVERDOSE_DROP_PCT", "63%"),
-    "linkage_pct": os.environ.get("ABOUT_LINKAGE_PCT", "78%"),
-    "savings": os.environ.get("ABOUT_SAVINGS", "$1.9M+"),
-    "units": os.environ.get("ABOUT_UNITS", "2"),
-    # Optional timeline label
-    "timeline_range": os.environ.get("ABOUT_TIMELINE_RANGE", "2018 → 2024"),
-}
-
 # --- Authentication UX ---
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/dashboard/"
@@ -159,3 +148,12 @@ ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
 # Optional: require login for dashboard pages. Enable to gate /dashboard/* behind auth.
 LOGIN_REQUIRED = False
 # To enable, also add "apps.core.middleware.LoginRequiredForDashboardMiddleware" to MIDDLEWARE.
+
+# --- Email configuration ---
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend"
+    if DEBUG
+    else "django.core.mail.backends.smtp.EmailBackend",
+)
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@cpmdash.local")

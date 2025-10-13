@@ -17,27 +17,37 @@ def make_dt(year: int, month: int, day: int, hour: int, minute: int = 0):
 
 
 def _stub_charts(monkeypatch: Any) -> None:
-    from apps.cases import views
+    from apps.dashboard import views as dashboard_views
 
     monkeypatch.setattr(
-        views,
+        dashboard_views,
         "build_chart_od_density_heatmap",
         lambda theme=None: ("<div id='density'></div>", None),
     )
     monkeypatch.setattr(
-        views, "build_chart_od_hourly_breakdown", lambda theme=None: "<div id='hourly'></div>"
+        dashboard_views,
+        "build_chart_od_hourly_breakdown",
+        lambda theme=None: "<div id='hourly'></div>",
     )
     monkeypatch.setattr(
-        views, "build_chart_day_of_week_totals", lambda theme=None: "<div id='dow'></div>"
+        dashboard_views,
+        "build_chart_day_of_week_totals",
+        lambda theme=None: "<div id='dow'></div>",
     )
     monkeypatch.setattr(
-        views, "build_chart_shift_scenarios", lambda theme=None: "<div id='scenarios'></div>"
+        dashboard_views,
+        "build_chart_shift_scenarios",
+        lambda theme=None: "<div id='scenarios'></div>",
     )
     monkeypatch.setattr(
-        views, "build_chart_cost_benefit_analysis", lambda theme=None: "<div id='cost'></div>"
+        dashboard_views,
+        "build_chart_cost_benefit_analysis",
+        lambda theme=None: "<div id='cost'></div>",
     )
     monkeypatch.setattr(
-        views, "calculate_coverage_scenarios", lambda: {"baseline": {"coverage": 30}}
+        dashboard_views,
+        "calculate_coverage_scenarios",
+        lambda: {"baseline": {"coverage": 30}},
     )
 
 
@@ -61,7 +71,7 @@ def test_shiftcoverage_percentage_calculations(client, monkeypatch):
     for idx, dt in enumerate(entries):
         ODReferrals.objects.create(od_date=dt, patient_id=idx + 1)
 
-    resp = client.get(reverse("cases:shiftcoverage"))
+    resp = client.get(reverse("dashboard:odreferrals_shift_coverage"))
     assert resp.status_code == 200
     # 3 of 8 records fall in old working hours => 37.5
     assert resp.context["current_coverage"] == 37.5
@@ -89,7 +99,7 @@ def test_shiftcoverage_with_early_evening_extension(client, monkeypatch):
     ]
     for idx, dt in enumerate(entries):
         ODReferrals.objects.create(od_date=dt, patient_id=idx + 1)
-    resp = client.get(reverse("cases:shiftcoverage"))
+    resp = client.get(reverse("dashboard:odreferrals_shift_coverage"))
     assert resp.status_code == 200
     # old working hours: 3/9 => 33.3
     assert resp.context["current_coverage"] == 33.3
@@ -99,10 +109,12 @@ def test_shiftcoverage_with_early_evening_extension(client, monkeypatch):
 
 def test_repeatods_statistics_content(client, monkeypatch):
     """Ensure repeat overdose year-by-year stats computed correctly."""
-    from apps.cases import views
+    from apps.dashboard import views as dashboard_views
 
     monkeypatch.setattr(
-        views, "build_chart_repeats_scatter", lambda theme=None: "<div id='repeats'></div>"
+        dashboard_views,
+        "build_chart_repeats_scatter",
+        lambda theme=None: "<div id='repeats'></div>",
     )
     ODReferrals.objects.all().delete()
     # Year 2024: patient 1 (3 overdoses), patient 2 (1) => repeat_overdoses=3, total=4 => 75.0%
@@ -114,7 +126,7 @@ def test_repeatods_statistics_content(client, monkeypatch):
         ODReferrals.objects.create(od_date=make_dt(2025, 1, 6, 9), patient_id=pid)
         ODReferrals.objects.create(od_date=make_dt(2025, 1, 7, 9), patient_id=pid)
 
-    resp = client.get(reverse("cases:repeatods"))
+    resp = client.get(reverse("dashboard:odreferrals_repeat_overdoses"))
     assert resp.status_code == 200
     stats = resp.context["repeat_stats_by_year"]
     by_year = {s["year"]: s for s in stats}

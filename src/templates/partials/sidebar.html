@@ -5,7 +5,7 @@
 >
   <!-- Sidebar Header -->
   <div :class="sidebarToggle ? 'justify-center' : 'justify-start'" class="flex items-center gap-2 pt-8 pb-7">
-  <a href="{% url 'cases:index' %}">
+  <a href="{% url 'home' %}">
       <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
         <svg class="dark:hidden size-8 text-black hover:text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
             <path fill-rule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.546 3.75 3.75 0 0 1 3.255 3.718Z" clip-rule="evenodd" />
@@ -19,13 +19,13 @@
       </svg>
     </a>
 
-    <h2 class="text-2xl font-droid font-semibold dark:text-white" :class="sidebarToggle ? 'hidden' : ''">CPM Dash</h2>
+  <h2 class="text-2xl font-droid font-semibold dark:text-white" :class="sidebarToggle ? 'hidden' : ''">CPM Insights</h2>
   </div>
   <!-- End Sidebar Header -->
 
   <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
     <!-- Sidebar Menu -->
-    <nav x-data="{selected: $persist('Dashboard Overview')}">
+  <nav x-data="{selected: $persist('Home')}">
       <!-- Menu Group Dashboard -->
       <div>
         <h3 class="mb-4 text-xs uppercase leading-[20px] text-gray-400">
@@ -36,16 +36,16 @@
         </h3>
 
         <ul class="flex flex-col gap-4 mb-6">
-          <!-- Menu Item Dashboard Overview -->
+          <!-- Menu Item Home -->
           <li>
             <a
-              href="{% url 'cases:index' %}"
-              @click="selected = (selected === 'Dashboard Overview' ? '':'Dashboard Overview')"
+              href="{% url 'home' %}"
+              @click="selected = (selected === 'Home' ? '' : 'Home')"
               class="menu-item group"
-              :class=" (selected === 'Dashboard Overview') || (page === 'dashboardOverview') ? 'menu-item-active' : 'menu-item-inactive'"
+              :class=" (selected === 'Home') || (page === 'coreOverview' || page === 'dashboardOverview') ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Dashboard Overview') || (page === 'dashboardOverview') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                :class="(selected === 'Home') || (page === 'coreOverview' || page === 'dashboardOverview') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -66,49 +66,48 @@
                 class="menu-item-text"
                 :class="sidebarToggle ? 'lg:hidden' : ''"
               >
-                Dashboard Overview
+                Home
               </span>
             </a>
           </li>
-          <!-- End Menu Item Dashboard Overview -->
+          <!-- End Menu Item Home -->
 
 
-          <!-- Menu Item Patients -->
+          <!-- Menu Item Program Overviews -->
           <li>
             <a
               href="{% url 'dashboard:patients' %}"
-              @click.prevent="selected = (selected === 'Patients' ? '':'Patients')"
+              @click.prevent="selected = (selected === 'Program Overviews' ? '' : 'Program Overviews')"
               class="menu-item group"
-              :class=" (selected === 'Patients') || (page === 'patientsOverview') ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="(selected === 'Program Overviews') || ['patientsOverview','referralsOverview','od-referrals-overview','encountersOverview'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Patients') || (page === 'patientsOverview') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                :class="(selected === 'Program Overviews') || ['patientsOverview','referralsOverview','od-referrals-overview','encountersOverview'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
-                stroke-width="1.5"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
                 fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-                  fill="none"
-                  />
+                  d="M3 5.25A2.25 2.25 0 0 1 5.25 3h3.5A2.25 2.25 0 0 1 11 5.25v3.5A2.25 2.25 0 0 1 8.75 11h-3.5A2.25 2.25 0 0 1 3 8.75v-3.5ZM13 5.25A2.25 2.25 0 0 1 15.25 3h3.5A2.25 2.25 0 0 1 21 5.25v3.5A2.25 2.25 0 0 1 18.75 11h-3.5A2.25 2.25 0 0 1 13 8.75v-3.5ZM3 15.25A2.25 2.25 0 0 1 5.25 13h3.5A2.25 2.25 0 0 1 11 15.25v3.5A2.25 2.25 0 0 1 8.75 21h-3.5A2.25 2.25 0 0 1 3 18.75v-3.5ZM13 15.25A2.25 2.25 0 0 1 15.25 13h3.5A2.25 2.25 0 0 1 21 15.25v3.5A2.25 2.25 0 0 1 18.75 21h-3.5A2.25 2.25 0 0 1 13 18.75v-3.5Z"
+                />
               </svg>
 
               <span
                 class="menu-item-text"
                 :class="sidebarToggle ? 'lg:hidden' : ''"
               >
-                Patients
+                Program Overviews
               </span>
 
               <svg
                 class="menu-item-arrow"
-                :class="[(selected === 'Patients') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                :class="[(selected === 'Program Overviews') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
                 width="20"
                 height="20"
                 viewBox="0 0 20 20"
@@ -128,7 +127,7 @@
             <!-- Dropdown Menu -->
             <div
               class="overflow-hidden transform translate"
-              :class="(selected === 'Patients') ? 'block' :'hidden'"
+              :class="(selected === 'Program Overviews') ? 'block' : 'hidden'"
             >
               <ul
                 :class="sidebarToggle ? 'lg:hidden' : 'flex'"
@@ -140,38 +139,65 @@
                     class="menu-dropdown-item group"
                     :class="page === 'patientsOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
-                    Overview
+                    Patients Overview
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{% url 'dashboard:referrals' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'referralsOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Referrals Overview
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{% url 'dashboard:odreferrals' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'od-referrals-overview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    OD Referrals Overview
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{% url 'dashboard:encounters' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'encountersOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Encounters Overview
                   </a>
                 </li>
               </ul>
             </div>
             <!-- End Dropdown Menu -->
           </li>
-          <!-- End Menu Item Patients -->
+          <!-- End Menu Item Program Overviews -->
 
 
-          <!-- Menu Item Referrals -->
+          <!-- Menu Item Program Insights -->
           <li>
             <a
-              href="{% url 'dashboard:referrals' %}"
-              @click.prevent="selected = (selected === 'Referrals' ? '':'Referrals')"
+              href="{% url 'dashboard:patients_insights' %}"
+              @click.prevent="selected = (selected === 'Program Insights' ? '' : 'Program Insights')"
               class="menu-item group"
-              :class=" (selected === 'Referrals') || (page === 'referralsOverview' || page === 'OD Referrals' || page === 'Encounters') ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="(selected === 'Program Insights') || ['patientsInsights','referralsInsights','od-referrals-insights','encountersInsights'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Referrals') || (page === 'referralsOverview' || page === 'OD Referrals' || page === 'Encounters') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                :class="(selected === 'Program Insights') || ['patientsInsights','referralsInsights','od-referrals-insights','encountersInsights'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
                 fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="m7.875 14.25 1.214 1.942a2.25 2.25 0 0 0 1.908 1.058h2.006c.776 0 1.497-.4 1.908-1.058l1.214-1.942M2.41 9h4.636a2.25 2.25 0 0 1 1.872 1.002l.164.246a2.25 2.25 0 0 0 1.872 1.002h2.092a2.25 2.25 0 0 0 1.872-1.002l.164-.246A2.25 2.25 0 0 1 16.954 9h4.636M2.41 9a2.25 2.25 0 0 0-.16.832V12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 12V9.832c0-.287-.055-.57-.16-.832M2.41 9a2.25 2.25 0 0 1 .382-.632l3.285-3.832a2.25 2.25 0 0 1 1.708-.786h8.43c.657 0 1.281.287 1.709.786l3.284 3.832c.163.19.291.404.382.632M4.5 20.25h15A2.25 2.25 0 0 0 21.75 18v-2.625c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125V18a2.25 2.25 0 0 0 2.25 2.25Z"
-                  fill="none"
+                  d="M12 3v4.5m0 9V21m4.5-9H21M3 12h4.5m11.91 4.91-3.182-3.182m-6.456 0L6.09 16.91m0-9.82 3.182 3.182m6.456 0L17.91 7.09"
                 />
               </svg>
 
@@ -179,12 +205,12 @@
                 class="menu-item-text"
                 :class="sidebarToggle ? 'lg:hidden' : ''"
               >
-                Referrals
+                Program Insights
               </span>
 
               <svg
                 class="menu-item-arrow"
-                :class="[(selected === 'Referrals') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                :class="[(selected === 'Program Insights') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
                 width="20"
                 height="20"
                 viewBox="0 0 20 20"
@@ -204,7 +230,7 @@
             <!-- Dropdown Menu -->
             <div
               class="overflow-hidden transform translate"
-              :class="(selected === 'Referrals') ? 'block' :'hidden'"
+              :class="(selected === 'Program Insights') ? 'block' : 'hidden'"
             >
               <ul
                 :class="sidebarToggle ? 'lg:hidden' : 'flex'"
@@ -212,42 +238,69 @@
               >
                 <li>
                   <a
-                    href="{% url 'dashboard:referrals' %}"
+                    href="{% url 'dashboard:patients_insights' %}"
                     class="menu-dropdown-item group"
-                    :class="page === 'referralsOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                    :class="page === 'patientsInsights' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
-                    Overview
+                    Patients Insights
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{% url 'dashboard:referrals_insights' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'referralsInsights' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Referrals Insights
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{% url 'dashboard:odreferrals_insights' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'od-referrals-insights' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    OD Referrals Insights
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{% url 'dashboard:encounters_insights' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'encountersInsights' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Encounters Insights
                   </a>
                 </li>
               </ul>
             </div>
             <!-- End Dropdown Menu -->
           </li>
-          <!-- End Menu Item Referrals -->
+          <!-- End Menu Item Program Insights -->
 
 
-          <!-- Menu Item OD Referrals -->
+          <!-- Menu Item OD Referral Deep Dives -->
           <li>
             <a
-              href="{% url 'dashboard:odreferrals' %}"
-              @click.prevent="selected = (selected === 'OD Referrals' ? '':'OD Referrals')"
+              href="{% url 'dashboard:odreferrals_shift_coverage' %}"
+              @click.prevent="selected = (selected === 'OD Referral Deep Dives' ? '' : 'OD Referral Deep Dives')"
               class="menu-item group"
-              :class=" (selected === 'OD Referrals') || (page === 'od-referrals-overview' || page === 'odreferralsMonthly') ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="(selected === 'OD Referral Deep Dives') || ['od-referrals-shift-coverage','od-referrals-repeat-overdoses','odreferralsMonthly'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'OD Referrals') || (page === 'od-referrals-overview' || page === 'odreferralsMonthly') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                :class="(selected === 'OD Referral Deep Dives') || ['od-referrals-shift-coverage','od-referrals-repeat-overdoses','odreferralsMonthly','operationShieldingHope'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
                 fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
-                  fill="none"
+                  d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM3 6.75A3.75 3.75 0 0 1 6.75 3h10.5A3.75 3.75 0 0 1 21 6.75v10.5A3.75 3.75 0 0 1 17.25 21H6.75A3.75 3.75 0 0 1 3 17.25V6.75Zm9 4.5v6"
                 />
               </svg>
 
@@ -255,12 +308,12 @@
                 class="menu-item-text"
                 :class="sidebarToggle ? 'lg:hidden' : ''"
               >
-                OD Referrals
+                OD Referral Deep Dives
               </span>
 
               <svg
                 class="menu-item-arrow"
-                :class="[(selected === 'OD Referrals') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                :class="[(selected === 'OD Referral Deep Dives') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
                 width="20"
                 height="20"
                 viewBox="0 0 20 20"
@@ -280,12 +333,30 @@
             <!-- Dropdown Menu -->
             <div
               class="overflow-hidden transform translate"
-              :class="(selected === 'OD Referrals') ? 'block' :'hidden'"
+              :class="(selected === 'OD Referral Deep Dives') ? 'block' : 'hidden'"
             >
               <ul
                 :class="sidebarToggle ? 'lg:hidden' : 'flex'"
                 class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
               >
+                <li>
+                  <a
+                    href="{% url 'dashboard:odreferrals_shift_coverage' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'od-referrals-shift-coverage' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Shift Coverage
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{% url 'dashboard:odreferrals_repeat_overdoses' %}"
+                    class="menu-dropdown-item group"
+                    :class="page === 'od-referrals-repeat-overdoses' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                  >
+                    Repeat Overdoses
+                  </a>
+                </li>
                 <li>
                   <a
                     href="{% url 'dashboard:odreferrals_monthly' %}"
@@ -299,87 +370,87 @@
             </div>
             <!-- End Dropdown Menu -->
           </li>
-          <!-- End Menu Item OD Referrals -->
+          <!-- End Menu Item OD Referral Deep Dives -->
+        </ul>
+      </div>
+      <!-- End Menu Group Dashboard -->
 
 
-          <!-- Menu Item Encounters -->
+      <!-- Menu Group Program Briefings -->
+      <div>
+        <h3 class="mb-4 text-xs uppercase leading-[20px] text-gray-400">
+          <span class="menu-group-title" :class="sidebarToggle ? 'lg:hidden' : ''">Program Briefings</span>
+          <svg :class="sidebarToggle ? 'lg:block hidden' : 'hidden'" class="mx-auto fill-current menu-group-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M11.25 3.75c0-.414.336-.75.75-.75h5.25a2.25 2.25 0 0 1 2.25 2.25v13.5a.75.75 0 0 1-1.21.586L16.5 17.21l-1.79 1.126a.75.75 0 0 1-1.21-.586V3.75ZM9 5.25H6a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h3a2.25 2.25 0 0 0 2.25-2.25v-9A2.25 2.25 0 0 0 9 5.25Z" />
+          </svg>
+        </h3>
+        <ul class="flex flex-col gap-4 mb-6">
           <li>
             <a
-              href="{% url 'dashboard:encounters' %}"
-              @click.prevent="selected = (selected === 'Encounters' ? '':'Encounters')"
+              href="{% url 'cases:opshield' %}"
+              @click="selected = 'Program Briefings'"
               class="menu-item group"
-              :class=" (selected === 'Encounters') || (page === 'encountersExample') ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="page === 'operationShieldingHope' ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Encounters') || (page === 'encountersExample') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                :class="page === 'operationShieldingHope' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
                 fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
-                  fill="none"
-                  />
+                  d="M12 6v6m0 6h.01M4.5 12a7.5 7.5 0 1 1 15 0 7.5 7.5 0 0 1-15 0Z"
+                />
               </svg>
 
               <span
                 class="menu-item-text"
                 :class="sidebarToggle ? 'lg:hidden' : ''"
               >
-                Encounters
+                Operation Shielding Hope
               </span>
-
-              <svg
-                class="menu-item-arrow"
-                :class="[(selected === 'Encounters') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585"
-                  stroke=""
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
             </a>
-
-            <!-- Dropdown Menu -->
-            <div
-              class="overflow-hidden transform translate"
-              :class="(selected === 'Encounters') ? 'block' :'hidden'"
-            >
-              <ul
-                :class="sidebarToggle ? 'lg:hidden' : 'flex'"
-                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
-              >
-                <li>
-                  <a
-                    href="{% url 'dashboard:encounters' %}"
-                    class="menu-dropdown-item group"
-                    :class="page === 'encountersExample' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Overview
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <!-- End Dropdown Menu -->
           </li>
-          <!-- End Menu Item Encounters -->
-        </ul>
-      </div>
-      <!-- End Menu Group Dashboard -->
+            <li>
+              <a
+                href="{% url 'cases:timeline' %}"
+                @click="selected = 'Program Briefings'"
+                class="menu-item group"
+                :class="page === 'cpmTimeline' ? 'menu-item-active' : 'menu-item-inactive'"
+              >
+                <svg
+                  :class="page === 'cpmTimeline' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5.25 3v5.25M8.25 5.25h-6M18.75 3v5.25M21.75 5.25h-6M4.5 12H2.25m19.5 0H19.5m-7.5 9v-6m0 0 2.25 2.25M12 15l-2.25 2.25M7.5 21h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 5.25 9.75v9A2.25 2.25 0 0 0 7.5 21Z"
+                  />
+                </svg>
 
+                <span
+                  class="menu-item-text"
+                  :class="sidebarToggle ? 'lg:hidden' : ''"
+                >
+                  Program Timeline
+                </span>
+              </a>
+            </li>
+        </ul>
+  </div>
 
       <!-- Menu Group Case Studies -->
       <div>
@@ -390,27 +461,28 @@
           </svg>
         </h3>
         <ul class="flex flex-col gap-4 mb-6">
-          <!-- Menu Item Case Studies -->
+          <!-- Menu Item Patient Stories -->
           <li>
             <a
-              href="{% url 'cases:index' %}"
-              @click.prevent="selected = (selected === 'Operations' ? '':'Operations')"
+              href="{% url 'blog:list' %}"
+              @click="selected = 'Patient Stories'"
               class="menu-item group"
-              :class=" (selected === 'Operations') || (page === 'operationShieldingHope' || page === 'shiftCoverage' || page === 'repeatOds' || page === 'costSavings') ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="(selected === 'Patient Stories') || (page === 'caseStudyBlog') ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Operations') || (page === 'operationShieldingHope' || page === 'shiftCoverage' || page === 'repeatOds' || page === 'costSavings') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                :class="(selected === 'Patient Stories') || (page === 'caseStudyBlog') ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
                 fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M5.5 3.25C4.25736 3.25 3.25 4.25736 3.25 5.5V8.99998C3.25 10.2426 4.25736 11.25 5.5 11.25H9C10.2426 11.25 11.25 10.2426 11.25 8.99998V5.5C11.25 4.25736 10.2426 3.25 9 3.25H5.5ZM4.75 5.5C4.75 5.08579 5.08579 4.75 5.5 4.75H9C9.41421 4.75 9.75 5.08579 9.75 5.5V8.99998C9.75 9.41419 9.41421 9.74998 9 9.74998H5.5C5.08579 9.74998 4.75 9.41419 4.75 8.99998V5.5ZM5.5 12.75C4.25736 12.75 3.25 13.7574 3.25 15V18.5C3.25 19.7426 4.25736 20.75 5.5 20.75H9C10.2426 20.75 11.25 19.7427 11.25 18.5V15C11.25 13.7574 10.2426 12.75 9 12.75H5.5ZM4.75 15C4.75 14.5858 5.08579 14.25 5.5 14.25H9C9.41421 14.25 9.75 14.5858 9.75 15V18.5C9.75 18.9142 9.41421 19.25 9 19.25H5.5C5.08579 19.25 4.75 18.9142 4.75 18.5V15ZM12.75 5.5C12.75 4.25736 13.7574 3.25 15 3.25H18.5C19.7426 3.25 20.75 4.25736 20.75 5.5V8.99998C20.75 10.2426 19.7426 11.25 18.5 11.25H15C13.7574 11.25 12.75 10.2426 12.75 8.99998V5.5ZM15 4.75C14.5858 4.75 14.25 5.08579 14.25 5.5V8.99998C14.25 9.41419 14.5858 9.74998 15 9.74998H18.5C18.9142 9.74998 19.25 9.41419 19.25 8.99998V5.5C19.25 5.08579 18.9142 4.75 18.5 4.75H15ZM15 12.75C13.7574 12.75 12.75 13.7574 12.75 15V18.5C12.75 19.7426 13.7574 20.75 15 20.75H18.5C19.7426 20.75 20.75 19.7427 20.75 18.5V15C20.75 13.7574 19.7426 12.75 18.5 12.75H15ZM14.25 15C14.25 14.5858 14.5858 14.25 15 14.25H18.5C18.9142 14.25 19.25 14.5858 19.25 15V18.5C19.25 18.9142 18.9142 19.25 18.5 19.25H15C14.5858 19.25 14.25 18.9142 14.25 18.5V15Z"
-                  fill=""
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM6.501 18.118a7.5 7.5 0 0 1 11.998 0A17.933 17.933 0 0 1 12 19.75c-2.676 0-5.216-.584-7.499-1.632Z"
                 />
               </svg>
 
@@ -418,12 +490,48 @@
                 class="menu-item-text"
                 :class="sidebarToggle ? 'lg:hidden' : ''"
               >
-                Operations
+                Patient Stories
+              </span>
+            </a>
+          </li>
+          <!-- End Menu Item Patient Stories -->
+
+
+          <!-- Menu Item System Case Studies -->
+          <li>
+            <a
+              href="{% url 'cases:opshield' %}"
+              @click.prevent="selected = (selected === 'System Case Studies' ? '' : 'System Case Studies')"
+              class="menu-item group"
+              :class="(selected === 'System Case Studies') || page === 'costSavings' ? 'menu-item-active' : 'menu-item-inactive'"
+            >
+              <svg
+                :class="(selected === 'System Case Studies') || page === 'costSavings' ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3.75 6.75 12 3l8.25 3.75M3.75 6.75 12 10.5m0 0 8.25-3.75M12 10.5V21m0 0L3.75 17.25m8.25 3.75L20.25 17.25m-16.5-10.5V17.25m0 0L12 21m8.25-3.75V6.75"
+                />
+              </svg>
+
+              <span
+                class="menu-item-text"
+                :class="sidebarToggle ? 'lg:hidden' : ''"
+              >
+                System Case Studies
               </span>
 
               <svg
                 class="menu-item-arrow"
-                :class="[(selected === 'Operations') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                :class="[(selected === 'System Case Studies') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
                 width="20"
                 height="20"
                 viewBox="0 0 20 20"
@@ -443,270 +551,64 @@
             <!-- Dropdown Menu -->
             <div
               class="overflow-hidden transform translate"
-              :class="(selected === 'Operations') ? 'block' :'hidden'"
+              :class="(selected === 'System Case Studies') ? 'block' : 'hidden'"
             >
               <ul
                 :class="sidebarToggle ? 'lg:hidden' : 'flex'"
                 class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
               >
-                <li>
-                  <a
-                    href="{% url 'cases:index' %}"
-                    class="menu-dropdown-item group"
-                    :class="page === 'operationShieldingHope' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Operation Shielding Hope
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'cases:shiftcoverage' %}"
-                    class="menu-dropdown-item group"
-                    :class="page === 'shiftCoverage' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Shift Coverage
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'cases:repeatods' %}"
-                    class="menu-dropdown-item group"
-                    :class="page === 'repeatOds' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Repeat Overdoses
-                  </a>
-                </li>
                 <li>
                   <a
                     href="{% url 'cases:costsavings' %}"
                     class="menu-dropdown-item group"
                     :class="page === 'costSavings' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
-                    Cost Savings
+                    Cost Savings Analysis
                   </a>
                 </li>
               </ul>
             </div>
             <!-- End Dropdown Menu -->
           </li>
-          <!-- End Menu Item OD Referrals -->
+          <!-- End Menu Item System Case Studies -->
         </ul>
       </div>
 
-      <!-- Menu Group About & Mission -->
+      <!-- Menu Group Administration -->
       <div>
         <h3 class="mb-4 text-xs uppercase leading-[20px] text-gray-400">
-          <span class="menu-group-title" :class="sidebarToggle ? 'lg:hidden' : ''">About & Mission</span>
+          <span class="menu-group-title" :class="sidebarToggle ? 'lg:hidden' : ''">Administration</span>
           <svg :class="sidebarToggle ? 'lg:block hidden' : 'hidden'" class="mx-auto fill-current menu-group-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M5.99915 10.2451C6.96564 10.2451 7.74915 11.0286 7.74915 11.9951V12.0051C7.74915 12.9716 6.96564 13.7551 5.99915 13.7551C5.03265 13.7551 4.24915 12.9716 4.24915 12.0051V11.9951C4.24915 11.0286 5.03265 10.2451 5.99915 10.2451ZM17.9991 10.2451C18.9656 10.2451 19.7491 11.0286 19.7491 11.9951V12.0051C19.7491 12.9716 18.9656 13.7551 17.9991 13.7551C17.0326 13.7551 16.2491 12.9716 16.2491 12.0051V11.9951C16.2491 11.0286 17.0326 10.2451 17.9991 10.2451ZM13.7491 11.9951C13.7491 11.0286 12.9656 10.2451 11.9991 10.2451C11.0326 10.2451 10.2491 11.0286 10.2491 11.9951V12.0051C10.2491 12.9716 11.0326 13.7551 11.9991 13.7551C12.9656 13.7551 13.7491 12.9716 13.7491 12.0051V11.9951Z" fill="" />
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 6.75a5.25 5.25 0 1 0 0 10.5 5.25 5.25 0 0 0 0-10.5Zm9.75 5.25a9.75 9.75 0 1 1-19.5 0 9.75 9.75 0 0 1 19.5 0Z" />
           </svg>
         </h3>
-
         <ul class="flex flex-col gap-4 mb-6">
-          <!-- Menu Item About (dropdown only; no direct navigation) -->
           <li>
             <a
-              href="#"
-              @click.prevent="selected = (selected === 'About & Mission' ? '':'About & Mission')"
+              href="{% url 'dashboard:user_profile' %}"
+              @click="selected = 'Administration'"
               class="menu-item group"
-              :class=" (selected === 'About & Mission') || (page === 'aboutLanding' || page === 'aboutMission' || page === 'aboutGoals' || page === 'aboutContact') ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="page === 'profile' ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'About & Mission') || (page === 'aboutLanding' || page === 'aboutMission' || page === 'aboutGoals' || page === 'aboutContact') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                :class="page === 'profile' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
+                fill="none"
                 stroke="currentColor"
-                fill="none"
+                stroke-width="1.5"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 0 1 .75.75v3.75h3.75a.75.75 0 0 1 0 1.5H12.75v3.75a.75.75 0 0 1-1.5 0V12.75H7.5a.75.75 0 0 1 0-1.5h3.75V7.5a.75.75 0 0 1 .75-.75Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
               </svg>
 
-              <span
-                class="menu-item-text"
-                :class="sidebarToggle ? 'lg:hidden' : ''"
-              >
-                About
-              </span>
-
-              <svg
-                class="menu-item-arrow"
-                :class="[(selected === 'About & Mission') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585"
-                  stroke=""
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">My Profile</span>
             </a>
-
-            <!-- Dropdown Menu: Contact, Mission, Goals -->
-            <div
-              class="overflow-hidden transform translate"
-              :class="(selected === 'About & Mission') ? 'block' :'hidden'"
-            >
-              <ul
-                :class="sidebarToggle ? 'lg:hidden' : 'flex'"
-                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
-              >
-                <li>
-                  <a
-                    href="{% url 'about:contact' %}"
-                    class="menu-dropdown-item group"
-                    :class="page === 'aboutContact' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Contact
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'about:mission' %}"
-                    class="menu-dropdown-item group"
-                    :class="page === 'aboutMission' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Mission Statement
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'about:goals' %}"
-                    class="menu-dropdown-item group"
-                    :class="page === 'aboutGoals' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Program Goals
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <!-- End Dropdown Menu -->
           </li>
-          <!-- End Menu Item About -->
         </ul>
       </div>
-      <!-- End Menu Group About & Mission -->
-
-      <!-- Others Group -->
-      <div>
-        <h3 class="mb-4 text-xs uppercase leading-[20px] text-gray-400">
-          <span
-            class="menu-group-title"
-            :class="sidebarToggle ? 'lg:hidden' : ''"
-          >
-            others
-          </span>
-
-          <svg
-            :class="sidebarToggle ? 'lg:block hidden' : 'hidden'"
-            class="mx-auto fill-current menu-group-icon"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M5.99915 10.2451C6.96564 10.2451 7.74915 11.0286 7.74915 11.9951V12.0051C7.74915 12.9716 6.96564 13.7551 5.99915 13.7551C5.03265 13.7551 4.24915 12.9716 4.24915 12.0051V11.9951C4.24915 11.0286 5.03265 10.2451 5.99915 10.2451ZM17.9991 10.2451C18.9656 10.2451 19.7491 11.0286 19.7491 11.9951V12.0051C19.7491 12.9716 18.9656 13.7551 17.9991 13.7551C17.0326 13.7551 16.2491 12.9716 16.2491 12.0051V11.9951C16.2491 11.0286 17.0326 10.2451 17.9991 10.2451ZM13.7491 11.9951C13.7491 11.0286 12.9656 10.2451 11.9991 10.2451C11.0326 10.2451 10.2491 11.0286 10.2491 11.9951V12.0051C10.2491 12.9716 11.0326 13.7551 11.9991 13.7551C12.9656 13.7551 13.7491 12.9716 13.7491 12.0051V11.9951Z"
-              fill=""
-            />
-          </svg>
-        </h3>
-
-        <ul class="flex flex-col gap-4 mb-6">
-          <!-- Menu Item Authentication -->
-          <li>
-            <a
-              href="#"
-              @click.prevent="selected = (selected === 'Authentication' ? '':'Authentication')"
-              class="menu-item group"
-              :class="(selected === 'Authentication') || (page === 'basicChart' || page === 'advancedChart') ? 'menu-item-active' : 'menu-item-inactive'"
-            >
-              <svg
-                :class="(selected === 'Authentication') || (page === 'basicChart' || page === 'advancedChart') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M14 2.75C14 2.33579 14.3358 2 14.75 2C15.1642 2 15.5 2.33579 15.5 2.75V5.73291L17.75 5.73291H19C19.4142 5.73291 19.75 6.0687 19.75 6.48291C19.75 6.89712 19.4142 7.23291 19 7.23291H18.5L18.5 12.2329C18.5 15.5691 15.9866 18.3183 12.75 18.6901V21.25C12.75 21.6642 12.4142 22 12 22C11.5858 22 11.25 21.6642 11.25 21.25V18.6901C8.01342 18.3183 5.5 15.5691 5.5 12.2329L5.5 7.23291H5C4.58579 7.23291 4.25 6.89712 4.25 6.48291C4.25 6.0687 4.58579 5.73291 5 5.73291L6.25 5.73291L8.5 5.73291L8.5 2.75C8.5 2.33579 8.83579 2 9.25 2C9.66421 2 10 2.33579 10 2.75L10 5.73291L14 5.73291V2.75ZM7 7.23291L7 12.2329C7 14.9943 9.23858 17.2329 12 17.2329C14.7614 17.2329 17 14.9943 17 12.2329L17 7.23291L7 7.23291Z"
-                  fill=""
-                />
-              </svg>
-
-              <span
-                class="menu-item-text"
-                :class="sidebarToggle ? 'lg:hidden' : ''"
-              >
-                Authentication
-              </span>
-
-              <svg
-                class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
-                :class="[(selected === 'Authentication') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585"
-                  stroke=""
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </a>
-
-            <!-- Dropdown Menu -->
-            <div
-              class="overflow-hidden transform translate"
-              :class="(selected === 'Authentication') ? 'block' :'hidden'"
-            >
-              <ul
-                :class="sidebarToggle ? 'lg:hidden' : 'flex'"
-                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
-              >
-                <li>
-                  <a
-                    href="#"
-                    class="menu-dropdown-item group"
-                    :class="page === 'signin' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Sign In
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="menu-dropdown-item group"
-                    :class="page === 'signup' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Sign Up
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <!-- Dropdown Menu End -->
-          </li>
-          <!-- End Menu Item Authentication -->
-        </ul>
-      </div>
+      <!-- End Menu Group Administration -->
     </nav>
     <!-- End Sidebar Menu -->
   </div>

@@ -219,14 +219,15 @@ class CaseStudyUpdateView(CaseStudyPermissionMixin, UpdateView):
         return self.object.get_absolute_url()
 
 
-class CaseStudyDeleteView(CaseStudyPermissionMixin, DeleteView):  # type: ignore[misc]
+class CaseStudyDeleteView(CaseStudyPermissionMixin, DeleteView):
     template_name = "blog/confirm_delete.html"
     permission_required = "blog.delete_casestudy"
     slug_field = "slug"
     slug_url_kwarg = "slug"
     success_url = reverse_lazy("blog:list")
-    form_class = Form
     model = CaseStudy
+    # Explicitly annotate to reconcile DeletionMixin/BaseDetailView attribute typing
+    object: CaseStudy | None
 
     def form_valid(self, form: Form) -> HttpResponse:
         messages.success(self.request, "Case study deleted.")

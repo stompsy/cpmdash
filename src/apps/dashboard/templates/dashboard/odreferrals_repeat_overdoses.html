@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block pageName %}od-referrals-repeat-overdoses{% endblock pageName %}
+{% block title %}OD Referrals — Repeat Overdoses{% endblock title %}
+
+{% block content %}
+<!-- Stats Page Section With Background Image -->
+<section class="col-span-12 mb-16">
+    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-12 sm:px-12 md:px-20 py-20 rounded-2xl shadow-md lg:overflow-visible">
+        <!-- Background photo -->
+        <div class="absolute inset-0 -z-20 bg-center bg-cover bg-no-repeat rounded-2xl bg-[url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')]"></div>
+        <!-- Extra dark overlay for image contrast -->
+        <div class="absolute inset-0 -z-10 bg-black opacity-80 rounded-2xl"></div>
+        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:items-start lg:gap-y-10">
+            <div class="mx-auto">
+                <!-- Section Label -->
+                <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Post Overdose Response Team (PORT)</p>
+                <!-- Main Heading -->
+                <h2 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl">
+                    Repeat Overdose Analysis
+                </h2>
+                <!-- Description -->
+                <p class="mt-6 text-xl/8 text-gray-200">
+                    Repeat overdoses signal critical gaps in care. Each recurrence offers insight into systemic failures, from lack of follow-up to incarceration or treatment disruptions. Understanding these patterns helps identify high-risk individuals and optimize intervention timing for maximum impact.
+                </p>
+            </div>
+        </div>
+        <!-- Year-over-Year Comparison (in place of key stats) -->
+        <div class="mt-16 w-full">
+            <div class="relative flex flex-col w-full bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm shadow-sm rounded-2xl bg-clip-border ring-1 ring-white/10 overflow-x-auto md:overflow-x-visible">
+                <div class="py-4 px-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Year-over-Year Comparison</h3>
+                </div>
+                <table class="w-full text-left table-auto dark:bg-gray-900">
+                    <thead>
+                        <tr>
+                            <th class="p-4 sm:pl-6 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300">Year</th>
+                            <th class="p-4 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300 text-right">Repeats</th>
+                            <th class="p-4 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300 text-right">Patients</th>
+                            <th class="p-4 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300 text-right">% Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in repeat_stats_by_year %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.06]">
+                            <td class="p-4 sm:pl-6 border-b border-gray-200/60 dark:border-white/10">
+                                <p class="block text-sm text-gray-900 dark:text-white font-medium">{{ item.year }}</p>
+                            </td>
+                            <td class="p-4 border-b border-gray-200/60 dark:border-white/10">
+                                <p class="block text-sm text-gray-900 dark:text-white text-right font-semibold tabular-nums">{{ item.repeat_overdoses }}</p>
+                            </td>
+                            <td class="p-4 border-b border-gray-200/60 dark:border-white/10">
+                                <p class="block text-sm text-gray-800 dark:text-gray-200 text-right tabular-nums">{{ item.repeat_patients }}</p>
+                            </td>
+                            <td class="p-4 border-b border-gray-200/60 dark:border-white/10">
+                                <p class="block text-sm text-gray-900 dark:text-white text-right font-semibold tabular-nums">{{ item.percent_repeat }}%</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Background overlay -->
+        <div class="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black opacity-60 rounded-2xl -z-10"></div>
+    </div>
+</section>
+
+
+<!-- Repeat Overdose Scatter Plot Section -->
+<section class="col-span-12 mb-16">
+    <div class="px-2 sm:px-4 lg:px-12">
+        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+                <div class="lg:pr-4 lg:col-span-2">
+                    <header class="text-left mb-4">
+                        <p class="text-base/7 font-semibold text-gray-900 dark:text-white">Repeat Overdose Analysis</p>
+                        <h2 class="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-indigo-600 dark:text-indigo-400">Repeat overdoses by patient timeline</h2>
+                    </header>
+                    <p class="text-base/7 text-gray-700 dark:text-gray-300 mb-6">
+                        Interactive timeline showing repeat overdose patterns for each patient. Red diamonds indicate fatal outcomes.
+                        Colored backgrounds represent different years for temporal context.
+                    </p>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div class="chart-container">
+                            {% autoescape off %}{{ fig_repeats_scatter|safe }}{% endautoescape %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Additional Insights Section -->
+<section class="col-span-12 mb-16">
+    <div class="px-2 sm:px-4 lg:px-12">
+        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+                <div class="lg:pr-4 lg:col-span-2">
+                    <header class="text-left mb-8">
+                        <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Additional Insights</p>
+                        <h2 class="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white">Key insights from repeat overdose analysis</h2>
+                    </header>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                <div class="flex items-center mb-3">
+                                    <div class="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">High-Risk Patterns</h4>
+                                </div>
+                                <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                    Patients with shorter intervals between overdoses often represent higher acuity cases requiring immediate, intensive intervention and continuous monitoring.
+                                </p>
+                            </div>
+
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                <div class="flex items-center mb-3">
+                                    <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">System Gaps</h4>
+                                </div>
+                                <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                    Long gaps between overdoses may indicate periods of incarceration, hospitalization, or successful treatment—requiring different follow-up strategies upon return.
+                                </p>
+                            </div>
+
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                <div class="flex items-center mb-3">
+                                    <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">Intervention Timing</h4>
+                                </div>
+                                <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                    Understanding individual patient patterns enables CPMs to time interventions strategically, particularly during vulnerable transition periods.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

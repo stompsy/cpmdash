@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}About & Mission — CPM Dash{% endblock title %}
-{% block pageName %}aboutLanding{% endblock pageName %}
+{% block title %}Community Paramedic Program — CPM Dash{% endblock title %}
+{% block pageName %}coreOverview{% endblock pageName %}
 
 {% block content %}
 <div class="col-span-12">
@@ -21,14 +21,14 @@
           We respond to overdoses, provide follow-up, and build pathways to recovery through partnerships with healthcare and social services.
         </p>
         <div class="mt-4">
-          <a href="{% url 'about:mission' %}" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-            Read the full Mission
+          <a href="{% url 'home' %}" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            Explore the Dashboard Overview
             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="m13.5 4.5 6 6m0 0-6 6m6-6H4.5"/>
             </svg>
           </a>
-          <a href="{% url 'about:goals' %}" class="ml-3 inline-flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800">
-            View Program Goals
+          <a href="{% url 'dashboard:odreferrals' %}" class="ml-3 inline-flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800">
+            View OD Referrals Insights
           </a>
         </div>
       </section>
