@@ -30,7 +30,7 @@
             {% if charts_list %}
                 {% for item in charts_list %}
                 {# Make donut charts half-width on md+; others span both columns #}
-                <article class="group bg-white dark:bg-gray-900 overflow-hidden md:col-span-{% if item.field == 'insurance' or item.field == 'sud' or item.field == 'marital_status' or item.field == 'veteran_status' %}1{% else %}2{% endif %}">
+                <article class="group bg-white dark:bg-gray-900 overflow-hidden md:col-span-{% if item.field == 'insurance' or item.field == 'sud' or item.field == 'behavioral_health' or item.field == 'marital_status' or item.field == 'veteran_status' %}1{% else %}2{% endif %}">
                     <!-- Card header -->
                     <div class="py-4 sm:py-4 flex items-start justify-between gap-3">
                         <div>

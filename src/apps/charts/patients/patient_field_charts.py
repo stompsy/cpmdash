@@ -149,8 +149,8 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                 automargin=True,
             )
             fig.update_layout(bargap=0.1)
-        elif field == "sud":
-            # Donut for SUD breakdown
+        elif field in {"sud", "behavioral_health"}:
+            # Donut for boolean health flags
             s2 = df[field].map({True: "Yes", False: "No"}).fillna("Unknown")
             vc = s2.value_counts().reindex(["Yes", "No", "Unknown"], fill_value=0).reset_index()
             vc.columns = ["label", "count"]
@@ -258,6 +258,7 @@ def build_patients_field_charts(theme: str) -> dict[str, str]:
         "race",
         "sex",
         "sud",
+        "behavioral_health",
         "zip_code",
         "created_date",
         "modified_date",
@@ -269,7 +270,7 @@ def build_patients_field_charts(theme: str) -> dict[str, str]:
 
     charts: dict[str, str] = {}
     # Define which fields should be treated as categorical even if numeric-like
-    categorical_overrides = {"zip_code", "sud"}
+    categorical_overrides = {"zip_code", "sud", "behavioral_health"}
     # We will not chart raw created/modified dates; we'll add a single quarterly count chart instead
     for field in df.columns:
         try:
@@ -361,7 +362,7 @@ def _render_categorical_override(series: pd.Series, field: str, theme: str) -> s
             [vc, pd.DataFrame([{field: "Other", "count": other_count}])], ignore_index=True
         )
 
-    if field == "sud":
+    if field in {"sud", "behavioral_health"}:
         vc2 = vc.rename(columns={field: "label"})
         return _build_donut_chart(vc2, "label", "count", theme)
     if field in {"zip_code"}:

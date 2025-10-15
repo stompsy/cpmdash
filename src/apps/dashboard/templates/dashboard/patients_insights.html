@@ -57,7 +57,7 @@
 </section>
 
 <!-- Top patient table -->
-<section class="col-span-12 mb-12 mx-auto px-6 sm:px-12 md:px-20">
+<section class="col-span-12 mb-12 mx-auto">
     <div class="rounded-2xl bg-white dark:bg-gray-900 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
         <div class="border-b border-gray-200 dark:border-white/10 px-6 py-6 sm:px-10 sm:py-8">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -92,6 +92,7 @@
                         <th scope="col" class="px-6 py-3">Age</th>
                         <th scope="col" class="px-6 py-3">Sex</th>
                         <th scope="col" class="px-6 py-3">SUD flag</th>
+                        <th scope="col" class="px-6 py-3">Behavioral health flag</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200/70 dark:divide-white/5 text-sm text-gray-700 dark:text-gray-200">
@@ -110,6 +111,7 @@
                         <td class="px-6 py-3">{{ patient.age }}</td>
                         <td class="px-6 py-3">{{ patient.sex }}</td>
                         <td class="px-6 py-3">{{ patient.sud }}</td>
+                        <td class="px-6 py-3">{{ patient.behavioral_health }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

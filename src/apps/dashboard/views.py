@@ -279,24 +279,37 @@ def _build_repeat_overdose_stats() -> list[dict[str, int | float]]:
     return stats
 
 
-def _insights_sud(df_all: pd.DataFrame) -> list[dict[str, object]] | None:
-    if "sud" not in df_all.columns:
+def _insights_boolean_flag(
+    df_all: pd.DataFrame, field: str, label_prefix: str
+) -> list[dict[str, object]] | None:
+    if field not in df_all.columns:
         return None
-    s2 = df_all["sud"].map({True: "Yes", False: "No"}).fillna("Unknown")
+    s2 = df_all[field].map({True: "Yes", False: "No"}).fillna("Unknown")
     vc = s2.value_counts()
     total = int(vc.sum())
+    if total == 0:
+        return None
     yes = int(vc.get("Yes", 0))
     no = int(vc.get("No", 0))
     unk = int(vc.get("Unknown", 0))
     known = yes + no
     prevalence_known = _pct(yes, known) if known else 0.0
+    prefix = label_prefix.strip()
     items: list[dict[str, object]] = [
-        {"label": "SUD Yes", "value": f"{yes} ({_pct(yes, total)}%)"},
-        {"label": "SUD No", "value": f"{no} ({_pct(no, total)}%)"},
+        {"label": f"{prefix} Yes", "value": f"{yes} ({_pct(yes, total)}%)"},
+        {"label": f"{prefix} No", "value": f"{no} ({_pct(no, total)}%)"},
         {"label": "Unknown", "value": f"{unk} ({_pct(unk, total)}%)"},
         {"label": "Prevalence (known)", "value": f"{prevalence_known}%"},
     ]
     return items
+
+
+def _insights_sud(df_all: pd.DataFrame) -> list[dict[str, object]] | None:
+    return _insights_boolean_flag(df_all, "sud", "SUD")
+
+
+def _insights_behavioral_health(df_all: pd.DataFrame) -> list[dict[str, object]] | None:
+    return _insights_boolean_flag(df_all, "behavioral_health", "Behavioral health")
 
 
 def _insights_categorical(
@@ -415,6 +428,9 @@ def _build_patients_chart_insights(
     sud_list = _insights_sud(df_all)
     if sud_list:
         insights["sud"] = sud_list
+    behavioral_health_list = _insights_behavioral_health(df_all)
+    if behavioral_health_list:
+        insights["behavioral_health"] = behavioral_health_list
     for f, label in [
         ("insurance", None),
         ("pcp_agency", "Primary Care Agency"),
@@ -467,6 +483,7 @@ def _load_patient_touchpoint_datasets() -> dict[str, pd.DataFrame]:
         "race",
         "sex",
         "sud",
+        "behavioral_health",
         "zip_code",
         "marital_status",
         "veteran_status",
@@ -490,6 +507,7 @@ def _enrich_patient_touchpoints(datasets: dict[str, pd.DataFrame]) -> pd.DataFra
                 "race",
                 "sex",
                 "sud",
+                "behavioral_health",
                 "zip_code",
                 "marital_status",
                 "veteran_status",
@@ -623,6 +641,7 @@ def _build_patient_top_patients(enriched: pd.DataFrame) -> list[dict[str, object
                 "age": age_value,
                 "sex": _normalize_text(row.get("sex")),
                 "sud": _format_bool_label(row.get("sud")),
+                "behavioral_health": _format_bool_label(row.get("behavioral_health")),
             }
         )
     return rows
@@ -884,6 +903,7 @@ def patients(request):
             "race",
             "sex",
             "sud",
+            "behavioral_health",
             "zip_code",
             "marital_status",
             "veteran_status",
@@ -926,6 +946,9 @@ def patients(request):
             "SUD screening is central to harm reduction and linkage to treatment. Tracking prevalence and screening "
             "completeness helps target naloxone, MAT referrals, and proactive outreach."
         ),
+        "behavioral_health": (
+            "Behavioral health indicators highlight crisis risk and the need for clinician co-response. Monitoring them helps plan warm handoffs, stabilize follow-ups, and align with partner capacity."
+        ),
         "patient_counts_quarterly": (
             "Quarterly volume shows throughput, staffing needs, and seasonality. It supports grant reporting, "
             "capacity planning, and demonstrates program growth or stabilization."
@@ -946,6 +969,8 @@ def patients(request):
         "patient_counts_quarterly": "Patients by Quarter",
         "sex_age_boxplot": "Age Distribution by Sex",
         "race_age_boxplot": "Age Distribution by Race",
+        "sud": "SUD Flag",
+        "behavioral_health": "Behavioral Health Flag",
     }
 
     charts_list = []
@@ -963,6 +988,8 @@ def patients(request):
     ordered_fields = list(charts.keys())
     # Ensure Insurance and SUD are adjacent (SUD immediately after Insurance)
     _move_after(ordered_fields, "sud", "insurance")
+    # Place Behavioral Health immediately after SUD for paired review
+    _move_after(ordered_fields, "behavioral_health", "sud")
     # Ensure Marital Status and Veteran Status are adjacent (Veteran immediately after Marital)
     _move_after(ordered_fields, "veteran_status", "marital_status")
 
@@ -1650,6 +1677,7 @@ def _build_encounter_top_patients(enriched: pd.DataFrame) -> list[dict[str, obje
                 "age": age_value,
                 "sex": _normalize_text(row.get("sex")),
                 "sud": _format_bool_label(row.get("sud")),
+                "behavioral_health": _format_bool_label(row.get("behavioral_health")),
             }
         )
     return rows

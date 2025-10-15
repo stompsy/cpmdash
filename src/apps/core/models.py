@@ -9,6 +9,7 @@ class Patients(models.Model):
     race = models.CharField(max_length=50, default="", blank=True)
     sex = models.CharField(max_length=10, default="", blank=True)
     sud = models.BooleanField(null=True, blank=True)
+    behavioral_health = models.BooleanField(null=True, blank=True)
     zip_code = models.CharField(max_length=50, default="", blank=True)
     created_date = models.DateField(max_length=20, null=True, blank=True)
     modified_date = models.DateField(max_length=20, null=True, blank=True)
