@@ -12,7 +12,6 @@ pytestmark = pytest.mark.django_db
 
 def test_basic_dashboard_pages(client):
     names = [
-        "dashboard:dashboard_overview",
         "dashboard:patients",
         "dashboard:referrals",
         "dashboard:odreferrals",
@@ -28,6 +27,12 @@ def test_basic_dashboard_pages(client):
             client.force_login(user)
         resp = client.get(reverse(name))
         assert resp.status_code == 200, name
+
+
+def test_dashboard_overview_redirects_to_home(client):
+    resp = client.get(reverse("dashboard:dashboard_overview"))
+    assert resp.status_code == 302
+    assert resp.headers["Location"] == reverse("home")
 
 
 def make_dt(year, month, day, hour):

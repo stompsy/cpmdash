@@ -1,49 +1,174 @@
-<div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8 dark:bg-gray-900">
-    <footer class="flex flex-col z-10 pb-10 pt-20 lg:pt-[120px]">
-        <div class="w-full">
-            <div class="flex flex-wrap gap-8 w-full font-droid">
-                <div class="flex flex-col grow items-start min-w-72 max-w-screen">
-                    <h3 class="mb-1 lg:text-[24px]">City of Port Angeles</h3>
-                    <p class="font-roboto text-gray-400">Fire Department - Community Paramedicine</p>
-                </div>
-                <div class="flex gap-2 w-72">
-                    <div>
-                        <svg class="size-8 mt-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+{% load static %}
+
+{# Professional Footer Component #}
+<footer class="relative mt-24 border-t border-slate-200/50 bg-gradient-to-b from-white to-slate-50/50 dark:border-slate-800/50 dark:from-slate-900 dark:to-slate-950">
+    {# Decorative gradient line #}
+    <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
+
+    <div class="mx-auto max-w-7xl px-6 py-16 sm:px-8 lg:px-10 lg:py-20">
+        {# Main Footer Content #}
+        <div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+            {# Brand Section - 4 columns #}
+            <div class="lg:col-span-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30">
+                        <svg class="h-7 w-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/>
                         </svg>
                     </div>
-                    <div class="flex flex-col pt-0.5">
-                        <h3 class="mb-1 lg:text-[24px]">Our Location</h3>
-                        <p class="font-roboto text-gray-400">102 E 5th St.<br>Port Angeles, WA<br>98362</p>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">City of Port Angeles</h3>
+                        <p class="text-sm text-gray-600 dark:text-slate-400">Fire Department</p>
                     </div>
                 </div>
-                <div class="flex gap-2 w-72">
-                    <div>
-                        <svg class="size-8 mt-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                <p class="mt-5 text-sm leading-relaxed text-gray-600 dark:text-slate-400">
+                    Community Paramedicine program dedicated to improving public health outcomes through innovative, compassionate care and data-driven decision making.
+                </p>
+                {# Social Links (optional - uncomment if needed) #}
+                {# <div class="mt-6 flex gap-4">
+                    <a href="#" class="group flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 transition hover:bg-indigo-500 dark:bg-slate-800 dark:hover:bg-indigo-500" aria-label="Facebook">
+                        <svg class="h-5 w-5 text-slate-600 transition group-hover:text-white dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                         </svg>
+                    </a>
+                    <a href="#" class="group flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 transition hover:bg-indigo-500 dark:bg-slate-800 dark:hover:bg-indigo-500" aria-label="Twitter">
+                        <svg class="h-5 w-5 text-slate-600 transition group-hover:text-white dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                        </svg>
+                    </a>
+                </div> #}
+            </div>
+
+            {# Contact Information - 4 columns #}
+            <div class="lg:col-span-4">
+                <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">Contact Us</h4>
+                <div class="mt-6 space-y-4">
+                    {# Address #}
+                    <div class="flex gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-500/20">
+                            <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                            </svg>
+                        </div>
+                        <div class="text-sm">
+                            <p class="font-medium text-gray-900 dark:text-white">Address</p>
+                            <p class="mt-1 text-gray-600 dark:text-slate-400">102 E 5th St.<br>Port Angeles, WA 98362</p>
+                        </div>
                     </div>
-                    <div class="flex flex-col pt-0.5">
-                        <h3 class="mb-1 lg:text-[24px]">How Can We Help?</h3>
-                        <p class="font-roboto text-gray-400">
-                            <span class="text-gray-300">Email:</span>
-                            <a class="text-gray-400 hover:text-gray-100 hover:underline underline-offset-2" href="mailto:cpm@cityofpa.us">cpm@cityofpa.us</a>
-                        </p>
-                        <p class="font-roboto text-gray-400">
-                            <span class="text-gray-300">Website:</span>
-                            <a class="text-gray-400 hover:text-gray-100 hover:underline underline-offset-2" href="https://www.cityofpa.us/">www.cityofpa.us</a>
-                        </p>
+
+                    {# Email #}
+                    <div class="flex gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-500/20">
+                            <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                            </svg>
+                        </div>
+                        <div class="text-sm">
+                            <p class="font-medium text-gray-900 dark:text-white">Email</p>
+                            <a href="mailto:cpm@cityofpa.us" class="mt-1 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                cpm@cityofpa.us
+                            </a>
+                        </div>
+                    </div>
+
+                    {# Website #}
+                    <div class="flex gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-500/20">
+                            <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                            </svg>
+                        </div>
+                        <div class="text-sm">
+                            <p class="font-medium text-gray-900 dark:text-white">Website</p>
+                            <a href="https://www.cityofpa.us/" target="_blank" rel="noopener noreferrer" class="mt-1 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                www.cityofpa.us
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {# Quick Links - 4 columns #}
+            <div class="lg:col-span-4">
+                <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">Resources</h4>
+                <ul class="mt-6 space-y-3 text-sm">
+                    <li>
+                        <a href="{% url 'dashboard:patients' %}" class="group flex items-center gap-2 text-gray-600 transition hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
+                            <svg class="h-4 w-4 transition group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                            Patient Analytics
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard:referrals' %}" class="group flex items-center gap-2 text-gray-600 transition hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
+                            <svg class="h-4 w-4 transition group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                            Referrals Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard:encounters' %}" class="group flex items-center gap-2 text-gray-600 transition hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
+                            <svg class="h-4 w-4 transition group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                            Encounters Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'blog:list' %}" class="group flex items-center gap-2 text-gray-600 transition hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
+                            <svg class="h-4 w-4 transition group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                            Case Studies
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cityofpa.us/departments/fire-department" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-2 text-gray-600 transition hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
+                            <svg class="h-4 w-4 transition group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                            Fire Department
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cityofpa.us/community-resources" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-2 text-gray-600 transition hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
+                            <svg class="h-4 w-4 transition group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                            Community Resources
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </footer>
-</div>
-<div class="mx-auto max-w-7xl p-6 sm:px-6 lg:px-8 dark:bg-gray-900">
-    <div id="copyright" class="text-xs text-center sm:text-right">
-        Copyright © 2025
-        <a href="mailto:brian.gerdes@protonmail.com" class="text-gray-400 hover:text-gray-100 hover:underline underline-offset-2">
-            Brian Gerdes</a>. All rights reserved.
+
+        {# Bottom Bar #}
+        <div class="mt-12 border-t border-slate-200/50 pt-8 dark:border-slate-800/50">
+            <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                {# Copyright #}
+                <p class="text-sm text-gray-600 dark:text-slate-400">
+                    © 2025 City of Port Angeles. All rights reserved.
+                </p>
+
+                {# Credits #}
+                <p class="text-sm text-gray-600 dark:text-slate-400">
+                    Built with care by
+                    <a href="mailto:brian.gerdes@protonmail.com" class="font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+                        Brian Gerdes
+                    </a>
+                </p>
+
+                {# Version or Additional Info (optional) #}
+                <p class="text-xs text-gray-500 dark:text-slate-500">
+                    Dashboard v1.0
+                </p>
+            </div>
+        </div>
     </div>
-</div>
+
+    {# Decorative bottom gradient #}
+    <div class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
+</footer>

@@ -4,102 +4,201 @@
 {% block pageName %}coreOverview{% endblock pageName %}
 {% block title %}Community Paramedicine Overview{% endblock title %}
 
+{% block page_header %}
+    {% url 'dashboard:odreferrals' as od_dashboard_url %}
+    {% url 'cases:timeline' as timeline_url %}
+    {% static 'media/data_collection.png' as overview_image %}
+    {% with eyebrow="Community Paramedicine Program" title="Collaborative care for a resilient Port Angeles" description="The Community Paramedicine team combines field medicine, behavioral health, and social support to close gaps between 9-1-1 calls and long-term recovery. Explore the partnerships, timelines, and evidence that guide our mission to meet residents where they are and navigate them toward stability." primary_label="View operational dashboard" primary_url=od_dashboard_url primary_hx_get=od_dashboard_url primary_hx_target="#dashboard-main" primary_hx_select="#dashboard-main" primary_hx_swap="outerHTML" primary_hx_push_url="true" primary_alpine_click="selected = 'Program Overviews'; page = 'od-referrals-overview'" secondary_label="Follow project timeline" secondary_url=timeline_url secondary_hx_get=timeline_url secondary_hx_target="#dashboard-main" secondary_hx_select="#dashboard-main" secondary_hx_swap="outerHTML" secondary_hx_push_url="true" secondary_alpine_click="selected = 'Program Briefings'; page = 'cpmTimeline'" image_src=overview_image image_alt="Community paramedicine overview" image_width="640" image_height="360" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
+        {% include "partials/page_header.html" %}
+    {% endwith %}
+{% endblock page_header %}
+
 {% block content %}
-<!-- Introduction - Full Width -->
-<section class="col-span-12 mb-16">
-    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-6 sm:px-12 md:px-20 py-20 lg:overflow-visible rounded-2xl shadow-md">
-        <div class="absolute inset-0 -z-10 overflow-hidden">
-            <svg class="absolute top-0 left-[max(50%,25rem)] h-256 w-512 -translate-x-1/2 mask-[radial-gradient(64rem_64rem_at_top,white,transparent)] dark:mask-[radial-gradient(64rem_64rem_at_top,black,transparent)] stroke-gray-200 dark:stroke-gray-700" aria-hidden="true">
-                <defs>
-                    <pattern id="e813992c-7d03-4cc4-a2bd-151760b470a0" width="200" height="200" x="50%" y="-1" patternUnits="userSpaceOnUse">
-                        <path d="M100 200V.5M.5 .5H200" fill="none" />
-                    </pattern>
-                </defs>
-                <svg x="50%" y="-1" class="overflow-visible fill-gray-50 dark:fill-gray-800">
-                    <path d="M-100.5 0h201v201h-201Z M699.5 0h201v201h-201Z M499.5 400h201v201h-201Z M-300.5 600h201v201h-201Z" stroke-width="0" />
-                </svg>
-                <rect width="100%" height="100%" stroke-width="0" fill="url(#e813992c-7d03-4cc4-a2bd-151760b470a0)" />
-            </svg>
-        </div>
-        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
-            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-                <div class="lg:pr-4">
-                    <div class="lg:max-w-2xl">
-                        <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Why We Collect Data</p>
-                        <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl">
-                            A Data-Driven Approach to Community Health
-                        </h1>
-                        <p class="mt-6 text-xl/8 text-gray-700 dark:text-gray-300">
-                            Our Community Paramedicine program relies on comprehensive data collection to drive meaningful change. By tracking patient interactions, referrals, and encounter details, we gain critical insights that allow us to improve community health, ensure operational accountability, and meet grant reporting requirements. This data is the foundation of our evidence-based approach to solving complex community problems.
-                        </p>
+    <div class="col-span-12 mx-auto mt-16 w-full max-w-7xl">
+        <span data-page-name="coreOverview" class="hidden" hidden></span>
+        <div class="space-y-16">
+            <section class="col-span-12">
+                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">About the program</p>
+                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">Who we are</h2>
+                    </div>
+                    <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+                        <div class="flex-1 space-y-6 text-base leading-relaxed text-slate-200">
+                            <p>
+                                The Community Paramedicine program launched in 2019 to meet residents where traditional systems left gaps. Today our team blends field medicine, behavioral health expertise, and care navigation to create a calmer path between a 9-1-1 call and long-term stability. We work shoulder to shoulder with trusted partners so neighbors receive home visits, post-overdose follow-up, chronic disease support, and harm reduction supplies without starting over at every door.
+                            </p>
+                            <p>
+                                Every encounter is relationship-centered. We focus on medication alignment, safety assessments, wound care, vaccinations, and the warm handoffs that keep people connected to services they trust. Our work is as much about restoring confidence as it is about providing care.
+                            </p>
+                        </div>
+                        <aside class="lg:w-80">
+                            <blockquote class="rounded-3xl border border-white/8 bg-gradient-to-br from-white/10 to-white/0 p-8 text-base italic text-slate-100 shadow-[0_22px_45px_rgba(8,47,73,0.3)]">
+                                “Wonderful people, providing exceptional service, to create a safer and healthier Port Angeles.”
+                                <span class="mt-5 block text-xs font-semibold uppercase tracking-[0.35em] text-brand-200">Fire Chief Derrell Sharp</span>
+                            </blockquote>
+                        </aside>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden lg:px-8">
-                <img class="w-full max-w-none rounded-xl bg-gray-900 shadow-xl ring-1 ring-gray-400/10"
-                    src="{% static 'media/data_collection.png' %}"
-                    alt="Data-driven community health"
-                    width="512"
-                    height="256" />
-            </div>
-
-            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-                <div class="lg:pr-4">
-                    <div class="lg:max-w-2xl text-base/7 text-gray-700 dark:text-gray-300">
-                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                            </svg>
-                            Grant Reporting Requirements
-                        </h2>
-                        <p class="mt-6">
-                            Accurate data collection is essential for maintaining transparency and accountability to our funding partners. Detailed reports on patient demographics, service utilization, and outcomes are necessary to demonstrate the impact of our programs and secure ongoing financial support.
-                        </p>
-
-                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                            Improving Community Health
-                        </h2>
-                        <p class="mt-6">
-                            By analyzing trends in patient needs and health outcomes, we can identify emerging health issues, allocate resources more effectively, and tailor our interventions to have the greatest positive impact on the well-being of our community.
-                        </p>
-
-                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                            Working with Partner Agencies
-                        </h2>
-                        <p class="mt-6">
-                            Our collaboration with local law enforcement, healthcare providers, and social services is crucial. Sharing anonymized, aggregated data helps us coordinate care, avoid duplication of services, and build a stronger, more integrated network of support for the individuals we serve.
-                        </p>
-
-                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 0 1 9 9v.375M10.125 2.25A3.375 3.375 0 0 1 13.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 0 1 3.375 3.375M9 15l2.25 2.25L15 12" />
-                            </svg>
-                            Operational Accountability
-                        </h2>
-                        <p class="mt-6">
-                            Data on response times, resource allocation, and program effectiveness allows us to make informed, strategic decisions. This ensures we are using our resources wisely, making necessary operational changes, and providing the highest level of oversight for our programs.
-                        </p>
-
-                        <h2 class="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                            </svg>
-                            Solving Community Problems
-                        </h2>
-                        <p class="mt-6">
-                            Ultimately, our goal is to address the root causes of health crises in our community. By understanding the complex factors that contribute to issues like substance use and homelessness, we can develop targeted, effective strategies that create lasting, positive change.
-                        </p>
+            <section class="col-span-12">
+                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">How we care</p>
+                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">Guiding residents from crisis to stability</h2>
+                    </div>
+                    <div class="grid gap-6 lg:grid-cols-3">
+                        <article class="flex flex-col gap-5 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/40 to-slate-800/60 p-8 text-[15px] leading-relaxed text-slate-100/90 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
+                            <header class="flex items-center gap-3">
+                                <span class="inline-flex size-10 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-200">Post-overdose stabilization</p>
+                                    <h3 class="text-lg font-semibold text-white">Operation Shielding Hope</h3>
+                                </div>
+                            </header>
+                            <p>
+                                Community Paramedics respond alongside EMS and law enforcement, helping patients stabilize, manage precipitated withdrawal, and enter medication assisted treatment with compassion. Warm handoffs to outreach partners begin before crews clear the scene.
+                            </p>
+                        </article>
+                        <article class="flex flex-col gap-5 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/40 to-slate-800/60 p-8 text-[15px] leading-relaxed text-slate-100/90 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
+                            <header class="flex items-center gap-3">
+                                <span class="inline-flex size-10 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 6h16" />
+                                        <path d="M4 12h16" />
+                                        <path d="M4 18h10" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-200">Continuity at home</p>
+                                    <h3 class="text-lg font-semibold text-white">In-home clinical support</h3>
+                                </div>
+                            </header>
+                            <p>
+                                Residents receive home visits, telehealth touchpoints, and coaching that keep care on track. From medication reconciliation to wound care and chronic disease monitoring, CPMs bridge the gap until long-term providers can step in.
+                            </p>
+                        </article>
+                        <article class="flex flex-col gap-5 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/40 to-slate-800/60 p-8 text-[15px] leading-relaxed text-slate-100/90 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
+                            <header class="flex items-center gap-3">
+                                <span class="inline-flex size-10 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 12h18" />
+                                        <path d="M12 3v18" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-200">Care navigation</p>
+                                    <h3 class="text-lg font-semibold text-white">Bridging to community partners</h3>
+                                </div>
+                            </header>
+                            <p>
+                                A dedicated office tracks referrals, follow-up calls, and data sharing with case managers. We coordinate transportation, documentation, and handoffs so patients arrive where they are expected and feel welcomed when they get there.
+                            </p>
+                        </article>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <section class="col-span-12">
+                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Field rhythm</p>
+                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">What the post-overdose journey feels like</h2>
+                    </div>
+                    <div class="grid gap-8 rounded-3xl border border-white/10 bg-slate-900/70 p-8 text-base leading-relaxed text-slate-200 shadow-[0_24px_50px_rgba(8,47,73,0.35)] lg:grid-cols-2">
+                        <div class="space-y-6">
+                            <p>
+                                When an overdose call goes out, a Community Paramedic unit launches with ALS equipment, buprenorphine, and the time to stay. Once life threats are managed, CPMs gain consent, listen, and prepare next steps while EMS units return to service.
+                            </p>
+                            <ul class="space-y-4 text-[15px]">
+                                <li class="flex items-start gap-3">
+                                    <span class="mt-1 inline-flex size-6 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">1</span>
+                                    <span class="leading-relaxed">911 dispatch alerts EMS, law enforcement, and the PORT unit simultaneously to reduce delays in specialized support.</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="mt-1 inline-flex size-6 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">2</span>
+                                    <span class="leading-relaxed">On scene, CPMs manage precipitated withdrawal, provide harm reduction supplies, and invite preferred outreach partners to meet the patient where they are.</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="mt-1 inline-flex size-6 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">3</span>
+                                    <span class="leading-relaxed">Within 24 hours, staff confirm referrals, document touchpoints, and coordinate follow-up so the patient is not navigating recovery alone.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-[15px] text-slate-100">
+                                <p class="text-xs uppercase tracking-[0.28em] text-brand-200">What stays with us</p>
+                                <p class="mt-3 leading-relaxed">
+                                    Zero repeat overdoses among the PORT referrals tracked in early 2025. Families tell us the difference is not a single medication – it is how long we stay and who we bring with us.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="col-span-12">
+                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Partners</p>
+                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">People and organizations in our circle</h2>
+                    </div>
+                    <div class="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
+                        <p class="text-[15px] leading-relaxed text-slate-200">
+                            Our success is built on constant communication and shared response protocols. From monthly overdose review boards to training exchanges, these partners help us remove barriers quickly and respectfully.
+                        </p>
+                        <div class="mt-6 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-brand-200">
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">REdisCOVERY</span>
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Reflections Counseling</span>
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Peninsula Behavioral Health REAL Team</span>
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Jamestown Healing Clinic</span>
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Olympic Medical Center</span>
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">North Olympic Healthcare Network</span>
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Clallam County Health & Human Services</span>
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Harm Reduction Center</span>
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">PAPD Community Resource Officers</span>
+                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">University of Washington / CROA</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="col-span-12">
+                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Contact</p>
+                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">Stay connected with our team</h2>
+                    </div>
+                    <div class="grid gap-6 lg:grid-cols-3 items-start">
+                        <div class="col-span-2 space-y-4 text-base leading-relaxed text-slate-200">
+                            <div class="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/50 to-slate-800/60 p-8 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
+                                <p class="text-xs uppercase tracking-[0.28em] text-brand-200">Community Paramedicine Office</p>
+                                <p class="mt-4">Port Angeles Fire Department</p>
+                                <p>102 E 5th St, Port Angeles, WA 98362</p>
+                                <p class="mt-3 text-slate-100">Office hours: Mon–Fri, 9am–5pm</p>
+                                <p class="mt-3">(360) 417-4668</p>
+                                <p><a href="mailto:pafdcpm@cityofpa.us" class="text-brand-200 transition hover:text-brand-100">pafdcpm@cityofpa.us</a></p>
+                                <p class="mt-4 text-slate-200/90">Established in 2019, our team operates from the Port Angeles Fire Department headquarters and welcomes partnership requests, media inquiries, or direct referrals from families and providers. When you reach out, we coordinate the right responder so follow-up begins immediately.</p>
+                            </div>
+                        </div>
+                        <div class="rounded-3xl border border-white/10 bg-slate-900/70 p-8 text-base leading-relaxed text-slate-200 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
+                            <p class="text-xs uppercase tracking-[0.28em] text-brand-200">Visit or share directions</p>
+                            <p class="mt-3 text-slate-100">102 E 5th St<br>Port Angeles, WA 98362</p>
+                            <a href="https://www.google.com/maps/search/102+E+5th+St+Port+Angeles+WA+98362" target="_blank" class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-200 transition hover:text-brand-100">Open in Google Maps
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14" />
+                                    <path d="m12 5 7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
-</section>
 {% endblock content %}

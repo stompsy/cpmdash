@@ -17,6 +17,7 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 SECRET_KEY = os.environ.get("SECRET_KEY", "dummy-key-for-pre-commit-checks")
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+JAWG_ACCESS_TOKEN = os.environ.get("JAWG_ACCESS_TOKEN", "")
 
 INSTALLED_APPS = [
     # Contrib
@@ -132,7 +133,7 @@ AUTH_USER_MODEL = "accounts.User"
 
 # --- Authentication UX ---
 LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/dashboard/"
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 SESSION_COOKIE_SAMESITE = "Lax"
 

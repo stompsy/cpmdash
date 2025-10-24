@@ -1,4 +1,6 @@
 # src/apps/core/views.py
+from datetime import date
+
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 
@@ -14,4 +16,10 @@ def healthz(_request: HttpRequest) -> JsonResponse:
 
 def overview(request: HttpRequest) -> HttpResponse:
     """Primary landing page for CPM insights overview."""
-    return render(request, "core/overview.html")
+    updated_on = date(2025, 10, 1)
+    context = {
+        "page_header_updated_at": updated_on,
+        "page_header_updated_at_iso": updated_on.isoformat(),
+        "page_header_read_time": "6 min read",
+    }
+    return render(request, "core/overview.html", context)

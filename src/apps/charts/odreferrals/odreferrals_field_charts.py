@@ -1,27 +1,19 @@
+from collections.abc import Collection
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import plot
 
+from utils.chart_colors import CHART_COLORS_VIBRANT
+from utils.chart_normalization import add_share_columns, count_share_text, rolling_average
 from utils.plotly import style_plotly_layout
 from utils.tailwind_colors import TAILWIND_COLORS
 
 from ...core.models import ODReferrals
 
-COLOR_SEQUENCE = [
-    TAILWIND_COLORS["indigo-600"],
-    TAILWIND_COLORS["blue-500"],
-    TAILWIND_COLORS["cyan-500"],
-    TAILWIND_COLORS["teal-500"],
-    TAILWIND_COLORS["emerald-500"],
-    TAILWIND_COLORS["green-500"],
-    TAILWIND_COLORS["yellow-500"],
-    TAILWIND_COLORS["amber-500"],
-    TAILWIND_COLORS["orange-500"],
-    TAILWIND_COLORS["red-500"],
-    TAILWIND_COLORS["pink-500"],
-    TAILWIND_COLORS["purple-500"],
-]
+# Use professional vibrant color palette for all charts
+COLOR_SEQUENCE = CHART_COLORS_VIBRANT
 
 WEEKDAY_ORDER = [
     "Monday",
@@ -50,6 +42,7 @@ def _clean_series(series: pd.Series) -> pd.Series:
 
 
 def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, theme: str) -> str:
+    vc_df = add_share_columns(vc_df, value_col)
     fig = px.pie(
         vc_df,
         names=label_col,
@@ -57,11 +50,12 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
         hole=0.55,
         color=label_col,
         color_discrete_sequence=COLOR_SEQUENCE,
+        custom_data=[vc_df["share_pct"].round(1)],
     )
     fig.update_traces(
         textposition="outside",
         textinfo="label+percent",
-        hovertemplate="%{label}<br>Count: %{value} (%{percent})<extra></extra>",
+        hovertemplate="%{label}<br>Count: %{value}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
     )
     fig = style_plotly_layout(
         fig,
@@ -76,14 +70,18 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
 
 
 def _build_treemap_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, theme: str) -> str:
+    vc_df = add_share_columns(vc_df, value_col)
     fig = px.treemap(
         vc_df,
         path=[label_col],
         values=value_col,
         color=label_col,
         color_discrete_sequence=COLOR_SEQUENCE,
+        custom_data=[vc_df["share_pct"].round(1)],
     )
-    fig.update_traces(hovertemplate="%{label}<br>Count: %{value}<extra></extra>")
+    fig.update_traces(
+        hovertemplate="%{label}<br>Count: %{value}<br>Share: %{customdata[0]:.1f}%<extra></extra>"
+    )
     fig = style_plotly_layout(
         fig,
         theme=theme,
@@ -99,17 +97,21 @@ def _build_treemap_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, th
 def _build_horizontal_bar(vc_df: pd.DataFrame, field: str, theme: str) -> str:
     vc_df["label_short"] = vc_df[field].astype(str).apply(lambda v: _shorten_label(v, 32))
     vc_df["full_label"] = vc_df[field].astype(str)
+    vc_df = add_share_columns(vc_df, "count")
+    text_values = [count_share_text(row["count"], row["share_pct"]) for _, row in vc_df.iterrows()]
     fig = px.bar(
         vc_df,
         x="count",
         y="label_short",
         orientation="h",
-        text="count",
+        text=text_values,
         color_discrete_sequence=[TAILWIND_COLORS["indigo-600"]],
-        custom_data=["full_label"],
+        custom_data=vc_df[["full_label", "share_pct"]],
     )
     fig.update_traces(textposition="outside", cliponaxis=False)
-    fig.update_traces(hovertemplate="%{customdata[0]}<br>Count: %{x}<extra></extra>")
+    fig.update_traces(
+        hovertemplate="%{customdata[0]}<br>Count: %{x}<br>Share: %{customdata[1]:.1f}%<extra></extra>"
+    )
     fig.update_yaxes(autorange="reversed")
     y_title = field.replace("_", " ").title()
     fig = style_plotly_layout(
@@ -193,16 +195,35 @@ def _build_monthly_chart(df: pd.DataFrame, theme: str) -> str | None:
         .reset_index(name="count")
     )
     monthly["label"] = monthly["month"].dt.to_timestamp().dt.strftime("%b %Y")
+    monthly = add_share_columns(monthly, "count")
+    monthly["text_label"] = [
+        count_share_text(row["count"], row["share_pct"]) for _, row in monthly.iterrows()
+    ]
+    rolling_counts = rolling_average(monthly["count"], window=3)
     fig = go.Figure(
         data=[
             go.Bar(
                 x=monthly["label"],
                 y=monthly["count"],
-                text=monthly["count"],
+                text=monthly["text_label"],
                 textposition="outside",
                 marker_color=TAILWIND_COLORS["indigo-600"],
+                customdata=monthly[["share_pct"]],
+                hovertemplate=(
+                    "Month: %{x}<br>Count: %{y}<br>Share: %{customdata[0]:.1f}%<extra></extra>"
+                ),
             )
         ]
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=monthly["label"],
+            y=rolling_counts,
+            mode="lines",
+            name="3-month avg",
+            line=dict(color=TAILWIND_COLORS["indigo-300"], width=3),
+            hovertemplate="Month: %{x}<br>3-month avg: %{y:.1f}<extra></extra>",
+        )
     )
     fig = style_plotly_layout(
         fig,
@@ -220,7 +241,11 @@ def _build_monthly_chart(df: pd.DataFrame, theme: str) -> str | None:
         ticklabelposition="outside",
         automargin=True,
     )
-    fig.update_layout(bargap=0.1)
+    fig.update_layout(
+        bargap=0.1,
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+    )
     return plot(fig, output_type="div", config={"responsive": True, "displaylogo": False})
 
 
@@ -239,15 +264,25 @@ def _build_weekday_chart(df: pd.DataFrame, theme: str) -> str | None:
         .rename_axis("weekday")
         .reset_index(name="count")
     )
+    weekday_counts = add_share_columns(weekday_counts, "count")
+    text_values = [
+        count_share_text(row["count"], row["share_pct"]) for _, row in weekday_counts.iterrows()
+    ]
     fig = px.bar(
         weekday_counts,
         x="weekday",
         y="count",
-        text="count",
+        text=text_values,
         color="weekday",
         color_discrete_sequence=[TAILWIND_COLORS["indigo-600"]] * len(WEEKDAY_ORDER),
+        custom_data=weekday_counts[["share_pct"]],
     )
-    fig.update_traces(textposition="outside", cliponaxis=False, showlegend=False)
+    fig.update_traces(
+        textposition="outside",
+        cliponaxis=False,
+        showlegend=False,
+        hovertemplate="Weekday: %{x}<br>Count: %{y}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
+    )
     fig = style_plotly_layout(
         fig,
         theme=theme,
@@ -277,7 +312,11 @@ def _build_weekday_chart(df: pd.DataFrame, theme: str) -> str | None:
     )
 
 
-def build_odreferrals_field_charts(theme: str) -> dict[str, str]:
+def build_odreferrals_field_charts(
+    theme: str,
+    fields: Collection[str] | None = None,
+) -> dict[str, str]:
+    target_fields = {field for field in fields} if fields is not None else None
     qs = ODReferrals.objects.all().values(
         "od_date",
         "referral_source",
@@ -296,13 +335,17 @@ def build_odreferrals_field_charts(theme: str) -> dict[str, str]:
     if df.empty:
         return charts
 
-    monthly_chart = _build_monthly_chart(df, theme)
-    if monthly_chart:
-        charts["odreferrals_counts_monthly"] = monthly_chart
+    wants_monthly = target_fields is None or "odreferrals_counts_monthly" in target_fields
+    if wants_monthly:
+        monthly_chart = _build_monthly_chart(df, theme)
+        if monthly_chart:
+            charts["odreferrals_counts_monthly"] = monthly_chart
 
-    weekday_chart = _build_weekday_chart(df, theme)
-    if weekday_chart:
-        charts["odreferrals_counts_weekday"] = weekday_chart
+    wants_weekday = target_fields is None or "odreferrals_counts_weekday" in target_fields
+    if wants_weekday:
+        weekday_chart = _build_weekday_chart(df, theme)
+        if weekday_chart:
+            charts["odreferrals_counts_weekday"] = weekday_chart
 
     for field in [
         "referral_source",
@@ -314,8 +357,13 @@ def build_odreferrals_field_charts(theme: str) -> dict[str, str]:
         "narcan_given",
         "referral_to_sud_agency",
     ]:
+        if target_fields is not None and field not in target_fields:
+            continue
         chart = _build_chart_for_field(df, field, theme)
         if chart:
             charts[field] = chart
 
-    return charts
+    if target_fields is None:
+        return charts
+
+    return {field: charts[field] for field in target_fields if field in charts}

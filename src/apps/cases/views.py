@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
@@ -11,23 +13,24 @@ from ..charts.overdose.od_shift_scenarios import (
 )
 
 
-def cases(request):
-    title = "PORT Referrals"
-    description = "Case Studies - OP Shielding Hope"
-    context = {
-        "title": title,
-        "description": description,
+def _get_opshielding_context() -> dict[str, object]:
+    updated_on = date(2025, 1, 17)
+    return {
+        "title": "PORT Referrals",
+        "description": "Case Studies - OP Shielding Hope",
+        "page_header_updated_at": updated_on,
+        "page_header_updated_at_iso": updated_on.isoformat(),
+        "page_header_read_time": "6 min read",
     }
+
+
+def cases(request):
+    context = _get_opshielding_context()
     return render(request, "cases/opshieldinghope.html", context=context)
 
 
 def opshield(request):
-    title = "PORT Referrals"
-    description = "Case Studies - OP Shielding Hope"
-    context = {
-        "title": title,
-        "description": description,
-    }
+    context = _get_opshielding_context()
     return render(request, "cases/opshieldinghope.html", context=context)
 
 
@@ -53,11 +56,16 @@ def costsavings(request):
     total_savings = cost_metrics["total_savings"]
     rounded_savings = round(total_savings / 500000) * 500000
 
+    updated_on = date(2025, 1, 24)
+
     context = {
         "title": title,
         "description": description,
         "cost_metrics": cost_metrics,
         "rounded_total_savings": rounded_savings,
+        "page_header_updated_at": updated_on,
+        "page_header_updated_at_iso": updated_on.isoformat(),
+        "page_header_read_time": "7 min read",
     }
     return render(request, "cases/costsavings.html", context)
 
@@ -201,10 +209,15 @@ def timeline(request):
         },
     ]
 
+    updated_on = date(2025, 1, 20)
+
     context = {
         "title": "PAFD Community Paramedicine Program Timeline",
         "description": "Milestones that have shaped the Port Angeles Fire Department's community paramedicine evolution.",
         "timeline_entries": timeline_entries,
+        "page_header_updated_at": updated_on,
+        "page_header_updated_at_iso": updated_on.isoformat(),
+        "page_header_read_time": "5 min read",
     }
 
     return render(request, "timeline/index.html", context)

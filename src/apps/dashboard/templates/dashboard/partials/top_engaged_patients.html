@@ -1,0 +1,55 @@
+{# Top Engaged Patients Table Partial #}
+<div class="rounded-2xl bg-white dark:bg-gray-900 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
+    <div class="border-b border-gray-200 dark:border-white/10 px-6 py-6 sm:py-8">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Insight spotlight</p>
+                <h2 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Top engaged patients</h2>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 max-w-2xl">
+                    Ten patients with the highest combined referrals, encounters, and overdose follow-ups. Use this short list for case conferencing
+                    and cross-agency coordination.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="overflow-x-auto">
+        {% if top_patients %}
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5 text-left">
+            <thead class="bg-gray-50/80 dark:bg-white/5 text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Patient ID</th>
+                    <th scope="col" class="px-6 py-3">Total touchpoints</th>
+                    <th scope="col" class="px-6 py-3">Referrals</th>
+                    <th scope="col" class="px-6 py-3">Encounters</th>
+                    <th scope="col" class="px-6 py-3">Age</th>
+                    <th scope="col" class="px-6 py-3">Sex</th>
+                    <th scope="col" class="px-6 py-3">Substance Use Disorder</th>
+                    <th scope="col" class="px-6 py-3">Behavioral Health</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200/70 dark:divide-white/5 text-sm text-gray-700 dark:text-gray-200">
+                {% for patient in top_patients %}
+                <tr class="hover:bg-indigo-50/40 dark:hover:bg-indigo-500/10">
+                    <td class="px-6 py-3 font-medium text-gray-900 dark:text-white">#{{ patient.patient_id }}</td>
+                    <td class="px-6 py-3">
+                        <span class="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-200">
+                            {{ patient.total_touchpoints }} touchpoints
+                        </span>
+                    </td>
+                    <td class="px-6 py-3">{{ patient.referrals }}</td>
+                    <td class="px-6 py-3">{{ patient.encounters }}</td>
+                    <td class="px-6 py-3">{{ patient.age }}</td>
+                    <td class="px-6 py-3">{{ patient.sex }}</td>
+                    <td class="px-6 py-3">{{ patient.sud }}</td>
+                    <td class="px-6 py-3">{{ patient.behavioral_health }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="px-6 py-12 text-center text-sm text-gray-600 dark:text-gray-300">
+            No patients have documented touchpoints yet. Add referrals, encounters, or overdose follow-ups to populate this list.
+        </div>
+        {% endif %}
+    </div>
+</div>

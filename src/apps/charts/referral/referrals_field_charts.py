@@ -1,8 +1,12 @@
+from collections.abc import Collection
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import plot
 
+from utils.chart_colors import CHART_COLORS_VIBRANT
+from utils.chart_normalization import add_share_columns, count_share_text, rolling_average
 from utils.plotly import style_plotly_layout
 from utils.tailwind_colors import TAILWIND_COLORS
 
@@ -21,23 +25,12 @@ def _shorten_label(text: str, max_len: int = 24) -> str:
     return (s[: max_len - 1] + "…") if len(s) > max_len else s
 
 
-COLOR_SEQUENCE = [
-    TAILWIND_COLORS["indigo-600"],
-    TAILWIND_COLORS["blue-500"],
-    TAILWIND_COLORS["cyan-500"],
-    TAILWIND_COLORS["teal-500"],
-    TAILWIND_COLORS["emerald-500"],
-    TAILWIND_COLORS["green-500"],
-    TAILWIND_COLORS["yellow-500"],
-    TAILWIND_COLORS["amber-500"],
-    TAILWIND_COLORS["orange-500"],
-    TAILWIND_COLORS["red-500"],
-    TAILWIND_COLORS["pink-500"],
-    TAILWIND_COLORS["purple-500"],
-]
+# Use professional vibrant color palette for all charts
+COLOR_SEQUENCE = CHART_COLORS_VIBRANT
 
 
 def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, theme: str) -> str:
+    vc_df = add_share_columns(vc_df, value_col)
     fig = px.pie(
         vc_df,
         names=label_col,
@@ -45,11 +38,12 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
         hole=0.55,
         color=label_col,
         color_discrete_sequence=COLOR_SEQUENCE,
+        custom_data=[vc_df["share_pct"].round(1)],
     )
     fig.update_traces(
         textposition="outside",
         textinfo="label+percent",
-        hovertemplate="%{label}<br>Count: %{value} (%{percent})<extra></extra>",
+        hovertemplate="%{label}<br>Count: %{value}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
     )
     fig = style_plotly_layout(
         fig,
@@ -64,14 +58,18 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
 
 
 def _build_treemap_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, theme: str) -> str:
+    vc_df = add_share_columns(vc_df, value_col)
     fig = px.treemap(
         vc_df,
         path=[label_col],
         values=value_col,
         color=label_col,
         color_discrete_sequence=COLOR_SEQUENCE,
+        custom_data=[vc_df["share_pct"].round(1)],
     )
-    fig.update_traces(hovertemplate="%{label}<br>Count: %{value}<extra></extra>")
+    fig.update_traces(
+        hovertemplate="%{label}<br>Count: %{value}<br>Share: %{customdata[0]:.1f}%<extra></extra>"
+    )
     fig = style_plotly_layout(
         fig,
         theme=theme,
@@ -103,14 +101,23 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                 vc = pd.concat(
                     [vc, pd.DataFrame([["Unknown", unknown_count]], columns=["age_group", "count"])]
                 )
+            vc = add_share_columns(vc, "count")
+            text_values = [
+                count_share_text(row["count"], row["share_pct"]) for _, row in vc.iterrows()
+            ]
             fig = px.bar(
                 vc,
                 x="age_group",
                 y="count",
-                text="count",
+                text=text_values,
                 color_discrete_sequence=[TAILWIND_COLORS["indigo-600"]],
+                custom_data=vc[["share_pct"]],
             )
-            fig.update_traces(textposition="outside", cliponaxis=False)
+            fig.update_traces(
+                textposition="outside",
+                cliponaxis=False,
+                hovertemplate="Age group: %{x}<br>Count: %{y}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
+            )
             fig = style_plotly_layout(
                 fig,
                 theme=theme,
@@ -181,17 +188,21 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
 
         vc["label_short"] = vc[field].astype(str).apply(lambda v: _shorten_label(v, 28))
         vc["full_label"] = vc[field].astype(str)
+        vc = add_share_columns(vc, "count")
+        text_values = [count_share_text(row["count"], row["share_pct"]) for _, row in vc.iterrows()]
         fig = px.bar(
             vc,
             x="count",
             y="label_short",
             orientation="h",
-            text="count",
+            text=text_values,
             color_discrete_sequence=[TAILWIND_COLORS["indigo-600"]],
-            custom_data=["full_label"],
+            custom_data=vc[["full_label", "share_pct"]],
         )
         fig.update_traces(textposition="outside", cliponaxis=False)
-        fig.update_traces(hovertemplate="%{customdata[0]}<br>Count: %{x}<extra></extra>")
+        fig.update_traces(
+            hovertemplate="%{customdata[0]}<br>Count: %{x}<br>Share: %{customdata[1]:.1f}%<extra></extra>"
+        )
         fig.update_yaxes(autorange="reversed")
         y_title = (
             "Referral Agency"
@@ -225,7 +236,11 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
     return plot(fig, output_type="div", config=config)
 
 
-def build_referrals_field_charts(theme: str) -> dict[str, str]:
+def build_referrals_field_charts(
+    theme: str,
+    fields: Collection[str] | None = None,
+) -> dict[str, str]:
+    target_fields = {field for field in fields} if fields is not None else None
     qs = Referrals.objects.all().values(
         "age",
         "sex",
@@ -251,13 +266,16 @@ def build_referrals_field_charts(theme: str) -> dict[str, str]:
         try:
             if field in {"date_received"}:
                 continue  # handled as quarterly chart below
+            if target_fields is not None and field not in target_fields:
+                continue
             charts[field] = _build_chart_for_field(df, field, theme)
         except Exception:
             continue
 
     # Add quarterly referral counts chart
     try:
-        if not df.empty and "date_received" in df.columns:
+        wants_quarterly = target_fields is None or "referrals_counts_quarterly" in target_fields
+        if wants_quarterly and not df.empty and "date_received" in df.columns:
             dates = pd.to_datetime(df["date_received"], errors="coerce")
             qdf = pd.DataFrame(
                 {
@@ -268,18 +286,41 @@ def build_referrals_field_charts(theme: str) -> dict[str, str]:
             qdf = qdf.groupby(["year", "quarter"], dropna=True).size().reset_index(name="count")
             if not qdf.empty:
                 qdf2 = qdf.sort_values(["year", "quarter"]).reset_index(drop=True)
+                qdf2 = add_share_columns(qdf2, "count")
+                total_referrals = max(int(qdf2["count"].sum()), 1)
+                qdf2["rate_per_100"] = (qdf2["count"] / total_referrals) * 100.0
+                qdf2["text_label"] = [
+                    count_share_text(row["count"], row["share_pct"]) for _, row in qdf2.iterrows()
+                ]
                 x_years = qdf2["year"].astype(str).tolist()
                 x_quarters = qdf2["quarter"].astype(str).tolist()
+                scatter_x = [[x_years[i], x_quarters[i]] for i in range(len(x_years))]
+                rolling_counts = rolling_average(qdf2["count"], window=3)
                 fig = go.Figure(
                     data=[
                         go.Bar(
                             x=[x_years, x_quarters],
                             y=qdf2["count"],
-                            text=qdf2["count"],
+                            text=qdf2["text_label"],
                             textposition="outside",
                             marker_color=TAILWIND_COLORS["indigo-600"],
+                            customdata=qdf2[["share_pct", "rate_per_100"]],
+                            hovertemplate=(
+                                "Quarter %{x[0]} %{x[1]}<br>Count: %{y}<br>Share: %{customdata[0]:.1f}%<br>"
+                                "Rate per 100 referrals: %{customdata[1]:.2f}<extra></extra>"
+                            ),
                         )
                     ]
+                )
+                fig.add_trace(
+                    go.Scatter(
+                        x=scatter_x,
+                        y=rolling_counts,
+                        mode="lines",
+                        name="3-quarter avg",
+                        line=dict(color=TAILWIND_COLORS["indigo-300"], width=3),
+                        hovertemplate="Quarter %{x[0]} %{x[1]}<br>3-quarter avg: %{y:.1f}<extra></extra>",
+                    )
                 )
                 fig = style_plotly_layout(
                     fig,
@@ -298,11 +339,18 @@ def build_referrals_field_charts(theme: str) -> dict[str, str]:
                     ticklabelposition="outside",
                     automargin=True,
                 )
-                fig.update_layout(bargap=0.1)
+                fig.update_layout(
+                    bargap=0.1,
+                    showlegend=True,
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
                 charts["referrals_counts_quarterly"] = plot(
                     fig, output_type="div", config={"responsive": True, "displaylogo": False}
                 )
     except Exception:
         pass
 
-    return charts
+    if target_fields is None:
+        return charts
+
+    return {field: charts[field] for field in target_fields if field in charts}

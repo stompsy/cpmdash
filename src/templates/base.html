@@ -66,13 +66,19 @@
 
                 <!-- ===== Main Content Start ===== -->
                 <main>
-                    <div class="p-8 mx-auto">
-                        <!-- 12-column grid container -->
+                    <div
+                        id="dashboard-main"
+                        class="mx-auto w-full px-6 py-10 space-y-12 sm:px-10"
+                    >
+                        {% block page_header %}{% endblock page_header %}
                         <div class="grid grid-cols-12 gap-6">
-                            {% block content %} {% endblock content %}
+                            {% block content %}{% endblock content %}
                         </div>
-                        <!-- Grid Container End -->
                     </div>
+
+                    <!-- ===== Footer Start ===== -->
+                    {% include "partials/footer.html" %}
+                    <!-- ===== Footer End ===== -->
                 </main>
                 <!-- ===== Main Content End ===== -->
             </div>
@@ -131,12 +137,39 @@
                     const parts = value.split(`; ${name}=`);
                     if (parts.length === 2) return parts.pop().split(';').shift();
                 }
-                document.body && document.body.addEventListener('htmx:configRequest', function(evt) {
-                    const token = getCookie('csrftoken');
-                    if (token) {
-                        evt.detail.headers['X-CSRFToken'] = token;
-                    }
-                });
+                if (document.body) {
+                    document.body.addEventListener('htmx:configRequest', function(evt) {
+                        const token = getCookie('csrftoken');
+                        if (token) {
+                            evt.detail.headers['X-CSRFToken'] = token;
+                        }
+                    });
+
+                    document.body.addEventListener('htmx:afterSwap', function(evt) {
+                        const target = evt.target;
+                        if (!target || target.id !== 'dashboard-main') {
+                            return;
+                        }
+                        const pageSource = target.getAttribute('data-page');
+                        const marker = target.querySelector('[data-page-name]');
+                        const pageName = pageSource || (marker ? marker.getAttribute('data-page-name') : null);
+                        if (pageName && document.body.__x && document.body.__x.$data) {
+                            document.body.__x.$data.page = pageName;
+                        }
+                    });
+
+                    document.body.addEventListener('htmx:historyRestore', function() {
+                        const target = document.querySelector('#dashboard-main');
+                        if (!target) {
+                            return;
+                        }
+                        const marker = target.querySelector('[data-page-name]');
+                        const pageName = marker ? marker.getAttribute('data-page-name') : null;
+                        if (pageName && document.body.__x && document.body.__x.$data) {
+                            document.body.__x.$data.page = pageName;
+                        }
+                    });
+                }
             })();
         </script>
     </body>

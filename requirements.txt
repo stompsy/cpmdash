@@ -14,6 +14,8 @@ attrs==25.3.0
     #   referencing
 click==8.2.1
     # via uvicorn
+defusedxml==0.7.1
+    # via cpmdash (pyproject.toml)
 dj-database-url==3.0.1
     # via cpmdash (pyproject.toml)
 django==5.2.7

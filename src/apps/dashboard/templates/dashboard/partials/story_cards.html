@@ -1,0 +1,34 @@
+{% if story_cards %}
+<div class="mt-12 w-full">
+    <div class="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+        {% for card in story_cards %}
+            <article class="flex h-full flex-col justify-between rounded-3xl border border-slate-200/70 bg-white/80 p-8 shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/60">
+                <div class="space-y-4">
+                    {% if card.eyebrow %}
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.32em] text-indigo-500 dark:text-brand-200/80">{{ card.eyebrow }}</p>
+                    {% endif %}
+                    {% if card.title %}
+                        <h2 class="text-2xl font-semibold leading-7 text-gray-900 dark:text-slate-50">{{ card.title }}</h2>
+                    {% endif %}
+                    {% if card.lede %}
+                        <p class="text-sm leading-6 text-gray-600 dark:text-slate-200/80">{{ card.lede }}</p>
+                    {% endif %}
+                    {% if card.bullets %}
+                        <ul class="mt-4 space-y-3 text-sm leading-6 text-gray-700 dark:text-slate-200/85">
+                            {% for bullet in card.bullets %}
+                                <li class="flex items-start gap-3">
+                                    <span class="mt-1 inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-indigo-400 dark:bg-brand-200/80"></span>
+                                    <span>{{ bullet }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                {% if card.callout %}
+                    <p class="mt-6 text-sm font-medium text-indigo-600 dark:text-brand-200/90">{{ card.callout }}</p>
+                {% endif %}
+            </article>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

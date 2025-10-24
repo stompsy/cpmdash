@@ -1,7 +1,7 @@
 import pandas as pd
 from django.db.models import Q
 
-from ..core.models import ODReferrals
+from ..core.models import ODReferrals, Patients
 
 
 def get_odreferral_counts() -> dict:
@@ -177,14 +177,88 @@ def get_od_fatality_rate_year(
     return (fatal_count / copa_population) * 100_000
 
 
-def get_quarterly_patient_counts() -> dict:
-    """Static quarterly patient counts supplied by domain expert.
+def _mapping_to_df(mapping: dict[str, int]) -> pd.DataFrame:
+    rows: list[dict[str, object]] = []
+    for label, count in mapping.items():
+        parts = label.split()
+        if len(parts) != 2:
+            continue
+        year_str, quarter = parts
+        try:
+            year = int(year_str)
+        except ValueError:
+            continue
+        rows.append({"year": year, "quarter": quarter, "count": int(count)})
 
-    Returns dict with:
-      - mapping: original mapping of "YYYY QX" -> count
-      - df: tidy DataFrame with columns [year, quarter, count]
-    """
-    data = {
+    df = pd.DataFrame(rows)
+    if df.empty:
+        return df
+
+    quarter_order = ["Q1", "Q2", "Q3", "Q4"]
+    df["quarter"] = pd.Categorical(df["quarter"], categories=quarter_order, ordered=True)
+    return df.sort_values(["year", "quarter"]).reset_index(drop=True)
+
+
+def _parse_year_quarter(label: str) -> tuple[int, int] | None:
+    parts = label.split()
+    if len(parts) != 2:
+        return None
+    year_str, quarter_str = parts
+    if not quarter_str.startswith("Q"):
+        return None
+    try:
+        year = int(year_str)
+        quarter = int(quarter_str[1:])
+    except ValueError:
+        return None
+    if quarter not in {1, 2, 3, 4}:
+        return None
+    return year, quarter
+
+
+def _build_dynamic_quarter_map(patient_dates: list[dict[str, object]]) -> dict[str, int]:
+    if not patient_dates:
+        return {}
+
+    df = pd.DataFrame.from_records(patient_dates)
+    if df.empty:
+        return {}
+
+    for col in ["created_date", "modified_date"]:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+
+    created_series = df.get("created_date")
+    if created_series is None:
+        created_series = pd.Series([], dtype="datetime64[ns]")
+
+    if "modified_date" in df.columns:
+        modified_series = df["modified_date"]
+        created_series = (
+            modified_series if created_series.empty else created_series.fillna(modified_series)
+        )
+
+    created_series = created_series.dropna()
+    if created_series.empty:
+        return {}
+
+    df_valid = pd.DataFrame({"date": created_series})
+    df_valid["year"] = df_valid["date"].dt.year.astype(int)
+    df_valid["quarter"] = df_valid["date"].dt.quarter.astype(int)
+
+    grouped = df_valid.groupby(["year", "quarter"], dropna=False).size().reset_index(name="count")
+    grouped["quarter_label"] = grouped["quarter"].apply(lambda q: f"Q{int(q)}")
+
+    return {
+        f"{int(row['year'])} {row['quarter_label']}": int(row["count"])
+        for _, row in grouped.iterrows()
+    }
+
+
+def get_quarterly_patient_counts() -> dict:
+    """Quarterly patient counts sourced from the Patients table with static fallbacks."""
+
+    static_defaults = {
         "2021 Q1": 47,
         "2021 Q2": 121,
         "2021 Q3": 141,
@@ -203,28 +277,30 @@ def get_quarterly_patient_counts() -> dict:
         "2024 Q4": 99,
         "2025 Q1": 165,
         "2025 Q2": 133,
-        "2025 Q3": 0,
-        "2025 Q4": 0,
     }
 
-    # Build tidy DataFrame
-    rows: list[dict] = []
-    for k, v in data.items():
-        parts = k.split()
-        if len(parts) != 2:
-            continue
-        year_str, quarter = parts
-        try:
-            year = int(year_str)
-        except ValueError:
-            continue
-        rows.append({"year": year, "quarter": quarter, "count": int(v)})
+    try:
+        patient_dates = list(Patients.objects.all().values("created_date", "modified_date"))
+    except Exception:
+        patient_dates = []
 
-    df = pd.DataFrame(rows)
+    dynamic_map = _build_dynamic_quarter_map(patient_dates)
+
+    merged = static_defaults.copy()
+    if dynamic_map:
+        cutoff = (2025, 2)
+        for label, count in dynamic_map.items():
+            parsed = _parse_year_quarter(label)
+            if parsed is None:
+                continue
+            if label not in merged or parsed > cutoff:
+                merged[label] = count
+
+    df = _mapping_to_df(merged)
     if not df.empty:
-        # Ensure sorting by year then quarter order Q1..Q4
-        quarter_order = ["Q1", "Q2", "Q3", "Q4"]
-        df["quarter"] = pd.Categorical(df["quarter"], categories=quarter_order, ordered=True)
-        df = df.sort_values(["year", "quarter"]).reset_index(drop=True)
+        merged = {
+            f"{int(record['year'])} {record['quarter']}": int(record["count"])
+            for record in df.to_dict("records")
+        }
 
-    return {"mapping": data, "df": df}
+    return {"mapping": merged, "df": df}

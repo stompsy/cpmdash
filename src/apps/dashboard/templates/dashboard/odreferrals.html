@@ -4,86 +4,55 @@
 {% block pageName %}od-referrals-overview{% endblock pageName %}
 {% block title %}Overdose Referrals — Operational Insights{% endblock title %}
 
+{% block page_header %}
+    {% static 'media/pafd_cpm.jpg' as odreferrals_header_image %}
+    {% with eyebrow="Program overviews" title="Overdose referral overview" description="Examine when overdose referrals arrive, who sends them, and how CPM teams respond so you can coordinate partners, plan outreach, and monitor harm-reduction impact." image_src=odreferrals_header_image image_alt="Community paramedic team reviewing overdose response plan" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
+        {% include "partials/page_header.html" %}
+    {% endwith %}
+{% endblock page_header %}
+
 {% block content %}
-<!-- Intro hero -->
-<section class="col-span-12 mb-16">
-    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-6 sm:px-12 md:px-20 py-20 rounded-2xl shadow-md lg:overflow-visible">
-        <div class="absolute inset-0 -z-20 bg-center bg-cover bg-no-repeat rounded-2xl"
-             style="background-image: url('{% static 'media/pafd_cpm.jpg' %}'); filter: contrast(1.25) brightness(0.85) saturate(1.1);"></div>
-        <div class="absolute inset-0 -z-10 bg-black opacity-75 rounded-2xl"></div>
-        <div class="mx-auto">
-            <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Community Paramedic Program</p>
-            <h1 class="mt-2 text-4xl sm:text-5xl font-semibold tracking-tight text-pretty text-white">
-                Overdose Referral Overview
-            </h1>
-            <p class="mt-6 text-lg sm:text-xl text-gray-200 max-w-prose">
-                Examine when overdose referrals arrive, who sends them, and how CPM teams respond. Use these charts to
-                coordinate partners, plan outreach, and monitor harm reduction impact.
-            </p>
-        </div>
-    </div>
-</section>
-
-<!-- Charts grid -->
-<section class="col-span-12 mb-16">
-    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-6 sm:px-12 md:px-20 py-20 rounded-2xl shadow-md lg:overflow-visible">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% if charts_list %}
-                {% for item in charts_list %}
-                <article class="group bg-white dark:bg-gray-900 shadow-sm overflow-hidden transition-shadow md:col-span-{{ item.col_span }}">
-                    <!-- Card header -->
-                    <div class="py-4 sm:py-4 flex items-start justify-between gap-3">
-                        <div>
-                            <p class="text-[11px] font-semibold tracking-wide text-indigo-600 dark:text-indigo-400 uppercase">OD Referrals</p>
-                            <h3 class="mt-1 mb-2 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{{ item.label }}</h3>
-                        </div>
-                        <div class="text-gray-400 dark:text-gray-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M3.75 3A.75.75 0 0 1 4.5 2.25h15a.75.75 0 0 1 0 1.5H4.5A.75.75 0 0 1 3.75 3Zm2 3A.75.75 0 0 1 6.5 5.25h11a.75.75 0 0 1 0 1.5h-11A.75.75 0 0 1 5.75 6Zm-2 12a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v2a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-2Zm6-6a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v8a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-8Zm6-4a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v12a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75V8.25Z"/></svg>
-                        </div>
-                    </div>
-
-                    <!-- Card body -->
-                    <div>
-                        <div class="rounded-2xl p-4 bg-white/70 dark:bg-gray-800/50">
-                            {% autoescape off %}{{ item.chart|safe }}{% endautoescape %}
-                        </div>
-                    </div>
-
-                    <!-- Card footer -->
-                    <div class="py-3 sm:py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                        {% if item.insights %}
-                            <div>
-                                <p class="font-medium text-gray-800 dark:text-gray-200">Insights</p>
-                                <ul class="mt-1 list-disc pl-5 space-y-1">
-                                    {% for tip in item.insights %}
-                                        {% if tip.label and tip.value is not None %}
-                                            <li><span class="font-medium text-gray-800 dark:text-gray-200">{{ tip.label }}:</span> {{ tip.value }}</li>
-                                        {% else %}
-                                            <li>{{ tip }}</li>
-                                        {% endif %}
-                                    {% endfor %}
-                                </ul>
-                                {% if item.rationale %}
-                                  <p class="mt-2 text-gray-700 dark:text-gray-300">{{ item.rationale }}</p>
-                                {% endif %}
+    <div class="col-span-12 mx-auto mt-16 w-full max-w-7xl">
+        <span data-page-name="od-referrals-overview" class="hidden" hidden></span>
+        {% include "dashboard/partials/story_cards.html" with story_cards=story_cards %}
+        <div class="grid grid-cols-1 gap-20 md:grid-cols-2">
+            {% if chart_cards %}
+                {% for card in chart_cards %}
+                    <div class="md:col-span-{{ card.col_span }}">
+                        <div
+                            id="odreferral-chart-{{ card.field }}"
+                            class="space-y-6 px-6 sm:px-10 lg:px-16"
+                            hx-get="{% url 'dashboard:odreferrals_chart_fragment' card.field %}"
+                            hx-trigger="load"
+                            hx-target="this"
+                            hx-swap="outerHTML"
+                            aria-busy="true"
+                        >
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                    <p class="text-[10px] font-semibold uppercase tracking-[0.32em] text-indigo-500 dark:text-brand-200/80">OD Referrals</p>
+                                    <h3 class="mt-2 text-xl sm:text-2xl font-semibold text-gray-900 dark:text-slate-100">{{ card.label }}</h3>
+                                </div>
+                                <div class="text-gray-400/80 dark:text-slate-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 opacity-60"><path d="M3.75 3A.75.75 0 0 1 4.5 2.25h15a.75.75 0 0 1 0 1.5H4.5A.75.75 0 0 1 3.75 3Zm2 3A.75.75 0 0 1 6.5 5.25h11a.75.75 0 0 1 0 1.5h-11A.75.75 0 0 1 5.75 6Zm-2 12a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v2a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-2Zm6-6a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v8a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-8Zm6-4a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v12a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75V8.25Z"/></svg>
+                                </div>
                             </div>
-                        {% else %}
-                            <div class="flex items-center justify-between">
-                                <p>Hover to explore overdose referral trends.</p>
-                                <p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-500">Updated {% now "M j, Y" %}</p>
+                            <div class="relative">
+                                <div class="h-[22rem] rounded-3xl bg-slate-200/60 dark:bg-slate-800/50 animate-pulse"></div>
                             </div>
-                        {% endif %}
+                            <div class="space-y-3 border-t border-slate-200/50 pt-6 text-xs sm:text-sm text-gray-500 dark:border-slate-700 dark:text-slate-500">
+                                <div class="h-4 w-2/3 rounded bg-slate-200/80 dark:bg-slate-700/60 animate-pulse"></div>
+                                <div class="h-3 w-3/4 rounded bg-slate-200/70 dark:bg-slate-700/50 animate-pulse"></div>
+                                <div class="h-3 w-1/2 rounded bg-slate-200/70 dark:bg-slate-700/50 animate-pulse"></div>
+                            </div>
+                        </div>
                     </div>
-                </article>
                 {% endfor %}
             {% else %}
-                <div class="col-span-1 md:col-span-2 xl:col-span-3">
-                    <div class="p-6 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">
-                        No overdose referral data available.
-                    </div>
+                <div class="md:col-span-2 text-center text-gray-700 dark:text-gray-300">
+                    No overdose referral data available.
                 </div>
             {% endif %}
         </div>
     </div>
-</section>
 {% endblock content %}

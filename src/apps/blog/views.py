@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from typing import Any, cast
 
 from django.contrib import messages
@@ -56,6 +57,14 @@ class CaseStudyListView(ListView):
         ordered_qs = cast(QuerySet[Tag], cast(Any, annotated_qs).order_by("-case_count", "name"))
         ctx["popular_tags"] = cast(list[Tag], list(ordered_qs[:6]))
         ctx["active_tag"] = self.request.GET.get("tag", "")
+        updated_on = date(2025, 1, 30)
+        ctx.update(
+            {
+                "page_header_updated_at": updated_on,
+                "page_header_updated_at_iso": updated_on.isoformat(),
+                "page_header_read_time": "9 min read",
+            }
+        )
         return ctx
 
 

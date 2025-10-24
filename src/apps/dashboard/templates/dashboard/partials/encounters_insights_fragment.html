@@ -1,0 +1,191 @@
+{% if data_is_empty %}
+<section class="col-span-12">
+    <div class="rounded-2xl bg-white dark:bg-gray-900 p-12 shadow-md text-center text-gray-700 dark:text-gray-300">
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">No encounter data available yet</h2>
+        <p class="mt-4 max-w-2xl mx-auto">
+            Log CPM encounters linked to referrals or overdose follow-ups to unlock encounter insights. Once data is available, this page surfaces high-frequency visits, encounter-only contacts, and PORT-aligned care plans.
+        </p>
+    </div>
+</section>
+{% else %}
+<!-- Summary cards -->
+<section class="col-span-12 mb-12 mx-auto px-6 sm:px-12 md:px-20">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-5">
+        {% for card in summary_cards %}
+            <article class="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">{{ card.label }}</p>
+                    <span class="rounded-full bg-indigo-50 dark:bg-indigo-500/20 p-2 text-indigo-500 dark:text-indigo-200">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 3.75h15M4.5 3.75v14.5A1.75 1.75 0 0 0 6.25 20h11.5A1.75 1.75 0 0 0 19.5 18.25V3.75" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.75v-1a2.25 2.25 0 0 1 4.5 0v1" />
+                        </svg>
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-semibold text-gray-900 dark:text-white">{{ card.value }}</p>
+                <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">{{ card.description }}</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Top encounter patients -->
+<section class="col-span-12 mb-12 mx-auto px-6 sm:px-12 md:px-20">
+    <div class="rounded-2xl bg-white dark:bg-gray-900 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
+        <div class="border-b border-gray-200 dark:border-white/10 px-6 py-6 sm:px-10 sm:py-8">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Engagement focus</p>
+                    <h2 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Top encounter patients</h2>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 max-w-2xl">
+                        Patients with the highest CPM encounter counts, along with referral and overdose touchpoint context. Use this roster to plan multidisciplinary huddles and manage care intensity.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-500/20 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-200">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+                    </svg>
+                    Care team spotlight
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            {% if top_patients %}
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5 text-left">
+                <thead class="bg-gray-50/80 dark:bg-white/5 text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Patient ID</th>
+                        <th scope="col" class="px-6 py-3">Encounters</th>
+                        <th scope="col" class="px-6 py-3">Total touchpoints</th>
+                        <th scope="col" class="px-6 py-3">Referrals</th>
+                        <th scope="col" class="px-6 py-3">Insurance</th>
+                        <th scope="col" class="px-6 py-3">Primary care agency</th>
+                        <th scope="col" class="px-6 py-3">ZIP</th>
+                        <th scope="col" class="px-6 py-3">Age</th>
+                        <th scope="col" class="px-6 py-3">Sex</th>
+                        <th scope="col" class="px-6 py-3">SUD flag</th>
+                        <th scope="col" class="px-6 py-3">Behavioral health flag</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200/70 dark:divide-white/5 text-sm text-gray-700 dark:text-gray-200">
+                    {% for patient in top_patients %}
+                    <tr class="hover:bg-indigo-50/40 dark:hover:bg-indigo-500/10">
+                        <td class="px-6 py-3 font-medium text-gray-900 dark:text-white">#{{ patient.patient_id }}</td>
+                        <td class="px-6 py-3">
+                            <span class="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-200">
+                                {{ patient.encounters }} encounters
+                            </span>
+                        </td>
+                        <td class="px-6 py-3">{{ patient.total_touchpoints }}</td>
+                        <td class="px-6 py-3">{{ patient.referrals }}</td>
+                        <td class="px-6 py-3">{{ patient.insurance }}</td>
+                        <td class="px-6 py-3">{{ patient.pcp_agency }}</td>
+                        <td class="px-6 py-3">{{ patient.zip_code }}</td>
+                        <td class="px-6 py-3">{{ patient.age }}</td>
+                        <td class="px-6 py-3">{{ patient.sex }}</td>
+                        <td class="px-6 py-3">{{ patient.sud }}</td>
+                        <td class="px-6 py-3">{{ patient.behavioral_health }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="px-6 py-12 text-center text-sm text-gray-600 dark:text-gray-300">
+                No patients have documented encounters yet. Add CPM encounter records to populate this list.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Detailed insights -->
+<section class="col-span-12 mb-12 mx-auto w-full px-6 sm:px-12 md:px-20">
+    <div class="grid grid-cols-1 gap-6">
+        <article class="rounded-2xl bg-white dark:bg-gray-900 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
+            <header class="border-b border-gray-200 dark:border-white/10 px-6 py-6">
+                <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Primary care partners</p>
+                <h3 class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">Top PCP agencies by encounters</h3>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Organizations coordinating the most CPM encounters and their reach across patients.</p>
+            </header>
+            <div class="overflow-x-auto">
+                {% if pcp_agency_interactions %}
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5 text-left">
+                    <thead class="bg-gray-50/80 dark:bg-white/5 text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">PCP Agency</th>
+                            <th scope="col" class="px-6 py-3">Encounters</th>
+                            <th scope="col" class="px-6 py-3">Share %</th>
+                            <th scope="col" class="px-6 py-3">Unique patients</th>
+                            <th scope="col" class="px-6 py-3">Avg encounters / patient</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200/70 dark:divide-white/5 text-sm text-gray-700 dark:text-gray-200">
+                        {% for row in pcp_agency_interactions %}
+                        <tr class="hover:bg-indigo-50/40 dark:hover:bg-indigo-500/10">
+                            <td class="px-6 py-3 font-medium text-gray-900 dark:text-white">{{ row.pcp_agency }}</td>
+                            <td class="px-6 py-3">{{ row.encounters }}</td>
+                            <td class="px-6 py-3">{{ row.share_pct|floatformat:1 }}%</td>
+                            <td class="px-6 py-3">{{ row.unique_patients }}</td>
+                            <td class="px-6 py-3">{{ row.avg_per_patient|floatformat:1 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="px-6 py-12 text-center text-sm text-gray-600 dark:text-gray-300">
+                    No PCP encounter data captured yet.
+                </div>
+                {% endif %}
+            </div>
+        </article>
+    </div>
+
+    <div class="mt-12">
+        <header class="mb-6 flex flex-col gap-2">
+            <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Encounter mix</p>
+            <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Encounter type distribution</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 max-w-3xl">Percentage of encounter documentation across category levels, along with patient reach and intensity.</p>
+        </header>
+        {% if encounter_type_percentages %}
+            <div class="grid grid-cols-1 gap-6">
+                {% for table in encounter_type_percentages %}
+                    <article class="rounded-2xl bg-white dark:bg-gray-900 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
+                        <header class="border-b border-gray-200 dark:border-white/10 px-6 py-6">
+                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ table.title }}</h4>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ table.subtitle }}</p>
+                        </header>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5 text-left">
+                                <thead class="bg-gray-50/80 dark:bg-white/5 text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Type</th>
+                                        <th scope="col" class="px-6 py-3">Encounters</th>
+                                        <th scope="col" class="px-6 py-3">Share %</th>
+                                        <th scope="col" class="px-6 py-3">Unique patients</th>
+                                        <th scope="col" class="px-6 py-3">Avg per patient</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200/70 dark:divide-white/5 text-sm text-gray-700 dark:text-gray-200">
+                                    {% for row in table.rows %}
+                                    <tr class="hover:bg-indigo-50/40 dark:hover:bg-indigo-500/10">
+                                        <td class="px-6 py-3 font-medium text-gray-900 dark:text-white">{{ row.label }}</td>
+                                        <td class="px-6 py-3">{{ row.encounters }}</td>
+                                        <td class="px-6 py-3">{{ row.share_pct|floatformat:1 }}%</td>
+                                        <td class="px-6 py-3">{{ row.unique_patients }}</td>
+                                        <td class="px-6 py-3">{{ row.avg_per_patient|floatformat:1 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="rounded-2xl bg-white dark:bg-gray-900 px-6 py-12 text-center text-gray-600 dark:text-gray-300 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
+                No encounter type categorization available yet. Add category data to analyze distribution.
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}

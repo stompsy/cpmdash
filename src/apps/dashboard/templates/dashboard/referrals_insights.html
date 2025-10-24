@@ -4,235 +4,43 @@
 {% block pageName %}referralsInsights{% endblock pageName %}
 {% block title %}Referrals — Insights{% endblock title %}
 
+{% block page_header %}
+{% static 'media/data_collection.png' as referrals_insights_header_image %}
+{% with eyebrow="Program insights" title="Referral Pipeline Insights" description="Track how referrals convert into CPM encounters and overdose follow-ups. Surface partner agencies that close the loop, highlight dormant referrals needing nudges, and celebrate strong PORT integrations." image_src=referrals_insights_header_image image_alt="Paramedic documenting referral information" image_width="960" image_height="640" %}
+    {% include "partials/page_header.html" %}
+{% endwith %}
+{% endblock page_header %}
+
 {% block content %}
-<!-- Hero / Intro -->
-<section class="col-span-12 mb-16">
-    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-6 sm:px-12 md:px-20 py-20 rounded-2xl shadow-md lg:overflow-visible">
-        <div class="absolute inset-0 -z-20 bg-center bg-cover bg-no-repeat rounded-2xl"
-             style="background-image: url('{% static 'media/data_collection.png' %}'); filter: contrast(1.1) brightness(0.85) saturate(1.05);"></div>
-        <div class="absolute inset-0 -z-10 bg-slate-900/80 rounded-2xl"></div>
-        <div class="relative z-10 mx-auto text-white">
-            <p class="text-sm font-semibold uppercase tracking-wider text-indigo-300">Referral Operations</p>
-            <h1 class="mt-3 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl">
-                Referral Pipeline Insights
-            </h1>
-            <p class="mt-6 text-lg sm:text-xl text-indigo-100/90">
-                Track how referrals convert into CPM encounters and overdose follow-ups. Surface partner agencies that close the loop,
-                highlight dormant referrals needing nudges, and celebrate strong PORT integrations.
-            </p>
-        </div>
-    </div>
-</section>
-
-{% if data_is_empty %}
+<span data-page-name="referralsInsights" class="hidden" hidden></span>
 <section class="col-span-12">
-    <div class="rounded-2xl bg-white dark:bg-gray-900 p-12 shadow-md text-center text-gray-700 dark:text-gray-300">
-        <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">No referral data available yet</h2>
-        <p class="mt-4 max-w-2xl mx-auto">
-            Load referral records (and, ideally, matching encounters and overdose follow-ups) to unlock referral insights. The dashboard then quantifies partner engagement,
-            identifies dormant referrals, and showcases agencies driving successful outcomes.
-        </p>
-    </div>
-</section>
-{% else %}
-<!-- Summary cards -->
-<section class="col-span-12 mb-12 mx-auto px-6 sm:px-12 md:px-20">
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-5">
-        {% for card in summary_cards %}
-            <article class="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
-                <div class="flex items-center justify-between">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">{{ card.label }}</p>
-                    <span class="rounded-full bg-indigo-50 dark:bg-indigo-500/20 p-2 text-indigo-500 dark:text-indigo-200">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.25h18M5.25 5.25v13.5A1.5 1.5 0 0 0 6.75 20.25h10.5a1.5 1.5 0 0 0 1.5-1.5V5.25" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5.25v-1.5a2.25 2.25 0 0 1 4.5 0v1.5" />
-                        </svg>
-                    </span>
-                </div>
-                <p class="mt-5 text-3xl font-semibold text-gray-900 dark:text-white">{{ card.value }}</p>
-                <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">{{ card.description }}</p>
-            </article>
-        {% endfor %}
-    </div>
-</section>
-
-<!-- Top referral agencies table -->
-<section class="col-span-12 mb-12 w-full mx-auto px-6 sm:px-12 md:px-20">
-    <div class="rounded-2xl bg-white dark:bg-gray-900 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
-        <div class="border-b border-gray-200 dark:border-white/10 px-6 py-6 sm:px-10 sm:py-8">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Partner performance</p>
-                    <h2 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Top referral agencies</h2>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 max-w-3xl">
-                        Agencies driving the highest referral volume and encounter conversion. Use this to celebrate champions, share best practices, and spot where to focus outreach support.
-                    </p>
-                </div>
-                <div class="flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-500/20 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-200">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75 9 12l3 3 7.5-7.5" />
-                    </svg>
-                    Conversion Leaders
-                </div>
+    <div
+        id="referrals-insights-fragment"
+        class="space-y-16 rounded-2xl bg-white/50 px-6 py-12 shadow-md ring-1 ring-slate-200/80 backdrop-blur dark:bg-slate-900/40 dark:ring-white/10 sm:px-10 lg:px-16"
+        hx-get="{% url 'dashboard:referrals_insights_fragment' %}"
+        hx-trigger="load"
+        hx-target="this"
+        hx-swap="outerHTML"
+        aria-busy="true"
+    >
+        <div class="animate-pulse space-y-12 text-slate-400 dark:text-slate-500">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+                {% for _ in "12345" %}
+                <div class="h-40 rounded-2xl bg-slate-200/60 dark:bg-slate-700/40"></div>
+                {% endfor %}
+            </div>
+            <div class="h-[22rem] rounded-3xl bg-slate-200/60 dark:bg-slate-700/40"></div>
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div class="h-[20rem] rounded-3xl bg-slate-200/60 dark:bg-slate-700/40"></div>
+                <div class="h-[20rem] rounded-3xl bg-slate-200/60 dark:bg-slate-700/40"></div>
+            </div>
+            <div class="h-[20rem] rounded-3xl bg-slate-200/60 dark:bg-slate-700/40"></div>
+            <div class="space-y-3">
+                <div class="h-4 w-2/3 rounded bg-slate-200/70 dark:bg-slate-700/40"></div>
+                <div class="h-4 w-1/2 rounded bg-slate-200/70 dark:bg-slate-700/40"></div>
+                <div class="h-4 w-3/4 rounded bg-slate-200/70 dark:bg-slate-700/40"></div>
             </div>
         </div>
-        <div class="overflow-x-auto">
-            {% if top_agencies %}
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5 text-left">
-                <thead class="bg-gray-50/80 dark:bg-white/5 text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">Agency</th>
-                        <th scope="col" class="px-6 py-3">Referrals</th>
-                        <th scope="col" class="px-6 py-3">Encounters</th>
-                        <th scope="col" class="px-6 py-3">PORT follow-ups</th>
-                        <th scope="col" class="px-6 py-3">Engagement %</th>
-                        <th scope="col" class="px-6 py-3">PORT %</th>
-                        <th scope="col" class="px-6 py-3">Unique patients</th>
-                        <th scope="col" class="px-6 py-3">Avg touchpoints</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200/70 dark:divide-white/5 text-sm text-gray-700 dark:text-gray-200">
-                    {% for agency in top_agencies %}
-                    <tr class="hover:bg-indigo-50/40 dark:hover:bg-indigo-500/10">
-                        <td class="px-6 py-3 font-medium text-gray-900 dark:text-white">{{ agency.agency }}</td>
-                        <td class="px-6 py-3">{{ agency.total_referrals }}</td>
-                        <td class="px-6 py-3">{{ agency.encounters }}</td>
-                        <td class="px-6 py-3">{{ agency.port_followups }}</td>
-                        <td class="px-6 py-3">{{ agency.engagement_rate|floatformat:1 }}%</td>
-                        <td class="px-6 py-3">{{ agency.port_rate|floatformat:1 }}%</td>
-                        <td class="px-6 py-3">{{ agency.unique_patients }}</td>
-                        <td class="px-6 py-3">{{ agency.avg_touchpoints|floatformat:1 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="px-6 py-12 text-center text-sm text-gray-600 dark:text-gray-300">
-                No referral agencies to display yet. Add referral records to populate partner performance insights.
-            </div>
-            {% endif %}
-        </div>
     </div>
 </section>
-
-<!-- Encounter type tables -->
-<section class="col-span-12 mb-12 w-full mx-auto px-6 sm:px-12 md:px-20">
-    {% if encounter_type_tables %}
-        <div class="grid grid-cols-1 gap-6">
-            {% for table in encounter_type_tables %}
-                <article class="rounded-2xl bg-white dark:bg-gray-900 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
-                    <header class="border-b border-gray-200 dark:border-white/10 px-6 py-6">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Encounter mix</p>
-                        <h3 class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">{{ table.title }}</h3>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ table.subtitle }}</p>
-                    </header>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5 text-left">
-                            <thead class="bg-gray-50/80 dark:bg-white/5 text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3">Type</th>
-                                    <th scope="col" class="px-6 py-3">Referrals</th>
-                                    <th scope="col" class="px-6 py-3">Share %</th>
-                                    <th scope="col" class="px-6 py-3">Engagement %</th>
-                                    <th scope="col" class="px-6 py-3">PORT %</th>
-                                    <th scope="col" class="px-6 py-3">Avg touchpoints</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200/70 dark:divide-white/5 text-sm text-gray-700 dark:text-gray-200">
-                                {% for row in table.rows %}
-                                <tr class="hover:bg-indigo-50/40 dark:hover:bg-indigo-500/10">
-                                    <td class="px-6 py-3 font-medium text-gray-900 dark:text-white">{{ row.label }}</td>
-                                    <td class="px-6 py-3">{{ row.referral_count }}</td>
-                                    <td class="px-6 py-3">{{ row.share_pct|floatformat:1 }}%</td>
-                                    <td class="px-6 py-3">{{ row.engagement_pct|floatformat:1 }}%</td>
-                                    <td class="px-6 py-3">{{ row.port_pct|floatformat:1 }}%</td>
-                                    <td class="px-6 py-3">
-                                        {% if row.avg_touchpoints is not None %}
-                                            {{ row.avg_touchpoints|floatformat:1 }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </article>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="rounded-2xl bg-white dark:bg-gray-900 p-8 text-center text-gray-600 dark:text-gray-300 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
-            No encounter-type breakdowns yet. Add referrals with categorized encounter types to populate this table set.
-        </div>
-    {% endif %}
-</section>
-
-<!-- Referral type rollup -->
-<section class="col-span-12 mb-12 w-full mx-auto px-6 sm:px-12 md:px-20">
-    <div class="mx-auto rounded-2xl bg-white dark:bg-gray-900 shadow-md ring-1 ring-gray-200/80 dark:ring-white/10">
-        <header class="border-b border-gray-200 dark:border-white/10 px-6 py-6 sm:px-10 sm:py-8">
-            <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Referral reasons</p>
-            <h3 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{{ referral_type_table.title }}</h3>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 max-w-3xl">{{ referral_type_table.subtitle }}</p>
-        </header>
-        <div class="overflow-x-auto">
-            {% if referral_type_table.rows %}
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5 text-left">
-                <thead class="bg-gray-50/80 dark:bg-white/5 text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">Referral type</th>
-                        <th scope="col" class="px-6 py-3">Referrals</th>
-                        <th scope="col" class="px-6 py-3">Share %</th>
-                        <th scope="col" class="px-6 py-3">Engagement %</th>
-                        <th scope="col" class="px-6 py-3">PORT %</th>
-                        <th scope="col" class="px-6 py-3">Avg touchpoints</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200/70 dark:divide-white/5 text-sm text-gray-700 dark:text-gray-200">
-                    {% for row in referral_type_table.rows %}
-                    <tr class="hover:bg-indigo-50/40 dark:hover:bg-indigo-500/10">
-                        <td class="px-6 py-3 font-medium text-gray-900 dark:text-white">{{ row.label }}</td>
-                        <td class="px-6 py-3">{{ row.referral_count }}</td>
-                        <td class="px-6 py-3">{{ row.share_pct|floatformat:1 }}%</td>
-                        <td class="px-6 py-3">{{ row.engagement_pct|floatformat:1 }}%</td>
-                        <td class="px-6 py-3">{{ row.port_pct|floatformat:1 }}%</td>
-                        <td class="px-6 py-3">
-                            {% if row.avg_touchpoints is not None %}
-                                {{ row.avg_touchpoints|floatformat:1 }}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="px-6 py-12 text-center text-sm text-gray-600 dark:text-gray-300">
-                No referral reason data captured yet. Populate the referral reason fields to analyze their impact.
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</section>
-
-<!-- Key takeaways -->
-{% if table_insights %}
-<section class="col-span-12 mb-12 w-full mx-auto px-6 sm:px-12 md:px-20">
-    <div class="rounded-2xl bg-indigo-50/60 dark:bg-indigo-500/10 p-8 shadow-md ring-1 ring-indigo-100/80 dark:ring-indigo-500/30">
-        <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-200">Highlights</p>
-        <h3 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Quick takeaways</h3>
-        <ul class="mt-6 space-y-3 text-sm text-gray-700 dark:text-gray-200">
-            {% for insight in table_insights %}
-            <li class="flex gap-3">
-                <span class="mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
-                <span>{{ insight }}</span>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-</section>
-{% endif %}
-{% endif %}
 {% endblock content %}

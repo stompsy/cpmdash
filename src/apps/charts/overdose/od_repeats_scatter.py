@@ -9,22 +9,20 @@ from ...core.models import ODReferrals
 
 
 def build_chart_repeats_scatter(theme):  # noqa: C901
-    odreferrals = ODReferrals.objects.all()
-    df = pd.DataFrame.from_records(
-        odreferrals.values(
-            "patient_id",
-            "od_date",
-            "disposition",
-            "patient_age",
-            "patient_sex",
-            "narcan_doses_prior_to_ems",
-            "narcan_prior_to_ems_dosage",
-            "jail_start_1",
-            "jail_end_1",
-            "jail_start_2",
-            "jail_end_2",
-        )
+    odreferrals_qs = ODReferrals.objects.values(
+        "patient_id",
+        "od_date",
+        "disposition",
+        "patient_age",
+        "patient_sex",
+        "narcan_doses_prior_to_ems",
+        "narcan_prior_to_ems_dosage",
+        "jail_start_1",
+        "jail_end_1",
+        "jail_start_2",
+        "jail_end_2",
     )
+    df = pd.DataFrame.from_records(list(odreferrals_qs))
 
     # If the dataframe is empty, return a message
     if df.empty:
@@ -33,7 +31,7 @@ def build_chart_repeats_scatter(theme):  # noqa: C901
     # Classify outcome
     df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
     df = df[df["od_date"] != pd.Timestamp("2000-01-01")]
-    fatal_conditions = ["CPR attempted", "DOA"]
+    fatal_conditions = ["cpr attempted", "doa", "fatal", "death", "deceased", "died"]
     df["overdose_outcome"] = df["disposition"].apply(
         lambda x: "Fatal" if str(x).strip().lower() in fatal_conditions else "Non-Fatal"
     )
@@ -125,26 +123,56 @@ def build_chart_repeats_scatter(theme):  # noqa: C901
 
     # Add scatter plot for ODs
     for label in df["merged_label"].cat.categories:
-        df_label = df[df["merged_label"] == label]
+        df_label = df[df["merged_label"] == label].sort_values("od_date")
+
+        # Create marker colors: red for fatal, patient color for non-fatal
+        marker_colors = [
+            "red" if outcome == "Fatal" else color_map[label]
+            for outcome in df_label["overdose_outcome"]
+        ]
+
+        # Create marker line colors: dark red for fatal, match marker for non-fatal
+        marker_line_colors = [
+            "darkred" if outcome == "Fatal" else color_map[label]
+            for outcome in df_label["overdose_outcome"]
+        ]
+
+        # Create hover text that shows FATAL in red for fatal overdoses
+        hover_text = []
+        for _, row in df_label.iterrows():
+            if row["overdose_outcome"] == "Fatal":
+                hover_text.append(
+                    f"<b>Patient: {row['merged_label']}</b><br>"
+                    f"OD Date: {row['od_date'].strftime('%Y-%m-%d')}<br>"
+                    f"<b style='color:red'>Outcome: FATAL</b><br>"
+                    f"Days Since Last OD: {row['days_since_last_od']}"
+                )
+            else:
+                hover_text.append(
+                    f"<b>Patient: {row['merged_label']}</b><br>"
+                    f"OD Date: {row['od_date'].strftime('%Y-%m-%d')}<br>"
+                    f"Outcome: {row['overdose_outcome']}<br>"
+                    f"Days Since Last OD: {row['days_since_last_od']}"
+                )
+
+        # Add all overdoses for this patient with connecting lines
         fig.add_trace(
             go.Scatter(
                 x=df_label["od_date"],
                 y=df_label["merged_label"],
                 mode="markers+lines",
                 marker=dict(
-                    color=color_map[label],
+                    color=marker_colors,
                     size=10,
-                    symbol=df_label["overdose_outcome"].map({"Fatal": "x", "Non-Fatal": "circle"}),
+                    symbol="circle",
+                    line=dict(color=marker_line_colors, width=1.5),
                 ),
                 line=dict(color=color_map[label], width=1),
                 name=label,
                 hoverlabel=dict(namelength=-1),
-                hovertemplate="<b>Patient: %{y}</b><br>"
-                + "OD Date: %{x|%Y-%m-%d}<br>"
-                + "Outcome: %{customdata[0]}<br>"
-                + "Days Since Last OD: %{customdata[1]}<br>"
-                + "<extra></extra>",
-                customdata=df_label[["overdose_outcome", "days_since_last_od"]],
+                hovertemplate="%{text}<extra></extra>",
+                text=hover_text,
+                showlegend=True,
             )
         )
 

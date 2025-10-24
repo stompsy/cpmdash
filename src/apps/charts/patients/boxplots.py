@@ -2,9 +2,22 @@ import pandas as pd
 import plotly.express as px
 from plotly.offline import plot
 
+from utils.chart_colors import CHART_COLORS_VIBRANT
 from utils.plotly import style_plotly_layout
 
 from ...core.models import Patients
+
+# Standardized color palette matching Veteran Care Coordination chart
+PATIENT_CHART_COLORS = [
+    CHART_COLORS_VIBRANT[0],  # Violet
+    CHART_COLORS_VIBRANT[1],  # Cyan
+    CHART_COLORS_VIBRANT[3],  # Emerald
+    CHART_COLORS_VIBRANT[4],  # Amber
+    CHART_COLORS_VIBRANT[5],  # Blue
+    CHART_COLORS_VIBRANT[2],  # Rose
+    CHART_COLORS_VIBRANT[7],  # Teal
+    CHART_COLORS_VIBRANT[6],  # Pink
+]
 
 
 def build_patients_age_by_sex_boxplot(theme: str) -> str:
@@ -25,7 +38,7 @@ def build_patients_age_by_sex_boxplot(theme: str) -> str:
         color="sex",
         points="all",
         category_orders={"sex": order},
-        color_discrete_sequence=["#636EFA", "#EF553B", "#00CC96", "#AB63FA"],
+        color_discrete_sequence=PATIENT_CHART_COLORS,  # Use standardized colors
     )
     fig = style_plotly_layout(fig, theme=theme, x_title="Sex", y_title="Age", scroll_zoom=False)
     return plot(
@@ -53,7 +66,7 @@ def build_patients_age_by_race_boxplot(theme: str) -> str:
         color="race",
         points="all",
         category_orders={"race": order},
-        color_discrete_sequence=px.colors.qualitative.Plotly,
+        color_discrete_sequence=PATIENT_CHART_COLORS,  # Use standardized colors
     )
     fig = style_plotly_layout(fig, theme=theme, x_title="Race", y_title="Age", scroll_zoom=False)
     return plot(

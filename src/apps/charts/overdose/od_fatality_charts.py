@@ -1,21 +1,21 @@
 import pandas as pd
 import plotly.express as px
 
+from utils.chart_colors import CHART_COLORS_VIBRANT
 from utils.plotly import style_plotly_layout
 
 from ...core.models import ODReferrals
 
 
 def _prepare_overdose_data():
-    df = pd.DataFrame.from_records(
-        ODReferrals.objects.all().values(
-            "disposition",
-            "suspected_drug",
-            "cpr_administered",
-            "police_ita",
-            "narcan_given",
-        )
+    qs = ODReferrals.objects.all().values(
+        "disposition",
+        "suspected_drug",
+        "cpr_administered",
+        "police_ita",
+        "narcan_given",
     )
+    df = pd.DataFrame.from_records(list(qs))
 
     fatal_conditions = ["CPR attempted", "DOA"]
     df["overdose_outcome"] = df["disposition"].apply(
@@ -51,7 +51,11 @@ def _build_fatality_chart(df, column, theme="light"):
             "count": "OD Count",
             "overdose_outcome": "Outcome",
         },
-        color_discrete_map={"Fatal": "red", "Non-Fatal": "#636EFA"},
+        # Use vibrant colors: rose for fatal, cyan for non-fatal
+        color_discrete_map={
+            "Fatal": CHART_COLORS_VIBRANT[2],  # Rose - high alert
+            "Non-Fatal": CHART_COLORS_VIBRANT[1],  # Cyan - safe
+        },
         text="count",
     )
 

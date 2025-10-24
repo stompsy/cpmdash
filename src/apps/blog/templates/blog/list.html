@@ -2,27 +2,32 @@
 {% load static %}
 {% load blog_extras %}
 {% block pageName %}caseStudyBlog{% endblock pageName %}
-{% block title %}Case Studies{% endblock title %}
+{% block title %}Patient Stories{% endblock title %}
+
+{% block page_header %}
+{% static 'media/roberto-sorin-RS0-h_pyByk-unsplash.jpg' as patient_stories_header_image %}
+{% with eyebrow="Patient stories" title="Patient stories in community paramedicine" description="Review evidence-informed interventions, outcome metrics, and procedural notes documented by CPM teams." image_src=patient_stories_header_image image_alt="Community paramedics supporting a patient in their home" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
+    {% include "partials/page_header.html" %}
+{% endwith %}
+{% endblock page_header %}
+
 {% block content %}
-    <section class="col-span-12 space-y-20">
-        <div class="relative overflow-hidden rounded-2xl border border-white/5 bg-[linear-gradient(135deg,#101a2c_0%,#111f30_52%,#0b1826_100%)] px-6 py-16 sm:px-10 lg:px-16">
-            <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(23,51,212,0.14),transparent_60%)]">
-            </div>
-            <div class="pointer-events-none absolute right-[-14%] top-[-28%] h-[28rem] w-[28rem] rounded-full bg-brand-400/16 blur-[140px]">
-            </div>
-            <div class="relative mx-auto max-w-7xl">
-                <div>
+<div class="col-span-12 mx-auto mt-16 w-full max-w-7xl">
+    <span data-page-name="caseStudyBlog" class="hidden" hidden></span>
+    <div class="space-y-16">
+        <section class="col-span-12">
+            <div class="relative overflow-hidden rounded-2xl border border-white/5 bg-[linear-gradient(135deg,#101a2c_0%,#111f30_52%,#0b1826_100%)] px-6 py-16 sm:px-10 lg:px-16">
+                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(23,51,212,0.14),transparent_60%)]"></div>
+                <div class="pointer-events-none absolute right-[-14%] top-[-28%] h-[28rem] w-[28rem] rounded-full bg-brand-400/16 blur-[140px]"></div>
+                <div class="relative mx-auto max-w-5xl">
                     <p class="inline-flex items-center text-center md:text-left gap-2 rounded-lg bg-white/5 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-brand-200/90">
                         Community paramedicine case registry
                     </p>
-                    <h1 class="mt-8 text-4xl text-center md:text-left font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
-                        Patient stories in community paramedicine
-                    </h1>
+                    <h2 class="mt-8 text-3xl text-center md:text-left font-semibold tracking-tight text-white sm:text-4xl lg:text-[2.8rem]">
+                        Explore featured recoveries and care plans from the CPM team
+                    </h2>
                     <p class="mt-8 max-w-2xl text-base text-center md:text-left leading-relaxed text-slate-300 sm:text-lg">
-                        Review evidence-informed interventions, outcome metrics, and
-                        procedural notes documented by CPM teams. Filter by the
-                        clinical priorities most relevant to your service and
-                        identify approaches currently in field use.
+                        Drill into recent cases to understand how CPM clinicians coordinate field medicine, behavioral health, and recovery partners to sustain long-term progress.
                     </p>
                     {% if request.user.is_authenticated and perms.blog.add_casestudy %}
                         <div class="mt-8 w-full flex justify-center md:justify-start">
@@ -42,141 +47,151 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
-        <div class="space-y-10 mx-auto px-6 sm:px-10 lg:px-16">
-            <div class="flex flex-col items-start">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Featured cases</p>
-                <div class="flex flex-col xl:flex-row justify-between items-center w-full gap-4 lg:gap-0">
-                    <h2 class="mt-2 xl:mt-0 text-2xl w-full font-semibold text-white sm:text-3xl">Recently highlighted case reviews</h2>
-                    <form method="get"
-                        class="relative flex w-full gap-3 rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 shadow-[0_16px_38px_rgba(15,23,42,0.28)] backdrop-blur focus-within:ring-2 focus-within:ring-brand-400/50">
-                        <svg class="h-5 w-5 text-brand-200/80"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2">
-                            <circle cx="11" cy="11" r="7" />
-                            <path d="M21 21l-3.85-3.85" />
-                        </svg>
-                        <input name="tag"
-                                value="{{ request.GET.tag }}"
-                                placeholder="Search by topic or clinical focus (e.g. harm reduction)"
-                                class="flex-1 bg-transparent text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none" />
-                        {% if request.GET.tag %}
-                            <a href="{% url 'blog:list' %}"
-                                class="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-brand-200 hover:bg-white/20">Clear</a>
-                        {% endif %}
-                    </form>
-                </div>
-                <div class="flex flex-col 2xl:flex-row items-center">
-                    <div class="mt-6 flex flex-col gap-5 lg:flex-row lg:items-center">
-                        <div class="flex flex-col gap-3 text-[11px] uppercase tracking-[0.25em] text-slate-300 lg:flex-row lg:items-center">
-                            <div class="flex flex-wrap items-center gap-2">
-                                {% if popular_tags %}
-                                    {% with active=active_tag|slugify %}
-                                        {% for tag in popular_tags %}
-                                            {% with name_slug=tag.name|slugify %}
-                                                {% if active %}
-                                                    {% if tag.slug == active or name_slug == active %}
-                                                        <a href="{{ tag.get_absolute_url }}"
-                                                            class="inline-flex items-center gap-1 rounded-full bg-brand-500/25 px-3 py-1 text-[11px] font-semibold text-brand-100 ring-1 ring-brand-400/70">#{{ tag.name }}</a>
+        </section>
+
+        <section class="col-span-12">
+            <div class="space-y-10 mx-auto px-6 sm:px-10 lg:px-16">
+                <div class="flex flex-col items-start">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Featured cases</p>
+                    <div class="flex flex-col xl:flex-row justify-between items-center w-full gap-4 lg:gap-0">
+                        <h2 class="mt-2 xl:mt-0 text-2xl w-full font-semibold text-white sm:text-3xl">Recently highlighted case reviews</h2>
+                        <form method="get"
+                              class="relative flex w-full gap-3 rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 shadow-[0_16px_38px_rgba(15,23,42,0.28)] backdrop-blur focus-within:ring-2 focus-within:ring-brand-400/50">
+                            <svg class="h-5 w-5 text-brand-200/80"
+                                 viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2">
+                                <circle cx="11" cy="11" r="7" />
+                                <path d="M21 21l-3.85-3.85" />
+                            </svg>
+                            <input name="tag"
+                                   value="{{ request.GET.tag }}"
+                                   placeholder="Search by topic or clinical focus (e.g. harm reduction)"
+                                   class="flex-1 bg-transparent text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none" />
+                            {% if request.GET.tag %}
+                                <a href="{% url 'blog:list' %}"
+                                   class="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-brand-200 hover:bg-white/20">Clear</a>
+                            {% endif %}
+                        </form>
+                    </div>
+                    <div class="flex flex-col 2xl:flex-row items-center">
+                        <div class="mt-6 flex flex-col gap-5 lg:flex-row lg:items-center">
+                            <div class="flex flex-col gap-3 text-[11px] uppercase tracking-[0.25em] text-slate-300 lg:flex-row lg:items-center">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    {% if popular_tags %}
+                                        {% with active=active_tag|slugify %}
+                                            {% for tag in popular_tags %}
+                                                {% with name_slug=tag.name|slugify %}
+                                                    {% if active %}
+                                                        {% if tag.slug == active or name_slug == active %}
+                                                            <a href="{{ tag.get_absolute_url }}"
+                                                               class="inline-flex items-center gap-1 rounded-full bg-brand-500/25 px-3 py-1 text-[11px] font-semibold text-brand-100 ring-1 ring-brand-400/70">#{{ tag.name }}</a>
+                                                        {% else %}
+                                                            <a href="{{ tag.get_absolute_url }}"
+                                                               class="inline-flex items-center gap-1 rounded-full bg-slate-900/60 px-3 py-1 text-[11px] font-semibold text-slate-200 transition hover:bg-slate-800/70 hover:text-white">#{{ tag.name }}</a>
+                                                        {% endif %}
                                                     {% else %}
                                                         <a href="{{ tag.get_absolute_url }}"
-                                                            class="inline-flex items-center gap-1 rounded-full bg-slate-900/60 px-3 py-1 text-[11px] font-semibold text-slate-200 transition hover:bg-slate-800/70 hover:text-white">#{{ tag.name }}</a>
+                                                           class="inline-flex items-center gap-1 rounded-full bg-slate-900/60 px-3 py-1 text-[11px] font-semibold text-slate-200 transition hover:bg-slate-800/70 hover:text-white">#{{ tag.name }}</a>
                                                     {% endif %}
-                                                {% else %}
-                                                    <a href="{{ tag.get_absolute_url }}"
-                                                        class="inline-flex items-center gap-1 rounded-full bg-slate-900/60 px-3 py-1 text-[11px] font-semibold text-slate-200 transition hover:bg-slate-800/70 hover:text-white">#{{ tag.name }}</a>
-                                                {% endif %}
-                                            {% endwith %}
-                                        {% endfor %}
-                                    {% endwith %}
-                                {% elif active_tag %}
-                                    <span class="inline-flex items-center gap-1 rounded-full bg-slate-900/60 px-3 py-1 text-[11px] font-semibold text-slate-200">#{{ active_tag }}</span>
-                                {% else %}
-                                    <span class="text-slate-500">No tags yet</span>
-                                {% endif %}
+                                                {% endwith %}
+                                            {% endfor %}
+                                        {% endwith %}
+                                    {% elif active_tag %}
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-slate-900/60 px-3 py-1 text-[11px] font-semibold text-slate-200">#{{ active_tag }}</span>
+                                    {% else %}
+                                        <span class="text-slate-500">No tags yet</span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="grid gap-6 lg:grid-cols-3">
-                {% for fp in case_studies|slice:':3' %}
-                    <article class="group relative flex flex-col overflow-hidden rounded-3xl border border-white/8 bg-[linear-gradient(150deg,rgba(17,25,40,0.9),rgba(17,31,49,0.82))] shadow-[0_18px_40px_rgba(8,47,73,0.28)] transition hover:-translate-y-1 hover:shadow-[0_26px_58px_rgba(8,47,73,0.4)]">
-                        {% with hero_url=fp.hero_image_source %}
-                            <a href="{{ fp.get_absolute_url }}"
-                               class="relative block overflow-hidden">
-                                {% if hero_url %}
-                                    <img src="{{ hero_url }}"
-                                         alt="{{ fp.title }}"
-                                         width="1200"
-                                         height="675"
-                                         class="h-60 w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                                         loading="lazy" />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent"></div>
-                                {% else %}
-                                    <div class="flex h-60 w-full items-center justify-center bg-gradient-to-br from-brand-500/20 via-slate-900 to-slate-950 text-xs font-medium uppercase tracking-[0.25em] text-slate-400">
-                                        Reference image unavailable
-                                    </div>
-                                {% endif %}
-                                {% if fp.featured %}
-                                    <span class="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-[11px] font-semibold text-slate-900 shadow">Featured</span>
-                                {% endif %}
-                            </a>
-                        {% endwith %}
-                        <div class="flex flex-1 flex-col gap-5 p-8">
-                            <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-400">
-                                {% if fp.published_at %}
-                                    <time datetime="{{ fp.published_at|date:'c' }}"
-                                          class="uppercase tracking-[0.2em]">{{ fp.published_at|date:"M d, Y" }}</time>
-                                {% endif %}
-                                {% if fp.published_at %}<span aria-hidden="true" class="text-slate-600">•</span>{% endif %}
-                                <span title="{{ fp.content|word_count }} words">{{ fp.content|reading_time }}</span>
-                            </div>
-                            <h3 class="text-xl font-semibold text-white transition-colors group-hover:text-brand-300">
+                <div class="grid gap-6 lg:grid-cols-3">
+                    {% for fp in case_studies|slice:':3' %}
+                        <article class="group relative flex flex-col overflow-hidden rounded-3xl border border-white/8 bg-[linear-gradient(150deg,rgba(17,25,40,0.9),rgba(17,31,49,0.82))] shadow-[0_18px_40px_rgba(8,47,73,0.28)] transition hover:-translate-y-1 hover:shadow-[0_26px_58px_rgba(8,47,73,0.4)]">
+                            {% with hero_url=fp.hero_image_source %}
                                 <a href="{{ fp.get_absolute_url }}"
-                                   class="focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">{{ fp.title }}</a>
-                            </h3>
-                            {% if fp.excerpt %}<p class="line-clamp-3 text-sm leading-relaxed text-slate-200/90">{{ fp.excerpt }}</p>{% endif %}
-                            <div class="mt-auto flex flex-wrap gap-2">
-                                {% for tag in fp.tags.all|slice:':3' %}
-                                    <a href="{{ tag.get_absolute_url }}"
-                                       class="rounded-full bg-brand-500/12 px-3 py-1 text-[11px] font-semibold text-brand-100 ring-1 ring-brand-400/40 transition hover:bg-brand-500/20">#{{ tag.name }}</a>
-                                {% endfor %}
+                                   class="relative block overflow-hidden">
+                                    {% if hero_url %}
+                                        <img src="{{ hero_url }}"
+                                             alt="{{ fp.title }}"
+                                             width="1200"
+                                             height="675"
+                                             class="h-60 w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                                             loading="lazy" />
+                                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent"></div>
+                                    {% else %}
+                                        <div class="flex h-60 w-full items-center justify-center bg-gradient-to-br from-brand-500/20 via-slate-900 to-slate-950 text-xs font-medium uppercase tracking-[0.25em] text-slate-400">
+                                            Reference image unavailable
+                                        </div>
+                                    {% endif %}
+                                    {% if fp.featured %}
+                                        <span class="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-[11px] font-semibold text-slate-900 shadow">Featured</span>
+                                    {% endif %}
+                                </a>
+                            {% endwith %}
+                            <div class="flex flex-1 flex-col gap-5 p-8">
+                                <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-400">
+                                    {% if fp.published_at %}
+                                        <time datetime="{{ fp.published_at|date:'c' }}"
+                                              class="uppercase tracking-[0.2em]">{{ fp.published_at|date:"M d, Y" }}</time>
+                                    {% endif %}
+                                    {% if fp.published_at %}<span aria-hidden="true" class="text-slate-600">•</span>{% endif %}
+                                    <span title="{{ fp.content|word_count }} words">{{ fp.content|reading_time }}</span>
+                                </div>
+                                <h3 class="text-xl font-semibold text-white transition-colors group-hover:text-brand-300">
+                                    <a href="{{ fp.get_absolute_url }}"
+                                       class="focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">{{ fp.title }}</a>
+                                </h3>
+                                {% if fp.excerpt %}<p class="line-clamp-3 text-sm leading-relaxed text-slate-200/90">{{ fp.excerpt }}</p>{% endif %}
+                                <div class="mt-auto flex flex-wrap gap-2">
+                                    {% for tag in fp.tags.all|slice:':3' %}
+                                        <a href="{{ tag.get_absolute_url }}"
+                                           class="rounded-full bg-brand-500/12 px-3 py-1 text-[11px] font-semibold text-brand-100 ring-1 ring-brand-400/40 transition hover:bg-brand-500/20">#{{ tag.name }}</a>
+                                    {% endfor %}
+                                </div>
                             </div>
-                        </div>
-                    </article>
-                {% empty %}
-                    <p class="text-sm text-slate-400">Published case reviews will appear here.</p>
-                {% endfor %}
-            </div>
-        </div>
-        <div class="space-y-8 mx-auto px-6 sm:px-10 lg:px-16">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Case index</p>
-                    <h2 class="text-2xl font-semibold text-white">Review the complete case index</h2>
+                        </article>
+                    {% empty %}
+                        <p class="text-sm text-slate-400">Published case reviews will appear here.</p>
+                    {% endfor %}
                 </div>
-                <span class="text-xs uppercase tracking-[0.35em] text-slate-500">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
             </div>
-            {% include "blog/_cards.html" %}
-        </div>
+        </section>
+
+        <section class="col-span-12">
+            <div class="space-y-8 mx-auto px-6 sm:px-10 lg:px-16">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Case index</p>
+                        <h2 class="text-2xl font-semibold text-white">Review the complete case index</h2>
+                    </div>
+                    <span class="text-xs uppercase tracking-[0.35em] text-slate-500">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </div>
+                {% include "blog/_cards.html" %}
+            </div>
+        </section>
+
         {% if is_paginated %}
-            <div id="load-more-container"
-                 class="mb-16 mx-auto flex max-w-7xl items-center justify-center pt-4">
-                {% if page_obj.has_next %}
-                    <button id="load-more"
-                            class="rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-semibold text-slate-100 shadow-sm transition hover:border-brand-400/60 hover:bg-brand-500/15 hover:text-white"
-                            hx-get="?page={{ page_obj.next_page_number }}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}"
-                            hx-target="#cards-grid"
-                            hx-select="#cards-grid > *"
-                            hx-swap="beforeend"
-                            hx-indicator="#load-more">Load more cases</button>
-                {% else %}
-                    <span class="text-sm text-slate-500">No additional cases</span>
-                {% endif %}
-            </div>
+            <section class="col-span-12">
+                <div id="load-more-container"
+                     class="mb-16 mx-auto flex max-w-5xl items-center justify-center pt-4">
+                    {% if page_obj.has_next %}
+                        <button id="load-more"
+                                class="rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-semibold text-slate-100 shadow-sm transition hover:border-brand-400/60 hover:bg-brand-500/15 hover:text-white"
+                                hx-get="?page={{ page_obj.next_page_number }}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}"
+                                hx-target="#cards-grid"
+                                hx-select="#cards-grid > *"
+                                hx-swap="beforeend"
+                                hx-indicator="#load-more">Load more cases</button>
+                    {% else %}
+                        <span class="text-sm text-slate-500">No additional cases</span>
+                    {% endif %}
+                </div>
+            </section>
         {% endif %}
-    </section>
+    </div>
+</div>
 {% endblock content %}

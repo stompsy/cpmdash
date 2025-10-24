@@ -1,0 +1,132 @@
+{% comment %}
+Reusable page header inspired by the blog hero layout.
+Expected context variables:
+    eyebrow: Optional small uppercase label
+    title: Required string
+    description: Optional supporting text
+    primary_label: Optional CTA button label
+    primary_url: URL for primary CTA when provided
+    primary_icon: Set to 'none' to hide arrow icon
+    primary_hx_get / primary_hx_target / primary_hx_select / primary_hx_swap / primary_hx_push_url: Optional HTMX attributes for primary CTA
+    primary_alpine_click: Optional Alpine.js expression for @click on the primary CTA
+    secondary_label: Optional secondary CTA label
+    secondary_url: URL for secondary CTA when provided
+    secondary_hx_get / secondary_hx_target / secondary_hx_select / secondary_hx_swap / secondary_hx_push_url: Optional HTMX attributes for secondary CTA
+    secondary_alpine_click: Optional Alpine.js expression for @click on the secondary CTA
+    image_src: Optional image URL used as full-bleed background
+    image_alt: Accessible text for the header image
+    image_width / image_height: Optional numeric attributes (kept for compatibility)
+    breadcrumbs: Optional list of {'label': str, 'url': str|None}
+    updated_at: Optional datetime or formatted string for "Last updated"
+    updated_at_iso: Optional ISO-8601 string for the datetime attribute
+    read_time: Optional preformatted read-time label (e.g., "6 min read")
+{% endcomment %}
+<section
+    class="relative overflow-hidden rounded-2xl bg-slate-950 px-6 py-16 text-white shadow-2xl shadow-slate-900/20 sm:px-10 lg:px-16 dark:shadow-slate-950/40"
+    {% if image_src %}
+        style="background-image: linear-gradient(95deg, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.88) 35%, rgba(15,23,42,0.44) 70%, rgba(15,23,42,0.15) 90%, rgba(15,23,42,0) 100%), radial-gradient(circle at top left, rgba(94,234,212,0.12), rgba(94,234,212,0) 60%), url('{{ image_src|escape }}'); background-size: 100% 100%, 100% 100%, cover; background-position: center center, left top, center center; background-repeat: no-repeat;"
+    {% endif %}
+>
+    {# Decorative gradient blob #}
+    <div class="pointer-events-none absolute right-[-18%] top-[-28%] h-[30rem] w-[30rem] rounded-full bg-brand-400/16 blur-[140px]"></div>
+
+    <div class="relative mx-auto max-w-6xl space-y-8">
+        {% if breadcrumbs %}
+            <nav class="text-[10px] font-semibold uppercase tracking-[0.45em] text-slate-400" aria-label="Breadcrumb">
+                <ol class="flex flex-wrap items-center gap-3">
+                    {% for crumb in breadcrumbs %}
+                        {% if not forloop.first %}
+                            <li class="text-slate-600">/</li>
+                        {% endif %}
+                        <li>
+                            {% if crumb.url and not forloop.last %}
+                                <a href="{{ crumb.url }}" class="transition hover:text-white/80">{{ crumb.label }}</a>
+                            {% else %}
+                                <span class="text-slate-200">{{ crumb.label }}</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ol>
+            </nav>
+        {% endif %}
+
+        <div class="max-w-3xl space-y-8">
+            {% if eyebrow %}
+                <p class="inline-flex items-center gap-2 rounded-lg bg-white/5 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-brand-200/90">
+                    {{ eyebrow }}
+                </p>
+            {% endif %}
+            <h1 class="text-pretty text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.35rem]">
+                {{ title }}
+            </h1>
+            {% if description %}
+                <p class="max-w-2xl text-base leading-relaxed text-slate-200/90 sm:text-lg">
+                    {{ description }}
+                </p>
+            {% endif %}
+
+            {% if updated_at or read_time %}
+                <div class="flex flex-wrap items-center gap-4 text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                    {% if updated_at %}
+                        <span class="inline-flex items-center gap-2">
+                            <svg class="h-4 w-4 text-brand-200/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 2v3"/><path d="M17 2v3"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M7 12h10"/></svg>
+                            {% if updated_at_iso %}
+                                <time datetime="{{ updated_at_iso }}">{{ updated_at|date:"F j, Y" }}</time>
+                            {% else %}
+                                {{ updated_at|date:"F j, Y" }}
+                            {% endif %}
+                        </span>
+                    {% endif %}
+                    {% if updated_at and read_time %}
+                        <span aria-hidden="true">•</span>
+                    {% endif %}
+                    {% if read_time %}
+                        <span class="inline-flex items-center gap-2" title="Estimated reading time">
+                            <svg class="h-4 w-4 text-brand-200/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M12 4h9"/><rect width="4" height="16" x="3" y="4" rx="1"/></svg>
+                            {{ read_time }}
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if primary_label or secondary_label %}
+                <div class="mt-6 flex flex-col gap-4 sm:flex-row">
+                    {% if primary_label and primary_url %}
+                        <a
+                            href="{{ primary_url }}"
+                            {% if primary_hx_get %}hx-get="{{ primary_hx_get }}"{% endif %}
+                            {% if primary_hx_target %} hx-target="{{ primary_hx_target }}"{% endif %}
+                            {% if primary_hx_select %} hx-select="{{ primary_hx_select }}"{% endif %}
+                            {% if primary_hx_swap %} hx-swap="{{ primary_hx_swap }}"{% endif %}
+                            {% if primary_hx_push_url %} hx-push-url="{{ primary_hx_push_url }}"{% endif %}
+                            {% if primary_alpine_click %} @click="{{ primary_alpine_click }}"{% endif %}
+                            class="inline-flex items-center justify-center gap-2 rounded-full bg-brand-500/80 px-6 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-brand-400"
+                        >
+                            {{ primary_label }}
+                            {% if primary_icon|default:'arrow' != 'none' %}
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14" />
+                                    <path d="m12 5 7 7-7 7" />
+                                </svg>
+                            {% endif %}
+                        </a>
+                    {% endif %}
+                    {% if secondary_label and secondary_url %}
+                        <a
+                            href="{{ secondary_url }}"
+                            {% if secondary_hx_get %}hx-get="{{ secondary_hx_get }}"{% endif %}
+                            {% if secondary_hx_target %} hx-target="{{ secondary_hx_target }}"{% endif %}
+                            {% if secondary_hx_select %} hx-select="{{ secondary_hx_select }}"{% endif %}
+                            {% if secondary_hx_swap %} hx-swap="{{ secondary_hx_swap }}"{% endif %}
+                            {% if secondary_hx_push_url %} hx-push-url="{{ secondary_hx_push_url }}"{% endif %}
+                            {% if secondary_alpine_click %} @click="{{ secondary_alpine_click }}"{% endif %}
+                            class="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-2.5 text-sm font-semibold text-slate-100 transition hover:border-brand-400/60 hover:bg-brand-500/15 hover:text-white"
+                        >
+                            {{ secondary_label }}
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>

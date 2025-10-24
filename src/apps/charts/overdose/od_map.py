@@ -1,5 +1,5 @@
 import json
-import os
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
@@ -15,11 +15,13 @@ def build_chart_od_map(theme):
     # Dataframe
     odreferrals = ODReferrals.objects.all()
     df = pd.DataFrame.from_records(
-        odreferrals.values(
-            "disposition",
-            "od_date",
-            "long",
-            "lat",
+        list(
+            odreferrals.values(
+                "disposition",
+                "od_date",
+                "long",
+                "lat",
+            )
         )
     )
 
@@ -64,11 +66,10 @@ def build_chart_od_map(theme):
 
     # TODO: Check and see if City of Port Angeles boundary matches?
     # Load Port Angeles boundary GeoJSON
-    boundary_path = os.path.join(
-        settings.BASE_DIR, "staticfiles", "src", "data", "port_angeles_outer_boundary.geojson"
+    boundary_path = (
+        Path(settings.BASE_DIR) / "src" / "static" / "data" / "port_angeles_outer_boundary.geojson"
     )
-    with open(boundary_path) as f:
-        pa_boundary = json.load(f)
+    pa_boundary = json.loads(boundary_path.read_text(encoding="utf-8"))
 
     # Overlay city boundary clearly on the map
     fig.update_layout(

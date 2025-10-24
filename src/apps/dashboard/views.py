@@ -1,16 +1,22 @@
 import json
 from contextlib import suppress
+from datetime import date
+from pathlib import Path
 from typing import TypedDict
 
 import pandas as pd
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_GET
 
 from apps.accounts.forms import ProfileForm
 from utils.theme import get_theme_from_request
 
+from ..charts.encounters.encounters_field_charts import build_encounters_field_charts
 from ..charts.od_utils import get_quarterly_patient_counts
 from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 from ..charts.overdose.od_all_cases_scatter import (
@@ -24,6 +30,7 @@ from ..charts.overdose.od_hourly_breakdown import (  # noqa: F401 - re-export fo
     build_chart_day_of_week_totals,
     build_chart_od_hourly_breakdown,
 )
+from ..charts.overdose.od_map import build_chart_od_map
 from ..charts.overdose.od_repeats_scatter import (  # noqa: F401 - re-export for tests monkeypatch
     build_chart_repeats_scatter,
 )
@@ -32,9 +39,26 @@ from ..charts.overdose.od_shift_scenarios import (  # noqa: F401 - re-export for
     build_chart_shift_scenarios,
     calculate_coverage_scenarios,
 )
+from ..charts.patients.age_chart_variations import build_all_age_chart_variations
 from ..charts.patients.patient_field_charts import build_patients_field_charts
 from ..charts.referral.referrals_field_charts import build_referrals_field_charts
 from ..core.models import Encounters, ODReferrals, Patients, Referrals
+
+OD_HOTSPOT_CONTEXT_PATH = (
+    Path(settings.BASE_DIR) / "src" / "static" / "data" / "od_hotspot_context.json"
+)
+
+
+def _load_hotspot_context() -> list[dict[str, str]]:
+    try:
+        with OD_HOTSPOT_CONTEXT_PATH.open(encoding="utf-8") as fp:
+            data = json.load(fp)
+    except FileNotFoundError:
+        return []
+    except json.JSONDecodeError:
+        return []
+    metrics = data.get("metrics", []) if isinstance(data, dict) else []
+    return [metric for metric in metrics if isinstance(metric, dict)]
 
 
 class EncounterTableRow(TypedDict):
@@ -61,7 +85,7 @@ class ReferralTypeTable(TypedDict):
 
 
 def overview(request):
-    return render(request, "dashboard/overview.html")
+    return redirect("home")
 
 
 # Patients
@@ -145,6 +169,43 @@ def _pct(n: int, d: int) -> float:
 def _norm_series(s: pd.Series) -> pd.Series:
     s2 = s.fillna("").astype(str).str.strip()
     return s2.replace({"": "Unknown", "NA": "Unknown", "None": "Unknown"})
+
+
+def _format_int(value: object | None) -> str:
+    if value is None:
+        return "—"
+    try:
+        number = float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return "—"
+    if pd.isna(number):
+        return "—"
+    return f"{int(round(number)):,}"
+
+
+def _format_percent(value: float | None, digits: int = 1) -> str:
+    if value is None or pd.isna(value):
+        return "—"
+    return f"{value:.{digits}f}%"
+
+
+def _format_float(value: float | None, digits: int = 1) -> str:
+    if value is None or pd.isna(value):
+        return "—"
+    return f"{value:.{digits}f}"
+
+
+def _format_days(value: float | None) -> str:
+    if value is None or pd.isna(value):
+        return "—"
+    return f"{int(round(value))} days"
+
+
+def _metric(label: str, value: str, description: str | None = None) -> dict[str, str]:
+    metric = {"label": label, "value": value}
+    if description:
+        metric["description"] = description
+    return metric
 
 
 def _to_int(v: object, default: int = 0) -> int:
@@ -390,6 +451,37 @@ def _insights_quarterly() -> list[dict[str, object]] | None:
         return None
 
 
+def _build_patient_quick_stats() -> dict[str, list[dict[str, str]]]:
+    """Build quick stat cards for patient charts."""
+    stats: dict[str, list[dict[str, str]]] = {}
+
+    # Quarterly patient counts stats
+    try:
+        q = get_quarterly_patient_counts()
+        qdf = q.get("df")
+        if qdf is not None and not qdf.empty:
+            total_patients = int(qdf["count"].sum())
+            avg_per_quarter = round(qdf["count"].mean(), 1)
+            stats["patient_counts_quarterly"] = [
+                {
+                    "label": "Total Patients",
+                    "value": f"{total_patients:,}",
+                    "description": "All-time patient count",
+                    "icon": "users",
+                },
+                {
+                    "label": "Avg per Quarter",
+                    "value": f"{avg_per_quarter}",
+                    "description": "Average patients enrolled quarterly",
+                    "icon": "chart",
+                },
+            ]
+    except Exception:
+        pass
+
+    return stats
+
+
 def _insights_boxplot_by(df_all: pd.DataFrame, group_field: str) -> list[dict[str, object]] | None:
     if not {"age", group_field}.issubset(df_all.columns):
         return None
@@ -416,7 +508,123 @@ def _insights_boxplot_by(df_all: pd.DataFrame, group_field: str) -> list[dict[st
     return items
 
 
-def _build_patients_chart_insights(
+def _insights_age_referral_sankey() -> list[dict[str, object]] | None:  # noqa: C901
+    """Generate insights for the age → referral type Sankey diagram."""
+    try:
+        # Get referrals count
+        referrals_qs = Referrals.objects.all().values(
+            "referral_1", "referral_2", "referral_3", "referral_4", "referral_5"
+        )
+        referrals_data = list(referrals_qs)
+
+        # Get OD referrals count
+        od_count = ODReferrals.objects.count()
+
+        if not referrals_data and od_count == 0:
+            return None
+
+        # Flatten all referral columns
+        all_referrals = []
+        for ref in referrals_data:
+            for i in range(1, 6):
+                val = ref.get(f"referral_{i}")
+                if val and str(val).strip() and str(val).lower() not in {"nan", "none", ""}:
+                    all_referrals.append(str(val).strip())
+
+        # Count specific referral types shown in Sankey
+        specific_types = {
+            "911 calls": 0,
+            "Vaccinations": 0,
+            "Lab - Blood Draw": 0,
+            "Eval - Assessment": 0,
+            "Case Management": 0,
+            "Eval - Psych/Dementia/Crisis": 0,
+            "Overdose": od_count,  # Start with OD referrals
+            "Med - Rx Reconciliation": 0,
+            "Med - Antipsychotic IM": 0,
+        }
+
+        for ref in all_referrals:
+            ref_lower = ref.lower().strip()
+            if "911" in ref_lower or "walk-in" in ref_lower or "walk in" in ref_lower:
+                specific_types["911 calls"] += 1
+            elif "vax -" in ref_lower or "vax-" in ref_lower or ref_lower.startswith("vax "):
+                specific_types["Vaccinations"] += 1
+            elif "lab - blood draw" in ref_lower or "lab-blood draw" in ref_lower:
+                specific_types["Lab - Blood Draw"] += 1
+            elif "eval - assessment" in ref_lower or "eval-assessment" in ref_lower:
+                specific_types["Eval - Assessment"] += 1
+            elif "case management" in ref_lower:
+                specific_types["Case Management"] += 1
+            elif "eval - psych" in ref_lower or "dementia" in ref_lower or "crisis" in ref_lower:
+                specific_types["Eval - Psych/Dementia/Crisis"] += 1
+            elif "overdose" in ref_lower or ref_lower == "od":
+                specific_types["Overdose"] += 1
+            elif "med - rx reconciliation" in ref_lower or "med-rx reconciliation" in ref_lower:
+                specific_types["Med - Rx Reconciliation"] += 1
+            elif "med - antipsychotic im" in ref_lower or "antipsychotic" in ref_lower:
+                specific_types["Med - Antipsychotic IM"] += 1
+
+        # Get top referral type
+        total_specific = sum(specific_types.values())
+        if total_specific == 0:
+            return None
+
+        top_type = max(specific_types.items(), key=lambda x: x[1])
+        top_pct = (top_type[1] / total_specific * 100) if total_specific else 0
+        types_shown = sum(1 for count in specific_types.values() if count > 0)
+
+        return [
+            {"label": "Total referrals shown", "value": total_specific},
+            {"label": "Service types displayed", "value": types_shown},
+            {"label": "Top service pathway", "value": f"{top_type[0]} ({top_pct:.1f}%)"},
+            {
+                "label": "Overdose referrals",
+                "value": f"{specific_types['Overdose']} (combined sources)",
+            },
+        ]
+    except Exception:
+        return None
+
+
+def _insights_age_gender_pyramid() -> list[dict[str, object]] | None:
+    """Generate insights for the age/gender population pyramid."""
+    try:
+        patients_qs = Patients.objects.all().values("age", "sex")
+        patients_data = list(patients_qs)
+        if not patients_data:
+            return None
+
+        df = pd.DataFrame.from_records(patients_data)
+
+        # Count by gender
+        total = len(df)
+        male_count = len(df[df["sex"].str.lower().isin(["male", "m"])])
+        female_count = len(df[df["sex"].str.lower().isin(["female", "f"])])
+        other_count = total - male_count - female_count
+
+        male_pct = (male_count / total * 100) if total else 0
+        female_pct = (female_count / total * 100) if total else 0
+
+        # Calculate age statistics
+        ages = pd.to_numeric(df["age"], errors="coerce").dropna()
+        if len(ages) == 0:
+            return None
+
+        median_age = ages.median()
+
+        return [
+            {"label": "Total patients", "value": total},
+            {"label": "Male patients", "value": f"{male_count} ({male_pct:.1f}%)"},
+            {"label": "Female patients", "value": f"{female_count} ({female_pct:.1f}%)"},
+            {"label": "Other/Unknown", "value": other_count},
+            {"label": "Median age", "value": f"{median_age:.0f} years"},
+        ]
+    except Exception:
+        return None
+
+
+def _build_patients_chart_insights(  # noqa: C901
     df_all: pd.DataFrame, age_insights: dict[str, object] | None
 ) -> dict[str, list[dict[str, object]]]:
     if df_all.empty:
@@ -450,6 +658,9 @@ def _build_patients_chart_insights(
     race_box = _insights_boxplot_by(df_all, "race")
     if race_box:
         insights["race_age_boxplot"] = race_box
+    sankey_list = _insights_age_referral_sankey()
+    if sankey_list:
+        insights["age_referral_sankey"] = sankey_list
     return insights
 
 
@@ -731,41 +942,22 @@ def _build_patient_insight_sections(enriched: pd.DataFrame) -> list[dict[str, ob
     return sections
 
 
-def _prepare_patients_insights_context() -> dict[str, object]:
+def top_engaged_patients(request):
+    """Return just the top engaged patients table for display in modals/popovers."""
     datasets = _load_patient_touchpoint_datasets()
     patients_df = datasets.get("patients", pd.DataFrame())
+
     if patients_df.empty:
-        return {
-            "data_is_empty": True,
-            "summary_cards": [],
-            "top_patients": [],
-            "insight_sections": [],
-        }
+        context = {"top_patients": []}
+    else:
+        enriched = _enrich_patient_touchpoints(datasets)
+        if enriched.empty or not enriched["has_touchpoint"].any():
+            context = {"top_patients": []}
+        else:
+            top_patients = _build_patient_top_patients(enriched)
+            context = {"top_patients": top_patients}
 
-    enriched = _enrich_patient_touchpoints(datasets)
-    if enriched.empty or not enriched["has_touchpoint"].any():
-        return {
-            "data_is_empty": True,
-            "summary_cards": [],
-            "top_patients": [],
-            "insight_sections": [],
-        }
-
-    summary_cards = _build_patient_summary_cards(enriched)
-    top_patients = _build_patient_top_patients(enriched)
-    insight_sections = _build_patient_insight_sections(enriched)
-
-    return {
-        "data_is_empty": False,
-        "summary_cards": summary_cards,
-        "top_patients": top_patients,
-        "insight_sections": insight_sections,
-    }
-
-
-def patients_insights(request):
-    context = _prepare_patients_insights_context()
-    return render(request, "dashboard/patients_insights.html", context)
+    return render(request, "dashboard/partials/top_engaged_patients.html", context)
 
 
 # Referrals insights helpers
@@ -889,194 +1081,761 @@ REFERRALS_RATIONALE_MAP: dict[str, str] = {
     ),
 }
 
+REFERRALS_STORY_CARDS = [
+    {
+        "eyebrow": "Story",
+        "title": "Referral pipeline with normalized context",
+        "lede": (
+            "Share-of-total overlays make it clear which partners supply the majority of volume and how "
+            "close you are to diversification targets."
+        ),
+        "bullets": [
+            "Treemap hover states now expose both count and percent for each referring agency.",
+            "Quarterly bars include percent share labels plus a three-quarter moving average to track momentum.",
+            "Insurance mix percent labels point to coverage gaps that can delay onboarding.",
+        ],
+        "callout": "Use the percent view when negotiating outreach cadences with partners.",
+    },
+    {
+        "eyebrow": "Throughput",
+        "title": "Closed reasons at-a-glance",
+        "lede": (
+            "Horizontal bars combine counts and percent so high-friction buckets (unable to contact, declined) "
+            "surface instantly."
+        ),
+        "bullets": [
+            "Unknown segments stand out for data hygiene follow-up.",
+            "Percentages make it easier to compare reasons even when total referrals fluctuate.",
+            "Layer insights with encounter type shares to prioritize process fixes.",
+        ],
+        "callout": "Assign action owners for any category above 25%.",
+    },
+    {
+        "eyebrow": "Next steps",
+        "title": "Focus partner conversations",
+        "lede": (
+            "Work the narrative: start with normalized quarterly trend, pivot to partner contributions, and finish "
+            "on closure-barriers."
+        ),
+        "bullets": [
+            "Export referral shares into briefing decks without extra spreadsheet work.",
+            "Use hover text percent values to align with grant reporting language (share of total referrals).",
+            "Document open questions directly in the dashboard so the team can respond asynchronously.",
+        ],
+        "callout": "Re-run the dashboard after each data import to keep the story fresh.",
+    },
+]
+
+
+REFERRALS_QUERY_FIELDS = [
+    "age",
+    "sex",
+    "date_received",
+    "referral_agency",
+    "encounter_type_cat1",
+    "encounter_type_cat2",
+    "encounter_type_cat3",
+    "referral_closed_reason",
+    "zipcode",
+    "insurance",
+    "referral_1",
+    "referral_2",
+    "referral_3",
+    "referral_4",
+    "referral_5",
+]
+
+REFERRALS_DISPLAY_FIELDS = [
+    "age",
+    "sex",
+    "referral_agency",
+    "encounter_type_cat1",
+    "encounter_type_cat2",
+    "encounter_type_cat3",
+    "referral_closed_reason",
+    "zipcode",
+    "insurance",
+    "referral_1",
+    "referral_2",
+    "referral_3",
+    "referral_4",
+    "referral_5",
+]
+
+REFERRALS_SINGLE_COLUMN_FIELDS = {"insurance", "referral_closed_reason", "sex"}
+
+REFERRALS_LABEL_OVERRIDES = {
+    "zipcode": "ZIP Code",
+    "referral_agency": "Referral Agency",
+    "referrals_counts_quarterly": "Referrals by Quarter",
+}
+
+
+def _load_referrals_dataframe() -> pd.DataFrame:
+    try:
+        values = list(Referrals.objects.all().values(*REFERRALS_QUERY_FIELDS))
+    except Exception:
+        values = []
+    df = _df_from_queryset(values, REFERRALS_QUERY_FIELDS)
+    if "date_received" in df.columns:
+        df["date_received"] = pd.to_datetime(df["date_received"], errors="coerce")
+    return df
+
+
+def _ordered_referral_fields(df: pd.DataFrame) -> list[str]:
+    fields = [field for field in REFERRALS_DISPLAY_FIELDS if field in df.columns]
+    if "referrals_counts_quarterly" not in fields:
+        fields.append("referrals_counts_quarterly")
+    return fields
+
+
+PATIENT_BASE_FIELDS = [
+    "age",
+    "marital_status",
+    "veteran_status",
+    "insurance",
+    "sud",
+    "pcp_agency",
+    "zip_code",
+    "race",
+    "sex",
+    # "behavioral_health",  # Hidden - insufficient data for meaningful visualization
+]
+
+PATIENT_SINGLE_COLUMN_FIELDS = {
+    "insurance",
+    "sud",
+    # "behavioral_health",  # Hidden - insufficient data
+    "marital_status",
+    "veteran_status",
+}
+
+PATIENT_LABEL_OVERRIDES = {
+    "pcp_agency": "Primary Care Agency",
+    "zip_code": "ZIP Code",
+    "patient_counts_quarterly": "Patients by Quarter",
+    "race_age_boxplot": "Age Distribution by Race",
+    "sud": "Substance Use Disorder",
+    "age": "Age Distribution by Sex",
+    "age_referral_sankey": "Age Groups → Key Services",
+    "veteran_service_bridge": "Veteran Care Coordination",
+}
+
+PATIENT_CHART_RATIONALE = {
+    "age": (
+        "Stacked bars show age distribution split by sex, revealing both demographic patterns and gender balance "
+        "across age cohorts. This guides risk stratification, service planning, and helps identify gender-specific "
+        "needs in each age group. It is used to plan targeted outreach and ensure equitable access across demographics."
+    ),
+    "insurance": (
+        "Insurance indicates coverage pathways and barriers to access. It helps target enrollment assistance, "
+        "reduce out-of-pocket costs, and select services that minimize financial burden."
+    ),
+    "pcp_agency": (
+        "Knowing a patient’s primary care agency enables closed-loop referrals and shared care plans. It also "
+        "reveals gaps in primary care linkage where CPMs can coordinate warm handoffs."
+    ),
+    "zip_code": (
+        "ZIP codes help identify geographic clusters, travel barriers, and social determinant of health needs. They inform mobile "
+        "clinic routing, outreach scheduling, and partnerships with local resources."
+    ),
+    "marital_status": (
+        "Marital status approximates available social support. It can inform safety planning, caregiver outreach, "
+        "and the intensity of follow-up needed to ensure adherence."
+    ),
+    "veteran_status": (
+        "Veteran status opens access to VA services, care coordination, and benefits unique to veterans. "
+        "Capturing it ensures no-duplicate coverage and better coordination."
+    ),
+    "sud": (
+        "Substance use disorder screening is central to harm reduction and linkage to treatment. Tracking prevalence "
+        "and screening completeness helps target naloxone distribution, MAT referrals, and proactive outreach. "
+        "Understanding SUD patterns guides resource allocation and partnership development with treatment providers."
+    ),
+    "patient_counts_quarterly": (
+        "Quarterly patient volume shows program trajectory and the impact of external factors and operational changes. "
+        "Bar colors clearly distinguish above-average volume (emerald green) from average or below-average volume "
+        "(cyan blue), with the baseline calculated dynamically from historical data. A dashed reference line marks "
+        "the actual quarterly average across all periods in our dataset. Year context labels explain factors affecting "
+        "volume: COVID-19 (2021), Behavioral Health expansion (2022), Normalization (2023-2024), and staffing increase "
+        "with 2 new Community Paramedics (2025). This adaptive visualization automatically adjusts as our data grows, "
+        "helping stakeholders understand community need relative to our true historical average for accurate capacity planning "
+        "and trend analysis."
+    ),
+    "race_age_boxplot": (
+        "Age distribution by race helps detect potential disparities and informs culturally responsive, "
+        "community-informed outreach strategies."
+    ),
+    "age_referral_sankey": (
+        "The Sankey diagram visualizes patient flow from age cohorts to key service types including 911 calls, "
+        "vaccinations, assessments, case management, overdose response, and medication services. "
+        "Flow thickness indicates service volume, helping identify which age groups receive which services most. "
+        "This guides resource allocation, partnership priorities, and age-targeted service delivery."
+    ),
+    "veteran_service_bridge": (
+        "Veterans deserve specialized coordination that honors their service and leverages VA benefits. This flow diagram "
+        "tracks identification completeness, VA linkage success, and service complementarity—ensuring veterans access both "
+        "CPM and VA resources without duplication. It reveals gaps where veterans remain unconnected to earned benefits and "
+        "measures the effectiveness of veteran-specific outreach and coordination protocols."
+    ),
+}
+
+PATIENTS_STORY_CARDS = [
+    {
+        "eyebrow": "Story",
+        "title": "Quarterly demand normalized per 100 patients",
+        "lede": (
+            "Counts now surface both raw totals and their share of the patient panel, while a three-quarter "
+            "rolling average highlights sustained growth beyond seasonal spikes."
+        ),
+        "bullets": [
+            "Hover labels pair counts with percent of panel so mix shifts stand out immediately.",
+            "Per 100 patient rates clarify throughput even as enrollment expands or contracts.",
+            "Use the rolling average trace to defend staffing pivots and resource pulls.",
+        ],
+        "callout": "Cross-check with encounter cadence to make the caseload story concrete.",
+    },
+    {
+        "eyebrow": "Equity",
+        "title": "Demographic mix in context",
+        "lede": (
+            "Horizontal bars now annotate percent share, making it easier to scan for underrepresented "
+            "communities across insurance, geography, and social determinants."
+        ),
+        "bullets": [
+            "Review combined count and percent text to prioritize outreach invitations.",
+            "Boxplots keep age distribution front of mind when coordinating partner services.",
+            "SUD and behavioral health donuts quantify screening completion and prevalence side by side.",
+        ],
+        "callout": "Flag any share under 10% for deeper qualitative follow-up.",
+    },
+    {
+        "eyebrow": "Next steps",
+        "title": "Translate insight to action",
+        "lede": (
+            "Pair the normalized dashboards with patient-level exports to queue specific follow-ups and "
+            "community clinics."
+        ),
+        "bullets": [
+            "Draft targeted narratives for quarterly reports using the new percent annotations.",
+            "Bundle charts into partner briefings to show progress toward equity and engagement goals.",
+            "Document any data quality issues surfaced by large Unknown buckets and assign clean-up owners.",
+        ],
+        "callout": "Schedule a monthly review to keep the normalization assumptions current.",
+    },
+]
+
+
+def _load_patients_dataframe() -> pd.DataFrame:
+    try:
+        data = list(Patients.objects.all().values(*PATIENT_BASE_FIELDS))
+    except Exception:
+        data = []
+    return pd.DataFrame.from_records(data, columns=PATIENT_BASE_FIELDS)
+
+
+def _ordered_patient_fields(df: pd.DataFrame) -> list[str]:
+    # Start with quarterly chart at the top
+    ordered = ["patient_counts_quarterly"]
+
+    # Then age-related charts grouped together
+    age_charts = ["age", "race_age_boxplot", "age_referral_sankey"]
+    ordered.extend(age_charts)
+
+    # Then donut charts in specified order: marital, veteran, insurance, sud
+    donut_fields = ["marital_status", "veteran_status", "insurance", "sud"]
+    for field in donut_fields:
+        if field in df.columns:
+            ordered.append(field)
+
+    # Add veteran service bridge after veteran_status
+    if "veteran_status" in ordered:
+        veteran_idx = ordered.index("veteran_status")
+        ordered.insert(veteran_idx + 1, "veteran_service_bridge")
+
+    # Then Primary Care Agency and ZIP Code
+    for field in ["pcp_agency", "zip_code"]:
+        if field in df.columns:
+            ordered.append(field)
+
+    return ordered
+
+
+def _build_patient_chart_meta() -> dict[str, object]:
+    meta: dict[str, object] = {}
+    # Recent quarters information removed per user request
+    return meta
+
+
+def _load_patients_story_frames() -> tuple[pd.DataFrame, pd.DataFrame] | None:
+    patients_records = list(
+        Patients.objects.all().values(
+            "id", "age", "zip_code", "sud", "behavioral_health", "created_date"
+        )
+    )
+    if not patients_records:
+        return None
+
+    df_patients = pd.DataFrame.from_records(patients_records)
+    df_patients["age"] = pd.to_numeric(df_patients["age"], errors="coerce")
+    df_patients["id"] = pd.to_numeric(df_patients["id"], errors="coerce")
+    df_patients["created_date"] = pd.to_datetime(df_patients["created_date"], errors="coerce")
+    df_patients = df_patients.dropna(subset=["id"])
+    df_patients["id"] = df_patients["id"].astype(int)
+
+    encounters_records = list(
+        Encounters.objects.exclude(patient_ID__isnull=True).values("patient_ID", "encounter_date")
+    )
+    df_enc = pd.DataFrame.from_records(encounters_records)
+    if df_enc.empty:
+        df_enc = pd.DataFrame(columns=["patient_ID", "encounter_date"])
+    else:
+        df_enc["patient_ID"] = pd.to_numeric(df_enc["patient_ID"], errors="coerce")
+        df_enc["encounter_date"] = pd.to_datetime(df_enc["encounter_date"], errors="coerce")
+        df_enc = df_enc.dropna(subset=["patient_ID", "encounter_date"])
+        if not df_enc.empty:
+            df_enc["patient_ID"] = df_enc["patient_ID"].astype(int)
+
+    return df_patients, df_enc
+
+
+def _patients_story_demand_section(
+    df_patients: pd.DataFrame, total_patients: int
+) -> dict[str, object]:
+    seniors_mask = df_patients["age"] >= 65
+    share_65 = _pct(int(seniors_mask.sum()), total_patients)
+    share_75 = _pct(int((df_patients["age"] >= 75).sum()), total_patients)
+
+    zip_series = (
+        df_patients.get("zip_code", pd.Series(dtype="object")).fillna("").astype(str).str.strip()
+    )
+    zip_series = zip_series[zip_series != ""]
+    top_zip_counts = zip_series.value_counts()
+    top_zip_share = (
+        _pct(int(top_zip_counts.head(3).sum()), total_patients) if not top_zip_counts.empty else 0.0
+    )
+    top_zip_names = ", ".join(top_zip_counts.head(3).index.tolist())
+
+    demand_lede = f"We're seeing {_format_percent(share_65)} of enrolled patients are 65+"
+    if top_zip_names:
+        demand_lede += f", and top ZIPs ({top_zip_names}) account for {_format_percent(top_zip_share)} of the caseload."
+    else:
+        demand_lede += "."
+    demand_lede += (
+        " Step 1 frames where demand is concentrated so the team can open with the right context."
+    )
+
+    demand_actions: list[str] = []
+    if top_zip_names:
+        demand_actions.append(
+            f"Coordinate mobile teams in {top_zip_names} to match the {_format_percent(top_zip_share)} of enrollment clustered there."
+        )
+    if share_75:
+        demand_actions.append("Partner with aging services to support the growing 75+ caseload.")
+    demand_actions.append("Keep the quarterly volume chart handy for grant and staffing updates.")
+
+    metrics = [
+        _metric("Active patients", _format_int(total_patients), "Current registry size"),
+        _metric(
+            "65+ share",
+            _format_percent(share_65),
+            f"{_format_percent(share_75)} of patients are 75+" if share_75 else None,
+        ),
+        _metric(
+            "Top ZIP concentration",
+            _format_percent(top_zip_share),
+            f"{top_zip_names}" if top_zip_names else None,
+        ),
+    ]
+
+    return {
+        "sequence": 1,
+        "title": "Community Need",
+        "lede": demand_lede,
+        "metrics": metrics,
+        "actions": demand_actions,
+        "related_charts": [
+            "patient_counts_quarterly",
+            "age",
+            "zip_code",
+            "sud",
+            "behavioral_health",
+        ],
+    }
+
+
+def _patients_story_response_section(
+    df_patients: pd.DataFrame, df_enc: pd.DataFrame, total_patients: int
+) -> dict[str, object]:
+    patients_with_encounter = int(df_enc["patient_ID"].nunique()) if not df_enc.empty else 0
+    engagement_rate = _pct(patients_with_encounter, total_patients)
+
+    recent_patients = 0
+    recent_pct = 0.0
+    avg_encounters_per_engaged: float | None = None
+    median_days_to_first: float | None = None
+
+    if not df_enc.empty:
+        now = pd.Timestamp.utcnow().tz_localize(None)
+        recent_cutoff = now - pd.Timedelta(days=90)
+        recent_patients = int(
+            df_enc[df_enc["encounter_date"] >= recent_cutoff]["patient_ID"].nunique()
+        )
+        recent_pct = _pct(recent_patients, total_patients)
+
+        encounters_per_patient = df_enc.groupby("patient_ID").size()
+        if not encounters_per_patient.empty:
+            avg_encounters_per_engaged = float(encounters_per_patient.mean())
+
+        first_encounters = df_enc.groupby("patient_ID")["encounter_date"].min()
+        patient_created = df_patients[["id", "created_date"]].dropna(subset=["id", "created_date"])
+        if not patient_created.empty:
+            first_df = patient_created.merge(
+                first_encounters.to_frame("first_encounter"),
+                left_on="id",
+                right_index=True,
+                how="inner",
+            )
+            if not first_df.empty:
+                first_df["days_to_first"] = (
+                    first_df["first_encounter"] - first_df["created_date"]
+                ).dt.days
+                valid_first = first_df[
+                    first_df["days_to_first"].notna() & (first_df["days_to_first"] >= 0)
+                ]
+                if not valid_first.empty:
+                    median_days_to_first = float(valid_first["days_to_first"].median())
+
+    response_lede = f"Step 2 highlights how we're responding: {_format_percent(engagement_rate)} of patients have completed at least one encounter, reaching {_format_int(recent_patients)} people in the past 90 days."
+    if median_days_to_first is not None:
+        response_lede += f" Median time from enrollment to first visit is {_format_days(median_days_to_first)}, showing how fast we activate services."
+
+    metrics = [
+        _metric(
+            "Engagement rate",
+            _format_percent(engagement_rate),
+            f"{_format_int(patients_with_encounter)} of {_format_int(total_patients)} patients have at least one encounter.",
+        ),
+        _metric(
+            "Reached in last 90 days",
+            _format_int(recent_patients),
+            f"{_format_percent(recent_pct)} of the panel received a touchpoint this quarter.",
+        ),
+        _metric(
+            "Median days to first visit",
+            _format_days(median_days_to_first),
+            "Enrollment to first encounter."
+            if median_days_to_first is not None
+            else "Enrollment timing data unavailable.",
+        ),
+    ]
+    if avg_encounters_per_engaged is not None:
+        metrics.append(
+            _metric(
+                "Avg encounters per engaged patient",
+                _format_float(avg_encounters_per_engaged, digits=1),
+                "Calculated across patients with at least one visit.",
+            )
+        )
+
+    actions = [
+        "Track enrollment-to-first-visit lag each week and clear blockers when it rises.",
+        "Pair encounter cadence with the age distribution to plan multidisciplinary rounds.",
+    ]
+    if recent_patients < patients_with_encounter:
+        actions.append("Schedule wellness checks for patients without contact in the last 90 days.")
+
+    return {
+        "sequence": 2,
+        "title": "Response",
+        "lede": response_lede,
+        "metrics": metrics,
+        "actions": actions,
+        "related_charts": ["patient_counts_quarterly", "sud", "behavioral_health"],
+    }
+
+
+def _patients_story_impact_section(
+    df_patients: pd.DataFrame,
+    df_enc: pd.DataFrame,
+    total_patients: int,
+) -> dict[str, object]:
+    patients_with_encounter = int(df_enc["patient_ID"].nunique()) if not df_enc.empty else 0
+    repeat_rate = 0.0
+    sud_engaged = 0
+    sud_count = 0
+    sud_engagement_pct = 0.0
+    senior_avg: float | None = None
+
+    if not df_enc.empty and patients_with_encounter:
+        df_enc_sorted = df_enc.sort_values(["patient_ID", "encounter_date"])
+        df_enc_sorted["prev_encounter"] = df_enc_sorted.groupby("patient_ID")[
+            "encounter_date"
+        ].shift(1)
+        df_enc_sorted["days_since_prior"] = (
+            df_enc_sorted["encounter_date"] - df_enc_sorted["prev_encounter"]
+        ).dt.days
+        repeat_within_30 = df_enc_sorted[
+            df_enc_sorted["days_since_prior"].notna()
+            & (df_enc_sorted["days_since_prior"] >= 1)
+            & (df_enc_sorted["days_since_prior"] <= 30)
+        ]
+        repeat_rate = _pct(int(repeat_within_30["patient_ID"].nunique()), patients_with_encounter)
+
+        sud_mask = df_patients.get("sud")
+        if sud_mask is not None:
+            sud_mask = sud_mask.fillna(False).astype(bool)
+            sud_ids = df_patients.loc[sud_mask, "id"]
+            sud_count = int(sud_ids.nunique())
+            if sud_count:
+                sud_engaged = int(
+                    df_enc[df_enc["patient_ID"].isin(sud_ids.tolist())]["patient_ID"].nunique()
+                )
+                sud_engagement_pct = _pct(sud_engaged, sud_count)
+
+        senior_ids = df_patients.loc[df_patients["age"] >= 65, "id"]
+        if not senior_ids.empty:
+            senior_encounters = df_enc[df_enc["patient_ID"].isin(senior_ids.tolist())]
+            if not senior_encounters.empty:
+                senior_avg = float(senior_encounters.groupby("patient_ID").size().mean())
+
+    impact_lede = f"Step 3 shows the impact we're driving: {_format_percent(repeat_rate)} of engaged patients need a follow-up within 30 days."
+    if sud_count:
+        impact_lede += f" {_format_percent(sud_engagement_pct)} of the SUD panel ({_format_int(sud_engaged)} people) is in active care, keeping high-risk neighbors connected."
+    if senior_avg is not None:
+        impact_lede += f" Seniors average {_format_float(senior_avg, digits=1)} encounters each, underscoring the preventive value of regular visits."
+
+    metrics = [
+        _metric(
+            "Repeat visit within 30 days",
+            _format_percent(repeat_rate),
+            "Share of engaged patients requiring rapid follow-up.",
+        ),
+        _metric(
+            "SUD cohort engaged",
+            _format_percent(sud_engagement_pct),
+            f"{_format_int(sud_engaged)} of {_format_int(sud_count)} flagged patients are in care."
+            if sud_count
+            else "SUD flags not recorded.",
+        ),
+        _metric(
+            "Avg encounters per 65+ patient",
+            _format_float(senior_avg, digits=1),
+            "Average visits among older adults who engaged."
+            if senior_avg is not None
+            else "No senior encounter data.",
+        ),
+    ]
+
+    actions = [
+        "Use the repeat-within-30-days list to prioritize proactive follow-up routes.",
+        "Check SUD-flagged patients without recent encounters and coordinate MAT or harm reduction outreach.",
+    ]
+    if senior_avg and senior_avg > 2:
+        actions.append(
+            "Align staffing for home visits to keep pace with high senior visit intensity."
+        )
+
+    return {
+        "sequence": 3,
+        "title": "Impact",
+        "lede": impact_lede,
+        "metrics": metrics,
+        "actions": actions,
+        "related_charts": ["patient_counts_quarterly", "age"],
+    }
+
+
+def _build_patients_story_sections() -> list[dict[str, object]]:
+    frames = _load_patients_story_frames()
+    if frames is None:
+        return []
+
+    df_patients, df_enc = frames
+    total_patients = int(df_patients.shape[0])
+    if total_patients == 0:
+        return []
+
+    demand_section = _patients_story_demand_section(df_patients, total_patients)
+    response_section = _patients_story_response_section(df_patients, df_enc, total_patients)
+    impact_section = _patients_story_impact_section(df_patients, df_enc, total_patients)
+
+    return [demand_section, response_section, impact_section]
+
 
 def patients(request):
     theme = get_theme_from_request(request)
-    charts = build_patients_field_charts(theme=theme)
+    df_all = _load_patients_dataframe()
+    ordered_fields = _ordered_patient_fields(df_all)
 
-    # Build DataFrame for insights
-    try:
-        base_fields = [
-            "age",
-            "insurance",
-            "pcp_agency",
-            "race",
-            "sex",
-            "sud",
-            "behavioral_health",
-            "zip_code",
-            "marital_status",
-            "veteran_status",
-        ]
-        df_all = pd.DataFrame(list(Patients.objects.all().values(*base_fields)))
-    except Exception:
-        df_all = pd.DataFrame()
-
-    age_insights = _compute_age_insights(df_all)
-    chart_insights = _build_patients_chart_insights(df_all, age_insights)
-
-    # Rationale text per field
-    rationale_map: dict[str, str] = {
-        "age": (
-            "Age guides risk stratification, eligibility for services, and care planning. Older adults often need "
-            "falls prevention, medication reconciliation, and chronic disease support, while younger cohorts may "
-            "benefit more from behavioral health linkage and injury prevention."
-        ),
-        "insurance": (
-            "Insurance indicates coverage pathways and barriers to access. It helps target enrollment assistance, "
-            "reduce out-of-pocket costs, and select services that minimize financial burden."
-        ),
-        "pcp_agency": (
-            "Knowing a patient’s primary care agency enables closed-loop referrals and shared care plans. It also "
-            "reveals gaps in primary care linkage where CPMs can coordinate warm handoffs."
-        ),
-        "zip_code": (
-            "ZIP codes help identify geographic clusters, travel barriers, and SDOH needs. They inform mobile "
-            "clinic routing, outreach scheduling, and partnerships with local resources."
-        ),
-        "marital_status": (
-            "Marital status approximates available social support. It can inform safety planning, caregiver outreach, "
-            "and the intensity of follow-up needed to ensure adherence."
-        ),
-        "veteran_status": (
-            "Veteran status opens access to VA services, care coordination, and benefits unique to veterans. "
-            "Capturing it ensures no-duplicate coverage and better coordination."
-        ),
-        "sud": (
-            "SUD screening is central to harm reduction and linkage to treatment. Tracking prevalence and screening "
-            "completeness helps target naloxone, MAT referrals, and proactive outreach."
-        ),
-        "behavioral_health": (
-            "Behavioral health indicators highlight crisis risk and the need for clinician co-response. Monitoring them helps plan warm handoffs, stabilize follow-ups, and align with partner capacity."
-        ),
-        "patient_counts_quarterly": (
-            "Quarterly volume shows throughput, staffing needs, and seasonality. It supports grant reporting, "
-            "capacity planning, and demonstrates program growth or stabilization."
-        ),
-        "sex_age_boxplot": (
-            "Age distribution by sex can reveal cohort differences relevant to scheduling, education, and outreach. "
-            "Monitoring gaps helps tailor services equitably."
-        ),
-        "race_age_boxplot": (
-            "Age distribution by race helps detect potential disparities and informs culturally responsive, "
-            "community-informed outreach strategies."
-        ),
-    }
-
-    label_overrides = {
-        "pcp_agency": "Primary Care Agency",
-        "zip_code": "ZIP Code",
-        "patient_counts_quarterly": "Patients by Quarter",
-        "sex_age_boxplot": "Age Distribution by Sex",
-        "race_age_boxplot": "Age Distribution by Race",
-        "sud": "SUD Flag",
-        "behavioral_health": "Behavioral Health Flag",
-    }
-
-    charts_list = []
-
-    # Reorder so donut pairs render side-by-side in the 2-col grid
-    def _move_after(lst: list[str], item: str, after_item: str) -> None:
-        if item in lst and after_item in lst:
-            lst.remove(item)
-            try:
-                idx = lst.index(after_item)
-            except ValueError:
-                return
-            lst.insert(idx + 1, item)
-
-    ordered_fields = list(charts.keys())
-    # Ensure Insurance and SUD are adjacent (SUD immediately after Insurance)
-    _move_after(ordered_fields, "sud", "insurance")
-    # Place Behavioral Health immediately after SUD for paired review
-    _move_after(ordered_fields, "behavioral_health", "sud")
-    # Ensure Marital Status and Veteran Status are adjacent (Veteran immediately after Marital)
-    _move_after(ordered_fields, "veteran_status", "marital_status")
-
-    for field in ordered_fields:
-        chart = charts[field]
-        charts_list.append(
-            {
-                "field": field,
-                "label": label_overrides.get(field, field.replace("_", " ").title()),
-                "chart": chart,
-                "insights": chart_insights.get(field),
-                "rationale": rationale_map.get(field),
-            }
-        )
+    chart_cards = [
+        {
+            "field": field,
+            "label": PATIENT_LABEL_OVERRIDES.get(field, field.replace("_", " ").title()),
+            "col_span": 1 if field in PATIENT_SINGLE_COLUMN_FIELDS else 2,
+        }
+        for field in ordered_fields
+    ]
 
     context = {
-        "charts": charts,
-        "charts_list": charts_list,
+        "chart_cards": chart_cards,
         "theme": theme,
-        "age_insights": age_insights,
+        "story_sections": _build_patients_story_sections(),
     }
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "7 min read",
+        }
+    )
     return render(request, "dashboard/patients.html", context)
+
+
+@require_GET
+def patients_chart_fragment(request, field: str):
+    theme = get_theme_from_request(request)
+    df_all = _load_patients_dataframe()
+    valid_fields = set(_ordered_patient_fields(df_all))
+    if field not in valid_fields:
+        raise Http404
+
+    charts = build_patients_field_charts(theme=theme, fields=[field])
+    chart_html = charts.get(field, "")
+    has_chart = bool(chart_html)
+    age_insights = _compute_age_insights(df_all)
+    chart_insights = _build_patients_chart_insights(df_all, age_insights)
+    chart_meta = _build_patient_chart_meta()
+    quick_stats = _build_patient_quick_stats()
+
+    item = {
+        "field": field,
+        "label": PATIENT_LABEL_OVERRIDES.get(field, field.replace("_", " ").title()),
+        "chart": chart_html,
+        "has_chart": has_chart,
+        "category_label": "Patients",
+        "insights": chart_insights.get(field),
+        "rationale": PATIENT_CHART_RATIONALE.get(field),
+        "meta": chart_meta.get(field),
+        "quick_stats": quick_stats.get(field),
+    }
+
+    return render(request, "dashboard/partials/patient_chart_fragment.html", {"item": item})
+
+
+@require_GET
+def referrals_chart_fragment(request, field: str):
+    theme = get_theme_from_request(request)
+    df_all = _load_referrals_dataframe()
+    valid_fields = set(_ordered_referral_fields(df_all))
+    if field not in valid_fields:
+        raise Http404
+
+    charts = build_referrals_field_charts(theme=theme, fields=[field])
+    chart_html = charts.get(field, "")
+    has_chart = bool(chart_html)
+
+    chart_insights = _build_referrals_chart_insights(df_all)
+
+    item = {
+        "field": field,
+        "label": REFERRALS_LABEL_OVERRIDES.get(field, field.replace("_", " ").title()),
+        "chart": chart_html,
+        "has_chart": has_chart,
+        "category_label": "Referrals",
+        "insights": chart_insights.get(field),
+        "rationale": REFERRALS_RATIONALE_MAP.get(field),
+        "meta": None,
+    }
+
+    return render(request, "dashboard/partials/patient_chart_fragment.html", {"item": item})
+
+
+@require_GET
+def odreferrals_chart_fragment(request, field: str):
+    theme = get_theme_from_request(request)
+    df_all = _load_odreferrals_dataframe()
+    valid_fields = set(_ordered_odreferral_fields(df_all))
+    if field not in valid_fields:
+        raise Http404
+
+    charts = build_odreferrals_field_charts(theme=theme, fields=[field])
+    chart_html = charts.get(field, "")
+    has_chart = bool(chart_html)
+
+    chart_insights = _build_odreferrals_chart_insights(df_all)
+
+    item = {
+        "field": field,
+        "label": OD_REFERRALS_LABEL_MAP.get(field, field.replace("_", " ").title()),
+        "chart": chart_html,
+        "has_chart": has_chart,
+        "category_label": "OD Referrals",
+        "insights": chart_insights.get(field),
+        "rationale": OD_REFERRALS_RATIONALE_MAP.get(field),
+        "meta": None,
+    }
+
+    return render(request, "dashboard/partials/patient_chart_fragment.html", {"item": item})
+
+
+@require_GET
+def encounters_chart_fragment(request, field: str):
+    theme = get_theme_from_request(request)
+    df_all = _load_encounters_dataframe()
+    valid_fields = set(_ordered_encounter_fields(df_all))
+    if field not in valid_fields:
+        raise Http404
+
+    charts = build_encounters_field_charts(theme=theme, fields=[field])
+    chart_html = charts.get(field, "")
+    has_chart = bool(chart_html)
+
+    chart_insights = _build_encounters_chart_insights(df_all)
+
+    item = {
+        "field": field,
+        "label": ENCOUNTERS_LABEL_MAP.get(field, field.replace("_", " ").title()),
+        "chart": chart_html,
+        "has_chart": has_chart,
+        "category_label": "Encounters",
+        "insights": chart_insights.get(field),
+        "rationale": ENCOUNTERS_RATIONALE_MAP.get(field),
+        "meta": None,
+    }
+
+    return render(request, "dashboard/partials/patient_chart_fragment.html", {"item": item})
 
 
 # Referrals
 def referrals(request):
     theme = get_theme_from_request(request)
-    charts = build_referrals_field_charts(theme=theme)
+    df_all = _load_referrals_dataframe()
+    ordered_fields = _ordered_referral_fields(df_all)
 
-    label_overrides = {
-        "zipcode": "ZIP Code",
-        "referral_agency": "Referral Agency",
-        "referrals_counts_quarterly": "Referrals by Quarter",
+    chart_cards = [
+        {
+            "field": field,
+            "label": REFERRALS_LABEL_OVERRIDES.get(field, field.replace("_", " ").title()),
+            "col_span": 1 if field in REFERRALS_SINGLE_COLUMN_FIELDS else 2,
+        }
+        for field in ordered_fields
+    ]
+
+    context = {
+        "chart_cards": chart_cards,
+        "theme": theme,
+        "story_cards": REFERRALS_STORY_CARDS,
     }
-
-    # Order donuts: Insurance then Closed Reason
-    ordered_fields = list(charts.keys())
-
-    def _move_after(lst: list[str], item: str, after_item: str) -> None:
-        if item in lst and after_item in lst:
-            lst.remove(item)
-            try:
-                idx = lst.index(after_item)
-            except ValueError:
-                return
-            lst.insert(idx + 1, item)
-
-    _move_after(ordered_fields, "referral_closed_reason", "insurance")
-
-    # Build DataFrame to compute insights for referrals
-    try:
-        from ..core.models import Referrals  # local import to avoid circular import in tests
-
-        df_all = pd.DataFrame(
-            list(
-                Referrals.objects.all().values(
-                    "age",
-                    "sex",
-                    "referral_agency",
-                    "encounter_type_cat1",
-                    "encounter_type_cat2",
-                    "encounter_type_cat3",
-                    "referral_closed_reason",
-                    "zipcode",
-                    "insurance",
-                    "date_received",
-                )
-            )
-        )
-    except Exception:
-        df_all = pd.DataFrame()
-
-    chart_insights = _build_referrals_chart_insights(df_all)
-
-    charts_list = []
-    for field in ordered_fields:
-        charts_list.append(
-            {
-                "field": field,
-                "label": label_overrides.get(field, field.replace("_", " ").title()),
-                "chart": charts[field],
-                "insights": chart_insights.get(field),
-                "rationale": REFERRALS_RATIONALE_MAP.get(field),
-            }
-        )
-
-    context = {"charts": charts, "charts_list": charts_list, "theme": theme}
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "8 min read",
+        }
+    )
     return render(request, "dashboard/referrals.html", context)
 
 
@@ -1115,7 +1874,123 @@ def odreferrals_shift_coverage(request):
         "proposed_coverage": coverage_stats["proposed"],
         "total_cases": coverage_stats["total"],
     }
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "9 min read",
+        }
+    )
     return render(request, "dashboard/odreferrals_shift_coverage.html", context)
+
+
+def _compute_hotspot_stats() -> dict[str, object]:
+    qs = ODReferrals.objects.exclude(lat__isnull=True).exclude(long__isnull=True)
+    df = _df_from_queryset(
+        qs.values("lat", "long", "disposition", "od_date"),
+        expected_columns=["lat", "long", "disposition", "od_date"],
+    )
+    if df.empty:
+        return {
+            "total": 0,
+            "fatal_count": 0,
+            "fatal_pct": 0.0,
+            "unique_locations": 0,
+            "top_location_count": 0,
+            "top_location_share": 0.0,
+            "weekend_pct": 0.0,
+        }
+
+    fatal_conditions = {"CPR attempted", "DOA"}
+    total = int(len(df))
+    fatal_count = int(df["disposition"].isin(fatal_conditions).sum())
+    fatal_pct = round((fatal_count / total) * 100, 1) if total else 0.0
+
+    unique_locations = int(df[["lat", "long"]].dropna().drop_duplicates().shape[0])
+
+    grouped = df.groupby(["lat", "long"]).size().sort_values(ascending=False)
+    top_location_count = int(grouped.iloc[0]) if not grouped.empty else 0
+    top_location_share = round((top_location_count / total) * 100, 1) if total else 0.0
+
+    weekend_count = 0
+    for raw_dt in df["od_date"].dropna():
+        converted = pd.to_datetime(raw_dt, errors="coerce")
+        if pd.isna(converted):
+            continue
+        if isinstance(converted, pd.Timestamp):
+            if converted.tzinfo is not None:
+                converted = converted.tz_convert(timezone.get_current_timezone())
+            converted = converted.to_pydatetime()
+        if timezone.is_naive(converted):
+            converted = timezone.make_aware(converted, timezone.get_current_timezone())
+        local_dt = timezone.localtime(converted)
+        weekend_count += int(local_dt.weekday() >= 5)
+
+    weekend_pct = round((weekend_count / total) * 100, 1) if total else 0.0
+
+    return {
+        "total": total,
+        "fatal_count": fatal_count,
+        "fatal_pct": fatal_pct,
+        "unique_locations": unique_locations,
+        "top_location_count": top_location_count,
+        "top_location_share": top_location_share,
+        "weekend_pct": weekend_pct,
+    }
+
+
+def odreferrals_hotspots(request):
+    theme = get_theme_from_request(request)
+    fig_od_map = _chart_html(build_chart_od_map(theme=theme))
+    stats = _compute_hotspot_stats()
+    document_metrics = _load_hotspot_context()
+
+    insights: list[dict[str, str]] = []
+    if stats["total"]:
+        insights.append(
+            {
+                "title": "Concentrated clusters",
+                "body": (
+                    f"{stats['unique_locations']} unique hotspot addresses recorded; the most active"
+                    f" location represents {stats['top_location_share']}% of EMS overdose responses."
+                ),
+            }
+        )
+        insights.append(
+            {
+                "title": "Severity mix",
+                "body": (
+                    f"Fatal overdoses make up {stats['fatal_pct']}% of mapped incidents"
+                    f" ({stats['fatal_count']} of {stats['total']} cases), reinforcing targeted naloxone support."
+                ),
+            }
+        )
+        insights.append(
+            {
+                "title": "Weekend activity",
+                "body": (
+                    f"Weekend calls account for {stats['weekend_pct']}% of overdoses, aligning with scheduling"
+                    " strategies that extend PORT coverage beyond standard weekday hours."
+                ),
+            }
+        )
+
+    context = {
+        "fig_od_map": fig_od_map,
+        "hotspot_stats": stats,
+        "hotspot_insights": insights,
+        "document_metrics": document_metrics,
+    }
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "6 min read",
+        }
+    )
+    return render(request, "dashboard/odreferrals_hotspots.html", context)
 
 
 def odreferrals_repeat_overdoses(request):
@@ -1129,6 +2004,14 @@ def odreferrals_repeat_overdoses(request):
         "fig_repeats_scatter": fig_repeats_scatter,
         "has_repeat_data": bool(repeat_stats),
     }
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "7 min read",
+        }
+    )
     return render(request, "dashboard/odreferrals_repeat_overdoses.html", context)
 
 
@@ -1587,7 +2470,20 @@ def _prepare_referrals_insights_context() -> dict[str, object]:
 
 def referrals_insights(request):
     context = _prepare_referrals_insights_context()
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "9 min read",
+        }
+    )
     return render(request, "dashboard/referrals_insights.html", context)
+
+
+def odreferrals_insights_fragment(request):
+    context = _prepare_odreferrals_insights_context()
+    return render(request, "dashboard/partials/odreferrals_insights_fragment.html", context)
 
 
 # Encounters placeholder insights
@@ -1845,7 +2741,20 @@ def _prepare_encounters_insights_context() -> dict[str, object]:
 
 def encounters_insights(request):
     context = _prepare_encounters_insights_context()
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "6 min read",
+        }
+    )
     return render(request, "dashboard/encounters_insights.html", context)
+
+
+def encounters_insights_fragment(request):
+    context = _prepare_encounters_insights_context()
+    return render(request, "dashboard/partials/encounters_insights_fragment.html", context)
 
 
 # OD Referrals
@@ -2348,6 +3257,20 @@ OD_REFERRALS_RATIONALE_MAP: dict[str, str] = {
 }
 
 
+OD_REFERRALS_DISPLAY_FIELDS = [
+    "odreferrals_counts_monthly",
+    "odreferrals_counts_weekday",
+    "referral_source",
+    "referral_agency",
+    "suspected_drug",
+    "cpm_disposition",
+    "living_situation",
+    "engagement_location",
+    "narcan_given",
+    "referral_to_sud_agency",
+]
+
+
 OD_REFERRALS_COL_SPAN: dict[str, int] = {
     "odreferrals_counts_monthly": 2,
     "odreferrals_counts_weekday": 2,
@@ -2355,13 +3278,54 @@ OD_REFERRALS_COL_SPAN: dict[str, int] = {
     "referral_to_sud_agency": 1,
 }
 
+OD_REFERRALS_STORY_CARDS = [
+    {
+        "eyebrow": "Story",
+        "title": "Critical overdose windows",
+        "lede": (
+            "Monthly cadence now displays percent share and a rolling average so you can see when surges "
+            "are trend versus spike."
+        ),
+        "bullets": [
+            "Weekday bars surface share-of-total alongside counts to focus scheduling.",
+            "Rolling three-month line pins down sustained increases for board updates.",
+            "Percent annotations simplify rate comparisons if total referrals change after outreach pushes.",
+        ],
+        "callout": "Map the peaks against staffing rosters to close coverage gaps.",
+    },
+    {
+        "eyebrow": "Response",
+        "title": "Narcan and SUD linkages",
+        "lede": (
+            "Donut charts now couple totals with share so you can quantify how often harm reduction closes the loop."
+        ),
+        "bullets": [
+            "Narcan deployment and treatment referrals show proportion of cases supported.",
+            "Hover to see exact counts for grant documentation without leaving the dashboard.",
+            "Large Unknown segments signal documentation clean-up needs.",
+        ],
+        "callout": "Share percent improvements directly with harm-reduction partners.",
+    },
+    {
+        "eyebrow": "Next steps",
+        "title": "Align outreach and prevention",
+        "lede": (
+            "Use the normalized suspected drug and living situation shares to tailor messaging and kit placement."
+        ),
+        "bullets": [
+            "Trace spikes back to referral sources to reinforce what is working.",
+            "Pair engagement location shares with map layers for deployment planning.",
+            "Document emerging patterns (e.g., evening rise) in the weekly operations brief.",
+        ],
+        "callout": "Revisit assumptions monthly so the percent context remains accurate.",
+    },
+]
 
-def odreferrals(request):
-    theme = get_theme_from_request(request)
-    charts = build_odreferrals_field_charts(theme=theme)
 
-    fields = [
-        "od_date",
+def _ordered_odreferral_fields(df: pd.DataFrame) -> list[str]:
+    fields: list[str] = []
+    fields.extend(["odreferrals_counts_monthly", "odreferrals_counts_weekday"])
+    for field in [
         "referral_source",
         "referral_agency",
         "suspected_drug",
@@ -2370,38 +3334,58 @@ def odreferrals(request):
         "engagement_location",
         "narcan_given",
         "referral_to_sud_agency",
+    ]:
+        if field in df.columns:
+            fields.append(field)
+    return fields
+
+
+def odreferrals(request):
+    theme = get_theme_from_request(request)
+    df_all = _load_odreferrals_dataframe()
+    ordered_fields = _ordered_odreferral_fields(df_all)
+
+    chart_cards = [
+        {
+            "field": field,
+            "label": OD_REFERRALS_LABEL_MAP.get(field, field.replace("_", " ").title()),
+            "col_span": OD_REFERRALS_COL_SPAN.get(field, 2),
+        }
+        for field in ordered_fields
     ]
-    try:
-        df_all = pd.DataFrame(list(ODReferrals.objects.all().values(*fields)))
-    except Exception:
-        df_all = pd.DataFrame(columns=fields)
-
-    chart_insights = _build_odreferrals_chart_insights(df_all)
-
-    charts_list: list[dict[str, object]] = []
-    for field, chart in charts.items():
-        charts_list.append(
-            {
-                "field": field,
-                "label": OD_REFERRALS_LABEL_MAP.get(field, field.replace("_", " ").title()),
-                "chart": chart,
-                "insights": chart_insights.get(field),
-                "rationale": OD_REFERRALS_RATIONALE_MAP.get(field),
-                "col_span": OD_REFERRALS_COL_SPAN.get(field, 2),
-            }
-        )
 
     context = {
-        "charts": charts,
-        "charts_list": charts_list,
+        "chart_cards": chart_cards,
         "theme": theme,
+        "story_cards": OD_REFERRALS_STORY_CARDS,
     }
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "9 min read",
+        }
+    )
     return render(request, "dashboard/odreferrals.html", context)
 
 
 def odreferrals_insights(request):
     context = _prepare_odreferrals_insights_context()
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "7 min read",
+        }
+    )
     return render(request, "dashboard/odreferrals_insights.html", context)
+
+
+def referrals_insights_fragment(request):
+    context = _prepare_referrals_insights_context()
+    return render(request, "dashboard/partials/referrals_insights_fragment.html", context)
 
 
 # Removed overdoses_by_case view per request
@@ -2530,13 +3514,253 @@ def odreferrals_monthly(request):
         "density_stats": density_stats,
         "theme": theme,
     }
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "8 min read",
+        }
+    )
 
     return render(request, "dashboard/monthly.html", context)
 
 
 # Encounters
+ENCOUNTERS_DISPLAY_FIELDS = [
+    "encounters_counts_monthly",
+    "encounters_counts_weekday",
+    "pcp_agency",
+    "encounter_type_cat1",
+    "encounter_type_cat2",
+    "encounter_type_cat3",
+]
+
+ENCOUNTERS_SINGLE_COLUMN_FIELDS = {
+    "pcp_agency",
+    "encounter_type_cat1",
+    "encounter_type_cat2",
+    "encounter_type_cat3",
+}
+
+ENCOUNTERS_LABEL_MAP: dict[str, str] = {
+    "encounters_counts_monthly": "Encounters by month",
+    "encounters_counts_weekday": "Encounters by weekday",
+    "pcp_agency": "PCP agency",
+    "encounter_type_cat1": "Encounter type (primary)",
+    "encounter_type_cat2": "Encounter type (secondary)",
+    "encounter_type_cat3": "Encounter type (tertiary)",
+}
+
+ENCOUNTERS_RATIONALE_MAP: dict[str, str] = {
+    "encounters_counts_monthly": (
+        "Monthly encounter volume shows program throughput and seasonality, informing staffing and outreach cadence."
+    ),
+    "encounters_counts_weekday": (
+        "Day-of-week patterns highlight when CPM teams are busiest so you can align shifts and partner availability."
+    ),
+    "pcp_agency": (
+        "PCP agency distribution reveals who CPM collaborates with most and where additional relationship building could help."
+    ),
+    "encounter_type_cat1": (
+        "Primary encounter categories surface the core reasons CPM gets involved, guiding training and resource allocation."
+    ),
+    "encounter_type_cat2": (
+        "Secondary encounter categories highlight co-occurring needs that shape care plans and follow-up workflows."
+    ),
+    "encounter_type_cat3": (
+        "Tertiary categorization captures nuances that matter for documentation, reporting, and quality improvement."
+    ),
+}
+
+ENCOUNTERS_STORY_CARDS = [
+    {
+        "eyebrow": "Story",
+        "title": "Encounter load with smoothing",
+        "lede": (
+            "Monthly bars now tag each value with percent of annual volume while the rolling average line "
+            "documents sustained surges."
+        ),
+        "bullets": [
+            "Use the percent annotations to explain why quieter months still need baseline coverage.",
+            "Three-month smoothing exposes structural increases for leadership updates.",
+            "Counts remain in the hover so operations can plan exact staffing shifts.",
+        ],
+        "callout": "Compare directly against the patient quarterly chart to show demand versus delivery.",
+    },
+    {
+        "eyebrow": "Scheduling",
+        "title": "Day-of-week priorities",
+        "lede": (
+            "Weekday distribution shows share alongside counts so you can rebalance shift assignments without spreadsheets."
+        ),
+        "bullets": [
+            "Color-coded bars stay consistent across modes making pattern recognition faster.",
+            "Percent labels flatten seasonal swings for easier communication with partners.",
+            "Tie the insights back to referral patterns when negotiating co-responder coverage.",
+        ],
+        "callout": "Aim for no weekday exceeding 22% of encounters without a matching staffing plan.",
+    },
+    {
+        "eyebrow": "Next steps",
+        "title": "Close the loop between demand and supply",
+        "lede": (
+            "Normalized encounter types clarify where CPMs spend field time, helping you brief partners and align ancillary services."
+        ),
+        "bullets": [
+            "Large Other or Unknown slices should trigger documentation refreshers.",
+            "Publish percent contributions in weekly standups to rally cross-functional teams.",
+            "Capture questions inline in the dashboard so analysts can iterate quickly.",
+        ],
+        "callout": "Layer these findings into the monthly operations memo alongside patient trends.",
+    },
+]
+
+
+def _load_encounters_dataframe() -> pd.DataFrame:
+    fields = [
+        "encounter_date",
+        "pcp_agency",
+        "encounter_type_cat1",
+        "encounter_type_cat2",
+        "encounter_type_cat3",
+    ]
+    try:
+        values = list(Encounters.objects.all().values(*fields))
+    except Exception:
+        values = []
+    df = _df_from_queryset(values, fields)
+    if "encounter_date" in df.columns:
+        df["encounter_date"] = pd.to_datetime(df["encounter_date"], errors="coerce")
+    return df
+
+
+def _ordered_encounter_fields(df: pd.DataFrame) -> list[str]:
+    fields = ["encounters_counts_monthly", "encounters_counts_weekday"]
+    for field in [
+        "pcp_agency",
+        "encounter_type_cat1",
+        "encounter_type_cat2",
+        "encounter_type_cat3",
+    ]:
+        if field in df.columns:
+            fields.append(field)
+    return fields
+
+
+def _encounters_monthly_insights(dates: pd.Series) -> list[dict[str, object]]:
+    monthly_counts = (
+        dates.dt.to_period("M").value_counts().sort_index()
+        if not dates.empty
+        else pd.Series(dtype="int64")
+    )
+    if monthly_counts.empty:
+        return []
+    latest_period = monthly_counts.index[-1]
+    latest_count = _to_int(monthly_counts.iloc[-1])
+    latest_label = latest_period.to_timestamp().strftime("%b %Y")
+
+    items: list[dict[str, object]] = [
+        {"label": "Most recent month", "value": f"{latest_label} — {latest_count}"},
+    ]
+
+    if len(monthly_counts) >= 2:
+        prev_count = _to_int(monthly_counts.iloc[-2])
+        delta = latest_count - prev_count
+        delta_pct = _pct(delta, prev_count) if prev_count else 0.0
+        items.append({"label": "Month-over-month", "value": f"{delta:+d} ({delta_pct:+.1f}%)"})
+
+    yoy_period = latest_period - 12
+    yoy_value = monthly_counts.get(yoy_period)
+    if yoy_value is not None and not pd.isna(yoy_value):
+        yoy_count = _to_int(yoy_value)
+        yoy_delta = latest_count - yoy_count
+        yoy_pct = _pct(yoy_delta, yoy_count) if yoy_count else 0.0
+        items.append({"label": "Year-over-year", "value": f"{yoy_delta:+d} ({yoy_pct:+.1f}%)"})
+
+    trailing_12 = _to_int(monthly_counts.tail(12).sum())
+    items.append({"label": "Trailing 12 months", "value": trailing_12})
+
+    return items
+
+
+def _encounters_weekday_insights(dates: pd.Series) -> list[dict[str, object]]:
+    weekdays = dates.dt.day_name()
+    if weekdays.empty:
+        return []
+    weekday_counts = weekdays.value_counts()
+    total = _to_int(weekday_counts.sum())
+    if total == 0:
+        return []
+    items: list[dict[str, object]] = []
+    top_day = str(weekday_counts.idxmax())
+    top_share = _pct(_to_int(weekday_counts.max()), total)
+    items.append({"label": "Busiest day", "value": f"{top_day} ({top_share:.1f}%)"})
+    weekend_total = _to_int(weekday_counts.get("Saturday", 0)) + _to_int(
+        weekday_counts.get("Sunday", 0)
+    )
+    weekend_share = _pct(weekend_total, total)
+    items.append({"label": "Weekend share", "value": f"{weekend_share:.1f}% of encounters"})
+    return items
+
+
+def _build_encounters_chart_insights(df_all: pd.DataFrame) -> dict[str, list[dict[str, object]]]:
+    if df_all.empty:
+        return {}
+
+    insights: dict[str, list[dict[str, object]]] = {}
+
+    if "encounter_date" in df_all.columns:
+        dates = pd.to_datetime(df_all["encounter_date"], errors="coerce").dropna()
+        if not dates.empty:
+            monthly_items = _encounters_monthly_insights(dates)
+            if monthly_items:
+                insights["encounters_counts_monthly"] = monthly_items
+            weekday_items = _encounters_weekday_insights(dates)
+            if weekday_items:
+                insights["encounters_counts_weekday"] = weekday_items
+
+    for field, label in [
+        ("pcp_agency", "PCP Agency"),
+        ("encounter_type_cat1", "Encounter Type (Primary)"),
+        ("encounter_type_cat2", "Encounter Type (Secondary)"),
+        ("encounter_type_cat3", "Encounter Type (Tertiary)"),
+    ]:
+        tips = _insights_categorical(df_all, field, label)
+        if tips:
+            insights[field] = tips
+
+    return insights
+
+
 def encounters(request):
-    return render(request, "dashboard/encounters.html")
+    theme = get_theme_from_request(request)
+    df_all = _load_encounters_dataframe()
+    ordered_fields = _ordered_encounter_fields(df_all)
+
+    chart_cards = [
+        {
+            "field": field,
+            "label": ENCOUNTERS_LABEL_MAP.get(field, field.replace("_", " ").title()),
+            "col_span": 1 if field in ENCOUNTERS_SINGLE_COLUMN_FIELDS else 2,
+        }
+        for field in ordered_fields
+    ]
+
+    context = {
+        "chart_cards": chart_cards,
+        "theme": theme,
+        "story_cards": ENCOUNTERS_STORY_CARDS,
+    }
+    updated_on = date(2025, 10, 17)
+    context.update(
+        {
+            "page_header_updated_at": updated_on,
+            "page_header_updated_at_iso": updated_on.isoformat(),
+            "page_header_read_time": "7 min read",
+        }
+    )
+    return render(request, "dashboard/encounters.html", context)
 
 
 @login_required
@@ -2563,3 +3787,47 @@ def user_profile(request):
 
 def authentication(request):
     return render(request, "dashboard/authentication.html")
+
+
+@login_required
+def age_chart_variations_demo(request):
+    """Demo view to compare all 5 enhanced age chart variations."""
+    theme = get_theme_from_request(request)
+    variations = build_all_age_chart_variations(theme)
+
+    context = {
+        "theme": theme,
+        "variations": [
+            {
+                "key": "option_a_annotated",
+                "title": "Option A: Annotated Bar Chart",
+                "description": "Enhanced with benchmark lines, target zones, and contextual insights",
+                "html": variations["option_a_annotated"],
+            },
+            {
+                "key": "option_b_pyramid",
+                "title": "Option B: Population Pyramid",
+                "description": "Gender comparison with mirrored horizontal bars",
+                "html": variations["option_b_pyramid"],
+            },
+            {
+                "key": "option_c_small_multiples",
+                "title": "Option C: Small Multiples (Temporal)",
+                "description": "Side-by-side comparison across time periods with trend indicators",
+                "html": variations["option_c_small_multiples"],
+            },
+            {
+                "key": "option_d_sankey",
+                "title": "Option D: Sankey Flow Diagram",
+                "description": "Visual flow from age groups to service pathways",
+                "html": variations["option_d_sankey"],
+            },
+            {
+                "key": "option_e_combination",
+                "title": "Option E: Combination Chart",
+                "description": "Bars for counts with cumulative percentage line overlay",
+                "html": variations["option_e_combination"],
+            },
+        ],
+    }
+    return render(request, "dashboard/age_chart_variations_demo.html", context)
