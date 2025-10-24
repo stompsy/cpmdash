@@ -33,7 +33,7 @@ jobs:
             - name: Lint & format
               run: uv run ruff check && uv run ruff format --check
             - name: Type check
-              run: uv run mypy
+              run: uv run mypy src
             - name: Migration check
               run: uv run python src/manage.py makemigrations --check --dry-run
             - name: Tests
