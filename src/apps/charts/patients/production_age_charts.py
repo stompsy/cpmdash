@@ -420,7 +420,9 @@ def build_enhanced_age_referral_sankey(theme: str) -> str:  # noqa: C901
 
     # Count flows from age category to referral type
     flow_counts = (
-        df_merged.groupby(["age_category", "normalized_type"]).size().reset_index(name="count")
+        df_merged.groupby(["age_category", "normalized_type"], observed=False)
+        .size()
+        .reset_index(name="count")
     )
 
     # Remove flows with missing age category
