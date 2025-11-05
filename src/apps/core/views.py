@@ -23,3 +23,18 @@ def overview(request: HttpRequest) -> HttpResponse:
         "page_header_read_time": "6 min read",
     }
     return render(request, "core/overview.html", context)
+
+
+def privacy(request: HttpRequest) -> HttpResponse:
+    """Privacy policy page."""
+    return render(request, "core/privacy.html")
+
+
+def terms(request: HttpRequest) -> HttpResponse:
+    """Terms of service page."""
+    return render(request, "core/terms.html")
+
+
+def accessibility(request: HttpRequest) -> HttpResponse:
+    """Accessibility statement page."""
+    return render(request, "core/accessibility.html")

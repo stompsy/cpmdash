@@ -5,54 +5,917 @@
 {% block title %}Overdose Referrals — Operational Insights{% endblock title %}
 
 {% block page_header %}
-    {% static 'media/pafd_cpm.jpg' as odreferrals_header_image %}
+    {% static 'media/20251028-IMG_20251101_085310.png' as odreferrals_header_image %}
     {% with eyebrow="Program overviews" title="Overdose referral overview" description="Examine when overdose referrals arrive, who sends them, and how CPM teams respond so you can coordinate partners, plan outreach, and monitor harm-reduction impact." image_src=odreferrals_header_image image_alt="Community paramedic team reviewing overdose response plan" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
         {% include "partials/page_header.html" %}
     {% endwith %}
 {% endblock page_header %}
 
 {% block content %}
-    <div class="col-span-12 mx-auto mt-16 w-full max-w-7xl">
+    <div class="col-span-12 mx-auto w-full max-w-7xl">
         <span data-page-name="od-referrals-overview" class="hidden" hidden></span>
-        {% include "dashboard/partials/story_cards.html" with story_cards=story_cards %}
-        <div class="grid grid-cols-1 gap-20 md:grid-cols-2">
+
+        {# PORT Introduction Section #}
+        <section class="mb-16 mt-12">
+            <p class="text-base leading-7 text-gray-700 dark:text-slate-300 sm:text-lg">
+                Every overdose referral represents an <span class="font-semibold text-gray-900 dark:text-white">opportunity to save a life</span>. By analyzing <span class="font-semibold text-gray-900 dark:text-white">referral patterns</span>, <span class="font-semibold text-gray-900 dark:text-white">sources</span>, and <span class="font-semibold text-gray-900 dark:text-white">outcomes</span>, we can optimize our <span class="font-semibold text-gray-900 dark:text-white">response strategies</span>, strengthen <span class="font-semibold text-gray-900 dark:text-white">partnerships</span>, and ensure that no call for help goes unanswered.
+            </p>
+
+            {# Key benefits list #}
+            <dl class="mt-10 space-y-6">
+                {# Rapid Response Impact #}
+                <div class="relative pl-8">
+                    <dt class="inline font-semibold text-gray-900 dark:text-white">
+                        <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
+                        Rapid Response Impact.
+                    </dt>
+                    <dd class="inline text-gray-600 dark:text-slate-400"> In the 12 months following PORT's launch, fatal overdose rates in Clallam County dropped 63%, from 73.3 to 34.8 per 100,000 population—demonstrating the power of immediate intervention.</dd>
+                </div>
+
+                {# Partnership Networks #}
+                <div class="relative pl-8">
+                    <dt class="inline font-semibold text-gray-900 dark:text-white">
+                        <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
+                        Partnership Networks.
+                    </dt>
+                    <dd class="inline text-gray-600 dark:text-slate-400"> Understanding which agencies refer cases helps us strengthen partnerships and ensure coordinated care across the entire safety net, building stronger community connections.</dd>
+                </div>
+            </dl>
+        </section>
+
+        {# Section Divider + Heading #}
+        <div class="relative mt-20 mb-12">
+            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                <div class="w-full border-t border-slate-300/70 dark:border-slate-700/70"></div>
+            </div>
+            <div class="relative flex justify-start">
+                <div class="bg-white pr-8 dark:bg-gray-900">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 shadow-lg shadow-rose-500/30">
+                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Data Distributions</h2>
+                            <p class="text-sm text-gray-600 dark:text-slate-400">Field-level analysis across all overdose referral records</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Charts Grid #}
+        <div class="grid grid-cols-1 gap-8 mb-16 lg:grid-cols-2 lg:gap-10">
             {% if chart_cards %}
                 {% for card in chart_cards %}
-                    <div class="md:col-span-{{ card.col_span }}">
-                        <div
+                    <div class="{% if card.col_span == 2 %}lg:col-span-2{% endif %}">
+                        <article
                             id="odreferral-chart-{{ card.field }}"
-                            class="space-y-6 px-6 sm:px-10 lg:px-16"
+                            class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80"
                             hx-get="{% url 'dashboard:odreferrals_chart_fragment' card.field %}"
                             hx-trigger="load"
                             hx-target="this"
                             hx-swap="outerHTML"
                             aria-busy="true"
                         >
-                            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                <div>
-                                    <p class="text-[10px] font-semibold uppercase tracking-[0.32em] text-indigo-500 dark:text-brand-200/80">OD Referrals</p>
-                                    <h3 class="mt-2 text-xl sm:text-2xl font-semibold text-gray-900 dark:text-slate-100">{{ card.label }}</h3>
+                            {# Card Header #}
+                            <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-100 ring-4 ring-rose-50 dark:bg-rose-500/20 dark:ring-rose-900/30">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-rose-600 dark:text-rose-400">
+                                                <path d="M3.75 3A.75.75 0 0 1 4.5 2.25h15a.75.75 0 0 1 0 1.5H4.5A.75.75 0 0 1 3.75 3Zm2 3A.75.75 0 0 1 6.5 5.25h11a.75.75 0 0 1 0 1.5h-11A.75.75 0 0 1 5.75 6Zm-2 12a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v2a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-2Zm6-6a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v8a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-8Zm6-4a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v12a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75V8.25Z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-rose-600/80 dark:text-rose-400/80">OD Referrals</p>
+                                            <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">{{ card.label }}</h3>
+                                        </div>
+                                    </div>
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
                                 </div>
-                                <div class="text-gray-400/80 dark:text-slate-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 opacity-60"><path d="M3.75 3A.75.75 0 0 1 4.5 2.25h15a.75.75 0 0 1 0 1.5H4.5A.75.75 0 0 1 3.75 3Zm2 3A.75.75 0 0 1 6.5 5.25h11a.75.75 0 0 1 0 1.5h-11A.75.75 0 0 1 5.75 6Zm-2 12a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v2a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-2Zm6-6a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v8a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75v-8Zm6-4a.75.75 0 0 1 .75-.75h2a.75.75 0 0 1 .75.75v12a.75.75 0 0 1-.75.75h-2a.75.75 0 0 1-.75-.75V8.25Z"/></svg>
+                            </div>
+
+                            {# Chart Loading State #}
+                            <div class="p-6 sm:p-8">
+                                <div class="relative">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="flex flex-col items-center gap-3">
+                                            <svg class="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <span class="text-sm font-medium text-gray-600 dark:text-slate-400">Loading chart...</span>
+                                        </div>
+                                    </div>
+                                    <div class="h-[22rem] rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800/50 dark:to-slate-900/30"></div>
                                 </div>
                             </div>
-                            <div class="relative">
-                                <div class="h-[22rem] rounded-3xl bg-slate-200/60 dark:bg-slate-800/50 animate-pulse"></div>
+
+                            {# Insights Loading State #}
+                            <div class="border-t border-slate-200/60 bg-slate-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
+                                <div class="space-y-3">
+                                    <div class="h-4 w-1/3 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                    <div class="h-3 w-2/3 animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/70"></div>
+                                    <div class="h-3 w-1/2 animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/70"></div>
+                                </div>
                             </div>
-                            <div class="space-y-3 border-t border-slate-200/50 pt-6 text-xs sm:text-sm text-gray-500 dark:border-slate-700 dark:text-slate-500">
-                                <div class="h-4 w-2/3 rounded bg-slate-200/80 dark:bg-slate-700/60 animate-pulse"></div>
-                                <div class="h-3 w-3/4 rounded bg-slate-200/70 dark:bg-slate-700/50 animate-pulse"></div>
-                                <div class="h-3 w-1/2 rounded bg-slate-200/70 dark:bg-slate-700/50 animate-pulse"></div>
-                            </div>
-                        </div>
+                        </article>
                     </div>
                 {% endfor %}
             {% else %}
-                <div class="md:col-span-2 text-center text-gray-700 dark:text-gray-300">
-                    No overdose referral data available.
+                <div class="lg:col-span-2">
+                    <div class="flex h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50">
+                        <div class="text-center">
+                            <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <p class="mt-4 text-sm font-medium text-gray-700 dark:text-gray-300">No overdose referral data available</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Charts will appear here once data is loaded</p>
+                        </div>
+                    </div>
                 </div>
             {% endif %}
+        </div>
+
+        {# Repeat Overdose Timeline Section #}
+        <section class="mt-20 mb-16">
+            {# Chart Container #}
+            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
+                {# Card Header #}
+                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 ring-4 ring-amber-50 dark:bg-amber-500/20 dark:ring-amber-900/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-amber-600 dark:text-amber-400">
+                                <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0112.548-3.364l1.903 1.903h-3.183a.75.75 0 100 1.5h4.992a.75.75 0 00.75-.75V4.356a.75.75 0 00-1.5 0v3.18l-1.9-1.9A9 9 0 003.306 9.67a.75.75 0 101.45.388zm15.408 3.352a.75.75 0 00-.919.53 7.5 7.5 0 01-12.548 3.364l-1.902-1.903h3.183a.75.75 0 000-1.5H2.984a.75.75 0 00-.75.75v4.992a.75.75 0 001.5 0v-3.18l1.9 1.9a9 9 0 0015.059-4.035.75.75 0 00-.53-.918z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">Patient Overdose Timeline</h3>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">When one reversal isn't enough — tracking repeat overdose patterns</p>
+                        </div>
+                    </div>
+                </div>
+
+                {# Quick Stats - if you have any for repeats, otherwise remove this section #}
+                {# For now, keeping the structure but you can add stats later if needed #}
+
+                {# Narrative Context #}
+                <div class="border-b border-slate-200/60 bg-amber-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-amber-900/5">
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="text-base font-bold uppercase tracking-wide text-amber-900 dark:text-amber-300">The Revolving Door</h4>
+                            <p class="mt-3 text-base leading-7 text-gray-700 dark:text-slate-300">
+                                <span class="font-semibold text-gray-900 dark:text-white">Every repeat overdose represents a missed opportunity.</span> When patients cycle back through the system, it's rarely random — it's a signal. Treatment fell through. Incarceration interrupted continuity. Housing collapsed. A partner relapsed. Maybe we never connected with them in the first place.
+                            </p>
+                        </div>
+                        <p class="text-base leading-7 text-gray-700 dark:text-slate-300">
+                            <span class="font-semibold text-gray-900 dark:text-white">This timeline reveals failure patterns.</span> Clusters show when the system breaks down. Rapid recurrence (days or weeks) suggests immediate post-reversal gaps — no warm handoff, no MAT access, no stable housing. Longer intervals might indicate treatment dropout or life disruption events. Each vertical line is a person we need to reach differently.
+                        </p>
+                    </div>
+                </div>
+
+                {# Chart Content #}
+                <div class="p-6 sm:p-8">
+                    {{ fig_repeats_scatter|safe }}
+                </div>
+
+                {# Footer Insights #}
+                <div class="border-t border-slate-200/60 bg-slate-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
+                    <div class="rounded-lg border border-slate-200/80 bg-white p-5 dark:border-slate-700/60 dark:bg-slate-900/50">
+                        <div class="mb-4 flex items-center gap-2">
+                            <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            <h4 class="text-sm font-bold uppercase tracking-[0.15em] text-gray-900 dark:text-slate-100">What to Do About It</h4>
+                        </div>
+                        <div class="space-y-3 text-base leading-7 text-gray-600 dark:text-slate-400">
+                            <p><span class="font-semibold text-gray-900 dark:text-white">Identify high-frequency patients</span> — those with 3+ overdoses warrant intensive case management, not just episodic response.</p>
+                            <p><span class="font-semibold text-gray-900 dark:text-white">Map time intervals</span> — rapid recurrence suggests acute system gaps. Target immediate post-reversal follow-up within 24-48 hours.</p>
+                            <p><span class="font-semibold text-gray-900 dark:text-white">Coordinate upstream</span> — connect with jails, detox facilities, and SUD providers to maintain continuity when patients transition.</p>
+                            <p><span class="font-semibold text-gray-900 dark:text-white">Build persistent relationships</span> — trust accumulates across encounters. The fifth contact might be the one that sticks.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# Narcan Administration Analysis Section #}
+        <section class="mt-20 mb-16">
+            {# Narcan Analysis Container #}
+            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
+                {# Card Header #}
+                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 ring-4 ring-purple-50 dark:bg-purple-500/20 dark:ring-purple-900/30">
+                            <svg class="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">Administration Comparison</h3>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">The paradigm shift from EMS-first to bystander-first Narcan response</p>
+                        </div>
+                    </div>
+                </div>
+
+                {# Quick Stats Grid #}
+                <div class="border-b border-slate-200/60 bg-slate-50/30 px-6 py-4 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
+                    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                        {% for stat in narcan_stats %}
+                        <div class="group/metric relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50 px-4 py-3 transition-all duration-200 hover:border-purple-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-purple-500/50">
+                            <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-purple-500/5 transition-all duration-300 group-hover/metric:scale-150 dark:bg-purple-400/5"></div>
+                            <div class="relative">
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stat.value }}</p>
+                                <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-slate-400">{{ stat.label }}</p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-slate-500">{{ stat.description }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Narrative Context #}
+                <div class="border-b border-slate-200/60 bg-purple-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-purple-900/5">
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="text-base font-bold uppercase tracking-wide text-purple-900 dark:text-purple-300">How Narcan Changed Everything</h4>
+                            <div class="mt-4 space-y-4">
+                                <div class="flex items-baseline gap-3">
+                                    <div class="shrink-0 font-bold text-sm text-purple-700 dark:text-purple-400">BEFORE HD NARCAN:</div>
+                                    <p class="text-base leading-7 text-gray-700 dark:text-slate-300">
+                                        EMS arrives first → ventilate → establish IV → carefully titrate 0.4mg doses → gradual awakening → transport → treatment advocacy. Engagement window: wide open.
+                                    </p>
+                                </div>
+                                <div class="flex items-baseline gap-3">
+                                    <div class="shrink-0 font-bold text-sm text-purple-700 dark:text-purple-400">HD NARCAN:</div>
+                                    <p class="text-base leading-7 text-gray-700 dark:text-slate-300">
+                                        Bystander gives 4mg spray → patient wakes in precipitated withdrawal → vomiting, agitated, combative → EMS arrives to refusal → no transport. Engagement window: slammed shut.
+                                    </p>
+                                </div>
+                                <div class="flex items-baseline gap-3">
+                                    <div class="shrink-0 font-bold text-sm text-purple-700 dark:text-purple-400">NOW:</div>
+                                    <p class="text-base leading-7 text-gray-700 dark:text-slate-300">
+                                        Bystander gives 4mg spray → patient wakes in precipitated withdrawal → vomiting, agitated, combative → EMS arrives to refusal → no transport. Engagement window: slammed shut.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-base leading-7 italic text-purple-800 dark:text-purple-200 border-l-4 border-purple-400 dark:border-purple-600 pl-4 py-2">
+                            Widespread Narcan distribution saves lives immediately, but fundamentally alters the care continuum.
+                        </p>
+                    </div>
+                </div>
+
+                {# Charts Section #}
+                <div class="p-6 sm:p-8">
+                    {{ narcan_grid_chart|safe }}
+
+                    {# Timeline Chart #}
+                    {% if narcan_timeline_chart %}
+                    <div class="mt-8 border-t border-slate-200/60 pt-8 dark:border-slate-700/50">
+                        <h4 class="mb-4 text-base font-semibold text-gray-900 dark:text-white">Temporal Evolution: When Did the Shift Happen?</h4>
+                        {{ narcan_timeline_chart|safe }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {# Footer Insights #}
+                <div class="border-t border-slate-200/60 bg-slate-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
+                    <div class="rounded-lg border border-slate-200/80 bg-white p-5 dark:border-slate-700/60 dark:bg-slate-900/50">
+                        <div class="mb-4 flex items-center gap-2">
+                            <svg class="h-5 w-5 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            <h4 class="text-sm font-bold uppercase tracking-[0.15em] text-gray-900 dark:text-slate-100">Adapting Your Response Strategy</h4>
+                        </div>
+                        <div class="space-y-3 text-base leading-7 text-gray-600 dark:text-slate-400">
+                            <p><span class="font-semibold text-gray-900 dark:text-white">Accept the new reality:</span> High-dose bystander Narcan isn't going away. Patients will be in withdrawal when you arrive. Plan for it.</p>
+                            <p><span class="font-semibold text-gray-900 dark:text-white">Shift to post-reversal follow-up:</span> If you can't engage at the scene, build a 24-48 hour follow-up protocol. Catch them when withdrawal subsides.</p>
+                            <p><span class="font-semibold text-gray-900 dark:text-white">Partner with distributors:</span> Work with needle exchanges and harm reduction orgs to teach optimal dosing (start low, go slow when possible).</p>
+                            <p><span class="font-semibold text-gray-900 dark:text-white">Track refusal patterns:</span> Correlate bystander-first cases with transport refusals to quantify the engagement gap and justify CPM follow-up resources.</p>
+                            <p><span class="font-semibold text-gray-900 dark:text-white">Build trust over time:</span> Accept that first contact post-withdrawal will be rocky. The relationship accumulates across encounters.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# Overdose Hotspots Section #}
+        <section class="mt-20 mb-16">
+            {# Section Divider + Heading #}
+            <div class="relative mb-12">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-slate-300/70 dark:border-slate-700/70"></div>
+                </div>
+                <div class="relative flex justify-start">
+                    <div class="bg-white pr-8 dark:bg-gray-900">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-lg shadow-red-500/30">
+                                <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                    <path d="M10 2a6 6 0 0 0-6 6c0 4.122 4.252 9.036 5.624 10.576a.5.5 0 0 0 .752 0C11.748 17.036 16 12.122 16 8a6 6 0 0 0-6-6Zm0 8.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Overdose Hotspots</h2>
+                                <p class="text-sm text-gray-600 dark:text-slate-400">Geographic clustering and density analysis</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if hotspot_stats.total %}
+                {# Hotspot Map Container #}
+                <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
+                    {# Map Header #}
+                    <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-4 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
+                        <div class="flex items-center justify-between gap-3">
+                            {# Title Section #}
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 ring-4 ring-red-50 dark:bg-red-500/20 dark:ring-red-900/30">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-red-600 dark:text-red-400">
+                                        <path fill-rule="evenodd" d="M8.161 2.58a1.875 1.875 0 0 1 1.678 0l4.993 2.498c.106.052.23.052.336 0l3.869-1.935A1.875 1.875 0 0 1 21.75 4.82v12.485c0 .71-.401 1.36-1.037 1.677l-4.875 2.437a1.875 1.875 0 0 1-1.676 0l-4.994-2.497a.375.375 0 0 0-.336 0l-3.868 1.935A1.875 1.875 0 0 1 2.25 19.18V6.695c0-.71.401-1.36 1.036-1.677l4.875-2.437ZM9 6a.75.75 0 0 1 .75.75V15a.75.75 0 0 1-1.5 0V6.75A.75.75 0 0 1 9 6Zm6.75 3a.75.75 0 0 0-1.5 0v8.25a.75.75 0 0 0 1.5 0V9Z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">Interactive Hotspot Map</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Quick Stats Bar - Styled like story sections key metrics #}
+                    <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/30 to-transparent px-6 py-4 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/20">
+                        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                            <div class="group/metric relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-4 py-3 transition-all duration-200 hover:border-red-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-red-500/50">
+                                <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-red-500/5 transition-all duration-300 group-hover/metric:scale-150 dark:bg-red-400/5"></div>
+                                <div class="relative flex items-center gap-3">
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ hotspot_stats.total }}</p>
+                                    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-slate-400">Mapped</p>
+                                </div>
+                            </div>
+                            <div class="group/metric relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-4 py-3 transition-all duration-200 hover:border-red-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-red-500/50">
+                                <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-red-500/5 transition-all duration-300 group-hover/metric:scale-150 dark:bg-red-400/5"></div>
+                                <div class="relative flex items-center gap-3">
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ hotspot_stats.fatal_pct }}<span class="text-base">%</span></p>
+                                    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-slate-400">Fatal</p>
+                                </div>
+                            </div>
+                            <div class="group/metric relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-4 py-3 transition-all duration-200 hover:border-red-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-red-500/50">
+                                <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-red-500/5 transition-all duration-300 group-hover/metric:scale-150 dark:bg-red-400/5"></div>
+                                <div class="relative flex items-center gap-3">
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ hotspot_stats.unique_locations }}</p>
+                                    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-slate-400">Locations</p>
+                                </div>
+                            </div>
+                            <div class="group/metric relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-4 py-3 transition-all duration-200 hover:border-red-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-red-500/50">
+                                <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-red-500/5 transition-all duration-300 group-hover/metric:scale-150 dark:bg-red-400/5"></div>
+                                <div class="relative flex items-center gap-3">
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ hotspot_stats.weekend_pct }}<span class="text-base">%</span></p>
+                                    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-slate-400">Weekend</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Map Content #}
+                    <div class="p-0">
+                        {{ fig_od_map|safe }}
+                    </div>
+
+                    {# Map Footer #}
+                    <div class="border-t border-slate-200/60 bg-slate-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
+                        <div class="rounded-lg border border-slate-200/80 bg-white p-4 dark:border-slate-700/60 dark:bg-slate-900/50">
+                            <div class="mb-2 flex items-center gap-2">
+                                <svg class="h-4 w-4 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                                <h4 class="text-xs font-bold uppercase tracking-[0.15em] text-gray-900 dark:text-slate-100">Chart Description</h4>
+                            </div>
+                            <p class="text-sm leading-6 text-gray-600 dark:text-slate-400">
+                                Hotspot analysis combines geospatial clustering with outcome markers to help prioritize outreach, naloxone distribution, and partner engagement. {{ hotspot_stats.unique_locations }} unique locations with the top address representing {{ hotspot_stats.top_location_share }}% of responses.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                {# No Data State #}
+                <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
+                    <div class="p-12 text-center text-gray-600 dark:text-gray-300">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                        <p class="mt-4 text-lg font-medium">No geocoded overdose data available</p>
+                        <p class="mt-2 text-sm">Add latitude and longitude to OD referrals to unlock hotspot analysis.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+
+    {# OD Referrals by Weekday Modal #}
+    <div
+        id="od-weekday-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+        onclick="if(event.target === this) this.classList.add('hidden')"
+    >
+        <div class="flex min-h-screen items-start justify-center overflow-y-auto p-4 pt-8 sm:p-6 sm:pt-12 lg:p-8 lg:pt-16">
+            <div
+                class="relative w-full max-w-7xl animate-in fade-in zoom-in-95 duration-300"
+                onclick="event.stopPropagation()"
+            >
+                {# Modal Container with Header Bar #}
+                <div class="overflow-hidden rounded-2xl border-4 border-white/20 bg-white shadow-2xl ring-1 ring-black/5 dark:border-slate-700/50 dark:bg-slate-900 dark:shadow-slate-950/50 dark:ring-white/10">
+
+                    {# Header Bar with Close Button #}
+                    <div class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/50 px-6 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800/50">
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
+                            Overdose Referrals by Day of Week
+                        </h2>
+                        <button
+                            type="button"
+                            class="group/close relative inline-flex items-center gap-2.5 overflow-hidden rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:scale-[0.98] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700 dark:focus:ring-slate-500 dark:focus:ring-offset-slate-900"
+                            onclick="document.getElementById('od-weekday-modal-overlay').classList.add('hidden')"
+                            aria-label="Close modal"
+                        >
+                            <svg class="h-4 w-4 transition-transform duration-300 group-hover/close:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <span class="relative font-medium">Close</span>
+                            <span class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-100 to-slate-200 opacity-0 transition-opacity duration-300 group-hover/close:opacity-100 dark:from-slate-700 dark:to-slate-600"></span>
+                        </button>
+                    </div>
+
+                    {# Modal Content #}
+                    <div id="od-weekday-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# OD Referral Source Modal #}
+    <div
+        id="od-referral-source-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+        onclick="if(event.target === this) this.classList.add('hidden')"
+    >
+        <div class="flex min-h-screen items-start justify-center overflow-y-auto p-4 pt-8 sm:p-6 sm:pt-12 lg:p-8 lg:pt-16">
+            <div
+                class="relative w-full max-w-7xl animate-in fade-in zoom-in-95 duration-300"
+                onclick="event.stopPropagation()"
+            >
+                {# Modal Container with Header Bar #}
+                <div class="overflow-hidden rounded-2xl border-4 border-white/20 bg-white shadow-2xl ring-1 ring-black/5 dark:border-slate-700/50 dark:bg-slate-900 dark:shadow-slate-950/50 dark:ring-white/10">
+
+                    {# Header Bar with Close Button #}
+                    <div class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/50 px-6 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800/50">
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
+                            Referral Source Analysis
+                        </h2>
+                        <button
+                            type="button"
+                            class="group/close relative inline-flex items-center gap-2.5 overflow-hidden rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:scale-[0.98] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700 dark:focus:ring-slate-500 dark:focus:ring-offset-slate-900"
+                            onclick="document.getElementById('od-referral-source-modal-overlay').classList.add('hidden')"
+                            aria-label="Close modal"
+                        >
+                            <svg class="h-4 w-4 transition-transform duration-300 group-hover/close:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <span class="relative font-medium">Close</span>
+                            <span class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-100 to-slate-200 opacity-0 transition-opacity duration-300 group-hover/close:opacity-100 dark:from-slate-700 dark:to-slate-600"></span>
+                        </button>
+                    </div>
+
+                    {# Modal Content #}
+                    <div id="od-referral-source-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Suspected Drug Modal #}
+    <div
+        id="od-suspected-drug-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        Suspected Substance Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-suspected-drug-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-suspected-drug-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# CPM Disposition Modal #}
+    <div
+        id="od-cpm-disposition-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        CPM Disposition Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-cpm-disposition-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-cpm-disposition-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Living Situation Modal #}
+    <div
+        id="od-living-situation-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        Living Situation Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-living-situation-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-living-situation-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Engagement Location Modal #}
+    <div
+        id="od-engagement-location-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        Engagement Location Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-engagement-location-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-engagement-location-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# SUD Referral Modal #}
+    <div
+        id="od-sud-referral-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        SUD Referral Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-sud-referral-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-sud-referral-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Narcan Administered Modal #}
+    <div
+        id="od-narcan-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        Narcan Administration Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-narcan-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-narcan-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Referral Delay Modal #}
+    <div
+        id="od-referral-delay-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        Referral Delay Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-referral-delay-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-referral-delay-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# CPM Notification Modal #}
+    <div
+        id="od-cpm-notification-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        CPM Notification Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-cpm-notification-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-cpm-notification-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Scene Responders Modal #}
+    <div
+        id="od-scene-responders-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        Scene Responder Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-scene-responders-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-scene-responders-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# CPR Administered Modal #}
+    <div
+        id="od-cpr-administered-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        CPR Administration Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-cpr-administered-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-cpr-administered-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Police ITA Modal #}
+    <div
+        id="od-police-ita-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        Police ITA Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-police-ita-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-police-ita-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Disposition Modal #}
+    <div
+        id="od-disposition-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        Disposition Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-disposition-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-disposition-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Transport Modal #}
+    <div
+        id="od-transport-modal-overlay"
+        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
+    >
+        <div class="flex h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-7xl animate-fade-in-zoom rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 sm:px-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                        Transport Analysis
+                    </h2>
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        onclick="document.getElementById('od-transport-modal-overlay').classList.add('hidden')"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {# Modal Content #}
+                    <div id="od-transport-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                        {# Content will be loaded here via HTMX #}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock content %}

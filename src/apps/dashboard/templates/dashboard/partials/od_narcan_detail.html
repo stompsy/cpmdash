@@ -1,0 +1,81 @@
+{# Narcan Administered Detail Modal Content #}
+<div class="p-6 sm:p-8">
+    {# Header - Full Width #}
+    <div class="mb-6">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-100 ring-4 ring-rose-50 dark:bg-rose-500/20 dark:ring-rose-900/30">
+                <svg class="h-5 w-5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Narcan Administration Analysis</h3>
+            </div>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-slate-400 ml-13">Tracking life-saving naloxone interventions</p>
+    </div>
+
+    {# Quick Stats Grid - Full Width #}
+    {% if narcan_stats %}
+    <div class="mb-8">
+        <h4 class="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-rose-600 dark:text-rose-400">Key Metrics</h4>
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {% for stat in narcan_stats %}
+                <div class="group/metric relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-4 py-3 transition-all duration-200 hover:border-rose-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-rose-500/50">
+                    <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-rose-500/5 transition-all duration-300 group-hover/metric:scale-150 dark:bg-rose-400/5"></div>
+                    <div class="relative">
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stat.value }}</p>
+                        <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-slate-400">{{ stat.label }}</p>
+                        <p class="mt-1 text-xs text-gray-600 dark:text-slate-400">{{ stat.description }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {# Chart and Insights Layout - Wider Chart, Narrower Insights #}
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-start">
+        {# Chart - Takes 3 columns on large screens (60%) #}
+        <div class="lg:col-span-3">
+            <h4 class="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-rose-600 dark:text-rose-400">Administration Distribution</h4>
+            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800/50 flex items-center justify-center">
+                <div class="plotly-chart-wrapper relative w-full overflow-hidden rounded-xl">
+                    {% autoescape off %}{{ narcan_chart|safe }}{% endautoescape %}
+                </div>
+            </div>
+        </div>
+
+        {# Strategic Insights - Takes 2 columns on large screens (40%) #}
+        <div class="lg:col-span-2">
+            <h4 class="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-rose-600 dark:text-rose-400">Strategic Insights</h4>
+            <div class="rounded-xl border border-slate-200 bg-gradient-to-br from-rose-50 to-white p-6 dark:border-slate-700 dark:from-rose-900/20 dark:to-slate-800/50 flex flex-col">
+                <div class="flex items-start gap-3">
+                    <svg class="h-5 w-5 mt-0.5 shrink-0 text-rose-600 dark:text-rose-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                    <div>
+                        <h5 class="font-semibold text-gray-900 dark:text-white mb-3">Why This Matters</h5>
+                        <div class="space-y-3 text-sm leading-relaxed text-gray-600 dark:text-slate-400">
+                            <p>
+                                <strong>Life-Saving Intervention:</strong> Naloxone (Narcan) is an FDA-approved opioid antagonist that rapidly reverses overdose by blocking opioid receptors. Administration rates measure your team's preparedness and response effectiveness in critical moments. High administration rates indicate proactive emergency response and proper equipment deployment.
+                            </p>
+                            <p>
+                                <strong>Fatal Outcome Context:</strong> Comparing fatal cases with/without narcan administration reveals critical insights: Did we reach them in time? Was naloxone available on scene? Were there multiple doses needed? Fatal cases where narcan was administered suggest either severe poly-substance toxicity, delayed response, or insufficient dosing. Fatal cases without narcan point to gaps in first-responder naloxone availability or training.
+                            </p>
+                            <p>
+                                <strong>Protocol Effectiveness:</strong> The percentage of cases receiving narcan reflects both overdose severity recognition and responder confidence in administering the medication. Low administration rates despite known overdoses may indicate training needs, equipment shortages, or protocol barriers. High rates demonstrate a prepared, responsive system.
+                            </p>
+                            <p>
+                                <strong>Community Distribution:</strong> Beyond CPM team administration, tracking narcan distribution to community members (take-home kits, public access programs) multiplies your life-saving reach. Bystander administration often occurs before professional responders arrive—the crucial first minutes that determine survival.
+                            </p>
+                            <p class="pt-2 border-t border-slate-200 dark:border-slate-700">
+                                <strong>Action Items:</strong> Ensure all responders carry naloxone, provide regular hands-on training, expand community distribution programs, analyze fatal cases for response time and dosing adequacy, and advocate for increased naloxone access at all levels of care.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

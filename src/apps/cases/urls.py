@@ -8,7 +8,6 @@ from .views import (
     htmx_hourly_breakdown_chart,
     htmx_shift_scenarios_chart,
     opshield,
-    repeatods,
     shiftcoverage,
     timeline,
 )
@@ -20,7 +19,6 @@ urlpatterns = [
     # Alias for tests and backward-compatibility
     path("opshield/", opshield, name="opshield"),
     path("cases/", cases, name="odreferrals"),
-    path("repeats/", repeatods, name="repeatods"),
     path("shiftcoverage/", shiftcoverage, name="shiftcoverage"),
     path("costsavings/", costsavings, name="costsavings"),
     path("timeline/", timeline, name="timeline"),

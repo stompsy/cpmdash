@@ -39,7 +39,9 @@ class CaseStudyListView(ListView):
         return qs
 
     def get_template_names(self) -> list[str]:
-        if self.request.headers.get("HX-Request") == "true":
+        # Only use partial template for pagination (load more button)
+        # Not for initial HTMX navigation from sidebar
+        if self.request.headers.get("HX-Request") == "true" and self.request.GET.get("page"):
             return ["blog/_cards.html"]
         template_name = self.template_name or "blog/list.html"
         return [template_name]
@@ -57,14 +59,21 @@ class CaseStudyListView(ListView):
         ordered_qs = cast(QuerySet[Tag], cast(Any, annotated_qs).order_by("-case_count", "name"))
         ctx["popular_tags"] = cast(list[Tag], list(ordered_qs[:6]))
         ctx["active_tag"] = self.request.GET.get("tag", "")
-        updated_on = date(2025, 1, 30)
+        updated_on = date(2025, 10, 27)
         ctx.update(
             {
                 "page_header_updated_at": updated_on,
                 "page_header_updated_at_iso": updated_on.isoformat(),
-                "page_header_read_time": "9 min read",
             }
         )
+
+        # Add "Create new case study" button for authenticated users with permission
+        if self.request.user.is_authenticated and cast(Any, self.request.user).has_perm(
+            "blog.add_casestudy"
+        ):
+            ctx["primary_cta_label"] = "Create new case study"
+            ctx["primary_cta_url"] = reverse_lazy("blog:create")
+
         return ctx
 
 

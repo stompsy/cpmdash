@@ -1,7 +1,7 @@
-<article class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50" aria-busy="false">
+<article class="relative flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50" aria-busy="false">
     {# Card Header #}
-    <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
-        <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+    <div class="shrink-0 border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
+        <div class="flex items-center justify-between gap-3">
             {# Title Section #}
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 ring-4 ring-indigo-50 dark:bg-indigo-500/20 dark:ring-indigo-900/30">
@@ -13,40 +13,283 @@
                     <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">{{ item.label }}</h3>
                 </div>
             </div>
+        </div>
+    </div>
 
-            {# Quick Stats - Minimalist Inline Design #}
-            {% if item.quick_stats %}
-                <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
-                    {% for stat in item.quick_stats %}
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ stat.value }}</span>
-                            <span class="text-xs font-medium text-gray-500 dark:text-slate-400">{{ stat.label }}</span>
+    {# Quick Stats Bar - Styled like story sections key metrics #}
+    {% if item.quick_stats %}
+        <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/30 to-transparent px-6 py-4 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/20">
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {% for stat in item.quick_stats %}
+                    <div class="group/metric relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-4 py-3 transition-all duration-200 hover:border-indigo-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-indigo-500/50">
+                        <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-indigo-500/5 transition-all duration-300 group-hover/metric:scale-150 dark:bg-indigo-400/5"></div>
+                        <div class="relative flex items-center gap-3">
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stat.value }}</p>
+                            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-slate-400">{{ stat.label }}</p>
                         </div>
-                    {% endfor %}
-                    <div class="h-6 w-px bg-slate-300 dark:bg-slate-600"></div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# Insights Actions Section #}
+        <div class="border-b border-slate-200/60 bg-gradient-to-r from-indigo-50/30 to-transparent px-6 py-4 sm:px-8 dark:border-slate-700/50 dark:from-indigo-900/10">
+            <div class="space-y-4">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600 dark:text-indigo-400">Deep Dive</h4>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">Explore detailed breakdowns and insights</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {% if item.field == 'patient_counts_quarterly' %}
                     <button
                         type="button"
-                        class="group/btn relative inline-flex items-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:from-indigo-700 hover:to-indigo-800 hover:shadow-lg hover:shadow-indigo-500/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:scale-95 dark:from-indigo-500 dark:to-indigo-600 dark:hover:from-indigo-600 dark:hover:to-indigo-700 dark:shadow-indigo-900/30 dark:hover:shadow-indigo-800/50 dark:focus:ring-offset-slate-900"
+                        class="group/btn relative inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:from-indigo-700 hover:to-indigo-800 hover:shadow-lg hover:shadow-indigo-500/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:scale-95 dark:from-indigo-500 dark:to-indigo-600 dark:hover:from-indigo-600 dark:hover:to-indigo-700 dark:shadow-indigo-900/30 dark:hover:shadow-indigo-800/50 dark:focus:ring-offset-slate-900"
                         hx-get="{% url 'dashboard:top_engaged_patients' %}"
                         hx-target="#top-engaged-modal-content"
                         hx-swap="innerHTML"
                         onclick="document.getElementById('top-engaged-modal-overlay').classList.remove('hidden')"
                     >
-                        <span class="relative z-10">Details</span>
+                        <span class="relative z-10">Insights</span>
                         <svg class="relative z-10 h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                         <span class="absolute inset-0 -z-0 bg-gradient-to-r from-indigo-700 to-indigo-800 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100"></span>
                     </button>
+                    {% elif item.field == 'referrals_counts_quarterly' %}
+                    <button
+                        type="button"
+                        class="group/btn relative inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:from-indigo-700 hover:to-indigo-800 hover:shadow-lg hover:shadow-indigo-500/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:scale-95 dark:from-indigo-500 dark:to-indigo-600 dark:hover:from-indigo-600 dark:hover:to-indigo-700 dark:shadow-indigo-900/30 dark:hover:shadow-indigo-800/50 dark:focus:ring-offset-slate-900"
+                        onclick="
+                            document.getElementById('referral-types-modal-overlay').classList.remove('hidden');
+                            fetch('{% url 'dashboard:referral_types_table' %}')
+                                .then(response => response.text())
+                                .then(html => {
+                                    const parser = new DOMParser();
+                                    const doc = parser.parseFromString(html, 'text/html');
+                                    const tableContent = doc.querySelector('#table-content');
+                                    const quickStatContent = doc.querySelector('#quick-stat-content');
+                                    if (tableContent) {
+                                        document.getElementById('referral-types-modal-content').innerHTML = tableContent.innerHTML;
+                                    }
+                                    if (quickStatContent) {
+                                        document.getElementById('referral-types-quick-stat').innerHTML = quickStatContent.innerHTML;
+                                    }
+                                });
+                        "
+                    >
+                        <span class="relative z-10">Referral Types</span>
+                        <svg class="relative z-10 h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                        <span class="absolute inset-0 -z-0 bg-gradient-to-r from-indigo-700 to-indigo-800 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100"></span>
+                    </button>
+                    {% elif item.field == 'odreferrals_counts_monthly' %}
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_weekday_detail' %}"
+                        hx-target="#od-weekday-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-weekday-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="flex-1 text-left">Weekly Patterns</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_referral_source_detail' %}"
+                        hx-target="#od-referral-source-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-referral-source-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="flex-1 text-left">Referral Sources</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_suspected_drug_detail' %}"
+                        hx-target="#od-suspected-drug-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-suspected-drug-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                        <span class="flex-1 text-left">Suspected Substance</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_cpm_disposition_detail' %}"
+                        hx-target="#od-cpm-disposition-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-cpm-disposition-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        <span class="flex-1 text-left">CPM Disposition</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_living_situation_detail' %}"
+                        hx-target="#od-living-situation-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-living-situation-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span class="flex-1 text-left">Living Situation</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_engagement_location_detail' %}"
+                        hx-target="#od-engagement-location-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-engagement-location-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="flex-1 text-left">Engagement Location</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_sud_referral_detail' %}"
+                        hx-target="#od-sud-referral-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-sud-referral-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        <span class="flex-1 text-left">SUD Referrals</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_narcan_detail' %}"
+                        hx-target="#od-narcan-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-narcan-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                        <span class="flex-1 text-left">Narcan Administered</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_referral_delay_detail' %}"
+                        hx-target="#od-referral-delay-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-referral-delay-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="flex-1 text-left">Referral Delays</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_cpm_notification_detail' %}"
+                        hx-target="#od-cpm-notification-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-cpm-notification-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span class="flex-1 text-left">CPM Notification</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_scene_responders_detail' %}"
+                        hx-target="#od-scene-responders-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-scene-responders-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span class="flex-1 text-left">Scene Responders</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_cpr_administered_detail' %}"
+                        hx-target="#od-cpr-administered-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-cpr-administered-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span class="flex-1 text-left">CPR Administered</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_police_ita_detail' %}"
+                        hx-target="#od-police-ita-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-police-ita-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span class="flex-1 text-left">Police ITA</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_disposition_detail' %}"
+                        hx-target="#od-disposition-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-disposition-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <span class="flex-1 text-left">Disposition</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="group relative inline-flex w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-3 text-sm font-semibold text-rose-900 shadow-sm transition-all duration-200 hover:border-rose-300 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-800/50 dark:from-rose-950/30 dark:to-rose-900/20 dark:text-rose-100 dark:hover:border-rose-700 dark:hover:from-rose-900/40 dark:hover:to-rose-800/30 dark:focus:ring-offset-slate-900"
+                        hx-get="{% url 'dashboard:od_transport_detail' %}"
+                        hx-target="#od-transport-modal-content"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('od-transport-modal-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="h-4 w-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span class="flex-1 text-left">Transport</span>
+                    </button>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
         </div>
-    </div>
+    {% endif %}
 
     {# Chart Content #}
-    <div class="p-6 sm:p-8">
+    <div class="flex-grow p-6 sm:p-8">
         {% if item.has_chart %}
-            <div class="plotly-chart-wrapper relative overflow-hidden rounded-xl">
+            <div class="plotly-chart-wrapper relative w-full overflow-hidden rounded-xl">
                 {% autoescape off %}{{ item.chart|safe }}{% endautoescape %}
             </div>
         {% else %}
@@ -63,7 +306,7 @@
     </div>
 
     {# Insights Footer #}
-    <div class="border-t border-slate-200/60 bg-slate-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
+    <div class="mt-auto shrink-0 border-t border-slate-200/60 bg-slate-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
         {% if item.rationale or item.field == 'age' %}
             <div class="rounded-lg border border-slate-200/80 bg-white p-4 dark:border-slate-700/60 dark:bg-slate-900/50">
                 <div class="mb-2 flex items-center gap-2">

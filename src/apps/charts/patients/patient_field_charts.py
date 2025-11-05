@@ -48,7 +48,13 @@ PATIENT_CHART_COLORS = [
 COLOR_SEQUENCE = PATIENT_CHART_COLORS
 
 
-def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, theme: str) -> str:
+def _build_donut_chart(
+    vc_df: pd.DataFrame,
+    label_col: str,
+    value_col: str,
+    theme: str,
+    legend_filter: str | None = None,
+) -> str:
     vc_df = add_share_columns(vc_df, value_col)
     fig = px.pie(
         vc_df,
@@ -61,32 +67,62 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
     fig.update_traces(
         textposition="inside",
         textinfo="percent",
-        textfont=dict(size=14, color="#000000", family="Arial, sans-serif"),
+        textfont=dict(size=16, color="#1e293b", family="Arial, sans-serif"),
         hovertemplate="%{label}<br>%{percent}<extra></extra>",
         insidetextorientation="radial",
-        marker=dict(line=dict(color="white", width=2)),
+        marker=dict(line=dict(color="white", width=1)),
+        texttemplate="%{percent}",
     )
+
+    # If legend_filter is specified, hide all legend items except the specified one
+    if legend_filter:
+        fig.for_each_trace(
+            lambda trace: trace.update(showlegend=False) if trace.name != legend_filter else None
+        )
+
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=360,
+        height=400,  # Increased to accommodate bottom legend
         x_title=None,
         y_title=None,
-        margin={"t": 40, "l": 20, "r": 20, "b": 40},  # Balanced margins for centering
+        margin={"t": 40, "l": 20, "r": 20, "b": 80},  # Extra bottom margin for legend
     )
-    # Show legend on the right side for better label readability
+    # Legend positioned below chart on all screen sizes for consistency
+    # This ensures proper display on both desktop and mobile
     fig.update_layout(
         showlegend=True,
         legend=dict(
-            orientation="v",
-            yanchor="middle",
-            y=0.5,
-            xanchor="left",
-            x=1.02,
+            orientation="h",  # Horizontal orientation wraps better
+            yanchor="top",
+            y=-0.15,  # Position below chart
+            xanchor="center",
+            x=0.5,  # Center horizontally
             font=dict(size=11),
+            bgcolor="rgba(0,0,0,0)",  # Transparent background
         ),
     )
-    return plot(fig, output_type="div", config={"responsive": True, "displaylogo": False})
+    return plot(
+        fig,
+        output_type="div",
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
+    )
 
 
 def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
@@ -174,7 +210,7 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
             fig.update_xaxes(showgrid=False)
             fig.update_yaxes(
                 showgrid=True,
-                gridcolor="rgba(128,128,128,0.1)",
+                gridcolor="rgba(128,128,128,0.15)",
                 ticklabelstandoff=10,  # Add gap between y-axis labels and bars
             )
             fig.update_layout(
@@ -182,10 +218,10 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                 bargap=0.15,  # Add gap between bars
                 legend=dict(
                     orientation="h",
-                    yanchor="bottom",
-                    y=1.02,
-                    xanchor="center",
-                    x=0.5,
+                    yanchor="top",
+                    y=1.15,
+                    xanchor="left",
+                    x=0,
                 ),
             )
         elif field in {"sud", "behavioral_health"}:
@@ -231,7 +267,8 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
         other_count = int(vc_full.iloc[top_n:].sum()) if vc_full.size > top_n else 0
         vc = vc_top.reset_index()
         vc.columns = [field, "count"]
-        if other_count > 0:
+        # Don't add "Other" category for pcp_agency field
+        if other_count > 0 and field != "pcp_agency":
             vc = pd.concat(
                 [vc, pd.DataFrame([{field: "Other", "count": other_count}])], ignore_index=True
             )
@@ -275,7 +312,7 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                 customdata=vc[["full_label", "share_pct"]].values,
                 hovertemplate="%{customdata[0]}<br>%{customdata[1]:.1f}%<extra></extra>",
                 cliponaxis=False,
-                textfont=dict(size=12),
+                textfont=dict(size=14, color="#1e293b", family="Arial, sans-serif"),
             )
         )
 
@@ -285,21 +322,20 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
         fig = style_plotly_layout(
             fig,
             theme=theme,
-            height=360,
+            height=400,  # Increased height to prevent cutoff
             x_title=x_title,
             y_title="Percentage",
-            margin={"t": 30, "l": 60, "r": 20, "b": 80},  # Full width with horizontal labels
+            margin={"t": 40, "l": 70, "r": 20, "b": 90},  # More space for labels and text
         )
         fig.update_xaxes(
             showgrid=False,
             tickangle=0,  # Horizontal labels
-            title_standoff=12,  # ~1/8 inch gap
         )
         fig.update_yaxes(
-            showgrid=False,
+            showgrid=True,  # Enable horizontal gridlines
+            gridcolor="rgba(128,128,128,0.15)",
             showticklabels=True,
             title="Percentage",
-            title_standoff=12,  # ~1/8 inch gap
             automargin=True,
         )
         fig.update_layout(bargap=0.15, showlegend=False)
@@ -308,7 +344,18 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
         "responsive": True,
         "displaylogo": False,
         "displayModeBar": "hover",
-        "modeBarButtonsToRemove": ["pan2d", "lasso2d", "select2d"],
+        "modeBarButtonsToRemove": [
+            "zoom2d",
+            "pan2d",
+            "select2d",
+            "lasso2d",
+            "zoomIn2d",
+            "zoomOut2d",
+            "autoScale2d",
+            "hoverClosestCartesian",
+            "hoverCompareCartesian",
+            "toggleSpikelines",
+        ],
     }
     return plot(fig, output_type="div", config=config)
 
@@ -379,11 +426,9 @@ def build_patients_field_charts(
     add_chart("race_age_boxplot", build_patients_age_by_race_boxplot)
 
     # Add enhanced production charts
-    from .enhanced_demographic_charts import build_veteran_service_bridge
     from .production_age_charts import build_enhanced_age_referral_sankey
 
     add_chart("age_referral_sankey", build_enhanced_age_referral_sankey)
-    add_chart("veteran_service_bridge", build_veteran_service_bridge)
 
     if requested is not None:
         charts = {k: v for k, v in charts.items() if k in requested}
@@ -391,7 +436,7 @@ def build_patients_field_charts(
     return charts
 
 
-def _build_quarterly_patient_bar(theme: str) -> str | None:
+def _build_quarterly_patient_bar(theme: str) -> str | None:  # noqa: C901
     q = get_quarterly_patient_counts()
     qdf = q.get("df")
     if not isinstance(qdf, pd.DataFrame) or qdf.empty:
@@ -421,7 +466,7 @@ def _build_quarterly_patient_bar(theme: str) -> str | None:
     fig = go.Figure(
         data=[
             go.Bar(
-                x=[x_years, x_quarters],
+                x=[x_years, x_quarters],  # Years on top, quarters below
                 y=qdf2["count"],
                 text=qdf2["text_label"],
                 textposition="outside",
@@ -467,104 +512,162 @@ def _build_quarterly_patient_bar(theme: str) -> str | None:
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=420,
+        height=620,  # Increased height for taller bars (~1.5 inches more at 72 DPI = ~108 pixels)
         x_title=None,
         y_title="Patient Count",
-        margin={"t": 60, "l": 60, "r": 20, "b": 100},  # Increased bottom margin for year labels
+        margin={"t": 40, "l": 90, "r": 20, "b": 20},  # Minimal top margin to reduce gap with header
     )
-    fig.update_xaxes(type="multicategory", showgrid=False)
+    fig.update_xaxes(
+        type="multicategory",
+        showgrid=False,
+        ticklabelstandoff=2,  # Reduced space between tick labels and axis baseline
+    )
+    # Set y-axis range with fixed top at 300 for consistent annotation positioning
     fig.update_yaxes(
         showgrid=True,
-        gridcolor="rgba(128,128,128,0.1)",
+        gridcolor="rgba(128,128,128,0.15)",
         showticklabels=True,
         title="Patient Count",
+        ticklabelstandoff=10,  # Space between tick labels and axis
         ticklabelposition="outside",
         automargin=True,
+        range=[0, 300],  # Fixed range with top at 300 for annotation space
     )
 
-    # Add year-based context annotations below the x-axis
-    # Collect unique years and their positions
-    year_annotations = []
+    # Calculate baseline average from 2021, 2023, and 2024 only
+    # These are the "normal" years excluding 2022 (Behavioral Health spike) and 2025 (+2 CPMs)
+    baseline_years = ["2021", "2023", "2024"]
+    baseline_data = qdf2[qdf2["year"].astype(str).isin(baseline_years)]
+    normalized_quarterly_avg = round(baseline_data["count"].mean(), 1)
+
+    # Collect all annotations (including year labels above bars)
+    all_annotations = []
+
+    # Add the existing "2 New CPMs Hired" annotation if it exists
+    if fig.layout.annotations:
+        all_annotations.extend(list(fig.layout.annotations))
+
+    # Add year-based context annotations ABOVE bars (vertical text)
     unique_years = sorted(set(x_years))
 
     year_labels = {
         "2021": "COVID-19",
-        "2022": "Behavioral Health",
+        "2022": "Behavioral<br>Health",
         "2023": "Normalization",
         "2024": "Normalization",
-        "2025": "+2 Community Paramedics",
+        "2025": "+2 Community<br>Paramedics",
     }
+
+    # Position annotations at y=270 (with chart top at y=300)
+    annotation_y = 270
 
     for year in unique_years:
         if year in year_labels:
-            # Find all indices for this year
+            # Find all quarter indices for this year
             year_indices = [i for i, y in enumerate(x_years) if y == year]
-            # Calculate center position (average of first and last index)
-            center_position = (year_indices[0] + year_indices[-1]) / 2.0
+            if year_indices:
+                # Calculate center position (middle of the year's quarters)
+                # For multicategory axis, use numeric position at the center
+                center_idx = (year_indices[0] + year_indices[-1]) / 2.0
 
-            year_annotations.append(
+                # Add vertical text annotation centered over the year
+                all_annotations.append(
+                    dict(
+                        x=center_idx,  # Numeric position at center of year
+                        xref="x",
+                        y=annotation_y,  # Positioned at y=275 in data coordinates
+                        yref="y",  # Use data coordinates for precise positioning
+                        text=f"<b>{year_labels[year]}</b>",  # Semibold text for readability
+                        textangle=270,  # Vertical text reading top-to-bottom
+                        showarrow=False,
+                        font=dict(size=12, color="#1e293b", family="Arial, sans-serif"),
+                        xanchor="center",
+                        yanchor="middle",  # Anchor to middle for centered alignment
+                    )
+                )
+
+    # Create background rectangles for each year with distinct colors
+    shapes = []
+
+    # Define year colors from the patient chart palette
+    year_colors = {
+        "2021": PATIENT_CHART_COLORS[0],  # Violet
+        "2022": PATIENT_CHART_COLORS[1],  # Cyan
+        "2023": PATIENT_CHART_COLORS[3],  # Emerald
+        "2024": PATIENT_CHART_COLORS[4],  # Amber
+        "2025": PATIENT_CHART_COLORS[5],  # Blue
+    }
+
+    for year in unique_years:
+        # Find all quarter indices for this year
+        year_indices = [i for i, y in enumerate(x_years) if y == year]
+        if year_indices:
+            # Calculate the span of this year's quarters (left and right edges)
+            x0 = year_indices[0] - 0.5  # Left edge of first quarter
+            x1 = year_indices[-1] + 0.5  # Right edge of last quarter
+
+            # Add semi-transparent background rectangle for this year
+            shapes.append(
                 dict(
-                    x=center_position,
-                    y=-0.22,  # Position below the x-axis
+                    type="rect",
                     xref="x",
                     yref="paper",
-                    text=f"<i>{year_labels[year]}</i>",
-                    showarrow=False,
-                    font=dict(size=10, color="gray"),
-                    xanchor="center",
+                    x0=x0,
+                    x1=x1,
+                    y0=0,
+                    y1=1,  # Full height - annotations positioned inside with clearance
+                    fillcolor=year_colors.get(year, PATIENT_CHART_COLORS[0]),
+                    opacity=0.08,  # Very subtle background
+                    layer="below",
+                    line_width=0,
                 )
             )
 
-    # Calculate dynamic average from the dataset
-    normalized_quarterly_avg = round(qdf2["count"].mean(), 1)
+    # Add the baseline average line
+    shapes.append(
+        dict(
+            type="line",
+            xref="paper",
+            yref="y",
+            x0=0,
+            x1=1,
+            y0=normalized_quarterly_avg,
+            y1=normalized_quarterly_avg,
+            line=dict(
+                color="rgba(255, 255, 255, 0.5)",  # White with 50% opacity
+                width=2,
+                dash="dash",
+            ),
+        )
+    )
 
     fig.update_layout(
         bargap=0.15,
         showlegend=False,
-        annotations=[
-            dict(
-                text=f"<i>Bar color: Emerald = Above Average (>{normalized_quarterly_avg}) | Cyan = Average or Below (≤{normalized_quarterly_avg})</i>",
-                xref="paper",
-                yref="paper",
-                x=0.5,
-                y=1.05,
-                showarrow=False,
-                font=dict(size=10),
-                xanchor="center",
-            ),
-            # Label for the normalized baseline
-            dict(
-                text=f"<i>Quarterly Average (~{normalized_quarterly_avg})</i>",
-                xref="paper",
-                yref="y",
-                x=1.02,
-                y=normalized_quarterly_avg,
-                showarrow=False,
-                font=dict(size=9, color="white"),
-                xanchor="left",
-                yanchor="middle",
-            ),
-        ]
-        + year_annotations
-        + (fig.layout.annotations if fig.layout.annotations else []),
-        shapes=[
-            dict(
-                type="line",
-                xref="paper",
-                yref="y",
-                x0=0,
-                x1=1,
-                y0=normalized_quarterly_avg,
-                y1=normalized_quarterly_avg,
-                line=dict(
-                    color="white",
-                    width=2,
-                    dash="dash",
-                ),
-            )
-        ],
+        annotations=all_annotations,
+        shapes=shapes,
     )
-    return plot(fig, output_type="div", config={"responsive": True, "displaylogo": False})
+    return plot(
+        fig,
+        output_type="div",
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
+    )
 
 
 def _render_categorical_override(series: pd.Series, field: str, theme: str) -> str:
@@ -653,7 +756,27 @@ def _render_categorical_override(series: pd.Series, field: str, theme: str) -> s
         automargin=True,
     )
     fig.update_layout(bargap=0.05, showlegend=False)  # Smaller gap between bars (~1-2mm)
-    return plot(fig, output_type="div", config={"responsive": True, "displaylogo": False})
+    return plot(
+        fig,
+        output_type="div",
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
+    )
 
 
 def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
@@ -747,32 +870,51 @@ def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
             customdata=vc[["display_name", "share_pct", "group"]].values,
             hovertemplate="%{customdata[0]} (%{customdata[2]})<br>%{customdata[1]:.1f}%<extra></extra>",
             cliponaxis=False,
-            textfont=dict(size=12),
+            textfont=dict(size=14, color="#1e293b", family="Arial, sans-serif"),
         )
     )
 
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=360,  # Fixed height for consistency
+        height=400,  # Increased height to prevent cutoff
         x_title="Region",
         y_title="Percentage",
-        margin={"t": 30, "l": 60, "r": 20, "b": 80},  # Full width with horizontal labels
+        margin={"t": 40, "l": 70, "r": 20, "b": 90},  # More space for labels and text
     )
     fig.update_xaxes(
         showgrid=False,
         tickangle=0,  # Horizontal labels
-        title_standoff=12,  # ~1/8 inch gap
     )
     fig.update_yaxes(
-        showgrid=False,
+        showgrid=True,  # Enable horizontal gridlines
+        gridcolor="rgba(128,128,128,0.15)",
         showticklabels=True,
         title="Percentage",
-        title_standoff=12,  # ~1/8 inch gap
         automargin=True,
     )
     fig.update_layout(
         bargap=0.15,
         showlegend=False,
     )
-    return plot(fig, output_type="div", config={"responsive": True, "displaylogo": False})
+    return plot(
+        fig,
+        output_type="div",
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
+    )

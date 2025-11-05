@@ -35,12 +35,6 @@ def test_shiftcoverage_redirects_to_dashboard(client):
     assert resp.url == reverse("dashboard:odreferrals_shift_coverage")
 
 
-def test_repeatods_redirects_to_dashboard(client):
-    resp = client.get(reverse("cases:repeatods"))
-    assert resp.status_code == 302
-    assert resp.url == reverse("dashboard:odreferrals_repeat_overdoses")
-
-
 def test_costsavings_page(client):
     resp = client.get(reverse("cases:costsavings"))
     assert resp.status_code == 200

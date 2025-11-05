@@ -56,6 +56,7 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
         textposition="outside",
         textinfo="label+percent",
         hovertemplate="%{label}<br>Count: %{value}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
+        marker=dict(line=dict(color="white", width=1)),
     )
     fig = style_plotly_layout(
         fig,
@@ -66,7 +67,27 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
         margin={"t": 30, "l": 24, "r": 24, "b": 10},
     )
     fig.update_layout(showlegend=False)
-    return plot(fig, output_type="div", config={"responsive": True, "displaylogo": False})
+    return plot(
+        fig,
+        output_type="div",
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
+    )
 
 
 def _build_treemap_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, theme: str) -> str:
@@ -91,7 +112,114 @@ def _build_treemap_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, th
         margin={"t": 30, "l": 10, "r": 10, "b": 10},
     )
     fig.update_layout(showlegend=False)
-    return plot(fig, output_type="div", config={"responsive": True, "displaylogo": False})
+    return plot(
+        fig,
+        output_type="div",
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
+    )
+
+
+def _build_hierarchical_encounter_treemap(df: pd.DataFrame, theme: str) -> str | None:
+    """Build a hierarchical treemap showing Cat1 → Cat2 → Cat3 structure."""
+    # Clean and prepare data
+    df_clean = df[["encounter_type_cat1", "encounter_type_cat2", "encounter_type_cat3"]].copy()
+
+    # Fill NaN and clean values
+    for col in df_clean.columns:
+        df_clean[col] = df_clean[col].fillna("").astype(str).str.strip()
+        df_clean[col] = df_clean[col].replace({"": "Unknown", "NA": "Unknown", "None": "Unknown"})
+
+    # Filter out unwanted values
+    excluded = {"not disclosed", "no data", "no-data", "no_data", ""}
+    for col in df_clean.columns:
+        df_clean = df_clean[~df_clean[col].str.lower().isin(excluded)]
+
+    if df_clean.empty:
+        return None
+
+    # Create hierarchical structure: All → Cat1 → Cat2 → Cat3
+    df_clean["count"] = 1
+    df_clean["root"] = "All Encounters"
+
+    # Build the path
+    treemap_df = (
+        df_clean.groupby(
+            ["root", "encounter_type_cat1", "encounter_type_cat2", "encounter_type_cat3"],
+            dropna=False,
+        )
+        .size()
+        .reset_index(name="count")
+    )
+
+    if treemap_df.empty:
+        return None
+
+    # Use explicit color value for text
+    text_color = "#0f172a" if theme == "light" else "#f8fafc"
+
+    fig = px.treemap(
+        treemap_df,
+        path=["root", "encounter_type_cat1", "encounter_type_cat2", "encounter_type_cat3"],
+        values="count",
+        color="encounter_type_cat1",  # Color by Cat1 for consistency
+        color_discrete_sequence=COLOR_SEQUENCE,
+    )
+
+    fig.update_traces(
+        textposition="top left",
+        textfont=dict(size=12, family="Roboto, sans-serif", color=text_color),
+        hovertemplate="<b>%{label}</b><br>Count: %{value}<extra></extra>",
+        marker=dict(line=dict(width=1)),
+        root_color="rgba(0,0,0,0)",
+    )
+
+    fig = style_plotly_layout(
+        fig,
+        theme=theme,
+        height=500,  # Taller for hierarchical visualization
+        x_title=None,
+        y_title=None,
+        margin={"t": 10, "l": 10, "r": 10, "b": 10},
+    )
+    fig.update_layout(showlegend=False)
+
+    return plot(
+        fig,
+        output_type="div",
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
+    )
 
 
 def _build_horizontal_bar(vc_df: pd.DataFrame, field: str, theme: str) -> str:
@@ -138,7 +266,18 @@ def _build_horizontal_bar(vc_df: pd.DataFrame, field: str, theme: str) -> str:
             "responsive": True,
             "displaylogo": False,
             "displayModeBar": "hover",
-            "modeBarButtonsToRemove": ["pan2d", "lasso2d", "select2d"],
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
         },
     )
 
@@ -180,7 +319,8 @@ def _build_monthly_chart(df: pd.DataFrame, theme: str) -> str | None:
     if dates.empty:
         return None
     monthly = (
-        dates.dt.to_period("M")
+        dates.dt.tz_localize(None)
+        .dt.to_period("M")
         .value_counts()
         .sort_index()
         .rename_axis("month")
@@ -238,7 +378,27 @@ def _build_monthly_chart(df: pd.DataFrame, theme: str) -> str | None:
         showlegend=True,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
-    return plot(fig, output_type="div", config={"responsive": True, "displaylogo": False})
+    return plot(
+        fig,
+        output_type="div",
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
+    )
 
 
 def _build_weekday_chart(df: pd.DataFrame, theme: str) -> str | None:
@@ -298,9 +458,44 @@ def _build_weekday_chart(df: pd.DataFrame, theme: str) -> str | None:
             "responsive": True,
             "displaylogo": False,
             "displayModeBar": "hover",
-            "modeBarButtonsToRemove": ["pan2d", "lasso2d", "select2d"],
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
         },
     )
+
+
+def _should_build_field(target_fields: set[str] | None, field_name: str) -> bool:
+    """Check if a specific field should be built based on target fields."""
+    return target_fields is None or field_name in target_fields
+
+
+def _build_individual_field_charts(
+    df: pd.DataFrame, theme: str, target_fields: set[str] | None
+) -> dict[str, str]:
+    """Build charts for individual encounter fields."""
+    charts: dict[str, str] = {}
+    for field in [
+        "pcp_agency",
+        "encounter_type_cat1",
+        "encounter_type_cat2",
+        "encounter_type_cat3",
+    ]:
+        if target_fields is not None and field not in target_fields:
+            continue
+        chart = _build_chart_for_field(df, field, theme)
+        if chart:
+            charts[field] = chart
+    return charts
 
 
 def build_encounters_field_charts(
@@ -323,29 +518,19 @@ def build_encounters_field_charts(
     if df.empty:
         return charts
 
-    wants_monthly = target_fields is None or "encounters_counts_monthly" in target_fields
-    if wants_monthly:
+    if _should_build_field(target_fields, "encounters_counts_monthly"):
         monthly_chart = _build_monthly_chart(df, theme)
         if monthly_chart:
             charts["encounters_counts_monthly"] = monthly_chart
 
-    wants_weekday = target_fields is None or "encounters_counts_weekday" in target_fields
-    if wants_weekday:
+    if _should_build_field(target_fields, "encounters_counts_weekday"):
         weekday_chart = _build_weekday_chart(df, theme)
         if weekday_chart:
             charts["encounters_counts_weekday"] = weekday_chart
 
-    for field in [
-        "pcp_agency",
-        "encounter_type_cat1",
-        "encounter_type_cat2",
-        "encounter_type_cat3",
-    ]:
-        if target_fields is not None and field not in target_fields:
-            continue
-        chart = _build_chart_for_field(df, field, theme)
-        if chart:
-            charts[field] = chart
+    # Build individual field charts (cat1, cat2, cat3, pcp_agency)
+    field_charts = _build_individual_field_charts(df, theme, target_fields)
+    charts.update(field_charts)
 
     if target_fields is None:
         return charts

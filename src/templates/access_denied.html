@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Access restricted - CPM Dashboard authentication required. Secure analytics platform for community paramedicine data and operational insights.">
+    <meta name="keywords" content="CPM Dashboard, community paramedicine, access restricted, authentication, secure analytics, healthcare data">
+    <title>Access Restricted — CPM Dashboard</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'media/favicon.ico' %}"/>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+<body class="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+    {# Background Image - Hurricane Ridge, Port Angeles #}
+    <div class="absolute inset-0">
+        <img
+            src="{% static 'media/hurricane_ridge_port_angeles.jpg' %}"
+            alt="Hurricane Ridge, Port Angeles"
+            class="h-full w-full object-cover"
+            loading="lazy"
+            width="2940"
+            height="1960"
+        >
+        <div class="absolute inset-0 bg-slate-950/70"></div>
+    </div>
+
+        {# Photo Credit - Lower Left Corner #}
+        <div class="absolute bottom-4 left-4 z-20">
+            <p class="text-sm text-white/70 drop-shadow-lg">
+                Photo by <a href="https://unsplash.com/@sliu7?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" class="underline hover:text-white/90 transition-colors" target="_blank" rel="noopener noreferrer">Shang Liu</a> on <a href="https://unsplash.com/photos/silhouette-of-mountain-under-starry-night-uz0iOk5vYfE?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" class="underline hover:text-white/90 transition-colors" target="_blank" rel="noopener noreferrer">Unsplash</a>
+            </p>
+        </div>
+
+    {# Content #}
+    <div class="relative flex min-h-screen w-full items-center justify-center px-6 py-12 sm:px-10">
+        <div class="w-full max-w-lg">
+            {# Header Outside Card #}
+            <div class="text-center">
+                <h1 class="text-3xl font-semibold tracking-tight text-white lg:text-4xl">Access Restricted</h1>
+                <p class="mt-3 text-sm text-slate-200/85">Authentication required to view this content</p>
+            </div>
+
+            {# Minimal Stacked Card #}
+            <div class="mt-10 rounded-3xl border border-white/10 bg-slate-900/65 p-8 shadow-xl backdrop-blur sm:p-10">
+                <div class="space-y-7">
+                    {# Message - No Box, Just Text #}
+                    <p class="text-center text-sm leading-relaxed text-slate-200">
+                        The <strong class="font-semibold text-white">PAFD Community Paramedicine Metrics Dashboard</strong> contains sensitive community paramedicine data and operational insights. Access is restricted to authorized personnel only.
+                    </p>
+
+                    {# Subtle Divider #}
+                    <div class="border-t border-white/5"></div>
+
+                    {# Login Button #}
+                    <a
+                        href="{% url 'account_login' %}?next={{ request.path }}"
+                        class="flex w-full justify-center rounded-full bg-brand-500 px-4 py-3.5 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-brand-500/30 transition hover:bg-brand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-300"
+                    >
+                        Sign in to Continue
+                    </a>
+
+                    {# Subtle Divider #}
+                    <div class="border-t border-white/5"></div>
+
+                    {# Contact Info - Simple Text #}
+                    <div class="text-center text-sm text-slate-300">
+                        <p>Need access? Contact <span class="font-semibold text-white">Brian Gerdes</span> at <a href="mailto:bgerdes@cityofpa.us" class="font-semibold text-brand-300 underline transition hover:text-brand-200">bgerdes@cityofpa.us</a></p>
+                    </div>
+
+                    {# Subtle Divider #}
+                    <div class="border-t border-white/5"></div>
+
+                    {# Security Notice - Minimal #}
+                    <p class="text-center text-xs text-slate-400">
+                        All authentication attempts are logged for security purposes.
+                    </p>
+                </div>
+            </div>
+
+            {# Footer #}
+            <p class="mt-8 text-center text-sm text-slate-200/80">
+                Brian Gerdes © {{ current_year|default:"2025" }} — Secure Analytics Platform
+            </p>
+        </div>
+    </div>
+</body>
+</html>

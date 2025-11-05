@@ -7,10 +7,10 @@
   <div :class="sidebarToggle ? 'justify-center' : 'justify-start'" class="flex items-center gap-2 pt-8 pb-7">
   <a href="{% url 'home' %}">
       <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
-        <svg class="dark:hidden size-8 text-black hover:text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <svg class="dark:hidden size-11 text-black hover:text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
             <path fill-rule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.546 3.75 3.75 0 0 1 3.255 3.718Z" clip-rule="evenodd" />
         </svg>
-        <svg class="hidden dark:block size-8 text-white hover:text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <svg class="hidden dark:block size-11 text-white hover:text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
             <path fill-rule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.546 3.75 3.75 0 0 1 3.255 3.718Z" clip-rule="evenodd" />
         </svg>
       </span>
@@ -19,7 +19,10 @@
       </svg>
     </a>
 
-  <h2 class="text-2xl font-droid font-semibold dark:text-white" :class="sidebarToggle ? 'hidden' : ''">CPM Insights</h2>
+  <div class="flex flex-col" :class="sidebarToggle ? 'hidden' : ''">
+    <span class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">PAFD</span>
+    <h2 class="text-2xl font-droid font-semibold leading-tight dark:text-white">CPM Metrics</h2>
+  </div>
   </div>
   <!-- End Sidebar Header -->
 
@@ -45,7 +48,7 @@
               hx-select="#dashboard-main"
               hx-swap="outerHTML"
               hx-push-url="true"
-              @click="selected = 'Home'; page = 'coreOverview'"
+              @click="selected = 'Home'; page = 'coreOverview'; if (window.innerWidth < 1024) sidebarToggle = false"
               class="menu-item group"
               :class=" (selected === 'Home') || (page === 'coreOverview' || page === 'dashboardOverview') ? 'menu-item-active' : 'menu-item-inactive'"
             >
@@ -84,10 +87,10 @@
               href="{% url 'dashboard:patients' %}"
               @click.prevent="selected = (selected === 'Program Overviews' ? '' : 'Program Overviews')"
               class="menu-item group"
-              :class="(selected === 'Program Overviews') || ['patientsOverview','referralsOverview','od-referrals-overview','encountersOverview'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="(selected === 'Program Overviews') || ['patientsOverview','referralsOverview','od-referrals-overview'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Program Overviews') || ['patientsOverview','referralsOverview','od-referrals-overview','encountersOverview'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
+                :class="(selected === 'Program Overviews') || ['patientsOverview','referralsOverview','od-referrals-overview'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -146,11 +149,11 @@
                     hx-select="#dashboard-main"
                     hx-swap="outerHTML"
                     hx-push-url="true"
-                    @click="page = 'patientsOverview'"
+                    @click="page = 'patientsOverview'; if (window.innerWidth < 1024) sidebarToggle = false"
                     class="menu-dropdown-item group"
                     :class="page === 'patientsOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
-                    Patients Overview
+                    Patients
                   </a>
                 </li>
                 <li>
@@ -161,11 +164,11 @@
                     hx-select="#dashboard-main"
                     hx-swap="outerHTML"
                     hx-push-url="true"
-                    @click="page = 'referralsOverview'"
+                    @click="page = 'referralsOverview'; if (window.innerWidth < 1024) sidebarToggle = false"
                     class="menu-dropdown-item group"
                     :class="page === 'referralsOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
-                    Referrals Overview
+                    Referrals
                   </a>
                 </li>
                 <li>
@@ -176,26 +179,11 @@
                     hx-select="#dashboard-main"
                     hx-swap="outerHTML"
                     hx-push-url="true"
-                    @click="page = 'od-referrals-overview'"
+                    @click="page = 'od-referrals-overview'; if (window.innerWidth < 1024) sidebarToggle = false"
                     class="menu-dropdown-item group"
                     :class="page === 'od-referrals-overview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
-                    OD Referrals Overview
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'dashboard:encounters' %}"
-                    hx-get="{% url 'dashboard:encounters' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    @click="page = 'encountersOverview'"
-                    class="menu-dropdown-item group"
-                    :class="page === 'encountersOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Encounters Overview
+                    OD Referrals
                   </a>
                 </li>
               </ul>
@@ -208,13 +196,13 @@
           <!-- Menu Item Program Insights -->
           <li>
             <a
-              href="{% url 'dashboard:referrals_insights' %}"
+              href="{% url 'dashboard:odreferrals_insights' %}"
               @click.prevent="selected = (selected === 'Program Insights' ? '' : 'Program Insights')"
               class="menu-item group"
-              :class="(selected === 'Program Insights') || ['referralsInsights','od-referrals-insights','encountersInsights'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="(selected === 'Program Insights') || ['od-referrals-insights'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Program Insights') || ['referralsInsights','od-referrals-insights','encountersInsights'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
+                :class="(selected === 'Program Insights') || ['od-referrals-insights'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -267,47 +255,17 @@
               >
                 <li>
                   <a
-                    href="{% url 'dashboard:referrals_insights' %}"
-                    hx-get="{% url 'dashboard:referrals_insights' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    @click="page = 'referralsInsights'"
-                    class="menu-dropdown-item group"
-                    :class="page === 'referralsInsights' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Referrals Insights
-                  </a>
-                </li>
-                <li>
-                  <a
                     href="{% url 'dashboard:odreferrals_insights' %}"
                     hx-get="{% url 'dashboard:odreferrals_insights' %}"
                     hx-target="#dashboard-main"
                     hx-select="#dashboard-main"
                     hx-swap="outerHTML"
                     hx-push-url="true"
-                    @click="page = 'od-referrals-insights'"
+                    @click="page = 'od-referrals-insights'; if (window.innerWidth < 1024) sidebarToggle = false"
                     class="menu-dropdown-item group"
                     :class="page === 'od-referrals-insights' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
                     OD Referrals Insights
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'dashboard:encounters_insights' %}"
-                    hx-get="{% url 'dashboard:encounters_insights' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    @click="page = 'encountersInsights'"
-                    class="menu-dropdown-item group"
-                    :class="page === 'encountersInsights' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Encounters Insights
                   </a>
                 </li>
               </ul>
@@ -323,10 +281,10 @@
               href="{% url 'dashboard:odreferrals_shift_coverage' %}"
               @click.prevent="selected = (selected === 'OD Referral Deep Dives' ? '' : 'OD Referral Deep Dives')"
               class="menu-item group"
-              :class="(selected === 'OD Referral Deep Dives') || ['od-referrals-shift-coverage','od-referrals-repeat-overdoses','od-referrals-hotspots','odreferralsMonthly'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="(selected === 'OD Referral Deep Dives') || ['od-referrals-shift-coverage','od-referrals-hotspots','odreferralsMonthly'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'OD Referral Deep Dives') || ['od-referrals-shift-coverage','od-referrals-repeat-overdoses','od-referrals-hotspots','odreferralsMonthly','operationShieldingHope'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
+                :class="(selected === 'OD Referral Deep Dives') || ['od-referrals-shift-coverage','od-referrals-hotspots','odreferralsMonthly','operationShieldingHope'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -387,7 +345,7 @@
                     hx-push-url="true"
                     class="menu-dropdown-item group"
                     :class="page === 'od-referrals-shift-coverage' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                    @click="page = 'od-referrals-shift-coverage'"
+                    @click="page = 'od-referrals-shift-coverage'; if (window.innerWidth < 1024) sidebarToggle = false"
                   >
                     Shift Coverage
                   </a>
@@ -402,39 +360,9 @@
                     hx-push-url="true"
                     class="menu-dropdown-item group"
                     :class="page === 'od-referrals-hotspots' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                    @click="page = 'od-referrals-hotspots'"
+                    @click="page = 'od-referrals-hotspots'; if (window.innerWidth < 1024) sidebarToggle = false"
                   >
                     Hotspot Map
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'dashboard:odreferrals_repeat_overdoses' %}"
-                    hx-get="{% url 'dashboard:odreferrals_repeat_overdoses' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    class="menu-dropdown-item group"
-                    :class="page === 'od-referrals-repeat-overdoses' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                    @click="page = 'od-referrals-repeat-overdoses'"
-                  >
-                    Repeat Overdoses
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'dashboard:odreferrals_monthly' %}"
-                    hx-get="{% url 'dashboard:odreferrals_monthly' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    class="menu-dropdown-item group"
-                    :class="page === 'odreferralsMonthly' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                    @click="page = 'odreferralsMonthly'"
-                  >
-                    Overdoses by Month
                   </a>
                 </li>
               </ul>
@@ -464,7 +392,7 @@
               hx-select="#dashboard-main"
               hx-swap="outerHTML"
               hx-push-url="true"
-              @click="selected = 'Program Briefings'; page = 'operationShieldingHope'"
+              @click="selected = 'Program Briefings'; page = 'operationShieldingHope'; if (window.innerWidth < 1024) sidebarToggle = false"
               class="menu-item group"
               :class="page === 'operationShieldingHope' ? 'menu-item-active' : 'menu-item-inactive'"
             >
@@ -501,7 +429,7 @@
                 hx-select="#dashboard-main"
                 hx-swap="outerHTML"
                 hx-push-url="true"
-                @click="selected = 'Program Briefings'; page = 'cpmTimeline'"
+                @click="selected = 'Program Briefings'; page = 'cpmTimeline'; if (window.innerWidth < 1024) sidebarToggle = false"
                 class="menu-item group"
                 :class="page === 'cpmTimeline' ? 'menu-item-active' : 'menu-item-inactive'"
               >
@@ -551,7 +479,7 @@
               hx-select="#dashboard-main"
               hx-swap="outerHTML"
               hx-push-url="true"
-              @click="selected = 'Patient Stories'; page = 'caseStudyBlog'"
+              @click="selected = 'Patient Stories'; page = 'caseStudyBlog'; if (window.innerWidth < 1024) sidebarToggle = false"
               class="menu-item group"
               :class="(selected === 'Patient Stories') || (page === 'caseStudyBlog') ? 'menu-item-active' : 'menu-item-inactive'"
             >
@@ -651,7 +579,7 @@
                     hx-select="#dashboard-main"
                     hx-swap="outerHTML"
                     hx-push-url="true"
-                    @click="page = 'costSavings'"
+                    @click="page = 'costSavings'; if (window.innerWidth < 1024) sidebarToggle = false"
                     class="menu-dropdown-item group"
                     :class="page === 'costSavings' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >

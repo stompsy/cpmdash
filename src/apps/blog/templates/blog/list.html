@@ -5,8 +5,8 @@
 {% block title %}Patient Stories{% endblock title %}
 
 {% block page_header %}
-{% static 'media/roberto-sorin-RS0-h_pyByk-unsplash.jpg' as patient_stories_header_image %}
-{% with eyebrow="Patient stories" title="Patient stories in community paramedicine" description="Review evidence-informed interventions, outcome metrics, and procedural notes documented by CPM teams." image_src=patient_stories_header_image image_alt="Community paramedics supporting a patient in their home" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
+{% static 'media/case_studies/roberto-sorin-RS0-h_pyByk-unsplash.jpg' as patient_stories_header_image %}
+{% with eyebrow="Patient stories" title="Patient stories in community paramedicine" description="Review evidence-informed interventions, outcome metrics, and procedural notes documented by CPM teams." image_src=patient_stories_header_image image_alt="Community paramedics supporting a patient in their home" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso primary_label=primary_cta_label primary_url=primary_cta_url primary_icon="plus" %}
     {% include "partials/page_header.html" %}
 {% endwith %}
 {% endblock page_header %}
@@ -15,40 +15,6 @@
 <div class="col-span-12 mx-auto mt-16 w-full max-w-7xl">
     <span data-page-name="caseStudyBlog" class="hidden" hidden></span>
     <div class="space-y-16">
-        <section class="col-span-12">
-            <div class="relative overflow-hidden rounded-2xl border border-white/5 bg-[linear-gradient(135deg,#101a2c_0%,#111f30_52%,#0b1826_100%)] px-6 py-16 sm:px-10 lg:px-16">
-                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(23,51,212,0.14),transparent_60%)]"></div>
-                <div class="pointer-events-none absolute right-[-14%] top-[-28%] h-[28rem] w-[28rem] rounded-full bg-brand-400/16 blur-[140px]"></div>
-                <div class="relative mx-auto max-w-5xl">
-                    <p class="inline-flex items-center text-center md:text-left gap-2 rounded-lg bg-white/5 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-brand-200/90">
-                        Community paramedicine case registry
-                    </p>
-                    <h2 class="mt-8 text-3xl text-center md:text-left font-semibold tracking-tight text-white sm:text-4xl lg:text-[2.8rem]">
-                        Explore featured recoveries and care plans from the CPM team
-                    </h2>
-                    <p class="mt-8 max-w-2xl text-base text-center md:text-left leading-relaxed text-slate-300 sm:text-lg">
-                        Drill into recent cases to understand how CPM clinicians coordinate field medicine, behavioral health, and recovery partners to sustain long-term progress.
-                    </p>
-                    {% if request.user.is_authenticated and perms.blog.add_casestudy %}
-                        <div class="mt-8 w-full flex justify-center md:justify-start">
-                            <a href="{% url 'blog:create' %}"
-                               class="inline-flex items-center gap-2 rounded-full bg-brand-500/80 px-5 py-2 text-sm font-semibold text-slate-900 shadow transition hover:bg-brand-400">
-                                Create new case study
-                                <svg class="h-4 w-4"
-                                     viewBox="0 0 24 24"
-                                     fill="none"
-                                     stroke="currentColor"
-                                     stroke-width="2">
-                                    <path d="M12 5v14" />
-                                    <path d="M5 12h14" />
-                                </svg>
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </section>
-
         <section class="col-span-12">
             <div class="space-y-10 mx-auto px-6 sm:px-10 lg:px-16">
                 <div class="flex flex-col items-start">

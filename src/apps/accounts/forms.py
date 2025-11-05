@@ -2,9 +2,25 @@ from __future__ import annotations
 
 from typing import Any
 
+from allauth.account.forms import SignupForm
 from django import forms
+from django.core.exceptions import ValidationError
 
 from .models import User
+
+
+class DisabledSignupForm(SignupForm):
+    """
+    Signup form that always raises a validation error.
+    Used to disable public account creation while keeping the URL accessible.
+    """
+
+    def clean(self) -> dict:
+        """Prevent any signup attempts."""
+        raise ValidationError(
+            "Public account registration is disabled. "
+            "Please contact your system administrator for access."
+        )
 
 
 class ProfileForm(forms.ModelForm):

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -8,7 +10,7 @@ from utils.plotly import style_plotly_layout
 from ...core.models import ODReferrals
 
 
-def build_chart_repeats_scatter(theme):  # noqa: C901
+def build_chart_repeats_scatter(theme):
     odreferrals_qs = ODReferrals.objects.values(
         "patient_id",
         "od_date",
@@ -30,7 +32,10 @@ def build_chart_repeats_scatter(theme):  # noqa: C901
 
     # Classify outcome
     df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
-    df = df[df["od_date"] != pd.Timestamp("2000-01-01")]
+
+    # Filter out sentinel date (2000-01-01) and null dates
+    df = df[(df["od_date"] != pd.Timestamp("2000-01-01")) & (df["od_date"].notna())].copy()
+
     fatal_conditions = ["cpr attempted", "doa", "fatal", "death", "deceased", "died"]
     df["overdose_outcome"] = df["disposition"].apply(
         lambda x: "Fatal" if str(x).strip().lower() in fatal_conditions else "Non-Fatal"
@@ -41,7 +46,7 @@ def build_chart_repeats_scatter(theme):  # noqa: C901
         df[col] = pd.to_datetime(df[col], errors="coerce")
         df.loc[df[col] == pd.Timestamp("2000-01-01"), col] = pd.NaT
 
-    # Filter for repeat patients
+    # Filter for repeat patients (count ALL overdoses per patient_id, not just after filtering)
     repeat_ids = df["patient_id"].value_counts()
     repeat_ids = repeat_ids[repeat_ids > 1].index
     df = df[df["patient_id"].isin(repeat_ids)].copy()
@@ -74,21 +79,26 @@ def build_chart_repeats_scatter(theme):  # noqa: C901
     #
     # jail_periods_df = pd.DataFrame(jail_periods)
 
-    # Map patient age and short sex
+    # Map patient age and short sex, including patient_id to ensure uniqueness
     age_map = df.groupby("patient_id", observed=False)["patient_age"].min()
     sex_map = (
         df.groupby("patient_id", observed=False)["patient_sex"]
         .last()
         .map({"Male": "M", "Female": "F"})
     )
-    df["merged_label"] = df["patient_id"].map(lambda pid: f"{age_map[pid]} {sex_map[pid]}")
+    # Include patient_id in the label to prevent different patients from being merged
+    df["merged_label"] = df["patient_id"].map(
+        lambda pid: f"ID {pid}: {age_map[pid]} {sex_map[pid]}"
+    )
     df["sort_key"] = df["patient_id"].map(age_map)
 
-    # Sort merged_label by age only
-    label_order = df.drop_duplicates("merged_label").sort_values("sort_key")["merged_label"]
+    # Sort merged_label by age, then by patient_id for consistent ordering
+    label_order = df.drop_duplicates("merged_label").sort_values(["sort_key", "patient_id"])[
+        "merged_label"
+    ]
     df["merged_label"] = pd.Categorical(df["merged_label"], categories=label_order, ordered=True)
 
-    # Sort and calculate time difference
+    # Sort and calculate time difference (now properly grouped by unique patient_id)
     df.sort_values(by=["merged_label", "od_date"], inplace=True)
     df["days_since_last_od"] = df.groupby("merged_label", observed=False)["od_date"].diff().dt.days
     df["days_since_last_od"] = df["days_since_last_od"].fillna("First OD")
@@ -140,19 +150,26 @@ def build_chart_repeats_scatter(theme):  # noqa: C901
         # Create hover text that shows FATAL in red for fatal overdoses
         hover_text = []
         for _, row in df_label.iterrows():
+            # Format days as int if it's a number, otherwise keep as-is (e.g., "First OD")
+            days_display = (
+                int(row["days_since_last_od"])
+                if isinstance(row["days_since_last_od"], int | float)
+                else row["days_since_last_od"]
+            )
+
             if row["overdose_outcome"] == "Fatal":
                 hover_text.append(
                     f"<b>Patient: {row['merged_label']}</b><br>"
                     f"OD Date: {row['od_date'].strftime('%Y-%m-%d')}<br>"
                     f"<b style='color:red'>Outcome: FATAL</b><br>"
-                    f"Days Since Last OD: {row['days_since_last_od']}"
+                    f"Days Since Last OD: {days_display}"
                 )
             else:
                 hover_text.append(
                     f"<b>Patient: {row['merged_label']}</b><br>"
                     f"OD Date: {row['od_date'].strftime('%Y-%m-%d')}<br>"
                     f"Outcome: {row['overdose_outcome']}<br>"
-                    f"Days Since Last OD: {row['days_since_last_od']}"
+                    f"Days Since Last OD: {days_display}"
                 )
 
         # Add all overdoses for this patient with connecting lines
@@ -182,7 +199,20 @@ def build_chart_repeats_scatter(theme):  # noqa: C901
         scroll_zoom=False,
         x_title="Date",
         y_title="Patient (Age Sex)",
-        margin=dict(t=0, l=50, r=20, b=20),
+        margin=dict(t=40, l=50, r=20, b=20),  # Added top margin for modebar clearance
+    )
+
+    # Customize grid lines and axis spacing (AFTER style_plotly_layout to override defaults)
+    fig.update_xaxes(
+        showgrid=False,  # Hide vertical grid lines
+        dtick="M1",  # Show tick every month
+        ticklabelmode="period",  # Center labels on the period (month)
+        range=[pd.Timestamp("2024-03-01"), datetime.now()],  # March 2024 to current date
+    )
+    fig.update_yaxes(
+        showgrid=True,  # Show horizontal grid lines
+        gridcolor="rgba(128,128,128,0.25)",  # Darker gray grid lines matching Patients page
+        ticklabelstandoff=10,  # ~1/8 inch gap between y-axis labels and chart
     )
 
     return plot(fig, output_type="div", config=fig._config)

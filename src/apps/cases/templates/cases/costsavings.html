@@ -4,187 +4,221 @@
 {% block pageName %}costSavings{% endblock pageName %}
 {% block title %}Cost Savings Analysis{% endblock title %}
 {% block page_header %}
-{% static 'media/jacob-grishey-j8iPllhcWWg-unsplash.jpg' as cost_savings_header_image %}
-{% with eyebrow="System case studies" title="Cost savings analysis" description="Quantify avoided 911 calls, transports, and emergency visits to show how CPM care bends the cost curve." image_src=cost_savings_header_image image_alt="Community paramedics reviewing financial impact charts" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
-    {% include "partials/page_header.html" %}
-{% endwith %}
+    {% static 'media/jacob-grishey-j8iPllhcWWg-unsplash.jpg' as cost_savings_header_image %}
+    {% include "partials/page_header.html" with eyebrow="System case studies" title="Cost savings analysis" description="Quantify avoided 911 calls, ambulance transports, and emergency visits to demonstrate how community paramedic care bends the healthcare cost curve." image_src=cost_savings_header_image image_alt="Community paramedics reviewing financial impact charts" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
 {% endblock page_header %}
 {% block content %}
-<div class="col-span-12 mx-auto mt-16 w-full max-w-7xl">
+<div class="col-span-12 mx-auto w-full max-w-7xl">
     <span data-page-name="costSavings" class="hidden" hidden></span>
-    <div class="space-y-16">
-<!-- Stats Page Section With Background Image -->
-<section class="col-span-12">
-    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-6 sm:px-12 md:px-20 py-20 rounded-2xl shadow-md lg:overflow-visible">
-        <!-- Background photo -->
-        <div class="absolute inset-0 -z-20 bg-center bg-cover bg-no-repeat rounded-2xl"
-                style="background-image: url('{% static 'media/jacob-grishey-j8iPllhcWWg-unsplash.jpg' %}');
-                    filter: contrast(1.35) brightness(0.9) saturate(1.2)"></div>
-        <!-- Extra dark overlay for image contrast -->
-        <div class="absolute inset-0 -z-10 bg-black opacity-80 rounded-2xl"></div>
-        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:items-start lg:gap-y-10">
-            <div class="mx-auto">
-                <!-- Section Label -->
-                <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Community Paramedic Program</p>
-                <!-- Main Heading -->
-                <h2 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl">
-                    Cost Savings Analysis
+
+    {# Introduction Section #}
+    <section class="mt-12 mb-16">
+        <div class="mx-auto max-w-4xl">
+            <div class="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-8 shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                    Measuring Community Impact Through Cost Avoidance
                 </h2>
-                <!-- Description -->
-                <p class="mt-6 text-xl/8 text-gray-700 dark:text-gray-300">
-                    When fire department paramedics step beyond traditional
-                    emergency response to deliver healthcare directly into homes
-                    and communities, the impact extends far beyond individual
-                    lives touched. Our Community Paramedic program prevents
-                    unnecessary 911 calls, reduces emergency department
-                    overutilization, and brings primary care to those who need
-                    it most—homebound patients, individuals with chronic
-                    conditions, and vulnerable populations facing barriers to
-                    traditional healthcare access.
-                </p>
-            </div>
-        </div>
-        <!-- Key Stats -->
-        <div class="mt-16 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 text-left text-lg font-medium">
-            <div class="flex flex-col border-l-1 border-gray-700 pl-6 py-2">
-                <p class="text-3xl font-extrabold text-white">{{ cost_metrics.calls_prevented }}</p>
-                <p class="text-gray-400">911 Calls Prevented</p>
-            </div>
-            <div class="flex flex-col border-l-1 border-gray-700 pl-6 py-2">
-                <p class="text-3xl font-extrabold text-white">{{ cost_metrics.transports_averted }}</p>
-                <p class="text-gray-400">Ambulance Transports Averted</p>
-            </div>
-            <div class="flex flex-col border-l-1 border-gray-700 pl-6 py-2">
-                <p class="text-3xl font-extrabold text-white">{{ cost_metrics.ed_visits_avoided }}</p>
-                <p class="text-gray-400">ED Visits Avoided</p>
-            </div>
-            <div class="flex flex-col border-l-1 border-gray-700 pl-6 py-2">
-                <p class="text-3xl font-extrabold text-white">${{ cost_metrics.total_savings|intcomma }}</p>
-                <p class="text-gray-400">Total System Savings</p>
-            </div>
-        </div>
-        <!-- Background overlay -->
-        <div class="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black opacity-60 rounded-2xl -z-10"></div>
-    </div>
-</section>
-<!-- Utilization & Avoided Costs — Narrative -->
-<section class="col-span-12 relative">
-    <div class="relative isolate overflow-hidden bg-white dark:bg-gray-900 px-6 sm:px-12 md:px-20 lg:overflow-visible">
-        <!-- divider -->
-        <div class="mt-12 mb-16">
-            <div class="h-px bg-gradient-to-r from-transparent via-gray-300/60 to-transparent dark:via-white/15"></div>
-        </div>
-        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:items-start lg:gap-y-10">
-            <header class="text-left">
-                <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Utilization & Avoided Costs</p>
-                <h2 class="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white">
-                    Observed changes after program enrollment
-                </h2>
-                <p class="mt-3 text-md sm:text-base text-gray-700 dark:text-gray-300 max-w-prose">
-                    We compare each patient’s emergency service use in equal pre/post windows anchored to enrollment. Results summarize observed changes and associated avoided costs using conservative unit rates.
-                </p>
-            </header>
-            <!-- KPI row -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <!-- Calls Prevented -->
-                <div class="group relative overflow-hidden p-4 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 bg-white/50 dark:bg-white/[0.04] transition-all duration-300 hover:shadow-md hover:ring-indigo-400/30 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-cyan-500/10">
-                    <h3 class="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">911 calls prevented</h3>
-                    <p class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white tabular-nums">
-                        {{ cost_metrics.calls_prevented }}
+                <div class="mt-6 space-y-4 text-base leading-relaxed text-gray-700 dark:text-gray-300">
+                    <p>
+                        Our community paramedic program reduces emergency system strain by connecting high-utilizers with appropriate care pathways. By comparing emergency service use before and after enrollment, we quantify real-world impact on 911 calls, ambulance transports, and ED visits.
                     </p>
-                    <p class="mt-3 text-sm text-gray-700 dark:text-gray-300">
-                        Cost avoided:
-                        <span class="font-medium text-gray-900 dark:text-green-400 tabular-nums">${{ cost_metrics.savings_breakdown.911_non_transport|intcomma }}
-                        </span>
-                    </p>
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        Rationale: 2024 example • 118 calls prevented; 42%
-                        of patients used 911; 71% (121) had reduced 911 use.
-                        Non‑transport unit rate ≈ ~$1,900.
-                    </p>
-                </div>
-                <!-- Transports Averted -->
-                <div class="group relative overflow-hidden p-4 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 bg-white/50 dark:bg-white/[0.04] transition-all duration-300 hover:shadow-md hover:ring-indigo-400/30 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-cyan-500/10">
-                    <h3 class="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                        Ambulance transports averted
-                    </h3>
-                    <p class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white tabular-nums">
-                        {{ cost_metrics.transports_averted }}
-                    </p>
-                    <p class="mt-3 text-sm text-gray-700 dark:text-gray-300">
-                        Cost avoided:
-                        <span class="font-medium text-gray-900 dark:text-green-400 tabular-nums">${{ cost_metrics.savings_breakdown.transports|intcomma }}</span>
-                    </p>
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        Rationale: 2024 example • 56% of 911 calls result in
-                        ambulance transport to ER • CPM intervention prevented
-                        68 ambulance transports = ~$3,800 per transport.
-                    </p>
-                </div>
-                <!-- ED Visits Avoided -->
-                <div class="group relative overflow-hidden p-4 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 bg-white/50 dark:bg-white/[0.04] transition-all duration-300 hover:shadow-md hover:ring-indigo-400/30 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-cyan-500/10">
-                    <h3 class="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">ED visits avoided</h3>
-                    <p class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white tabular-nums">
-                        {{ cost_metrics.ed_visits_avoided }}
-                    </p>
-                    <p class="mt-3 text-sm text-gray-700 dark:text-gray-300">
-                        Cost avoided:
-                        <span class="font-medium text-gray-900 dark:text-green-400 tabular-nums">${{ cost_metrics.savings_breakdown.ed_visits|intcomma }}
-                        </span>
-                    </p>
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        Rationale: 2024 example — 144 ED visits prevented; 69%
-                        had reduced ER use. Unit cost ≈ $1,146 per ED encounter.
+                    <p>
+                        The metrics below represent <strong class="font-semibold text-gray-900 dark:text-white">observed reductions in emergency service utilization</strong> and their associated cost savings using conservative unit rates. These figures demonstrate how proactive, community-based care delivery generates measurable value for both patients and the healthcare system.
                     </p>
                 </div>
             </div>
-            <!-- Methods + Limitations -->
-            <div class="mt-0 rounded-2xl bg-white/50 dark:bg-gray-900/40 backdrop-blur-sm">
-                <p class="text-[11px] font-semibold tracking-wide text-gray-600 dark:text-gray-300 uppercase mb-2">
-                    Methods (pre–post within-person)
-                </p>
-                <ul class="space-y-2 text-[0.95rem] text-gray-700 dark:text-gray-300 leading-relaxed">
-                    <li class="flex gap-2">
-                        <span class="mt-2 h-1.5 w-1.5 rounded-full bg-green-400"></span>Equal-length windows (e.g., 6 months) before and after
-                        enrollment, per patient.
-                    </li>
-                    <li class="flex gap-2">
-                        <span class="mt-2 h-1.5 w-1.5 rounded-full bg-green-400"></span>Metrics: 911 call volume, ambulance transports, and ED
-                        encounters.
-                    </li>
-                    <li class="flex gap-2">
-                        <span class="mt-2 h-1.5 w-1.5 rounded-full bg-green-400"></span>Changes linked to documented clinical contacts within
-                        the observation window.
-                    </li>
-                    <li class="flex gap-2">
-                        <span class="mt-2 h-1.5 w-1.5 rounded-full bg-green-400"></span>Costs use conservative base rates;
-                        procedures/diagnostics not included.
-                    </li>
-                </ul>
+        </div>
+    </section>
+
+    {# Key Performance Indicators Section #}
+    <section class="mb-16">
+        <div class="relative mb-12">
+            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                <div class="w-full border-t border-slate-300/70 dark:border-slate-700/70"></div>
+            </div>
+            <div class="relative flex justify-start">
+                <div class="bg-white pr-8 dark:bg-gray-900">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/30">
+                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Key Performance Indicators</h2>
+                            <p class="text-sm text-gray-600 dark:text-slate-400">Total avoided costs and utilization reductions</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</section>
-<!-- Year-by-Year Savings -->
-<section class="col-span-12">
-    <div class="px-6 sm:px-12 md:px-20 lg:overflow-visible">
-        <!-- divider -->
-        <div class="my-16">
-            <div class="h-px bg-gradient-to-r from-transparent via-gray-300/60 to-transparent dark:via-white/15"></div>
+
+        {# KPI Cards Grid #}
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-12">
+            {# 911 Calls Prevented Card #}
+            <article class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80">
+                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 dark:border-slate-700/50 dark:from-slate-800/30">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 ring-4 ring-red-50 dark:bg-red-500/20 dark:ring-red-900/30">
+                                <svg class="h-5 w-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-red-600/80 dark:text-red-400/80">Emergency Calls</p>
+                                <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">911 Calls Prevented</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <p class="text-5xl font-bold tabular-nums text-gray-900 dark:text-white">{{ cost_metrics.calls_prevented }}</p>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">calls avoided through intervention</p>
+                    </div>
+                    <div class="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">Cost Avoided</p>
+                        <p class="mt-1 text-2xl font-bold tabular-nums text-green-900 dark:text-green-300">${{ cost_metrics.savings_breakdown.911_non_transport|intcomma }}</p>
+                    </div>
+                    <p class="mt-4 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                        Based on observed pre/post reductions. Unit rate ≈ $1,900 per non-transport call response.
+                    </p>
+                </div>
+            </article>
+
+            {# Ambulance Transports Averted Card #}
+            <article class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80">
+                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 dark:border-slate-700/50 dark:from-slate-800/30">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-100 ring-4 ring-orange-50 dark:bg-orange-500/20 dark:ring-orange-900/30">
+                                <svg class="h-5 w-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-orange-600/80 dark:text-orange-400/80">Ambulance</p>
+                                <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">Transports Averted</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <p class="text-5xl font-bold tabular-nums text-gray-900 dark:text-white">{{ cost_metrics.transports_averted }}</p>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">unnecessary transports prevented</p>
+                    </div>
+                    <div class="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">Cost Avoided</p>
+                        <p class="mt-1 text-2xl font-bold tabular-nums text-green-900 dark:text-green-300">${{ cost_metrics.savings_breakdown.transports|intcomma }}</p>
+                    </div>
+                    <p class="mt-4 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                        CPM intervention prevented transports. Unit cost ≈ $3,800 per ambulance transport to ED.
+                    </p>
+                </div>
+            </article>
+
+            {# ED Visits Avoided Card #}
+            <article class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80">
+                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 dark:border-slate-700/50 dark:from-slate-800/30">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 ring-4 ring-blue-50 dark:bg-blue-500/20 dark:ring-blue-900/30">
+                                <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-blue-600/80 dark:text-blue-400/80">Hospital</p>
+                                <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">ED Visits Avoided</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <p class="text-5xl font-bold tabular-nums text-gray-900 dark:text-white">{{ cost_metrics.ed_visits_avoided }}</p>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">emergency department encounters prevented</p>
+                    </div>
+                    <div class="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">Cost Avoided</p>
+                        <p class="mt-1 text-2xl font-bold tabular-nums text-green-900 dark:text-green-300">${{ cost_metrics.savings_breakdown.ed_visits|intcomma }}</p>
+                    </div>
+                    <p class="mt-4 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                        Observed reductions in ED utilization post-enrollment. Unit cost ≈ $1,146 per ED encounter.
+                    </p>
+                </div>
+            </article>
         </div>
-        <div class="overflow-hidden bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm">
-            <div class="py-4">
-                <p class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400">Year-by-Year Savings</p>
-                <h2 class="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white">
-                    Annual avoided costs and utilization
-                </h2>
-                <p class="mt-3 mb-4 text-md sm:text-base text-gray-700 dark:text-gray-300 max-w-prose">
-                    Annual totals by year for patients served, 911 calls prevented, transports averted, ED visits avoided, and total system savings.
-                </p>
+
+        {# Total System Savings - Highlight Card #}
+        <div class="mx-auto max-w-3xl mb-12">
+            <div class="relative overflow-hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-8 shadow-2xl shadow-green-500/20 dark:border-green-700/50 dark:from-green-900/30 dark:to-emerald-900/30 dark:shadow-green-900/40">
+                <div class="absolute right-0 top-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-green-400/20 blur-3xl"></div>
+                <div class="relative">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-600 shadow-lg">
+                            <svg class="h-7 w-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold uppercase tracking-wider text-green-700 dark:text-green-400">Total System Savings</p>
+                            <p class="text-xs text-green-600 dark:text-green-500">Combined avoided costs across all metrics</p>
+                        </div>
+                    </div>
+                    <p class="text-6xl font-bold tabular-nums text-green-900 dark:text-green-300">${{ cost_metrics.total_savings|intcomma }}</p>
+                </div>
             </div>
-            <!-- Yearly Savings Table -->
+        </div>
+
+        {# Methodology Card #}
+        <div class="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
+            <div class="flex items-start gap-3 mb-6">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 ring-4 ring-indigo-50 dark:bg-indigo-500/20 dark:ring-indigo-900/30">
+                    <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Methodology</h3>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Pre–post within-person comparison design</p>
+                </div>
+            </div>
+            <ul class="space-y-3 text-base text-gray-700 dark:text-gray-300">
+                <li class="flex gap-3">
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Equal-length observation windows (e.g., 6 months) before and after enrollment for each patient</span>
+                </li>
+                <li class="flex gap-3">
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Tracked metrics: 911 call volume, ambulance transport events, and emergency department encounters</span>
+                </li>
+                <li class="flex gap-3">
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Utilization changes linked to documented community paramedic contacts within observation period</span>
+                </li>
+                <li class="flex gap-3">
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Cost calculations use conservative base unit rates; does not include additional procedures, diagnostics, or downstream care</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+    <section>
+        {# Yearly Savings Table #}
+        <div class="rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
             <div
-                class="relative flex flex-col w-full bg-white/60 dark:bg-gray-900/40 shadow-sm rounded-2xl bg-clip-border ring-1 ring-white/10 mt-2 overflow-x-auto md:overflow-x-visible overflow-y-visible"
+                class="relative flex flex-col w-full overflow-x-auto"
                 x-data="(() => {
                     const el = document.getElementById('yearly-breakdown-data');
                     const rows = el ? JSON.parse(el.textContent) : [];
@@ -312,8 +346,6 @@
                 </table>
             </div>
         </div>
-    </div>
-</section>
-</div>
+    </section>
 </div>
 {% endblock content %}

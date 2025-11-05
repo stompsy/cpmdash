@@ -101,14 +101,18 @@ def build_pcp_agency_coverage_map(theme: str) -> str:
             font=dict(size=16),
         ),
         showlegend=False,
-    )
-
-    fig.update_xaxes(showgrid=True, gridcolor="rgba(128,128,128,0.1)")
-    fig.update_yaxes(
-        showgrid=False,
-        tickfont=dict(size=11),
-        ticklabelposition="outside left",
-        ticklabelstandoff=20,  # Add 10px gap between labels and plot area
+        xaxis=dict(
+            showgrid=True,
+            gridcolor="rgba(128,128,128,0.25)",  # Higher opacity for visibility
+            gridwidth=1.5,  # Thicker lines
+            griddash="solid",
+        ),
+        yaxis=dict(
+            showgrid=False,
+            tickfont=dict(size=11),
+            ticklabelposition="outside left",
+            ticklabelstandoff=20,
+        ),
     )
 
     config = {
@@ -227,10 +231,17 @@ def build_zip_code_heat_map(theme: str) -> str:
             font=dict(size=16),
         ),
         showlegend=False,
+        xaxis=dict(
+            showgrid=True,
+            gridcolor="rgba(128,128,128,0.25)",  # Higher opacity for visibility
+            gridwidth=1.5,  # Thicker lines
+            griddash="solid",
+        ),
+        yaxis=dict(
+            showgrid=False,
+            tickfont=dict(size=12),
+        ),
     )
-
-    fig.update_xaxes(showgrid=True, gridcolor="rgba(128,128,128,0.1)")
-    fig.update_yaxes(showgrid=False, tickfont=dict(size=12))
 
     config = {
         "responsive": True,

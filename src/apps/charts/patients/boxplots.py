@@ -41,10 +41,35 @@ def build_patients_age_by_sex_boxplot(theme: str) -> str:
         color_discrete_sequence=PATIENT_CHART_COLORS,  # Use standardized colors
     )
     fig = style_plotly_layout(fig, theme=theme, x_title="Sex", y_title="Age", scroll_zoom=False)
+
+    # Add darkened horizontal gridlines
+    fig.update_yaxes(
+        showgrid=True,
+        gridcolor="rgba(128,128,128,0.15)",
+        layer="below traces",
+    )
+    fig.update_xaxes(showgrid=False)
+
     return plot(
         fig,
         output_type="div",
-        config=getattr(fig, "_config", {"responsive": True, "displaylogo": False}),
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
     )
 
 
@@ -57,20 +82,77 @@ def build_patients_age_by_race_boxplot(theme: str) -> str:
     # Filter out undesired labels
     df["race"] = df["race"].astype(str).str.strip()
     df = df[~df["race"].str.lower().isin({"not disclosed", "single"})]
-    # Order by count
+
+    # Wrap long race labels for better display
+    race_label_mapping = {
+        "American Indian or Alaska Native": "American Indian or<br>Alaska Native",
+        "Black or African American": "Black or<br>African American",
+        "Hispanic or Latino": "Hispanic or<br>Latino",
+        "Hawaiian or Other Pacific Islander": "Hawaiian or Other<br>Pacific Islander",
+    }
+    df["race"] = df["race"].replace(race_label_mapping)
+
+    # Order by count (descending)
     order = df["race"].value_counts().sort_values(ascending=False).index.tolist()
+
+    # Use horizontal orientation (swap x and y) for better label visibility on narrow screens
     fig = px.box(
         df,
-        x="race",
-        y="age",
+        y="race",  # Race on y-axis (vertical labels have more room)
+        x="age",  # Age on x-axis
         color="race",
         points="all",
+        orientation="h",  # Horizontal boxplots
         category_orders={"race": order},
         color_discrete_sequence=PATIENT_CHART_COLORS,  # Use standardized colors
     )
-    fig = style_plotly_layout(fig, theme=theme, x_title="Race", y_title="Age", scroll_zoom=False)
+
+    fig = style_plotly_layout(
+        fig,
+        theme=theme,
+        x_title="Age",  # Swapped labels
+        y_title="Race",
+        scroll_zoom=False,
+        margin={
+            "t": 40,
+            "l": 20,
+            "r": 20,
+            "b": 60,
+        },  # Minimal margins, let automargin and ticklabelstandoff control spacing
+    )
+
+    # Configure x-axis to constrain gridlines to plot area
+    fig.update_xaxes(
+        showgrid=True,
+        gridcolor="rgba(128,128,128,0.15)",
+        layer="below traces",  # Ensure grid is behind data
+    )
+
+    # Configure y-axis with minimal gap between labels and axis
+    fig.update_yaxes(
+        showgrid=False,  # No horizontal gridlines for categorical y-axis
+        automargin=True,  # Let Plotly calculate needed space for labels
+        ticklabelstandoff=2,  # Minimal gap (~1/8 inch at 96 DPI) between labels and axis
+    )
+
     return plot(
         fig,
         output_type="div",
-        config=getattr(fig, "_config", {"responsive": True, "displaylogo": False}),
+        config={
+            "responsive": True,
+            "displaylogo": False,
+            "displayModeBar": "hover",
+            "modeBarButtonsToRemove": [
+                "zoom2d",
+                "pan2d",
+                "select2d",
+                "lasso2d",
+                "zoomIn2d",
+                "zoomOut2d",
+                "autoScale2d",
+                "hoverClosestCartesian",
+                "hoverCompareCartesian",
+                "toggleSpikelines",
+            ],
+        },
     )

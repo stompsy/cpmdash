@@ -14,18 +14,20 @@ from ...core.models import ODReferrals
 def build_chart_all_cases_scatter(theme):
     odreferrals = ODReferrals.objects.all()
     df = pd.DataFrame.from_records(
-        odreferrals.values(
-            "patient_id",
-            "od_date",
-            "disposition",
-            "patient_age",
-            "patient_sex",
-            "narcan_doses_prior_to_ems",
-            "narcan_prior_to_ems_dosage",
-            "jail_start_1",
-            "jail_end_1",
-            "jail_start_2",
-            "jail_end_2",
+        list(
+            odreferrals.values(
+                "patient_id",
+                "od_date",
+                "disposition",
+                "patient_age",
+                "patient_sex",
+                "narcan_doses_prior_to_ems",
+                "narcan_prior_to_ems_dosage",
+                "jail_start_1",
+                "jail_end_1",
+                "jail_start_2",
+                "jail_end_2",
+            )
         )
     )
 
@@ -403,7 +405,7 @@ def create_calendar_heatmap(df, y_categories):
 
     # Create a pivot table for heatmap
     df_copy = df.copy()
-    df_copy["year_month"] = df_copy["od_date"].dt.to_period("M").astype(str)
+    df_copy["year_month"] = df_copy["od_date"].dt.tz_localize(None).dt.to_period("M").astype(str)
 
     # Count overdoses per patient per month
     heatmap_data = (

@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from apps.core.views import accessibility, privacy, terms
 from apps.core.views import overview as core_overview
 
 urlpatterns = [
@@ -16,8 +17,11 @@ urlpatterns = [
     path("partials/", include("apps.partials_viewer.urls")),
     path("blog/", include("apps.blog.urls")),
     path("tasks/", include("apps.tasks.urls")),
-    path("", core_overview, name="home"),
     path("cases/", include("apps.cases.urls")),
+    path("privacy/", privacy, name="privacy"),
+    path("terms/", terms, name="terms"),
+    path("accessibility/", accessibility, name="accessibility"),
+    path("", core_overview, name="home"),
 ]
 
 if settings.DEBUG:

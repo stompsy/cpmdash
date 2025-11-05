@@ -107,7 +107,7 @@ def _build_jawg_provider() -> TileProvider:
     token = getattr(settings, "JAWG_ACCESS_TOKEN", "")
     if not token:
         raise RuntimeError(
-            "JAWG_ACCESS_TOKEN is not configured. Add it to your .env file to render Jawg basemaps."
+            "w_ACCESS_TOKEN is not configured. Add it to your .env file to render Jawg basemaps."
         )
     return TileProvider(
         name="Jawg Streets",

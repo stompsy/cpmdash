@@ -5,7 +5,7 @@
 
 {% block page_header %}
     {% static 'media/pafd_cpm.jpg' as patients_header_image %}
-    {% with eyebrow="Program overviews" title="Patient profile distributions" description="Quick demographic and attribute summaries for all registered patients. Each chart surfaces one field from the Patients model so you can spot trends at a glance and tailor outreach." image_src=patients_header_image image_alt="Community paramedics preparing to support residents" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
+    {% with eyebrow="Program overviews" title="Patient profile distributions" description="Quick demographic and attribute summaries for all registered patients. Each chart surfaces one field from the Patients model so you can spot trends at a glance and tailor outreach." image_src=patients_header_image image_alt="Community paramedics preparing to support residents" image_width="960" image_height="640" image_position="center 45%" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
         {% include "partials/page_header.html" %}
     {% endwith %}
 {% endblock page_header %}
@@ -14,11 +14,11 @@
     <div class="col-span-12 mx-auto w-full max-w-7xl">
         <span data-page-name="patientsOverview" class="hidden" hidden></span>
 
-        {# Executive Summary - Story Sections #}
-        {% include "dashboard/partials/story_sections.html" with story_sections=story_sections %}
+        {# Yearly Accordions #}
+        {% include "dashboard/partials/yearly_accordions.html" with yearly_accordions=yearly_accordions %}
 
         {# Section Divider + Heading #}
-        <div class="relative mt-20 mb-12">
+        <div class="relative mt-12 mb-12">
             <div class="absolute inset-0 flex items-center" aria-hidden="true">
                 <div class="w-full border-t border-slate-300/70 dark:border-slate-700/70"></div>
             </div>
@@ -40,13 +40,13 @@
         </div>
 
         {# Charts Grid #}
-        <div class="grid grid-cols-1 gap-8 pb-24 lg:grid-cols-2 lg:gap-10">
+        <div class="grid grid-cols-1 gap-8 mb-16 lg:grid-cols-2 lg:gap-10">
             {% if chart_cards %}
                 {% for card in chart_cards %}
-                    <div class="{% if card.col_span == 2 %}lg:col-span-2{% endif %}">
+                    <div class="{% if card.col_span == 2 %}lg:col-span-2{% else %}flex{% endif %}">
                         <article
                             id="patient-chart-{{ card.field }}"
-                            class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80"
+                            class="group relative w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80"
                             hx-get="{% url 'dashboard:patients_chart_fragment' card.field %}"
                             hx-trigger="load"
                             hx-target="this"

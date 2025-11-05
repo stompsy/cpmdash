@@ -61,6 +61,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "apps.core.middleware.GlobalLoginRequiredMiddleware",  # Require login for all pages
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -146,7 +147,9 @@ ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_EMAIL_VERIFICATION = "optional"  # can switch to 'mandatory' later
 ACCOUNT_SIGNUP_FIELDS = ["username*", "email", "password1*", "password2*"]
 ACCOUNT_RATE_LIMITS = {"login_failed": "5/5m"}
-ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
+# Disable public signup - users must be created by admins
+ACCOUNT_ADAPTER = "apps.accounts.adapter.NoSignupAccountAdapter"
+ACCOUNT_FORMS = {"signup": "apps.accounts.forms.DisabledSignupForm"}
 
 # Optional: require login for dashboard pages. Enable to gate /dashboard/* behind auth.
 LOGIN_REQUIRED = False

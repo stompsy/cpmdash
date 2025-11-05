@@ -41,8 +41,8 @@ def style_plotly_layout(
     fig: Any,
     theme: str = "dark",
     hovermode_unified: bool = False,
-    axis_font_size: int = 13,
-    font_family: str = "Roboto",
+    axis_font_size: int = 14,
+    font_family: str = "Arial, sans-serif",
     scroll_zoom: bool = True,
     show_legend: bool = False,
     show_modebar: bool = True,
@@ -72,18 +72,20 @@ def style_plotly_layout(
         xaxis=dict(
             title=x_title if x_title else None,
             title_font=dict(size=axis_font_size, color=colors["axis_font_color"]),
+            title_standoff=15,  # ~1/8 inch gap from axis
             showgrid=True,
             gridcolor=colors["grid_color"],
             zeroline=False,
-            tickfont=dict(color=colors["tick_color"]),
+            tickfont=dict(size=axis_font_size, color=colors["tick_color"]),
         ),
         yaxis=dict(
             title=y_title if y_title else None,
             title_font=dict(size=axis_font_size, color=colors["axis_font_color"]),
+            title_standoff=15,  # ~1/8 inch gap from axis
             showgrid=True,
             gridcolor=colors["grid_color"],
             zeroline=False,
-            tickfont=dict(color=colors["tick_color"]),
+            tickfont=dict(size=axis_font_size, color=colors["tick_color"]),
         ),
         margin=margin,
         height=height,
@@ -97,7 +99,7 @@ def style_plotly_layout(
         hoverlabel=dict(
             bgcolor=colors["hover_bg"],
             bordercolor=colors["hover_border"],
-            font=dict(family="Roboto, sans-serif", size=14, color=colors["hover_font"]),
+            font=dict(family="Arial, sans-serif", size=14, color=colors["hover_font"]),
             namelength=-1,
             align="left",
         ),

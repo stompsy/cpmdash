@@ -107,37 +107,6 @@ def test_shiftcoverage_with_early_evening_extension(client, monkeypatch):
     assert resp.context["proposed_coverage"] >= resp.context["current_coverage"]
 
 
-def test_repeatods_statistics_content(client, monkeypatch):
-    """Ensure repeat overdose year-by-year stats computed correctly."""
-    from apps.dashboard import views as dashboard_views
-
-    monkeypatch.setattr(
-        dashboard_views,
-        "build_chart_repeats_scatter",
-        lambda theme=None: "<div id='repeats'></div>",
-    )
-    ODReferrals.objects.all().delete()
-    # Year 2024: patient 1 (3 overdoses), patient 2 (1) => repeat_overdoses=3, total=4 => 75.0%
-    for _ in range(3):
-        ODReferrals.objects.create(od_date=make_dt(2024, 5, 1, 10), patient_id=1)
-    ODReferrals.objects.create(od_date=make_dt(2024, 6, 1, 12), patient_id=2)
-    # Year 2025: patient 3 (2), patient 4 (2) => repeat_overdoses=4, total=4 => 100.0%
-    for pid in (3, 4):
-        ODReferrals.objects.create(od_date=make_dt(2025, 1, 6, 9), patient_id=pid)
-        ODReferrals.objects.create(od_date=make_dt(2025, 1, 7, 9), patient_id=pid)
-
-    resp = client.get(reverse("dashboard:odreferrals_repeat_overdoses"))
-    assert resp.status_code == 200
-    stats = resp.context["repeat_stats_by_year"]
-    by_year = {s["year"]: s for s in stats}
-    assert by_year[2024]["repeat_overdoses"] == 3
-    assert by_year[2024]["repeat_patients"] == 1
-    assert by_year[2024]["percent_repeat"] == 75.0
-    assert by_year[2025]["repeat_overdoses"] == 4
-    assert by_year[2025]["repeat_patients"] == 2
-    assert by_year[2025]["percent_repeat"] == 100.0
-
-
 def test_set_theme_cookie_invalid_not_set(rf):
     from django.http import HttpResponse
 

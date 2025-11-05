@@ -14,13 +14,13 @@ from ..charts.overdose.od_shift_scenarios import (
 
 
 def _get_opshielding_context() -> dict[str, object]:
-    updated_on = date(2025, 1, 17)
+    updated_on = date(2025, 10, 28)
     return {
         "title": "PORT Referrals",
         "description": "Case Studies - OP Shielding Hope",
         "page_header_updated_at": updated_on,
         "page_header_updated_at_iso": updated_on.isoformat(),
-        "page_header_read_time": "6 min read",
+        "page_header_read_time": "4 min read",
     }
 
 
@@ -36,10 +36,6 @@ def opshield(request):
 
 def shiftcoverage(request):
     return redirect("dashboard:odreferrals_shift_coverage")
-
-
-def repeatods(request):
-    return redirect("dashboard:odreferrals_repeat_overdoses")
 
 
 def costsavings(request):

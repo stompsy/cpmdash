@@ -1,3 +1,4 @@
+{% load humanize %}
 {% comment %}
 Reusable page header inspired by the blog hero layout.
 Expected context variables:
@@ -20,17 +21,46 @@ Expected context variables:
     updated_at: Optional datetime or formatted string for "Last updated"
     updated_at_iso: Optional ISO-8601 string for the datetime attribute
     read_time: Optional preformatted read-time label (e.g., "6 min read")
+    show_stats: Optional boolean to display cost savings stats (requires cost_metrics context)
+    image_position: Optional background-position for the header image (defaults to "center center")
 {% endcomment %}
 <section
     class="relative overflow-hidden rounded-2xl bg-slate-950 px-6 py-16 text-white shadow-2xl shadow-slate-900/20 sm:px-10 lg:px-16 dark:shadow-slate-950/40"
     {% if image_src %}
-        style="background-image: linear-gradient(95deg, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.88) 35%, rgba(15,23,42,0.44) 70%, rgba(15,23,42,0.15) 90%, rgba(15,23,42,0) 100%), radial-gradient(circle at top left, rgba(94,234,212,0.12), rgba(94,234,212,0) 60%), url('{{ image_src|escape }}'); background-size: 100% 100%, 100% 100%, cover; background-position: center center, left top, center center; background-repeat: no-repeat;"
+        style="background-image: linear-gradient(95deg, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.88) 35%, rgba(15,23,42,0.44) 70%, rgba(15,23,42,0.15) 90%, rgba(15,23,42,0) 100%), radial-gradient(circle at top left, rgba(94,234,212,0.12), rgba(94,234,212,0) 60%), url('{{ image_src|escape }}'); background-size: 100% 100%, 100% 100%, cover; background-position: center center, left top, {% if image_position %}{{ image_position }}{% else %}center center{% endif %}; background-repeat: no-repeat;"
     {% endif %}
 >
     {# Decorative gradient blob #}
     <div class="pointer-events-none absolute right-[-18%] top-[-28%] h-[30rem] w-[30rem] rounded-full bg-brand-400/16 blur-[140px]"></div>
 
-    <div class="relative mx-auto max-w-6xl space-y-8">
+    {# Hash overlay pattern with fade and rotation #}
+    <style>
+    /* Moved from inline style to a class to avoid inline styles (H021) */
+    .page-header-hash-overlay {
+        background-image: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(255, 255, 255, 0.03) 10px,
+            rgba(255, 255, 255, 0.03) 20px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 10px,
+            rgba(255, 255, 255, 0.03) 10px,
+            rgba(255, 255, 255, 0.03) 20px
+        ),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+        transform: rotate(-3deg) scale(1.2);
+        mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+        -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+    }
+    </style>
+
+    <div class="pointer-events-none absolute inset-0 opacity-30 page-header-hash-overlay"></div>
+
+    <div class="relative mx-auto max-w-7xl space-y-8">
         {% if breadcrumbs %}
             <nav class="text-[10px] font-semibold uppercase tracking-[0.45em] text-slate-400" aria-label="Breadcrumb">
                 <ol class="flex flex-wrap items-center gap-3">
@@ -104,10 +134,17 @@ Expected context variables:
                         >
                             {{ primary_label }}
                             {% if primary_icon|default:'arrow' != 'none' %}
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M5 12h14" />
-                                    <path d="m12 5 7 7-7 7" />
-                                </svg>
+                                {% if primary_icon == 'plus' %}
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 5v14" />
+                                        <path d="M5 12h14" />
+                                    </svg>
+                                {% else %}
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M5 12h14" />
+                                        <path d="m12 5 7 7-7 7" />
+                                    </svg>
+                                {% endif %}
                             {% endif %}
                         </a>
                     {% endif %}
