@@ -8,15 +8,23 @@ from django.utils import timezone
 from apps.blog.models import CaseStudy, Tag
 
 
+@pytest.fixture
+def authenticated_client(client, django_user_model):
+    """Fixture providing an authenticated client to bypass GlobalLoginRequiredMiddleware."""
+    user = django_user_model.objects.create_user("testuser", "test@example.com", "password123")
+    client.force_login(user)
+    return client
+
+
 @pytest.mark.django_db
 class TestBlogViews:
-    def test_list_view_empty(self, client):
+    def test_list_view_empty(self, authenticated_client):
         url = reverse("blog:list")
-        resp = client.get(url)
+        resp = authenticated_client.get(url)
         assert resp.status_code == 200
         assert b"No case studies" in resp.content
 
-    def test_list_and_detail_published(self, client):
+    def test_list_and_detail_published(self, authenticated_client):
         post = CaseStudy.objects.create(
             title="Test Post",
             slug="test-post",
@@ -29,19 +37,19 @@ class TestBlogViews:
         t2 = Tag.objects.create(name="community", slug="community")
         post.tags.set([t1, t2])
         list_url = reverse("blog:list")
-        resp = client.get(list_url)
+        resp = authenticated_client.get(list_url)
         assert resp.status_code == 200
         assert post.title.encode() in resp.content
         # word count tooltip presence (title attribute ending with 'words')
         assert b'title="' in resp.content and b'words"' in resp.content
 
         detail_url = reverse("blog:detail", kwargs={"slug": post.slug})
-        resp2 = client.get(detail_url)
+        resp2 = authenticated_client.get(detail_url)
         assert resp2.status_code == 200
         assert post.title.encode() in resp2.content
         assert b'title="' in resp2.content and b'words"' in resp2.content
 
-    def test_detail_unpublished_404(self, client):
+    def test_detail_unpublished_404(self, authenticated_client):
         post = CaseStudy.objects.create(
             title="Draft",
             slug="draft-post",
@@ -49,10 +57,10 @@ class TestBlogViews:
             is_published=False,
         )
         url = reverse("blog:detail", kwargs={"slug": post.slug})
-        resp = client.get(url)
+        resp = authenticated_client.get(url)
         assert resp.status_code == 404
 
-    def test_list_view_htmx_partial(self, client):
+    def test_list_view_htmx_partial(self, authenticated_client):
         # create > paginate_by items to ensure pagination + OOB load-more container
         posts = []
         for i in range(10):
@@ -66,7 +74,7 @@ class TestBlogViews:
                 )
             )
         url = reverse("blog:list")
-        resp = client.get(url, **{"HTTP_HX_REQUEST": "true"})
+        resp = authenticated_client.get(url, **{"HTTP_HX_REQUEST": "true"})
         assert resp.status_code == 200
         assert b'id="cards-grid"' in resp.content
         # Ordered newest-first, so the last created should appear on page 1
@@ -75,7 +83,7 @@ class TestBlogViews:
         # should also OOB include load-more container markup
         assert b'id="load-more-container"' in resp.content
 
-    def test_tag_detail_htmx_partial(self, client):
+    def test_tag_detail_htmx_partial(self, authenticated_client):
         tag = Tag.objects.create(name="alpha", slug="alpha")
         post = CaseStudy.objects.create(
             title="Tag Post",
@@ -86,12 +94,12 @@ class TestBlogViews:
         )
         post.tags.set([tag])
         url = reverse("blog:tag-detail", kwargs={"slug": tag.slug})
-        resp = client.get(url, **{"HTTP_HX_REQUEST": "true"})
+        resp = authenticated_client.get(url, **{"HTTP_HX_REQUEST": "true"})
         assert resp.status_code == 200
         assert b'id="cards-grid"' in resp.content
         assert post.title.encode() in resp.content
 
-    def test_list_view_partial_tag_search(self, client):
+    def test_list_view_partial_tag_search(self, authenticated_client):
         tag = Tag.objects.create(name="Harm Reduction", slug="harm-reduction")
         post = CaseStudy.objects.create(
             title="Naloxone Outreach",
@@ -111,7 +119,7 @@ class TestBlogViews:
         )
 
         url = reverse("blog:list")
-        resp = client.get(url, {"tag": "harm"})
+        resp = authenticated_client.get(url, {"tag": "harm"}, **{"HTTP_HX_REQUEST": "true"})
         assert resp.status_code == 200
         assert post.title.encode() in resp.content
         assert other_post.title.encode() not in resp.content
@@ -133,9 +141,10 @@ def manager_user(django_user_model):
 class TestCaseStudyCrud:
     def test_create_requires_permission(self, client, django_user_model):
         url = reverse("blog:create")
-        # Anonymous users should be redirected to login
+        # GlobalLoginRequiredMiddleware blocks anonymous users with 403
         resp = client.get(url)
-        assert resp.status_code == 302
+        assert resp.status_code == 403
+        # Authenticated users without permission also get 403
         user = django_user_model.objects.create_user("viewer", "viewer@example.com", "pass1234")
         client.force_login(user)
         resp = client.get(url)

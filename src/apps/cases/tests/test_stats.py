@@ -11,6 +11,13 @@ from utils.theme import set_theme_cookie_response
 pytestmark = pytest.mark.django_db
 
 
+@pytest.fixture()
+def authenticated_client(client, django_user_model):
+    user = django_user_model.objects.create_user("testuser", "test@example.com", "password123")
+    client.force_login(user)
+    return client
+
+
 def make_dt(year: int, month: int, day: int, hour: int, minute: int = 0):
     tz = timezone.get_current_timezone()
     return timezone.make_aware(datetime(year, month, day, hour, minute), tz)
@@ -51,7 +58,7 @@ def _stub_charts(monkeypatch: Any) -> None:
     )
 
 
-def test_shiftcoverage_percentage_calculations(client, monkeypatch):
+def test_shiftcoverage_percentage_calculations(authenticated_client, monkeypatch):
     """Verify working / proposed coverage math using controlled timestamps."""
     _stub_charts(monkeypatch)
     ODReferrals.objects.all().delete()
@@ -71,7 +78,7 @@ def test_shiftcoverage_percentage_calculations(client, monkeypatch):
     for idx, dt in enumerate(entries):
         ODReferrals.objects.create(od_date=dt, patient_id=idx + 1)
 
-    resp = client.get(reverse("dashboard:odreferrals_shift_coverage"))
+    resp = authenticated_client.get(reverse("dashboard:odreferrals_shift_coverage"))
     assert resp.status_code == 200
     # 3 of 8 records fall in old working hours => 37.5
     assert resp.context["current_coverage"] == 37.5
@@ -81,7 +88,7 @@ def test_shiftcoverage_percentage_calculations(client, monkeypatch):
     assert resp.context["proposed_coverage"] == 37.5
 
 
-def test_shiftcoverage_with_early_evening_extension(client, monkeypatch):
+def test_shiftcoverage_with_early_evening_extension(authenticated_client, monkeypatch):
     """Adding an early-evening event increases proposed coverage over current."""
     _stub_charts(monkeypatch)
     ODReferrals.objects.all().delete()
@@ -99,7 +106,7 @@ def test_shiftcoverage_with_early_evening_extension(client, monkeypatch):
     ]
     for idx, dt in enumerate(entries):
         ODReferrals.objects.create(od_date=dt, patient_id=idx + 1)
-    resp = client.get(reverse("dashboard:odreferrals_shift_coverage"))
+    resp = authenticated_client.get(reverse("dashboard:odreferrals_shift_coverage"))
     assert resp.status_code == 200
     # old working hours: 3/9 => 33.3
     assert resp.context["current_coverage"] == 33.3

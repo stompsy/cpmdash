@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "apps.dashboard",
+    "apps.charts",
     "apps.cases",
     "apps.partials_viewer",
     "apps.blog",

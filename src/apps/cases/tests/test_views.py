@@ -8,6 +8,13 @@ from utils.theme import get_theme_from_request, set_theme_cookie_response
 pytestmark = pytest.mark.django_db
 
 
+@pytest.fixture()
+def authenticated_client(client, django_user_model):
+    user = django_user_model.objects.create_user("testuser", "test@example.com", "password123")
+    client.force_login(user)
+    return client
+
+
 @pytest.fixture
 def odreferral_factory():
     def make(**kwargs):
@@ -23,25 +30,25 @@ def minimal_odreferral(odreferral_factory):
     return odreferral_factory()
 
 
-def test_opshield_page(client):
-    resp = client.get(reverse("cases:opshield"))
+def test_opshield_page(authenticated_client):
+    resp = authenticated_client.get(reverse("cases:opshield"))
     assert resp.status_code == 200
     assert b"Operation Shielding Hope" in resp.content
 
 
-def test_shiftcoverage_redirects_to_dashboard(client):
-    resp = client.get(reverse("cases:shiftcoverage"))
+def test_shiftcoverage_redirects_to_dashboard(authenticated_client):
+    resp = authenticated_client.get(reverse("cases:shiftcoverage"))
     assert resp.status_code == 302
     assert resp.url == reverse("dashboard:odreferrals_shift_coverage")
 
 
-def test_costsavings_page(client):
-    resp = client.get(reverse("cases:costsavings"))
+def test_costsavings_page(authenticated_client):
+    resp = authenticated_client.get(reverse("cases:costsavings"))
     assert resp.status_code == 200
     assert b"Cost Savings" in resp.content or b"Cost" in resp.content
 
 
-def test_htmx_heatmap_endpoint(client, monkeypatch):
+def test_htmx_heatmap_endpoint(authenticated_client, monkeypatch):
     from apps.cases import views
 
     monkeypatch.setattr(
@@ -49,40 +56,40 @@ def test_htmx_heatmap_endpoint(client, monkeypatch):
         "build_chart_od_density_heatmap",
         lambda theme=None: ("<svg id='density'></svg>", None),
     )
-    resp = client.get(reverse("cases:htmx_heatmap"))
+    resp = authenticated_client.get(reverse("cases:htmx_heatmap"))
     assert resp.status_code == 200
     assert b"density" in resp.content
 
 
-def test_htmx_hourly_breakdown_endpoint(client, monkeypatch):
+def test_htmx_hourly_breakdown_endpoint(authenticated_client, monkeypatch):
     from apps.cases import views
 
     monkeypatch.setattr(
         views, "build_chart_od_hourly_breakdown", lambda theme=None: "<svg id='hourly'></svg>"
     )
-    resp = client.get(reverse("cases:htmx_hourly_breakdown"))
+    resp = authenticated_client.get(reverse("cases:htmx_hourly_breakdown"))
     assert resp.status_code == 200
     assert b"hourly" in resp.content
 
 
-def test_htmx_shift_scenarios_endpoint(client, monkeypatch):
+def test_htmx_shift_scenarios_endpoint(authenticated_client, monkeypatch):
     from apps.cases import views
 
     monkeypatch.setattr(
         views, "build_chart_shift_scenarios", lambda theme=None: "<div id='shift'></div>"
     )
-    resp = client.get(reverse("cases:htmx_shift_scenarios"))
+    resp = authenticated_client.get(reverse("cases:htmx_shift_scenarios"))
     assert resp.status_code == 200
     assert b"shift" in resp.content
 
 
-def test_htmx_cost_benefit_endpoint(client, monkeypatch):
+def test_htmx_cost_benefit_endpoint(authenticated_client, monkeypatch):
     from apps.cases import views
 
     monkeypatch.setattr(
         views, "build_chart_cost_benefit_analysis", lambda theme=None: "<div id='cost'></div>"
     )
-    resp = client.get(reverse("cases:htmx_cost_benefit"))
+    resp = authenticated_client.get(reverse("cases:htmx_cost_benefit"))
     assert resp.status_code == 200
     assert b"cost" in resp.content
 
