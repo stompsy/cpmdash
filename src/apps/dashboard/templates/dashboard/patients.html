@@ -40,7 +40,7 @@
         <div class="grid grid-cols-1 gap-8 mb-16 lg:grid-cols-2 lg:gap-10">
             {% if chart_cards %}
                 {% for card in chart_cards %}
-                    <div class="{% if card.col_span == 2 %}lg:col-span-2{% else %}flex{% endif %}">
+                    <div class="{% if card.col_span == 2 %}lg:col-span-2{% endif %}">
                         <article
                             id="patient-chart-{{ card.field }}"
                             class="group relative w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80"

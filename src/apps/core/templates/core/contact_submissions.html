@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block pageName %}contactSubmissions{% endblock pageName %}
+{% block title %}Contact Submissions{% endblock title %}
+
+{% block page_header %}
+    {% static 'media/brian_kneeling_dark.png' as header_image %}
+    {% with eyebrow="Administration" title="Contact Submissions" description="Review and manage inquiries submitted through the public contact form." image_src=header_image image_alt="Contact submissions" image_width="960" image_height="640" %}
+        {% include "partials/page_header.html" %}
+    {% endwith %}
+{% endblock page_header %}
+
+{% block content %}
+<div class="col-span-12 mx-auto mt-16 w-full max-w-7xl">
+    <span data-page-name="contactSubmissions" class="hidden" hidden></span>
+
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                <thead class="bg-slate-50 dark:bg-slate-800/50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Organization</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Contact</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Message</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
+                    {% for submission in submissions %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+                            {{ submission.created_at|date:"M d, Y H:i" }}
+                        </td>
+                        <td class="whitespace-nowrap px-6 py-4">
+                            <div class="text-sm font-medium text-slate-900 dark:text-white">{{ submission.first_name }} {{ submission.last_name }}</div>
+                        </td>
+                        <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+                            {{ submission.organization|default:"-" }}
+                        </td>
+                        <td class="whitespace-nowrap px-6 py-4">
+                            <div class="text-sm text-slate-900 dark:text-white">{{ submission.email }}</div>
+                            {% if submission.phone_number %}
+                            <div class="text-xs text-slate-500 dark:text-slate-400">{{ submission.phone_number }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 max-w-md truncate" title="{{ submission.message }}">
+                            {{ submission.message }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+                            No submissions found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock content %}

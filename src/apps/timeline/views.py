@@ -12,7 +12,7 @@ def timeline_view(request: HttpRequest) -> HttpResponse:
     """Render the Community Paramedicine program timeline."""
     entries = timeline_store.get_all()
 
-    updated_on = date(2025, 1, 20)
+    updated_on = date(2025, 11, 30)
 
     context = {
         "title": "PAFD Community Paramedicine Program Timeline",

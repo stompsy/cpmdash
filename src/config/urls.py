@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from apps.core.views import accessibility, privacy, terms
+from apps.core.views import accessibility, contact_submissions_list, contact_submit, privacy, terms
 from apps.core.views import overview as core_overview
 
 urlpatterns = [
@@ -22,6 +22,8 @@ urlpatterns = [
     path("privacy/", privacy, name="privacy"),
     path("terms/", terms, name="terms"),
     path("accessibility/", accessibility, name="accessibility"),
+    path("contact/submit/", contact_submit, name="contact_submit"),
+    path("administration/submissions/", contact_submissions_list, name="contact_submissions"),
     path("", core_overview, name="home"),
 ]
 

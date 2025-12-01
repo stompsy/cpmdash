@@ -26,14 +26,6 @@
         <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script src="https://d3js.org/d3.v7.min.js"></script>
-        <script>
-            // Scroll to top on HTMX navigation
-            document.addEventListener('htmx:afterSwap', function(event) {
-                if (event.detail.target.id === 'dashboard-main') {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            });
-        </script>
     </head>
     <body
         x-data="{
@@ -64,6 +56,7 @@
 
             <!-- ===== Content Area Start ===== -->
             <div
+                id="main-content-scroll-area"
                 class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
             >
                 <!-- Small Device Overlay Start -->
@@ -73,6 +66,46 @@
                 <!-- ===== Header Start ===== -->
                 {% include "partials/header.html" %}
                 <!-- ===== Header End ===== -->
+
+                <!-- Toasts: sticky overlay in content area -->
+                {% if messages %}
+                <div class="sticky top-24 z-[100000] flex w-full justify-center pointer-events-none h-0 overflow-visible">
+                    <div class="flex w-full max-w-sm flex-col gap-3 pointer-events-auto px-4 sm:px-0">
+                        {% for message in messages %}
+                        <div
+                            x-data="{
+                                open: true,
+                                timer: null,
+                                scheduleHide(delay = 6000) {
+                                    if (this.timer) clearTimeout(this.timer);
+                                    this.timer = setTimeout(() => this.open = false, delay);
+                                }
+                            }"
+                            x-init="scheduleHide()"
+                            x-show="open"
+                            x-transition.opacity.duration.250ms
+                            @mouseenter="if (timer) clearTimeout(timer)"
+                            @mouseleave="scheduleHide(3000)"
+                            role="alert"
+                            aria-live="assertive"
+                            class="relative flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm text-slate-100 shadow-xl backdrop-blur {% if 'error' in message.tags %}!border-rose-500/50 !bg-rose-500/15 !text-rose-100{% elif 'success' in message.tags %}!border-emerald-400/40 !bg-emerald-400/15 !text-emerald-100{% endif %}"
+                        >
+                            <span class="flex-1 leading-relaxed">{{ message }}</span>
+                            <button
+                                type="button"
+                                class="shrink-0 rounded-full p-1 text-slate-200/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                                @click="open = false"
+                                aria-label="Dismiss notification"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 0 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- ===== Main Content Start ===== -->
                 <main id="dashboard-main">
@@ -92,44 +125,6 @@
             <!-- ===== Content Area End ===== -->
         </div>
         <!-- ===== Page Wrapper End ===== -->
-
-        <!-- Toasts: fixed overlay -->
-        {% if messages %}
-        <div class="pointer-events-none fixed top-4 right-4 z-[100] flex max-h-[calc(100vh-2rem)] w-full max-w-sm flex-col gap-3 overflow-y-auto">
-            {% for message in messages %}
-            <div
-                x-data="{
-                    open: true,
-                    timer: null,
-                    scheduleHide(delay = 6000) {
-                        if (this.timer) clearTimeout(this.timer);
-                        this.timer = setTimeout(() => this.open = false, delay);
-                    }
-                }"
-                x-init="scheduleHide()"
-                x-show="open"
-                x-transition.opacity.duration.250ms
-                @mouseenter="if (timer) clearTimeout(timer)"
-                @mouseleave="scheduleHide(3000)"
-                role="alert"
-                aria-live="assertive"
-                class="pointer-events-auto relative flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm text-slate-100 shadow-xl backdrop-blur {% if 'error' in message.tags %}!border-rose-500/50 !bg-rose-500/15 !text-rose-100{% elif 'success' in message.tags %}!border-emerald-400/40 !bg-emerald-400/15 !text-emerald-100{% endif %}"
-            >
-                <span class="flex-1 leading-relaxed">{{ message }}</span>
-                <button
-                    type="button"
-                    class="shrink-0 rounded-full p-1 text-slate-200/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
-                    @click="open = false"
-                    aria-label="Dismiss notification"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 0 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
 
         <!-- BEGIN MODAL -->
         {% include "partials/profile/profile-info-modal.html" %}
@@ -166,13 +161,13 @@
                     });
 
                     // Scroll to top on navigation
-                    document.body.addEventListener('htmx:afterSettle', function(evt) {
+                    document.body.addEventListener('htmx:afterSwap', function(evt) {
                         // Only scroll for main content navigation, not for inline updates
                         if (evt.target && evt.target.id === 'dashboard-main') {
-                            // Find the scrollable content area (parent with overflow-y-auto)
-                            const contentArea = document.querySelector('.overflow-y-auto');
+                            // Find the scrollable content area
+                            const contentArea = document.getElementById('main-content-scroll-area');
                             if (contentArea) {
-                                contentArea.scrollTo({ top: 0, behavior: 'smooth' });
+                                contentArea.scrollTo({ top: 0, behavior: 'instant' });
                             }
                         }
                     });

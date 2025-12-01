@@ -5334,11 +5334,10 @@ def _build_historical_hargrove_metrics(year_metrics: dict, str_q: str) -> list[d
 
 def _build_2025_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
     """Build dynamic metrics for 2025 from database."""
+    from datetime import timedelta
+
     start_date = date(year, (q - 1) * 3 + 1, 1)
-    if q == 4:
-        end_date = date(year, 12, 31)
-    else:
-        end_date = date(year, q * 3 + 1, 1) - timezone.timedelta(days=1)
+    end_date = date(year, 12, 31) if q == 4 else date(year, q * 3 + 1, 1) - timedelta(days=1)
 
     # 1. Patient Demographics
     served_patient_ids = (

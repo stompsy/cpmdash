@@ -7,8 +7,13 @@ from pathlib import Path
 from typing import Any
 
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST
+
+from .models import ContactSubmission
 
 
 def health(_request: HttpRequest) -> HttpResponse:
@@ -20,7 +25,7 @@ def healthz(_request: HttpRequest) -> JsonResponse:
 
 
 def overview(request: HttpRequest) -> HttpResponse:
-    updated_on = date(2025, 10, 1)
+    updated_on = date(2025, 11, 30)
     ecosystem_partners = _load_collaborative_ecosystem()
 
     context = {
@@ -45,6 +50,35 @@ def terms(request: HttpRequest) -> HttpResponse:
 def accessibility(request: HttpRequest) -> HttpResponse:
     """Accessibility statement page."""
     return render(request, "core/accessibility.html")
+
+
+@require_POST
+def contact_submit(request: HttpRequest) -> HttpResponse:
+    """Handle contact form submission."""
+    try:
+        ContactSubmission.objects.create(
+            first_name=request.POST.get("first-name", ""),
+            last_name=request.POST.get("last-name", ""),
+            organization=request.POST.get("organization", ""),
+            email=request.POST.get("email", ""),
+            phone_number=request.POST.get("phone-number", ""),
+            message=request.POST.get("message", ""),
+        )
+        messages.success(request, "Thank you for your message. We will be in touch shortly.")
+    except Exception:
+        messages.error(request, "There was an error sending your message. Please try again.")
+
+    return redirect("home")
+
+
+@login_required
+def contact_submissions_list(request: HttpRequest) -> HttpResponse:
+    """List all contact submissions (Admin only)."""
+    if not request.user.is_staff:
+        return render(request, "access_denied.html")
+
+    submissions = ContactSubmission.objects.all().order_by("-created_at")
+    return render(request, "core/contact_submissions.html", {"submissions": submissions})
 
 
 def _load_collaborative_ecosystem() -> dict[str, Any]:

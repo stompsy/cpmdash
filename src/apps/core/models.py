@@ -121,3 +121,17 @@ class ODReferrals(models.Model):
 
     def __str__(self) -> str:
         return "OD Referral ID: " + str(self.ID)
+
+
+class ContactSubmission(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    organization = models.CharField(max_length=200, blank=True)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=20, blank=True)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"{self.first_name} {self.last_name} - {self.created_at}"

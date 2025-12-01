@@ -59,7 +59,7 @@ class CaseStudyListView(ListView):
         ordered_qs = cast(QuerySet[Tag], cast(Any, annotated_qs).order_by("-case_count", "name"))
         ctx["popular_tags"] = cast(list[Tag], list(ordered_qs[:6]))
         ctx["active_tag"] = self.request.GET.get("tag", "")
-        updated_on = date(2025, 10, 27)
+        updated_on = date(2025, 11, 30)
         ctx.update(
             {
                 "page_header_updated_at": updated_on,
