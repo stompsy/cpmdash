@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block pageName %}hargrove-grant{% endblock pageName %}
+{% block title %}Hargrove Grant Reporting{% endblock title %}
+
+{% block page_header %}
+    {% static 'media/data_collection.png' as hargrove_header_image %}
+    {% with eyebrow="Administration" title="Hargrove Grant Quarterly Reporting" description="Automated metrics calculation and reporting for the Hargrove Grant (1/10 of 1% sales tax). Track quarterly performance, patient encounters, SUD services, and behavioral health interventions to demonstrate program impact and justify continued funding." image_src=hargrove_header_image image_alt="Community paramedic documenting grant metrics" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
+        {% include "partials/page_header.html" %}
+    {% endwith %}
+{% endblock page_header %}
+
+{% block content %}
+    <div class="col-span-12 mx-auto w-full">
+        <span data-page-name="hargrove-grant" class="hidden" hidden></span>
+        <div class="mx-auto max-w-6xl px-6 py-20 space-y-24">
+
+        {# About the Hargrove Grant - Simple text block aligned with header #}
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">About the Hargrove Grant</h2>
+            <p class="text-base text-gray-700 leading-relaxed dark:text-slate-300">
+                The Hargrove Grant is funded through a <strong class="font-semibold text-gray-900 dark:text-white">1/10 of 1% sales tax</strong> dedicated to programs that respond to and provide services for individuals experiencing substance use disorder (SUD) and behavioral health challenges. This dashboard automates the collection and calculation of quarterly metrics required for grant reporting, ensuring accurate documentation of program impact and compliance with funding requirements.
+            </p>
+        </div>
+
+        {# Yearly Accordions #}
+        <div>
+            <div class="relative mb-12">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-slate-300/70 dark:border-slate-700/70"></div>
+                </div>
+                <div class="relative flex justify-start">
+                    <div class="bg-white pr-8 dark:bg-gray-900">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30">
+                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Quarterly Reports</h2>
+                                <p class="text-sm text-gray-600 dark:text-slate-400">Metrics and performance indicators by year and quarter</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Accordions Container - Default to current year open #}
+            <div class="space-y-6" x-data="{ openYear: {{ years_data.0.year }} }">
+                {% for year_data in years_data %}
+                    <div>
+                        {# Accordion Header Button #}
+                        <button
+                            @click="openYear = openYear === {{ year_data.year }} ? null : {{ year_data.year }}"
+                            class="group/year relative flex w-full items-center justify-between overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-6 py-4 text-left shadow-sm transition-all duration-300 hover:border-emerald-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-emerald-500/50"
+                            :class="openYear === {{ year_data.year }} ? 'border-emerald-300 shadow-lg dark:border-emerald-500/50' : ''"
+                        >
+                            {# Animated background circle #}
+                            <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-emerald-500/5 transition-all duration-300 group-hover/year:scale-150 dark:bg-emerald-400/5"></div>
+
+                            <div class="relative flex items-center gap-4">
+                                {# Year badge with calendar icon #}
+                                <div class="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-100 to-emerald-50 ring-4 ring-emerald-50 transition-all duration-300 group-hover/year:scale-110 group-hover/year:ring-emerald-100 dark:from-emerald-500/20 dark:to-emerald-600/10 dark:ring-emerald-900/30 dark:group-hover/year:ring-emerald-800/40">
+                                    <svg class="h-7 w-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ year_data.year }}</span>
+                                        {% if year_data.is_current %}
+                                            <span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                                Current
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex items-center gap-3 mt-1">
+                                        <p class="text-sm text-gray-600 dark:text-slate-400">{{ year_data.quarters|length }} quarters</p>
+                                        <span class="text-slate-300 dark:text-slate-600">•</span>
+                                        <a
+                                            href="https://github.com/stompsy/cpmdash/blob/main/src/static/data/HARGROVE_GRANT_METRICS_INSIGHTS.md"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="group/link flex items-center gap-1 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                            @click.stop
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                            </svg>
+                                            <span class="underline decoration-blue-300/50 decoration-1 underline-offset-2 group-hover/link:decoration-blue-500 dark:decoration-blue-500/30 dark:group-hover/link:decoration-blue-400">Metrics Insights</span>
+                                            <svg class="h-3 w-3 opacity-60" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <svg
+                                    class="h-6 w-6 text-slate-400 transition-all duration-300 group-hover/year:text-emerald-500 dark:group-hover/year:text-emerald-400"
+                                    :class="openYear === {{ year_data.year }} ? 'rotate-180 text-emerald-500 dark:text-emerald-400' : ''"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2.5"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </button>
+
+                        {# Accordion Content - Quarterly Breakdown #}
+                        <div
+                            x-show="openYear === {{ year_data.year }}"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 -translate-y-2"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                            class="mt-6"
+                            x-cloak
+                        >
+                            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                                {% for quarter in year_data.quarters %}
+                                    <div class="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95">
+                                        <div class="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 px-6 py-4 dark:from-emerald-500/20 dark:to-teal-500/20">
+                                            <div class="flex items-center justify-between">
+                                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ quarter.label }}</h3>
+                                                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                                                    {{ quarter.date_range }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="p-6">
+                                            <div class="space-y-6">
+                                                {% for section in quarter.sections %}
+                                                    <div class="rounded-lg border border-slate-200/70 bg-slate-50/50 dark:border-slate-700/50 dark:bg-slate-800/30">
+                                                        <div class="border-b border-slate-200/70 bg-white px-4 py-3 dark:border-slate-700/50 dark:bg-slate-900/50">
+                                                            <h4 class="font-semibold text-gray-900 dark:text-white">{{ section.title }}</h4>
+                                                        </div>
+                                                        <div class="p-4">
+                                                            {% if section.type == "table" %}
+                                                                {# Table Layout for first 4 sections #}
+                                                                <div class="overflow-x-auto">
+                                                                    <table class="w-full text-sm">
+                                                                        <thead>
+                                                                            <tr class="border-b border-slate-200 dark:border-slate-700">
+                                                                                <th class="w-[12%] px-3 py-2 text-left font-semibold text-gray-700 dark:text-slate-300">{{ section.columns.0 }}</th>
+                                                                                <th class="w-[54%] px-3 py-2 text-left font-semibold text-gray-700 dark:text-slate-300">{{ section.columns.1 }}</th>
+                                                                                <th class="w-[14%] px-3 py-2 text-left font-semibold text-gray-700 dark:text-slate-300">{{ section.columns.2 }}</th>
+                                                                                <th class="w-[20%] px-3 py-2 text-left font-semibold text-gray-700 dark:text-slate-300">{{ section.columns.3 }}</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {% if section.rows %}
+                                                                                {% for row in section.rows %}
+                                                                                    <tr class="border-b border-slate-100 last:border-0 dark:border-slate-800">
+                                                                                        <td class="w-[12%] px-3 py-2 text-gray-600 dark:text-slate-400">{{ row.id }}</td>
+                                                                                        <td class="w-[54%] px-3 py-2 text-gray-900 dark:text-white">{{ row.metric }}</td>
+                                                                                        <td class="w-[14%] px-3 py-2 font-medium text-gray-900 dark:text-white">{{ row.value }}</td>
+                                                                                        <td class="w-[20%] px-3 py-2 text-gray-600 dark:text-slate-400">{{ row.notes }}</td>
+                                                                                    </tr>
+                                                                                {% endfor %}
+                                                                            {% else %}
+                                                                                <tr>
+                                                                                    <td colspan="4" class="px-3 py-6 text-center text-gray-500 dark:text-slate-400">
+                                                                                        <div class="flex flex-col items-center gap-2">
+                                                                                            <svg class="h-8 w-8 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                                                                                            </svg>
+                                                                                            <p class="text-xs">Data will be calculated automatically</p>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            {% endif %}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            {% elif section.type == "narrative" %}
+                                                                {# Narrative Layout for the 5th section #}
+                                                                <div class="space-y-4">
+                                                                    {% for item in section.questions_responses %}
+                                                                        <div class="rounded-md border border-slate-200/70 bg-white p-3 dark:border-slate-700/50 dark:bg-slate-900/50">
+                                                                            <p class="mb-2 text-xs font-medium text-gray-700 dark:text-slate-300">{{ forloop.counter }}. {{ item.question }}</p>
+                                                                            {% if item.response %}
+                                                                                <div class="min-h-[60px] whitespace-pre-wrap rounded-md bg-slate-50/50 p-3 text-xs text-gray-700 dark:bg-slate-800/50 dark:text-slate-300">{{ item.response }}</div>
+                                                                            {% else %}
+                                                                                <div class="min-h-[60px] rounded-md border border-dashed border-slate-300 bg-slate-50/50 p-3 text-xs italic text-gray-400 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-500">
+                                                                                    Response will be entered manually...
+                                                                                </div>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    {% endfor %}
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

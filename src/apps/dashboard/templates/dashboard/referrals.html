@@ -5,18 +5,46 @@
 {% block title %}Referrals — Profile Distributions{% endblock title %}
 
 {% block page_header %}
-    {% static 'media/20251028-IMG_20251101_085252.png' as referrals_header_image %}
+    {% static 'media/20251028-IMG_20251101_085252.jpg' as referrals_header_image %}
     {% with eyebrow="Program overviews" title="Referral profile distributions" description="Quick distributions for each field on the Referrals model so you can spot partner trends and address throughput gaps alongside the Patients dashboard." image_src=referrals_header_image image_alt="Referral paperwork being reviewed by a paramedic" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
         {% include "partials/page_header.html" %}
     {% endwith %}
 {% endblock page_header %}
 
 {% block content %}
-    <div class="col-span-12 mx-auto mt-12 w-full max-w-7xl">
+    <div class="col-span-12 mx-auto w-full max-w-7xl mt-24 mb-16">
         <span data-page-name="referralsOverview" class="hidden" hidden></span>
 
+        {# Introduction Section #}
+        <section>
+            <p class="text-base leading-7 text-gray-700 dark:text-slate-300 sm:text-lg">
+                Understanding <span class="font-semibold text-gray-900 dark:text-white">referral patterns</span> is key to optimizing our community paramedicine response. By analyzing the distribution of referral types, sources, and outcomes, we can identify <span class="font-semibold text-gray-900 dark:text-white">service gaps</span>, strengthen <span class="font-semibold text-gray-900 dark:text-white">partner relationships</span>, and ensure resources are allocated where they are needed most.
+            </p>
+
+            {# Key benefits list #}
+            <dl class="mt-10 space-y-6">
+                {# Partner Trends #}
+                <div class="relative pl-8">
+                    <dt class="inline font-semibold text-gray-900 dark:text-white">
+                        <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
+                        Partner Trends.
+                    </dt>
+                    <dd class="inline text-gray-600 dark:text-slate-400"> Monitor which agencies and providers are utilizing the program most effectively and identify opportunities for better coordination.</dd>
+                </div>
+
+                {# Throughput Gaps #}
+                <div class="relative pl-8">
+                    <dt class="inline font-semibold text-gray-900 dark:text-white">
+                        <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
+                        Throughput Gaps.
+                    </dt>
+                    <dd class="inline text-gray-600 dark:text-slate-400"> Spot bottlenecks in the referral process to streamline patient intake and improve response times.</dd>
+                </div>
+            </dl>
+        </section>
+
         {# Section Divider + Heading #}
-        <div class="relative mb-12">
+        <div class="relative mt-20 mb-12">
             <div class="absolute inset-0 flex items-center" aria-hidden="true">
                 <div class="w-full border-t border-slate-300/70 dark:border-slate-700/70"></div>
             </div>
@@ -122,16 +150,16 @@
         class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
         onclick="if(event.target === this) this.classList.add('hidden')"
     >
-        <div class="flex min-h-screen items-start justify-center overflow-y-auto p-4 pt-8 sm:p-6 sm:pt-12 lg:p-8 lg:pt-16">
+        <div class="flex min-h-screen items-center justify-center p-4 sm:p-6 lg:p-8">
             <div
-                class="relative w-full max-w-7xl animate-in fade-in zoom-in-95 duration-300"
+                class="relative flex h-[calc(100vh-3rem)] w-full max-w-7xl animate-in fade-in zoom-in-95 duration-300 sm:h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)]"
                 onclick="event.stopPropagation()"
             >
-                {# Modal Container with Header Bar #}
-                <div class="overflow-hidden rounded-2xl border-4 border-white/20 bg-white shadow-2xl ring-1 ring-black/5 dark:border-slate-700/50 dark:bg-slate-900 dark:shadow-slate-950/50 dark:ring-white/10">
+                {# Modal Container #}
+                <div class="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl ring-1 ring-black/5 dark:border-slate-700/50 dark:bg-slate-900 dark:shadow-slate-950/50 dark:ring-white/10">
 
                     {# Header Bar with Close Button #}
-                    <div class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/50 px-6 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800/50">
+                    <div class="flex shrink-0 items-center justify-between border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/50 px-6 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800/50">
                         <div class="flex items-center gap-4">
                             <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
                                 All Referral Types
@@ -142,20 +170,19 @@
                         </div>
                         <button
                             type="button"
-                            class="group/close relative inline-flex items-center gap-2.5 overflow-hidden rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:scale-[0.98] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700 dark:focus:ring-slate-500 dark:focus:ring-offset-slate-900"
+                            class="group ml-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-600 shadow-sm transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-rose-900/50 dark:hover:bg-rose-900/20 dark:hover:text-rose-400 dark:focus:ring-offset-slate-900"
                             onclick="document.getElementById('referral-types-modal-overlay').classList.add('hidden')"
                             aria-label="Close modal"
                         >
-                            <svg class="h-4 w-4 transition-transform duration-300 group-hover/close:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <span>Close</span>
+                            <svg class="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            <span class="relative font-medium">Close</span>
-                            <span class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-100 to-slate-200 opacity-0 transition-opacity duration-300 group-hover/close:opacity-100 dark:from-slate-700 dark:to-slate-600"></span>
                         </button>
                     </div>
 
                     {# Modal Content #}
-                    <div id="referral-types-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                    <div id="referral-types-modal-content" class="flex-1 overflow-y-auto">
                         {# Content will be loaded here via HTMX #}
                     </div>
                 </div>

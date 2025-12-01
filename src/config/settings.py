@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "apps.partials_viewer",
     "apps.blog",
     "apps.tasks",
+    "apps.timeline",
     # Third-party
     "rest_framework",
     "django_filters",
@@ -62,7 +63,6 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "apps.core.middleware.GlobalLoginRequiredMiddleware",  # Require login for all pages
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

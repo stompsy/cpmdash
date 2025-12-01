@@ -1,0 +1,303 @@
+{
+  "metadata": {
+    "last_updated": "2025-11-15",
+    "total_agencies": 31,
+    "notes": [
+      "Sorted roughly by referral volume and readiness for warm handoffs",
+      "Emergency contacts are always reachable via 9-1-1 dispatch",
+      "Behavioral health partners provide both crisis stabilization and longitudinal care"
+    ]
+  },
+  "categories": [
+    {
+      "slug": "emergency-services",
+      "name": "Emergency Services",
+      "description": "Primary dispatch, fire, EMS, and law enforcement partners who stabilize scenes before we transition patients into longitudinal care.",
+      "color": "#ef4444",
+      "agencies": [
+        {
+          "name": "Clallam County Fire District 2",
+          "details": {
+            "services": "Fire suppression, emergency medical response, rescue services",
+            "phone": "(360) 457-2550",
+            "website": "https://www.clallamfire2.org/",
+            "hours": "24/7 Emergency Response"
+          }
+        },
+        {
+          "name": "Clallam County Fire District 3",
+          "details": {
+            "services": "Fire suppression, emergency medical response, rescue services",
+            "phone": "(360) 683-4242",
+            "website": "https://ccfd3.org/",
+            "hours": "24/7 Emergency Response"
+          }
+        },
+        {
+          "name": "Olympic Ambulance",
+          "details": {
+            "services": "Emergency medical transport, ambulance services",
+            "phone": "(360) 681-4882",
+            "website": "https://olympicambulance.com/",
+            "hours": "24/7 Emergency Response"
+          }
+        },
+        {
+          "name": "Port Angeles Police Department",
+          "short_name": "PAPD",
+          "details": {
+            "services": "Law enforcement, emergency response, community policing",
+            "phone": "(360) 457-0411",
+            "website": "https://www.cityofpa.us/268/Police-Department",
+            "hours": "24/7 Emergency Response"
+          }
+        },
+        {
+          "name": "Clallam County Sheriff's Office",
+          "details": {
+            "services": "Law enforcement, jail operations, civil process, emergency management",
+            "phone": "Emergency: 911",
+            "hours": "24/7 Emergency Response"
+          }
+        },
+        {
+          "name": "Peninsula Communications / Clallam 911",
+          "details": {
+            "services": "Emergency dispatch center",
+            "phone": "Emergency: 911",
+            "hours": "24/7 Emergency Response"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "medical-clinical",
+      "name": "Medical & Clinical",
+      "description": "Health systems and clinics that absorb complex patients for diagnostics, specialty consults, and chronic disease management.",
+      "color": "#22d3ee",
+      "agencies": [
+        {
+          "name": "Olympic Medical Center",
+          "details": {
+            "services": "Emergency medicine, Level III Trauma Center, general surgery, urology",
+            "phone": "(360) 417-7000",
+            "website": "https://www.olympicmedical.org/",
+            "hours": "24/7 Emergency Department"
+          }
+        },
+        {
+          "name": "North Olympic Healthcare Network",
+          "details": {
+            "services": "Family medicine, behavioral health, dental, eyecare",
+            "phone": "(360) 452-7891",
+            "website": "https://www.nohn-pa.org/",
+            "hours": "M-F 7am-6pm (Downtown)"
+          }
+        },
+        {
+          "name": "Jamestown Family Health Clinic",
+          "details": {
+            "services": "Primary medical services, orthopedic, behavioral health, pharmacy, dental",
+            "phone": "(360) 683-5900",
+            "email": "info@jamestownhealth.org",
+            "website": "https://jamestownhealth.org/"
+          }
+        },
+        {
+          "name": "Lower Elwha Health Clinic",
+          "details": {
+            "services": "Primary care, community health",
+            "phone": "(360) 452-8471",
+            "email": "info@elwha.org",
+            "website": "https://elwhahealth.org/"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "behavioral-health",
+      "name": "Behavioral Health & Recovery",
+      "description": "Counseling, MAT, crisis, and harm-reduction partners who keep overdose survivors and high-acuity patients engaged.",
+      "color": "#a855f7",
+      "agencies": [
+        {
+          "name": "Peninsula Behavioral Health",
+          "details": {
+            "services": "Mental health, substance use disorder counseling, crisis intervention",
+            "phone": "(360) 457-0431",
+            "website": "https://peninsulabehavioral.org/",
+            "hours": "M-Th 8am-6pm, F 8am-5pm"
+          }
+        },
+        {
+          "name": "Healthy Families of Clallam County",
+          "details": {
+            "services": "Domestic violence support, crisis intervention, family services",
+            "address": "1210 E Front Street, Suite C, Port Angeles, WA 98362",
+            "phone": "(360) 452-3811",
+            "website": "https://www.healthyfam.org",
+            "hours": "Monday-Friday 9:00 AM - 4:00 PM | Crisis: 24/7/365 Crisis Line | Note: Walk-ins welcome, appointments encouraged"
+          }
+        },
+        {
+          "name": "Jamestown Healing Clinic",
+          "details": {
+            "services": "Opioid treatment program, primary care, dental, substance abuse counseling",
+            "phone": "(360) 681-7755",
+            "email": "info@jamestownhealingclinic.org",
+            "website": "https://jamestownhealingclinic.org/",
+            "hours": "M-F 6:00am – 2:00pm"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "social-support",
+      "name": "Social & Housing",
+      "description": "Agencies that solve transportation, food, shelter, and benefits obstacles so medical plans can actually succeed.",
+      "color": "#fbbf24",
+      "agencies": [
+        {
+          "name": "Olympic Community Action Programs (OlyCAP)",
+          "details": {
+            "services": "Housing assistance, energy assistance, early childhood education",
+            "locations": [
+              {
+                "name": "Port Angeles",
+                "address": "228 W 1st St, Suite J, Port Angeles, WA 98363",
+                "phone": "(360) 452-4726",
+                "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+              },
+              {
+                "name": "Port Townsend",
+                "address": "2120 W Sims Way, Port Townsend, WA 98368",
+                "phone": "(360) 385-2571",
+                "hours": "Opens 9:00 AM Monday"
+              }
+            ],
+            "website": "https://www.olycap.org"
+          }
+        },
+        {
+          "name": "Serenity House of Clallam County",
+          "details": {
+            "services": "Homeless shelter, housing assistance, transitional housing",
+            "locations": [
+              {
+                "name": "Main Office",
+                "address": "2203 W 18th St, Port Angeles, WA 98363",
+                "phone": "(360) 452-7224",
+                "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+              },
+              {
+                "name": "24/7 Adult Shelter",
+                "address": "2321 W 18th St, Port Angeles, WA 98363",
+                "phone": "(360) 452-7221",
+                "hours": "Open 24 hours"
+              }
+            ],
+            "email": "housinghelp@serenityhouseclallam.org",
+            "website": "https://serenityhouseclallam.org"
+          }
+        },
+        {
+          "name": "Salvation Army Port Angeles",
+          "details": {
+            "services": "Food assistance, holiday programs, emergency services",
+            "address": "202 S Peabody St, Port Angeles, WA 98362",
+            "phone": "(360) 452-7679",
+            "website": "https://portangeles.salvationarmy.org",
+            "hours": "Open until 2:00 PM | Breakfast: 8:00 AM - 9:00 AM | Lunch: Noon - 1:00 PM"
+          }
+        },
+        {
+          "name": "Clallam County Health & Human Services",
+          "details": {
+            "services": "Public health, environmental health, vital records",
+            "address": "111 E 3rd St, Port Angeles, WA 98362",
+            "phone": "(360) 417-2303",
+            "website": "https://www.clallamcountywa.gov/261/Health-Human-Services",
+            "hours": "Monday-Friday 8:00 AM - 4:30 PM | Forks: Tuesday, Thursday, Friday 8:30 AM - noon & 1:00 PM - 4:00 PM"
+          }
+        },
+        {
+          "name": "WA Department of Social and Health Services (DSHS)",
+          "details": {
+            "services": "Cash assistance, food assistance, medical programs",
+            "address": "Port Angeles, WA 98362",
+            "phone": "(360) 565-2240",
+            "website": "https://www.dshs.wa.gov/location/dshs-cso-005",
+            "hours": "Monday-Friday 8:00 AM - 5:00 PM | Office_Services: 8:00 AM - 2:00 PM for interviews"
+          }
+        },
+        {
+          "name": "Adult Protective Services",
+          "details": {
+            "services": "Vulnerable adult protection, abuse investigation, support services",
+            "address": "235 W 1st St, Port Angeles, WA 98362",
+            "phone": "(360) 565-2160",
+            "email": "apscentralintake@dshs.wa.gov",
+            "website": "https://www.dshs.wa.gov/altsa/adult-protective-services",
+            "hours": "Monday-Friday (standard business hours)"
+          }
+        },
+        {
+          "name": "Concerned Citizens of Clallam County",
+          "details": {
+            "services": "Early intervention, employment services, family support",
+            "locations": [
+              {
+                "name": "Port Angeles",
+                "address": "1601 E Front St #2A, Port Angeles, WA 98362",
+                "phone": "(360) 452-2396",
+                "hours": "Opens 9:00 AM"
+              },
+              {
+                "name": "Forks",
+                "address": "945 S Forks Avenue, Forks, WA 98331",
+                "phone": "(360) 374-9340",
+                "hours": "Monday-Friday 8:00 AM - 5:00 PM"
+              }
+            ],
+            "website": "https://ccpnw.org"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "outreach-support",
+      "name": "Outreach & Community Support",
+      "description": "Trusted navigators and culturally specific partners who close the loop after we step off the street or out of the living room.",
+      "color": "#34d399",
+      "agencies": [
+        {
+          "name": "Reflections Counseling Services Group",
+          "details": {
+            "services": "Substance use counseling, outpatient treatment, REAL Team services",
+            "address": "3430 E Highway 101, Port Angeles, WA 98362",
+            "phone": "(360) 452-4062",
+            "website": "https://reflectionscounselingservicesgroup.org",
+            "hours": "Walk_In: 10:00 AM - 11:00 AM & 1:00 PM - 2:00 PM | Office: Monday-Friday 9:00 AM - 5:00 PM (by appointment)"
+          }
+        },
+        {
+          "name": "Olympic Community of Health - North West Region",
+          "details": {
+            "services": "Care coordination, resource connection, COVID-19 support",
+            "phone": "1-833-453-0336",
+            "website": "https://www.olympicch.org/",
+            "email": "OCH@olympicch.org"
+          }
+        },
+        {
+          "name": "Korean Women's Association (KWA)",
+          "details": {
+            "services": "Social services, domestic violence assistance, community health, affordable housing",
+            "phone": "(360) 452-2129",
+            "website": "https://www.kwacares.org/"
+          }
+        }
+      ]
+    }
+  ]
+}

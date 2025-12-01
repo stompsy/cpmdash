@@ -11,75 +11,75 @@
 {% endblock page_header %}
 
 {% block content %}
-<div class="col-span-12">
-    <div class="rounded-2xl border border-white/5 bg-slate-900/40 px-6 py-16 backdrop-blur-sm sm:px-10 lg:px-16">
-        <div class="mx-auto max-w-6xl">
-            <div class="max-w-3xl space-y-8">
-                {# Introduction #}
-                <div class="inline-flex items-center gap-2 rounded-lg bg-indigo-500/10 px-4 py-2 text-sm font-semibold text-indigo-300">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                    </svg>
-                    Post Overdose Response Team (PORT)
-                </div>
+<div class="col-span-12 w-full">
+    <div class="py-20 max-w-7xl">
 
-                <p class="text-base leading-relaxed text-slate-200/90 sm:text-lg">
-                    Community Paramedics in Port Angeles are leading a groundbreaking initiative to reduce opioid overdoses and provide compassionate, in-field care. By responding directly to overdose scenes, offering medication-assisted treatment, and linking survivors to long-term recovery services, they're transforming crisis moments into pathways toward hope and healing.
+        <div class="prose prose-lg prose-invert max-w-none">
+            {# Introduction #}
+            <p class="lead mb-12 text-xl leading-relaxed text-slate-200">
+                Community Paramedics in Port Angeles are leading a groundbreaking initiative to reduce opioid overdoses and provide compassionate, in-field care. By responding directly to overdose scenes, offering medication-assisted treatment, and linking survivors to long-term recovery services, they're transforming crisis moments into pathways toward hope and healing.
+            </p>
+
+            {# Key Stats Callout #}
+            <div class="not-prose my-16 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-10">
+                <p class="text-xl leading-relaxed text-slate-200">
+                    In the first months of implementation, Community Medics responded to 23 overdoses. <strong class="font-bold text-white">78% of those individuals were linked to substance use disorder services.</strong> When CPMs are not present, that linkage rate drops to just 3%.
                 </p>
+            </div>
 
-                {# Key Stats #}
-                <div class="rounded-lg border border-indigo-500/20 bg-indigo-500/5 p-6">
-                    <p class="text-base leading-relaxed text-slate-200/90">
-                        In the first months of implementation, Community Medics responded to 23 overdoses. <strong class="font-semibold text-white">78% of those individuals were linked to substance use disorder services.</strong> When CPMs are not present, that linkage rate drops to just 3%.
+            {# Key Points #}
+            <ul class="not-prose my-16 space-y-10">
+                <li class="flex gap-6">
+                    <div class="mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-brand-500/10">
+                        <svg class="h-6 w-6 text-brand-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <strong class="block text-xl font-bold text-white mb-2">Timely Intervention</strong>
+                        <span class="text-lg leading-relaxed text-slate-300">Field-based follow-ups within 72 hours help build trust and reduce repeat overdoses.</span>
+                    </div>
+                </li>
+                <li class="flex gap-6">
+                    <div class="mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-brand-500/10">
+                        <svg class="h-6 w-6 text-brand-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <strong class="block text-xl font-bold text-white mb-2">Community Impact</strong>
+                        <span class="text-lg leading-relaxed text-slate-300">Overdose fatality rate in Clallam County fell 63% between March 2024 and March 2025.</span>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="space-y-16">
+                <div>
+                    <p class="text-lg leading-relaxed text-slate-300">
+                        Through trusted partnerships with PAPD, ReDiscovery, Reflections Counseling Services Group, and others, CPMs coordinate services that save lives and relieve pressure on emergency units. Their work exemplifies how public safety-led outreach can turn a moment of crisis into a turning point toward recovery.
                     </p>
                 </div>
 
-                {# Key Points #}
-                <ul class="space-y-4 text-base leading-relaxed text-slate-200/90">
-                    <li class="flex gap-3">
-                        <svg class="mt-1 h-5 w-5 flex-shrink-0 text-brand-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>
-                            <strong class="font-semibold text-white">Timely Intervention.</strong> Field-based follow-ups within 72 hours help build trust and reduce repeat overdoses.
-                        </span>
-                    </li>
-                    <li class="flex gap-3">
-                        <svg class="mt-1 h-5 w-5 flex-shrink-0 text-brand-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>
-                            <strong class="font-semibold text-white">Integrated Care.</strong> CPMs provide buprenorphine in the field, reducing withdrawal symptoms that can lead to treatment refusal.
-                        </span>
-                    </li>
-                    <li class="flex gap-3">
-                        <svg class="mt-1 h-5 w-5 flex-shrink-0 text-brand-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>
-                            <strong class="font-semibold text-white">Community Impact.</strong> Overdose fatality rate in Clallam County fell 63% between March 2024 and March 2025.
-                        </span>
-                    </li>
-                </ul>
+                <div>
+                    <h2 class="mb-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">Redefining the Response</h2>
+                    <p class="text-lg leading-relaxed text-slate-300">
+                        Operation Shielding Hope represents a shift in how our city responds to addiction. It's a model rooted in empathy, connection, and evidence-based care—and it's working. Port Angeles is not only confronting the opioid crisis, but leading the way with a public health-driven solution.
+                    </p>
+                </div>
 
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    Through trusted partnerships with PAPD, ReDiscovery, Reflections Counseling, and others, CPMs coordinate services that save lives and relieve pressure on emergency units. Their work exemplifies how public safety-led outreach can turn a moment of crisis into a turning point toward recovery.
-                </p>
+                <div>
+                    <h2 class="mb-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">Opioid Settlement Funds</h2>
+                    <p class="text-lg leading-relaxed text-slate-300">
+                        In May of 2022, Attorney General Bob Ferguson announced a $518 million settlement with several major opioid distributors aimed at resolving opioid-related claims. Following City Council approval on July 5, 2023, approximately $1.8M of these funds will be allocated to the City of Port Angeles over the next 18 years to address the opioid crisis, including substance use treatment, access to overdose-reversal drugs, and services to assist with those struggling with addiction.
+                    </p>
+                </div>
 
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Redefining the Response</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    Operation Shielding Hope represents a shift in how our city responds to addiction. It's a model rooted in empathy, connection, and evidence-based care—and it's working. With your continued support, Port Angeles is not only confronting the opioid crisis, but leading the way with a public health-driven solution.
-                </p>
-
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Opioid Settlement Funds</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    In May of 2022, Attorney General Bob Ferguson announced a $518 million settlement with several major opioid distributors aimed at resolving opioid-related claims. Following City Council approval on July 5, 2023, approximately $1.8M of these funds will be allocated to the City of Port Angeles over the next 18 years to address the opioid crisis, including substance use treatment, access to overdose-reversal drugs, and services to assist with those struggling with addiction.
-                </p>
-
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Goals and Scope</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    The City's goal when distributing these funds is to reduce the impact to public safety services, healthcare facilities, local businesses, and our City residents and visitors through effective and strategic measures, such as treatment, prevention, and education on opioid use and abuse.
-                </p>
+                <div>
+                    <h2 class="mb-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">Goals and Scope</h2>
+                    <p class="text-lg leading-relaxed text-slate-300">
+                        The City's goal when distributing these funds is to reduce the impact to public safety services, healthcare facilities, local businesses, and our City residents and visitors through effective and strategic measures, such as treatment, prevention, and education on opioid use and abuse.
+                    </p>
+                </div>
             </div>
         </div>
     </div>

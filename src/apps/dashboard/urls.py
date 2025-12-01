@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     age_chart_variations_demo,
     authentication,
+    hargrove_grant,
     od_cpm_disposition_detail,
     od_cpm_notification_detail,
     od_cpr_administered_detail,
@@ -20,9 +21,6 @@ from .views import (
     od_weekday_detail,
     odreferrals,
     odreferrals_chart_fragment,
-    odreferrals_hotspots,
-    odreferrals_insights,
-    odreferrals_insights_fragment,
     odreferrals_shift_coverage,
     overview,
     patients,
@@ -123,25 +121,15 @@ urlpatterns = [
         od_transport_detail,
         name="od_transport_detail",
     ),
-    path("odreferrals/insights/", odreferrals_insights, name="odreferrals_insights"),
-    path(
-        "odreferrals/insights/fragment/",
-        odreferrals_insights_fragment,
-        name="odreferrals_insights_fragment",
-    ),
     path(
         "odreferrals/shift-coverage/",
         odreferrals_shift_coverage,
         name="odreferrals_shift_coverage",
     ),
-    path(
-        "odreferrals/hotspots/",
-        odreferrals_hotspots,
-        name="odreferrals_hotspots",
-    ),
     # Back-compat alias: route removed per request but referenced in tests
     path("overdoses/by-case/", odreferrals, name="overdoses_by_case"),
     path("profile/", user_profile, name="user_profile"),
+    path("hargrove-grant/", hargrove_grant, name="hargrove_grant"),
     path("authentication/", authentication, name="authentication"),
     path("demo/age-chart-variations/", age_chart_variations_demo, name="age_chart_variations_demo"),
 ]

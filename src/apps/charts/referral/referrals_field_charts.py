@@ -831,7 +831,7 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
         s = s.fillna("").replace({None: ""}).astype(str).str.strip()
         s = s.replace({"": "Unknown", "NA": "Unknown", "None": "Unknown"})
 
-    if _is_numeric_series(df[field]):
+    if _is_numeric_series(df[field]) or field == "age":
         if field == "age":
             ages = pd.to_numeric(df[field], errors="coerce")
             bins = [-1, 17, 24, 34, 44, 54, 64, 74, 84, float("inf")]
@@ -918,7 +918,7 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
 
         # Decide if we should use a simple bar for very few categories (<= 3)
         few_cats = int(s_clean.nunique()) <= 3
-        top_n = 8
+        top_n = 13 if field == "referral_agency" else 8
         vc_top = vc_full.head(top_n)
         other_count = int(vc_full.iloc[top_n:].sum()) if vc_full.size > top_n else 0
         vc = vc_top.reset_index()

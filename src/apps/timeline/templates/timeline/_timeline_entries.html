@@ -1,0 +1,230 @@
+{% load timeline_filters %}
+
+{% for entry in timeline_entries %}
+<div class="timeline-entry relative pb-12 group" data-entry-id="{{ entry.id }}">
+    <div class="flex gap-8 items-start">
+        <!-- LEFT SIDE: Date Block + Tagline (like quick stat card) -->
+        <div class="flex-shrink-0 w-44 relative z-10">
+            <!-- Date Block styled like quick stat -->
+            <div class="group/date relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-indigo-50 to-white shadow-sm transition-all duration-300 hover:border-indigo-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-indigo-500/50">
+                <!-- Animated background circle -->
+                <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-indigo-500/5 transition-all duration-300 group-hover/date:scale-150 dark:bg-indigo-400/5"></div>
+
+                <!-- Content -->
+                <div class="relative px-5 py-4">
+                    <!-- Month/Year -->
+                    <div class="flex items-center gap-4 mb-3">
+                        <!-- Calendar icon badge -->
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-100 to-indigo-50 ring-4 ring-indigo-50 transition-all duration-300 group-hover/date:scale-110 group-hover/date:ring-indigo-100 dark:from-indigo-500/20 dark:to-indigo-600/10 dark:ring-indigo-900/30 dark:group-hover/date:ring-indigo-800/40">
+                            <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            {% if entry.month %}
+                            <div class="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-indigo-600/70 dark:text-indigo-400/70 leading-none">
+                                {{ entry.month }}
+                            </div>
+                            {% endif %}
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight mt-0.5">
+                                {{ entry.year }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Horizontal divider -->
+                    <div class="border-t border-slate-200/60 dark:border-slate-700/50 mb-3"></div>
+
+                    <!-- Tagline -->
+                    <div class="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-indigo-600 dark:text-indigo-400 leading-tight">
+                        {{ entry.tagline }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vertical line - positioned below date block, height dynamically set by JS -->
+            {% if not forloop.last %}
+            <div class="timeline-line absolute left-1/2 -translate-x-1/2 top-[calc(100%+0.5rem)] w-0.5 h-[20rem] bg-gradient-to-b from-indigo-300/60 via-indigo-200/40 via-50% to-transparent dark:from-indigo-500/50 dark:via-indigo-600/30 dark:via-50% dark:to-transparent"></div>
+            {% endif %}
+        </div>
+
+        <!-- RIGHT SIDE: Content Card (styled like chart cards) -->
+        <div class="flex-1 min-w-0 relative">
+            <!-- Admin Edit/Delete Buttons -->
+            {% if is_admin %}
+            <div class="absolute -right-3 -top-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
+                <button
+                    @click="openEditModal({{ entry.id }})"
+                    data-entry='{{ entry|tojson }}'
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800/95 dark:bg-slate-700/95 text-slate-300 backdrop-blur-md transition-all hover:bg-indigo-500 hover:text-white hover:scale-110 hover:shadow-lg hover:shadow-indigo-500/30 border border-white/10"
+                    title="Edit entry"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+                    </svg>
+                </button>
+                <button
+                    @click="deleteEntry({{ entry.id }})"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800/95 dark:bg-slate-700/95 text-slate-300 backdrop-blur-md transition-all hover:bg-rose-500 hover:text-white hover:scale-110 hover:shadow-lg hover:shadow-rose-500/30 border border-white/10"
+                    title="Delete entry"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 713.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                    </svg>
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- Main content card -->
+            <article class="group/card relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80">
+                <!-- Card Header - Simplified without icon -->
+                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-7 dark:border-slate-700/50 dark:from-slate-800/30">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-indigo-600/80 dark:text-indigo-400/80 mb-2">
+                        {% if entry.type == 'impact' %}Community Impact{% elif entry.type == 'event' %}Event{% else %}Milestone{% endif %}
+                    </p>
+                    <h3 class="text-lg font-semibold leading-snug text-gray-900 dark:text-white">
+                        {{ entry.lead }}
+                    </h3>
+                </div>
+
+                <!-- Card Body -->
+                <div class="px-6 py-5 sm:px-7">
+                    {% if entry.type == 'impact' %}
+                        <!-- Impact Layout -->
+                        <div class="space-y-6">
+                            {% if entry.need %}
+                            <div>
+                                <h4 class="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-rose-500 dark:text-rose-400 mb-2">Community Need</h4>
+                                <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{{ entry.need }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if entry.response %}
+                            <div>
+                                <h4 class="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-indigo-600 dark:text-indigo-400 mb-2">Program Response</h4>
+                                <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{{ entry.response }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if entry.impact %}
+                            <div class="rounded-lg bg-indigo-50/50 dark:bg-indigo-900/20 p-4 border border-indigo-100 dark:border-indigo-800/30">
+                                <h4 class="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-indigo-700 dark:text-indigo-300 mb-2">Impact & Outcome</h4>
+                                <p class="text-sm leading-relaxed text-slate-800 dark:text-slate-200 font-medium">{{ entry.impact }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <!-- Bullets -->
+                        {% if entry.bullets %}
+                        <ul class="space-y-3">
+                            {% for item in entry.bullets %}
+                            <li class="flex items-start gap-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                                <span class="mt-1.5 flex-shrink-0 h-1.5 w-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400"></span>
+                                <span class="flex-1">{{ item }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+
+                        <!-- Sections -->
+                        {% if entry.sections %}
+                        <div class="space-y-4 {% if entry.bullets %}mt-6 pt-5 border-t border-slate-200/60 dark:border-slate-700/60{% endif %}">
+                            {% for section in entry.sections %}
+                            <div class="rounded-lg bg-slate-50/50 dark:bg-slate-800/30 p-4 border border-slate-200/50 dark:border-slate-700/30">
+                                <h4 class="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-indigo-600 dark:text-indigo-400 mb-3">
+                                    {{ section.title }}
+                                </h4>
+                                <ul class="space-y-2">
+                                    {% for item in section.items %}
+                                    <li class="flex items-start gap-2.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                                        <span class="mt-1 flex-shrink-0 h-1 w-1 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+                                        <span class="flex-1">{{ item }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- NOW MARKER -->
+<div class="timeline-now-marker relative pb-12">
+    <div class="flex gap-8 items-start">
+        <!-- LEFT SIDE: NOW Badge -->
+        <div class="flex-shrink-0 w-44 relative z-10 flex justify-center items-center">
+            <div class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 shadow-lg shadow-indigo-500/30 ring-4 ring-white dark:from-indigo-400 dark:to-indigo-500 dark:shadow-indigo-400/20 dark:ring-slate-900">
+                <svg class="h-4 w-4 text-white animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-xs font-black uppercase tracking-[0.15em] text-white">NOW</span>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: Empty space -->
+        <div class="flex-1"></div>
+    </div>
+
+    <!-- Short line segment after NOW -->
+    <div class="absolute left-[5.5rem] top-14 w-0.5 h-16 bg-gradient-to-b from-indigo-300/40 to-transparent dark:from-indigo-500/30"></div>
+</div>
+
+<!-- FUTURE ENTRY (2026) - Grayed out -->
+<div class="timeline-entry relative pb-8 opacity-50 grayscale">
+    <div class="flex gap-8 items-start">
+        <!-- LEFT SIDE: Future Date Block -->
+        <div class="flex-shrink-0 w-44 relative z-10">
+            <div class="relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-100 to-white shadow-sm dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30">
+                <div class="relative px-5 py-4">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-200 ring-4 ring-slate-100 dark:bg-slate-700 dark:ring-slate-800">
+                            <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-gray-600 dark:text-slate-400 leading-tight">
+                                2026
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t border-slate-200/60 dark:border-slate-700/50 mb-3"></div>
+                    <div class="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400 leading-tight">
+                        CONTINUED GROWTH
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: Future Content Card -->
+        <div class="flex-1 min-w-0">
+            <article class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95">
+                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-7 dark:border-slate-700/50 dark:from-slate-800/30">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 dark:text-slate-500 mb-2">Future</p>
+                    <h3 class="text-lg font-semibold leading-snug text-slate-600 dark:text-slate-400">
+                        Ongoing program expansion and community impact anticipated
+                    </h3>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <!-- Ellipsis dots below -->
+    <div class="absolute left-[5.5rem] top-[7rem] flex flex-col gap-2 -translate-x-1/2">
+        <div class="h-1 w-1 rounded-full bg-slate-400 animate-pulse"></div>
+        <div class="h-1 w-1 rounded-full bg-slate-400 animate-pulse"></div>
+        <div class="h-1 w-1 rounded-full bg-slate-400 animate-pulse"></div>
+    </div>
+</div>

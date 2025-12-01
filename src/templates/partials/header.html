@@ -106,7 +106,7 @@
       <!-- Application nav menu button -->
 
       <div class="hidden lg:block">
-        <form>
+        <form action="#" method="get" onsubmit="return false;">
           <div class="relative">
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <svg
@@ -126,15 +126,19 @@
               </svg>
             </span>
             <input
+              disabled
               type="text"
-              placeholder="Search or type command..."
+              name="q"
+              placeholder="Search disabled"
               id="search-input"
-              class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+              class="cursor-not-allowed opacity-50 dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
             />
 
             <button
+              disabled
+              type="submit"
               id="search-button"
-              class="absolute top-1/2 right-2.5 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400"
+              class="cursor-not-allowed opacity-50 absolute top-1/2 right-2.5 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400"
             >
               <span> ⌘ </span>
               <span> K </span>
@@ -192,7 +196,8 @@
           @click.outside="dropdownOpen = false"
         >
           <button
-            class="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+            disabled
+            class="cursor-not-allowed opacity-50 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400"
             @click.prevent="dropdownOpen = ! dropdownOpen; notifying = false"
           >
             <span

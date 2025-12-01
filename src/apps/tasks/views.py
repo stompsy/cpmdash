@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, cast
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -32,36 +32,12 @@ class TaskListCreateView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self) -> QuerySet[Task]:
-        # Show all tasks (not user-scoped) with filters/search/sort
-        qs = Task.objects.all()
-        q = self.request.GET.get("q", "").strip()
-        if q:
-            qs = qs.filter(
-                Q(title__icontains=q)
-                | Q(description__icontains=q)
-                | Q(user__username__icontains=q)
-                | Q(assignee__username__icontains=q)
-            )
-        incomplete_only = self.request.GET.get("incomplete") in {"1", "true", "on"}
-        if incomplete_only:
-            qs = qs.filter(is_completed=False)
-        sort = self.request.GET.get("sort") or "completed_last"
-        if sort == "recent":
-            qs = qs.order_by("-created_at")
-        elif sort == "completed_last":
-            qs = qs.order_by("is_completed", "-created_at")
-        elif sort == "due_soon":
-            qs = qs.order_by("is_completed", "due_date", "-priority", "-created_at")
-        else:
-            qs = qs.order_by("is_completed", "-created_at")
-        return qs
+        # Show all tasks ordered by completion status and creation date
+        return Task.objects.all().order_by("is_completed", "-created_at")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context.setdefault("form", TaskForm())
-        context["q"] = self.request.GET.get("q", "")
-        context["incomplete"] = self.request.GET.get("incomplete") in {"1", "true", "on"}
-        context["sort"] = self.request.GET.get("sort", "completed_last")
         # Keep page object/paginator already provided by ListView
         return context
 
@@ -180,6 +156,18 @@ def task_row_edit(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @login_required
+def task_row_cancel(request: HttpRequest, pk: int) -> HttpResponse:
+    """Cancel editing and return to task item view"""
+    task = get_object_or_404(Task, pk=pk)
+    if not _can_modify(request.user, task):
+        return HttpResponseForbidden("Not allowed")
+    from django.template.loader import render_to_string
+
+    html = render_to_string("tasks/_task_item.html", {"task": task}, request=request)
+    return HttpResponse(html)
+
+
+@login_required
 def task_row_update(request: HttpRequest, pk: int) -> HttpResponse:
     task = get_object_or_404(Task, pk=pk)
     if not _can_modify(request.user, task):
@@ -203,27 +191,8 @@ def task_row_update(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 def export_csv(request: HttpRequest) -> HttpResponse:
-    # Export filtered queryset like list view
-    qs = Task.objects.all()
-    q = request.GET.get("q", "").strip()
-    if q:
-        qs = qs.filter(
-            Q(title__icontains=q)
-            | Q(description__icontains=q)
-            | Q(user__username__icontains=q)
-            | Q(assignee__username__icontains=q)
-        )
-    if request.GET.get("incomplete") in {"1", "true", "on"}:
-        qs = qs.filter(is_completed=False)
-    sort = request.GET.get("sort") or "completed_last"
-    if sort == "recent":
-        qs = qs.order_by("-created_at")
-    elif sort == "completed_last":
-        qs = qs.order_by("is_completed", "-created_at")
-    elif sort == "due_soon":
-        qs = qs.order_by("is_completed", "due_date", "-priority", "-created_at")
-    else:
-        qs = qs.order_by("is_completed", "-created_at")
+    # Export all tasks ordered by completion status and creation date
+    qs = Task.objects.all().order_by("is_completed", "-created_at")
 
     import csv
 

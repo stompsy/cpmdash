@@ -1,50 +1,76 @@
 {% load blog_extras %}
 <div id="cards-grid"
-     class="grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3 xl:gap-12">
+     class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {% for post in case_studies %}
-        <article class="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(150deg,rgba(17,27,44,0.92),rgba(17,32,51,0.82))] p-7 shadow-[0_18px_46px_rgba(8,47,73,0.28)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-400/50 hover:shadow-[0_26px_64px_rgba(8,47,73,0.4)] focus-within:border-brand-400/55 focus-within:shadow-[0_26px_64px_rgba(8,47,73,0.4)]">
-            <header class="flex flex-wrap items-center gap-y-2 gap-x-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+        <article class="group relative flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-[linear-gradient(150deg,rgba(17,27,44,0.92),rgba(17,32,51,0.82))] p-6 transition hover:-translate-y-1">
+            <header class="flex items-start justify-between gap-4">
+                <h3 class="text-lg font-semibold leading-tight text-white transition-colors group-hover:text-brand-200">
+                    <a href="{{ post.get_absolute_url }}"
+                       class="focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">{{ post.title }}</a>
+                </h3>
+                {% if request.user.is_authenticated %}
+                    <div class="flex shrink-0 items-center gap-2">
+                        {% if perms.blog.change_casestudy %}
+                            <a href="{% url 'blog:update' slug=post.slug %}"
+                               class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                               title="Edit case study">
+                                <svg class="h-4 w-4"
+                                     viewBox="0 0 24 24"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="1.8">
+                                    <path d="M12 20h9" />
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                                </svg>
+                            </a>
+                        {% endif %}
+                        {% if perms.blog.delete_casestudy %}
+                            <a href="{% url 'blog:delete' slug=post.slug %}"
+                               class="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-400 transition hover:border-rose-500/40 hover:bg-rose-500/20 hover:text-rose-100"
+                               title="Delete case study">
+                                <svg class="h-4 w-4"
+                                     viewBox="0 0 24 24"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="1.8">
+                                    <path d="m3 6 3 18h12l3-18" />
+                                    <path d="M2 6h20" />
+                                    <path d="M10 11v6" />
+                                    <path d="M14 11v6" />
+                                    <path d="M9 6V4h6v2" />
+                                </svg>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </header>
+            <div class="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 {% if post.published_at %}
                     <time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"M d, Y" }}</time>
                 {% endif %}
                 {% if post.published_at %}<span aria-hidden="true" class="text-slate-600">•</span>{% endif %}
                 <span title="{{ post.content|word_count }} words">{{ post.content|reading_time }}</span>
-            </header>
-            <main class="mt-5 flex flex-1 flex-col">
-                <h3 class="text-[1.35rem] font-semibold leading-tight text-white transition-colors group-hover:text-brand-200">
-                    <a href="{{ post.get_absolute_url }}"
-                       class="focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">{{ post.title }}</a>
-                </h3>
+            </div>
+            <main class="mt-4 flex flex-1 flex-col">
                 {% if post.excerpt %}
-                    <p class="mt-4 line-clamp-4 text-sm leading-relaxed text-slate-200/90">{{ post.excerpt }}</p>
+                    <p class="line-clamp-4 text-sm leading-relaxed text-slate-200/90">{{ post.excerpt }}</p>
                 {% else %}
-                    <p class="mt-4 line-clamp-4 text-sm leading-relaxed text-slate-300/90">{{ post.content|truncatechars:140 }}</p>
+                    <p class="line-clamp-4 text-sm leading-relaxed text-slate-300/90">{{ post.content|truncatechars:140 }}</p>
                 {% endif %}
-                <div class="mt-6 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                <div class="mt-auto flex flex-col gap-4 pt-6">
                     {% if post.author %}
-                        <span class="inline-flex items-center gap-2">
-                            {% if post.author.avatar %}
-                                <img src="{{ post.author.avatar.url }}"
-                                     alt="{{ post.author.username }} avatar"
-                                     width="28"
-                                     height="28"
-                                     class="h-7 w-7 rounded-full object-cover ring-2 ring-white/10"
-                                     loading="lazy" />
-                            {% endif %}
-                            <span class="font-medium text-slate-200">{{ post.author.get_full_name|default:post.author.username }}</span>
-                        </span>
+                        <div class="text-xs font-medium text-slate-400">
+                            Author: <span class="text-slate-200">{{ post.author.get_full_name|default:post.author.username }}</span>
+                        </div>
                     {% endif %}
-                    {% if post.author and post.tags.exists %}<span aria-hidden="true" class="text-slate-600">•</span>{% endif %}
                     {% if post.tags.exists %}
                         <span class="flex flex-wrap gap-2 text-[11px] font-medium text-brand-200/90">
                             {% for tag in post.tags.all|slice:':4' %}
                                 <a href="{{ tag.get_absolute_url }}"
-                                   class="rounded-full bg-brand-500/12 px-2.5 py-1 text-[11px] text-brand-100 ring-1 ring-brand-400/40 transition hover:bg-brand-500/22">#{{ tag.name }}</a>
+                                   class="rounded-md bg-brand-500/10 px-2.5 py-1 text-[11px] font-medium text-brand-200 ring-1 ring-inset ring-brand-400/20 transition hover:bg-brand-500/20">#{{ tag.name }}</a>
                             {% endfor %}
                         </span>
                     {% endif %}
-                </div>
-                <div class="mt-auto space-y-3 pt-6">
                     <a href="{{ post.get_absolute_url }}"
                        class="inline-flex items-center gap-2 text-sm font-semibold text-brand-200 transition hover:text-brand-100">
                         Open case summary
@@ -56,44 +82,8 @@
                             <path d="M5 12h14M13 6l6 6-6 6" />
                         </svg>
                     </a>
-                    {% if request.user.is_authenticated %}
-                        <div class="flex flex-wrap gap-3 text-xs font-semibold">
-                            {% if perms.blog.change_casestudy %}
-                                <a href="{% url 'blog:update' slug=post.slug %}"
-                                   class="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-slate-200 transition hover:border-brand-400/60 hover:bg-brand-500/15 hover:text-white">
-                                    Edit
-                                    <svg class="h-4 w-4"
-                                         viewBox="0 0 24 24"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         stroke-width="1.8">
-                                        <path d="M12 20h9" />
-                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
-                                    </svg>
-                                </a>
-                            {% endif %}
-                            {% if perms.blog.delete_casestudy %}
-                                <a href="{% url 'blog:delete' slug=post.slug %}"
-                                   class="inline-flex items-center gap-1 rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1 text-rose-100 transition hover:bg-rose-500/30 hover:text-white">
-                                    Delete
-                                    <svg class="h-4 w-4"
-                                         viewBox="0 0 24 24"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         stroke-width="1.8">
-                                        <path d="m3 6 3 18h12l3-18" />
-                                        <path d="M2 6h20" />
-                                        <path d="M10 11v6" />
-                                        <path d="M14 11v6" />
-                                        <path d="M9 6V4h6v2" />
-                                    </svg>
-                                </a>
-                            {% endif %}
-                        </div>
-                    {% endif %}
                 </div>
             </main>
-            <span class="pointer-events-none absolute inset-0 rounded-[2rem] ring-0 ring-brand-400/0 transition group-focus-within:ring-2 group-focus-within:ring-brand-400/50"></span>
         </article>
     {% empty %}
         <div class="col-span-full text-sm text-slate-400">No case studies available yet.</div>

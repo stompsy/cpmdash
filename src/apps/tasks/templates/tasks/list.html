@@ -2,76 +2,118 @@
 {% load static %}
 {% block pageName %}tasks{% endblock pageName %}
 {% block title %}Tasks{% endblock title %}
+
+{% block page_header %}
+    {% static 'media/jacob-grishey-j8iPllhcWWg-unsplash.jpg' as tasks_header_image %}
+    {% with eyebrow="Task Management" title="Your Tasks" description="Create tasks, check them off as you complete them, and manage your to-dos." image_src=tasks_header_image image_alt="Task management" image_width="960" image_height="640" primary_label="New Task" primary_icon="plus" %}
+        {% include "partials/page_header.html" %}
+    {% endwith %}
+{% endblock page_header %}
+
 {% block content %}
-<section class="col-span-12 mb-16 space-y-12">
-  <!-- Header -->
-  <div class="relative overflow-hidden rounded-2xl border border-white/5 px-6 py-16 sm:px-10 lg:px-16">
-    <div class="absolute inset-0 -z-10 bg-cover bg-center" style="background-image: url('{% static 'media/jacob-grishey-j8iPllhcWWg-unsplash.jpg' %}')"></div>
-    <div class="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(2,6,23,0.92)_0%,rgba(2,6,23,0.88)_28%,rgba(2,6,23,0.58)_60%,rgba(2,6,23,0.28)_80%,rgba(2,6,23,0.12)_100%)]"></div>
-    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(23,51,212,0.14),transparent_60%)]"></div>
-    <div class="pointer-events-none absolute right-[-14%] top-[-28%] h-[28rem] w-[28rem] rounded-full bg-brand-400/16 blur-[140px]"></div>
-    <div class="relative mx-auto max-w-7xl">
-      <p class="inline-flex items-center gap-2 rounded-lg bg-white/5 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-brand-200/90">Task List</p>
-      <div class="mt-8 flex items-start gap-3">
-        <h1 class="text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">Your Tasks</h1>
-        {% include "tasks/_tasks_badge.html" with element_id="tasks-badge-header" %}
-      </div>
-      <p class="mt-8 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">Create tasks, check them off as you complete them, and manage your to-dos.</p>
-    </div>
-  </div>
+<div class="col-span-12 mx-auto w-full" x-data="{ showTaskModal: false }">
+    <span data-page-name="tasks" class="hidden" hidden></span>
+    <div class="mx-auto max-w-6xl px-6 py-20 space-y-24">
 
-  <!-- Content container matches header width -->
-  <div class="px-6 sm:px-10 lg:px-16">
-    <div class="relative mx-auto max-w-7xl space-y-10">
-      <!-- Filters and actions -->
-      <div class="rounded-2xl border border-white/10 bg-slate-900/60 p-5 sm:p-6 shadow-[0_16px_38px_rgba(15,23,42,0.28)] backdrop-blur">
-        <form method="get" class="grid grid-cols-12 gap-3">
-          <div class="col-span-6">
-            <input type="text" name="q" value="{{ q }}" placeholder="Search tasks..." class="w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400/60" />
-          </div>
-          <label class="col-span-2 inline-flex items-center gap-2 text-slate-200"><input type="checkbox" name="incomplete" value="1" {% if incomplete %}checked{% endif %} class="h-4 w-4 rounded border-white/20 bg-white/5 text-brand-500 focus:ring-brand-400/60"> Incomplete only</label>
-          <div class="col-span-3">
-            <select name="sort" class="w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-400/60">
-              <option value="completed_last" {% if sort == 'completed_last' %}selected{% endif %}>Completed last</option>
-              <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Recently added</option>
-              <option value="due_soon" {% if sort == 'due_soon' %}selected{% endif %}>Due soon</option>
-            </select>
-          </div>
-          <div class="col-span-1 flex justify-end">
-            <button class="inline-flex items-center gap-2 rounded-md bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-400">Apply</button>
-          </div>
-        </form>
-        <div class="mt-4">
-          <a href="{% url 'tasks:export_csv' %}?q={{ q|urlencode }}{% if incomplete %}&incomplete=1{% endif %}&sort={{ sort|urlencode }}" class="text-xs text-slate-300 hover:text-white underline">Export CSV</a>
+    {# Quick Actions #}
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Manage Your Tasks</h2>
+            <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">Stay organized and track your progress</p>
         </div>
-      </div>
-
-      <!-- New Task Form (HTMX) -->
-      <div class="rounded-2xl border border-white/10 bg-slate-900/60 p-5 sm:p-6 shadow-[0_16px_38px_rgba(15,23,42,0.28)] backdrop-blur">
-  {% include "tasks/_task_create_form.html" with form=form %}
-      </div>
-  <!-- Tasks list -->
-  <div id="tasks-list" class="rounded-2xl border border-white/10 bg-slate-900/60 p-6 sm:p-8 shadow-[0_16px_38px_rgba(15,23,42,0.28)] backdrop-blur">
-        <h2 class="text-xl font-semibold text-white flex items-center">
-          <svg class="w-6 h-6 mr-3 text-brand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-          Tasks
-        </h2>
-        {% include "tasks/_tasks_list.html" %}
-        {% if is_paginated %}
-          <div class="mt-6 flex items-center justify-between text-sm text-slate-300">
-            <div>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
-            <div class="flex items-center gap-2">
-              {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}&q={{ q|urlencode }}{% if incomplete %}&incomplete=1{% endif %}&sort={{ sort|urlencode }}" class="underline">Previous</a>
-              {% endif %}
-              {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}&q={{ q|urlencode }}{% if incomplete %}&incomplete=1{% endif %}&sort={{ sort|urlencode }}" class="underline">Next</a>
-              {% endif %}
-            </div>
-          </div>
-        {% endif %}
-      </div>
+        <button
+            @click="showTaskModal = true"
+            class="inline-flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all duration-200 hover:shadow-xl hover:shadow-brand-500/40 hover:scale-[1.02] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-400"
+        >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+            <span>New Task</span>
+        </button>
     </div>
-  </div>
-</section>
+
+    {# Task Creation Modal #}
+    <div
+        x-show="showTaskModal"
+        x-cloak
+        @keydown.escape.window="showTaskModal = false"
+        class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-8 sm:py-16"
+    >
+        {# Backdrop #}
+        <div
+            x-show="showTaskModal"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click="showTaskModal = false"
+            class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+        ></div>
+
+        {# Modal #}
+        <div
+            x-show="showTaskModal"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="relative z-10 w-full max-w-xl rounded-2xl border border-white/10 bg-slate-900 shadow-2xl"
+        >
+            {# Modal Header #}
+            <div class="flex items-center justify-between border-b border-white/10 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white">Create New Task</h2>
+                <button
+                    @click="showTaskModal = false"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-400/40"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            {# Modal Body #}
+            <div class="p-6">
+                {% include "tasks/_task_create_form.html" with form=form %}
+            </div>
+        </div>
+    </div>
+
+    {# Tasks List Card #}
+    <div class="mb-16">
+        <div id="tasks-list" class="rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
+            <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
+                <h3 class="flex items-center text-lg font-semibold text-gray-900 dark:text-white">
+                    <svg class="mr-3 h-5 w-5 text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                    All Tasks
+                </h3>
+            </div>
+            <div class="p-6 sm:p-8">
+                {% include "tasks/_tasks_list.html" %}
+            </div>
+            {% if is_paginated %}
+                <div class="border-t border-slate-200/60 px-6 py-4 sm:px-8 dark:border-slate-700/50">
+                    <div class="flex items-center justify-between text-sm text-gray-600 dark:text-slate-300">
+                        <div>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+                        <div class="flex items-center gap-4">
+                            {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}" class="text-brand-500 hover:text-brand-600 dark:text-brand-300 dark:hover:text-brand-200">Previous</a>
+                            {% endif %}
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}" class="text-brand-500 hover:text-brand-600 dark:text-brand-300 dark:hover:text-brand-200">Next</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
 {% endblock content %}

@@ -8,7 +8,6 @@ highlighting the shift from EMS-first to bystander-first intervention and its cl
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from django.db.models import Avg
 
 from utils.chart_colors import CHART_COLORS_VIBRANT
 from utils.plotly import style_plotly_layout
@@ -52,12 +51,6 @@ def build_narcan_administration_grid(theme: str) -> str:
     bystander_total_doses = int(df["narcan_doses_prior_to_ems"].sum())
     ems_total_doses = int(df["narcan_doses_by_ems"].sum())
 
-    # Calculate average doses per incident
-    bystander_avg_doses = df[df["narcan_doses_prior_to_ems"] > 0][
-        "narcan_doses_prior_to_ems"
-    ].mean()
-    ems_avg_doses = df[df["narcan_doses_by_ems"] > 0]["narcan_doses_by_ems"].mean()
-
     # Calculate average dosages
     bystander_avg_dosage = df[df["narcan_prior_to_ems_dosage"] > 0][
         "narcan_prior_to_ems_dosage"
@@ -76,8 +69,6 @@ def build_narcan_administration_grid(theme: str) -> str:
     categories = [
         "Bystander<br>Total Doses",
         "EMS<br>Total Doses",
-        "Bystander<br>Avg Doses",
-        "EMS<br>Avg Doses",
         "Bystander<br>Avg Dosage (mg)",
         "EMS<br>Avg Dosage (mg)",
     ]
@@ -85,15 +76,11 @@ def build_narcan_administration_grid(theme: str) -> str:
     values = [
         bystander_total_doses,
         ems_total_doses,
-        bystander_avg_doses if not pd.isna(bystander_avg_doses) else 0,
-        ems_avg_doses if not pd.isna(ems_avg_doses) else 0,
         bystander_avg_dosage if not pd.isna(bystander_avg_dosage) else 0,
         ems_avg_dosage if not pd.isna(ems_avg_dosage) else 0,
     ]
 
     colors = [
-        CHART_COLORS_VIBRANT[0],  # Bystander
-        CHART_COLORS_VIBRANT[1],  # EMS
         CHART_COLORS_VIBRANT[0],  # Bystander
         CHART_COLORS_VIBRANT[1],  # EMS
         CHART_COLORS_VIBRANT[0],  # Bystander
@@ -337,21 +324,6 @@ def build_narcan_stats() -> list[dict[str, str]]:
     total_count = ODReferrals.objects.count()
     narcan_rate = (narcan_given_count / total_count * 100) if total_count > 0 else 0
 
-    # Average doses
-    bystander_avg = (
-        ODReferrals.objects.filter(narcan_given=True, narcan_doses_prior_to_ems__gt=0).aggregate(
-            avg=Avg("narcan_doses_prior_to_ems")
-        )["avg"]
-        or 0
-    )
-
-    ems_avg = (
-        ODReferrals.objects.filter(narcan_given=True, narcan_doses_by_ems__gt=0).aggregate(
-            avg=Avg("narcan_doses_by_ems")
-        )["avg"]
-        or 0
-    )
-
     # Cases where bystander gave more - calculate from raw data for simplicity
     queryset_compare = ODReferrals.objects.filter(narcan_given=True).values(
         "narcan_doses_prior_to_ems", "narcan_doses_by_ems"
@@ -375,15 +347,5 @@ def build_narcan_stats() -> list[dict[str, str]]:
             "label": "Bystander-first cases",
             "value": f"{bystander_led:,}",
             "description": f"{bystander_led_pct:.0f}% had bystanders give more doses than EMS",
-        },
-        {
-            "label": "Avg bystander doses",
-            "value": f"{bystander_avg:.1f}",
-            "description": "Per incident with bystander administration",
-        },
-        {
-            "label": "Avg EMS doses",
-            "value": f"{ems_avg:.1f}",
-            "description": "Per incident with EMS administration",
         },
     ]

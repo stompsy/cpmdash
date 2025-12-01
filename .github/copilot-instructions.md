@@ -133,6 +133,11 @@ def build_chart_<name>(theme: str) -> str:
 
 ## Frontend Patterns
 
+**Standard Layouts:**
+-   **Page Wrapper:** Use `mx-auto max-w-6xl px-6 py-20` for the main content container.
+-   **Vertical Spacing:** Use `space-y-24` or `space-y-40` between major sections to create breathing room.
+-   **Narrative Data Story:** For complex analytics (e.g., Cost Savings), prefer a vertical timeline or narrative flow over dense grids of cards. Use connecting lines (`w-px bg-slate-200`) to guide the user's eye.
+
 **HTMX Usage:**
 -   Pages use `hx-get`, `hx-post`, `hx-target` for dynamic content loading
 -   Example: `<div hx-get="{% url 'dashboard:partial' %}" hx-trigger="load">` for lazy-loaded charts

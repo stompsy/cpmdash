@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+{% load static %}
+{% load timeline_filters %}
+
+{% block pageName %}cpmTimeline{% endblock pageName %}
+{% block title %}{{ title }}{% endblock title %}
+
+{% block page_header %}
+{% static 'media/brian_kneeling_dark.png' as timeline_header_image %}
+{% if is_admin %}
+    {% with eyebrow="Program briefings" title=title description=description image_src=timeline_header_image image_alt="Community paramedics reviewing program milestones" image_width="960" image_height="640" primary_label="Add Timeline Entry" primary_url="#" primary_alpine_click="$dispatch('open-add-modal')" primary_icon="plus" %}
+        {% include "partials/page_header.html" %}
+    {% endwith %}
+{% else %}
+    {% with eyebrow="Program briefings" title=title description=description image_src=timeline_header_image image_alt="Community paramedics reviewing program milestones" image_width="960" image_height="640" %}
+        {% include "partials/page_header.html" %}
+    {% endwith %}
+{% endif %}
+{% endblock page_header %}
+
+{% block content %}
+<div class="col-span-12 mx-auto mt-16 w-full max-w-7xl" x-data="timelineEditor()" @open-add-modal.window="openAddModal()">
+    <span data-page-name="cpmTimeline" class="hidden" hidden></span>
+
+    <div class="space-y-16">
+        <!-- Timeline entries with document gutter -->
+        <section class="col-span-12">
+            <div class="py-6">
+                <div class="w-full mx-auto">
+                    <!-- Two column layout: Timeline + Document Gutter -->
+                    <div class="grid grid-cols-1 lg:grid-cols-[1fr_20rem] xl:grid-cols-[1fr_24rem] gap-8 lg:gap-12">
+                        <!-- Left column: Timeline -->
+                        <div id="timeline-entries">
+                            {% include "timeline/_timeline_entries.html" %}
+                        </div>
+
+                        <!-- Right column: Document Gutter (sticky) -->
+                        <aside class="hidden lg:block">
+                            <div class="sticky">
+                                <!-- Document Section Header -->
+                                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900/80 dark:to-slate-900/60 p-6 shadow-sm">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                                        </svg>
+                                        <h3 class="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-600 dark:text-indigo-300">
+                                            Resources
+                                        </h3>
+                                    </div>
+                                    <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                                        Program documents, reports, and reference materials
+                                    </p>
+                                </div>
+
+                                <!-- Document Links -->
+                                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm overflow-hidden">
+                                    <div class="divide-y divide-slate-200 dark:divide-slate-800">
+                                        <!-- Annual Report -->
+                                        <a href="{% static 'documents/Annual Report 2024 Draft 1.docx' %}"
+                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                           download>
+                                            <svg class="h-5 w-5 flex-none text-sky-600 dark:text-sky-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                            </svg>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                    Annual Report 2024
+                                                </p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                    Program overview & outcomes
+                                                </p>
+                                            </div>
+                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                        </a>
+
+                                        <!-- PORT PowerPoint -->
+                                        <a href="{% static 'documents/PORT Powerpoint.docx' %}"
+                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                           download>
+                                            <svg class="h-5 w-5 flex-none text-orange-600 dark:text-orange-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M23 3H1a1 1 0 00-1 1v16a1 1 0 001 1h22a1 1 0 001-1V4a1 1 0 00-1-1zm-1 16H2V5h20v14zM5 7h6v2H5V7zm0 4h6v2H5v-2zm0 4h6v2H5v-2zm8-8h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2z"/>
+                                            </svg>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                    PORT Presentation
+                                                </p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                    Post Overdose Response Team
+                                                </p>
+                                            </div>
+                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                        </a>
+
+                                        <!-- UW CROA Grant -->
+                                        <a href="{% static 'documents/UW-CROA_MOUD_Expansion.docx' %}"
+                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                           download>
+                                            <svg class="h-5 w-5 flex-none text-emerald-600 dark:text-emerald-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                            </svg>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                    UW-CROA MOUD Expansion
+                                                </p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                    Grant & program expansion
+                                                </p>
+                                            </div>
+                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                        </a>
+
+                                        <!-- Naloxone Protocol -->
+                                        <a href="{% static 'documents/Naloxone Leave-Behind Protocol.docx' %}"
+                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                           download>
+                                            <svg class="h-5 w-5 flex-none text-rose-600 dark:text-rose-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                            </svg>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                    Naloxone Leave-Behind Protocol
+                                                </p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                    Overdose response guidelines
+                                                </p>
+                                            </div>
+                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                        </a>
+
+                                        <!-- Q1 2025 Report -->
+                                        <a href="{% static 'documents/2025 Q1 Hargrove Report.docx' %}"
+                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                           download>
+                                            <svg class="h-5 w-5 flex-none text-purple-600 dark:text-purple-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                            </svg>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                    2025 Q1 Hargrove Report
+                                                </p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                    Quarterly program report
+                                                </p>
+                                            </div>
+                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                        </a>
+
+                                        <!-- Q2 2025 Report -->
+                                        <a href="{% static 'documents/2025 Q2 Hargrove Report.docx' %}"
+                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                           download>
+                                            <svg class="h-5 w-5 flex-none text-purple-600 dark:text-purple-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                            </svg>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                    2025 Q2 Hargrove Report
+                                                </p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                    Quarterly program report
+                                                </p>
+                                            </div>
+                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- External Links Section -->
+                                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm overflow-hidden">
+                                    <div class="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                        <h4 class="text-xs font-semibold uppercase tracking-[0.25em] text-gray-600 dark:text-gray-400">
+                                            External Resources
+                                        </h4>
+                                    </div>
+                                    <div class="divide-y divide-slate-200 dark:divide-slate-800">
+                                        <a href="https://www.doh.wa.gov/"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                            <svg class="h-5 w-5 flex-none text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+                                            </svg>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                    WA Dept. of Health
+                                                </p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                    State health resources
+                                                </p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Edit/Add Modal -->
+    {% if is_admin %}
+    {% include "timeline/_edit_modal.html" %}
+    {% endif %}
+</div>
+
+<script>
+function timelineEditor() {
+    return {
+        showModal: false,
+        isEditing: false,
+        currentEntry: {
+            id: null,
+            type: 'event',
+            year: '',
+            month: '',
+            tagline: '',
+            lead: '',
+            bullets: [],
+            sections: [],
+            need: '',
+            response: '',
+            impact: ''
+        },
+        bulletInput: '',
+        sectionTitleInput: '',
+        sectionItemInput: '',
+
+        openAddModal() {
+            this.isEditing = false;
+            this.resetForm();
+            this.showModal = true;
+        },
+
+        openEditModal(entryId) {
+            // Find the button with the entry data
+            const button = event.target.closest('button');
+            const entryData = button.dataset.entry;
+            const entry = JSON.parse(entryData);
+
+            this.isEditing = true;
+            this.currentEntry = JSON.parse(JSON.stringify(entry)); // Deep copy
+            // Ensure defaults for new fields
+            if (!this.currentEntry.type) this.currentEntry.type = 'event';
+            if (!this.currentEntry.need) this.currentEntry.need = '';
+            if (!this.currentEntry.response) this.currentEntry.response = '';
+            if (!this.currentEntry.impact) this.currentEntry.impact = '';
+
+            this.showModal = true;
+        },
+
+        closeModal() {
+            this.showModal = false;
+            this.resetForm();
+        },
+
+        resetForm() {
+            this.currentEntry = {
+                id: null,
+                type: 'event',
+                year: '',
+                month: '',
+                tagline: '',
+                lead: '',
+                bullets: [],
+                sections: [],
+                need: '',
+                response: '',
+                impact: ''
+            };
+            this.bulletInput = '';
+            this.sectionTitleInput = '';
+            this.sectionItemInput = '';
+        },
+
+        addBullet() {
+            if (this.bulletInput.trim()) {
+                this.currentEntry.bullets.push(this.bulletInput.trim());
+                this.bulletInput = '';
+            }
+        },
+
+        removeBullet(index) {
+            this.currentEntry.bullets.splice(index, 1);
+        },
+
+        addSection() {
+            this.currentEntry.sections.push({
+                title: '',
+                items: []
+            });
+        },
+
+        removeSection(index) {
+            this.currentEntry.sections.splice(index, 1);
+        },
+
+        addSectionItem(sectionIndex) {
+            const section = this.currentEntry.sections[sectionIndex];
+            const input = this.$refs['sectionItem' + sectionIndex];
+            if (input && input.value.trim()) {
+                section.items.push(input.value.trim());
+                input.value = '';
+            }
+        },
+
+        removeSectionItem(sectionIndex, itemIndex) {
+            this.currentEntry.sections[sectionIndex].items.splice(itemIndex, 1);
+        },
+
+        async saveEntry() {
+            const url = this.isEditing
+                ? `/timeline/api/entries/${this.currentEntry.id}/update/`
+                : '/timeline/api/entries/';
+
+            const method = this.isEditing ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(this.currentEntry)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Reload timeline entries via HTMX
+                    htmx.ajax('GET', '/timeline/htmx/entries/', {
+                        target: '#timeline-entries',
+                        swap: 'innerHTML'
+                    });
+                    this.closeModal();
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error saving entry: ' + error.message);
+            }
+        },
+
+        async deleteEntry(entryId) {
+            if (!confirm('Are you sure you want to delete this timeline entry?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/timeline/api/entries/${entryId}/delete/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Reload timeline entries
+                    htmx.ajax('GET', '/timeline/htmx/entries/', {
+                        target: '#timeline-entries',
+                        swap: 'innerHTML'
+                    });
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error deleting entry: ' + error.message);
+            }
+        },
+
+        getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    }
+}
+
+// Adjust vertical line heights to match content card heights
+function adjustTimelineLines() {
+    const entries = document.querySelectorAll('.timeline-entry');
+    entries.forEach((entry) => {
+        const contentCard = entry.querySelector('article.group\\/card');
+        const verticalLine = entry.querySelector('.timeline-line');
+
+        if (contentCard && verticalLine) {
+            const cardHeight = contentCard.offsetHeight;
+            // Set line height to match card height minus some padding
+            verticalLine.style.height = `${Math.max(cardHeight - 32, 100)}px`;
+        }
+    });
+}
+
+// Run on page load and after HTMX updates
+document.addEventListener('DOMContentLoaded', adjustTimelineLines);
+document.addEventListener('htmx:afterSwap', (event) => {
+    if (event.detail.target.id === 'timeline-entries') {
+        setTimeout(adjustTimelineLines, 50);
+    }
+});
+</script>
+
+{% endblock content %}

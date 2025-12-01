@@ -13,7 +13,7 @@ from utils.tailwind_colors import TAILWIND_COLORS
 from ...core.models import ODReferrals
 from ..overdose.od_hist_monthly import (
     build_chart_od_hist_monthly,
-    build_chart_top3_drugs_monthly,
+    build_chart_top5_drugs_monthly,
 )
 
 # Use professional vibrant color palette for all charts
@@ -212,6 +212,10 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str | No
     else:
         s = _clean_series(df[field])
 
+    # Filter out "No CPM Response" for cpm_disposition
+    if field == "cpm_disposition":
+        s = s[s != "No CPM Response"]
+
     if s.empty:
         return None
 
@@ -362,15 +366,15 @@ def build_odreferrals_field_charts(
     wants_monthly = target_fields is None or "odreferrals_counts_monthly" in target_fields
     if wants_monthly:
         monthly_chart = build_chart_od_hist_monthly(theme)
-        top3_drugs_chart = build_chart_top3_drugs_monthly(theme)
-        if monthly_chart and top3_drugs_chart:
+        top5_drugs_chart = build_chart_top5_drugs_monthly(theme)
+        if monthly_chart and top5_drugs_chart:
             # Combine both charts with a separator
             combined_chart = f"""
             {monthly_chart}
             <div class="border-t border-slate-200/60 dark:border-slate-700/50 my-6"></div>
             <div class="px-2">
-                <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Top 3 Suspected Drugs by Month</h4>
-                {top3_drugs_chart}
+                <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Top 5 Suspected Drugs by Month</h4>
+                {top5_drugs_chart}
             </div>
             """
             charts["odreferrals_counts_monthly"] = combined_chart

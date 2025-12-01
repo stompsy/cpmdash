@@ -17,6 +17,7 @@ urlpatterns = [
     path("partials/", include("apps.partials_viewer.urls")),
     path("blog/", include("apps.blog.urls")),
     path("tasks/", include("apps.tasks.urls")),
+    path("timeline/", include("apps.timeline.urls")),
     path("cases/", include("apps.cases.urls")),
     path("privacy/", privacy, name="privacy"),
     path("terms/", terms, name="terms"),

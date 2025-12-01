@@ -1,0 +1,362 @@
+<!-- Timeline Entry Edit/Add Modal -->
+<!-- Backdrop -->
+<div
+    x-show="showModal"
+    x-cloak
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-150"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    @click="closeModal()"
+    @keydown.escape.window="closeModal()"
+    class="fixed inset-0 z-999999 bg-slate-950/80 backdrop-blur-sm"
+></div>
+
+<!-- Modal Container -->
+<div
+    x-show="showModal"
+    x-cloak
+    @keydown.escape.window="closeModal()"
+    class="fixed inset-0 z-9999999 flex items-center justify-center p-4 overflow-y-auto"
+>
+    <!-- Modal -->
+    <div
+        x-show="showModal"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        @click.stop
+        class="relative w-full max-w-4xl my-8 rounded-2xl border border-white/10 bg-slate-900 shadow-2xl"
+    >
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-white/10 px-6 py-4">
+            <h2 class="text-xl font-semibold text-white" x-text="isEditing ? 'Edit Timeline Entry' : 'Add Timeline Entry'"></h2>
+            <button
+                @click="closeModal()"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+            >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+            <!-- Entry Type -->
+            <div>
+                <label class="block text-sm font-medium text-slate-200 mb-2">
+                    Entry Type <span class="text-rose-400">*</span>
+                </label>
+                <div class="grid grid-cols-3 gap-3">
+                    <button
+                        type="button"
+                        @click="currentEntry.type = 'event'"
+                        :class="currentEntry.type === 'event' ? 'bg-brand-500 text-white ring-2 ring-brand-400/50' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'"
+                        class="flex items-center justify-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium transition-all"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                        </svg>
+                        Event
+                    </button>
+                    <button
+                        type="button"
+                        @click="currentEntry.type = 'milestone'"
+                        :class="currentEntry.type === 'milestone' ? 'bg-brand-500 text-white ring-2 ring-brand-400/50' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'"
+                        class="flex items-center justify-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium transition-all"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5"/>
+                        </svg>
+                        Milestone
+                    </button>
+                    <button
+                        type="button"
+                        @click="currentEntry.type = 'impact'"
+                        :class="currentEntry.type === 'impact' ? 'bg-brand-500 text-white ring-2 ring-brand-400/50' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'"
+                        class="flex items-center justify-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium transition-all"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        Impact
+                    </button>
+                </div>
+            </div>
+
+            <!-- Year and Month Row -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Year -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-200 mb-2">
+                        Year <span class="text-rose-400">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        x-model="currentEntry.year"
+                        placeholder="2025"
+                        class="w-full rounded-lg border border-white/10 bg-slate-800 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                        required
+                    />
+                </div>
+
+                <!-- Month -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-200 mb-2">
+                        Month
+                    </label>
+                    <select
+                        x-model="currentEntry.month"
+                        class="w-full rounded-lg border border-white/10 bg-slate-800 px-4 py-2.5 text-slate-100 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                    >
+                        <option value="">Not specified</option>
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tagline -->
+            <div>
+                <label class="block text-sm font-medium text-slate-200 mb-2">
+                    Tagline <span class="text-rose-400">*</span>
+                </label>
+                <input
+                    type="text"
+                    x-model="currentEntry.tagline"
+                    placeholder="Program milestone"
+                    class="w-full rounded-lg border border-white/10 bg-slate-800 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                    required
+                />
+            </div>
+
+            <!-- Lead Text -->
+            <div>
+                <label class="block text-sm font-medium text-slate-200 mb-2">
+                    Lead Description <span class="text-rose-400">*</span>
+                </label>
+                <textarea
+                    x-model="currentEntry.lead"
+                    rows="3"
+                    placeholder="Brief overview of this milestone..."
+                    class="w-full rounded-lg border border-white/10 bg-slate-800 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                    required
+                ></textarea>
+            </div>
+
+            <!-- IMPACT FIELDS -->
+            <div x-show="currentEntry.type === 'impact'" class="space-y-6">
+                <!-- Community Need -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-200 mb-2">
+                        Community Need
+                    </label>
+                    <textarea
+                        x-model="currentEntry.need"
+                        rows="3"
+                        placeholder="Describe the community need or gap..."
+                        class="w-full rounded-lg border border-white/10 bg-slate-800 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                    ></textarea>
+                </div>
+
+                <!-- Response -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-200 mb-2">
+                        Program Response
+                    </label>
+                    <textarea
+                        x-model="currentEntry.response"
+                        rows="3"
+                        placeholder="How did the program respond?"
+                        class="w-full rounded-lg border border-white/10 bg-slate-800 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                    ></textarea>
+                </div>
+
+                <!-- Impact -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-200 mb-2">
+                        Impact / Outcome
+                    </label>
+                    <textarea
+                        x-model="currentEntry.impact"
+                        rows="3"
+                        placeholder="What was the result or impact?"
+                        class="w-full rounded-lg border border-white/10 bg-slate-800 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- STANDARD FIELDS (Event/Milestone) -->
+            <div x-show="currentEntry.type !== 'impact'" class="space-y-6">
+                <!-- Bullets -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-200 mb-2">
+                        Bullet Points
+                    </label>
+                    <div class="space-y-2">
+                        <!-- Existing bullets -->
+                        <template x-for="(bullet, index) in currentEntry.bullets" :key="index">
+                            <div class="flex gap-2">
+                                <input
+                                    type="text"
+                                    x-model="currentEntry.bullets[index]"
+                                    class="flex-1 rounded-lg border border-white/10 bg-slate-800 px-4 py-2 text-sm text-slate-100 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                                />
+                                <button
+                                    @click="removeBullet(index)"
+                                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                                    title="Remove bullet"
+                                >
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+
+                        <!-- Add new bullet -->
+                        <div class="flex gap-2">
+                            <input
+                                type="text"
+                                x-model="bulletInput"
+                                @keydown.enter.prevent="addBullet()"
+                                placeholder="Add a bullet point..."
+                                class="flex-1 rounded-lg border border-white/10 bg-slate-800 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                            />
+                            <button
+                                @click="addBullet()"
+                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-brand-500/30 bg-brand-500/10 text-brand-400 hover:bg-brand-500/20"
+                                title="Add bullet"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sections -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="block text-sm font-medium text-slate-200">
+                            Sections
+                        </label>
+                        <button
+                            @click="addSection()"
+                            class="inline-flex items-center gap-2 rounded-lg border border-brand-500/30 bg-brand-500/10 px-3 py-1.5 text-xs font-semibold text-brand-400 hover:bg-brand-500/20"
+                        >
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                            </svg>
+                            Add Section
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <template x-for="(section, sectionIndex) in currentEntry.sections" :key="sectionIndex">
+                            <div class="rounded-xl border border-slate-700 bg-slate-800/50 p-4 space-y-3">
+                                <!-- Section Title -->
+                                <div class="flex gap-2">
+                                    <input
+                                        type="text"
+                                        x-model="section.title"
+                                        placeholder="Section title..."
+                                        class="flex-1 rounded-lg border border-white/10 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 placeholder:text-slate-500 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                                    />
+                                    <button
+                                        @click="removeSection(sectionIndex)"
+                                        class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                                        title="Remove section"
+                                    >
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <!-- Section Items -->
+                                <div class="space-y-2 pl-4">
+                                    <template x-for="(item, itemIndex) in section.items" :key="itemIndex">
+                                        <div class="flex gap-2">
+                                            <input
+                                                type="text"
+                                                x-model="section.items[itemIndex]"
+                                                class="flex-1 rounded-lg border border-white/10 bg-slate-800 px-3 py-1.5 text-xs text-slate-100 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                                            />
+                                            <button
+                                                @click="removeSectionItem(sectionIndex, itemIndex)"
+                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                                            >
+                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <!-- Add section item -->
+                                    <div class="flex gap-2">
+                                        <input
+                                            type="text"
+                                            :x-ref="'sectionItem' + sectionIndex"
+                                            @keydown.enter.prevent="addSectionItem(sectionIndex)"
+                                            placeholder="Add item..."
+                                            class="flex-1 rounded-lg border border-white/10 bg-slate-800 px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-brand-400/50 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                                        />
+                                        <button
+                                            @click="addSectionItem(sectionIndex)"
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-brand-500/30 bg-brand-500/10 text-brand-400 hover:bg-brand-500/20"
+                                            title="Add item"
+                                        >
+                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-end gap-3 border-t border-white/10 px-6 py-4">
+            <button
+                @click="closeModal()"
+                class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-100 transition-all hover:bg-white/10 hover:border-white/20"
+            >
+                Cancel
+            </button>
+            <button
+                @click="saveEntry()"
+                class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:shadow-xl hover:shadow-brand-500/40 hover:scale-[1.02]"
+            >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                </svg>
+                <span x-text="isEditing ? 'Update Entry' : 'Create Entry'"></span>
+            </button>
+        </div>
+    </div>
+    <!-- End Modal -->
+</div>
+<!-- End Modal Container -->

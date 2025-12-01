@@ -195,7 +195,7 @@ def build_chart_od_hist_monthly(theme):
     return plot(fig, output_type="div", config=chart_config)
 
 
-def build_chart_top3_drugs_monthly(theme):
+def build_chart_top5_drugs_monthly(theme):
     """
     Build a stacked area chart showing top 3 drugs by month
     """
@@ -208,7 +208,11 @@ def build_chart_top3_drugs_monthly(theme):
         return "<p>No data available</p>"
 
     # Create monthly aggregations
-    df["month"] = df["od_date"].dt.tz_localize(None).dt.to_period("M")
+    # Cast to Series[datetime] to satisfy mypy, which gets confused otherwise
+    od_date_series: pd.Series[datetime] = df["od_date"]
+    # Mypy gets confused by the chained .dt accessors. Chaining them directly
+    # seems to resolve the false positive.
+    df["month"] = od_date_series.dt.tz_localize(None).dt.to_period("M")
 
     # Find top 5 drugs overall
     top_drugs = df["suspected_drug"].value_counts().head(5).index.tolist()

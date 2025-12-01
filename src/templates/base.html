@@ -21,9 +21,19 @@
         <title>{% block title %} {% endblock title %}</title>
         <link rel="shortcut icon" type="image/png" href="{% static 'media/favicon.ico' %}"/>
         <link rel="stylesheet" href="{% static 'css/output.css' %}" />
+        <style>[x-cloak] { display: none !important; }</style>
         <script defer src="{% static 'js/htmx.min.js' %}"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script>
+            // Scroll to top on HTMX navigation
+            document.addEventListener('htmx:afterSwap', function(event) {
+                if (event.detail.target.id === 'dashboard-main') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        </script>
     </head>
     <body
         x-data="{
@@ -65,13 +75,10 @@
                 <!-- ===== Header End ===== -->
 
                 <!-- ===== Main Content Start ===== -->
-                <main>
-                    <div
-                        id="dashboard-main"
-                        class="mx-auto w-full px-6 py-10 space-y-12 sm:px-10"
-                    >
-                        {% block page_header %}{% endblock page_header %}
-                        <div class="grid grid-cols-12 gap-6">
+                <main id="dashboard-main">
+                    {% block page_header %}{% endblock page_header %}
+                    <div class="mx-auto w-full max-w-7xl space-y-8">
+                        <div class="grid grid-cols-12 gap-6 px-6">
                             {% block content %}{% endblock content %}
                         </div>
                     </div>
@@ -155,6 +162,18 @@
                         const pageName = pageSource || (marker ? marker.getAttribute('data-page-name') : null);
                         if (pageName && document.body.__x && document.body.__x.$data) {
                             document.body.__x.$data.page = pageName;
+                        }
+                    });
+
+                    // Scroll to top on navigation
+                    document.body.addEventListener('htmx:afterSettle', function(evt) {
+                        // Only scroll for main content navigation, not for inline updates
+                        if (evt.target && evt.target.id === 'dashboard-main') {
+                            // Find the scrollable content area (parent with overflow-y-auto)
+                            const contentArea = document.querySelector('.overflow-y-auto');
+                            if (contentArea) {
+                                contentArea.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
                         }
                     });
 

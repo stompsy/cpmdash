@@ -1,0 +1,2438 @@
+{
+  "2022": {
+    "1": {
+      "metrics": {
+        "services": [
+          {
+            "id": "68204",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "320.0"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "68205",
+            "metric": "# patients (current quarter)",
+            "value": "166.0"
+          },
+          {
+            "id": "68206",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "17.0"
+          }
+        ],
+        "Health Insurance Type": [
+          {
+            "id": "68158",
+            "metric": "Private (current quarter)",
+            "value": "11.0"
+          },
+          {
+            "id": "68152",
+            "metric": "Medicaid (current quarter)",
+            "value": "36.0"
+          },
+          {
+            "id": "68154",
+            "metric": "Medicare (current quarter)",
+            "value": "44.0"
+          },
+          {
+            "id": "68148",
+            "metric": "Dual Medicaid/Medicare (current quarter)",
+            "value": "7.0"
+          },
+          {
+            "id": "68150",
+            "metric": "Indian Health Service (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68160",
+            "metric": "Tricare (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68162",
+            "metric": "Uninsured (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68164",
+            "metric": "Unknown (current quarter)",
+            "value": "71.0"
+          },
+          {
+            "id": "68156",
+            "metric": "Other (current quarter)",
+            "value": "0.0"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "68207",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "166.0"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "68190",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "14.0"
+          },
+          {
+            "id": "68182",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68180",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68172",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68170",
+            "metric": "98305 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68188",
+            "metric": "98381 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68184",
+            "metric": "98362 (current quarter)",
+            "value": "82.0"
+          },
+          {
+            "id": "68186",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "46.0"
+          },
+          {
+            "id": "68178",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68176",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68174",
+            "metric": "98326 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68194",
+            "metric": "Jail (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68196",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "68192",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "21.0"
+          },
+          {
+            "id": "68201",
+            "metric": "Unknown (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "68198",
+            "metric": "Other (current quarter)",
+            "value": "1.0"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "In our 2021, year-end report we mentioned Community Paramedicine and Clallam County Health Department developed a Community Sharps program to install sharps containers in strategic locations around Port Angeles. We have begun the first stage of this and, with the help of Port Angeles Parks & Recreation, installed 11 sharps containers in public parks. We are participating in educational opportunities that target vulnerable populations. We are currently focused on the mental health aspect. Recently, one of our Community Paramedics was promoted to Lieutenant and moved back to line staff. We are actively recruiting a third Paramedic for this position and will be interviewing next week."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "During Quarter 1 of 2022, we have developed several collaborative projects with other agencies. With North Olympic Healthcare Network (NOHN), we have agreed to be a resource for their blood pressure monitoring program, providing medical evaluations for patients who are concerned about their blood pressure readings, coordinated through NOHN triage. With Clallam Care Connection (3C), we are working to further strengthen and implement policies to assist multi-agency patients. The Clallam Health Department has taken over the 3C group, allowing a more HIPPA-protected and streamlined exchange of information between agencies involved in the collaborative. In the first quarter, we became involved in discussions with the goal of establishing a Medical Respite Program - a collaboration between CCC, Serenity House, OMC, NOHN, the Health Department, PAFD, Olympic Ambulance, and PBH \u0096 to assist vulnerable populations that have been discharged from the hospital but require a safe place to recuperate. We continue to participate in frequent outreach efforts with REdisCOVERY, working to bring medical care and social services to vulnerable and unhoused individuals in our community."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "We are all always searching for additional funding for this program. We are actively pursuing one grant opportunity at this time and we are working to make a coordinated funding appeal to the Managed Care Organizations (MCO\u0092s) that serve the County."
+        },
+        {
+          "question": "Success Stories",
+          "response": "84-year-old Female with history of severe hip fracture after being hit by a car and pushed into a construction hole. Patient has no health insurance due to being undocumented. This limited her ability to receive physical therapy/occupational therapy services. Her ongoing discomfort and ability to ambulate resulted in a deterioration of her cognition. Community Paramedicine got involved and were able to transport her to her follow-up appointments with orthopedist and primary care. This resolved a medication issue that had further contributed to her declining mental state. Now she is able to fully ambulate and go on walks, take her trash out, etc., and has has had remarkable improvement in her cognition and emotional state."
+        }
+      ]
+    },
+    "2": {
+      "metrics": {
+        "services": [
+          {
+            "id": "68237",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "788.0"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "68238",
+            "metric": "# patients (current quarter)",
+            "value": "225.0"
+          },
+          {
+            "id": "68239",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "33.0"
+          }
+        ],
+        "Health Insurance Type": [
+          {
+            "id": "68213",
+            "metric": "Private (current quarter)",
+            "value": "27.0"
+          },
+          {
+            "id": "68210",
+            "metric": "Medicaid (current quarter)",
+            "value": "67.0"
+          },
+          {
+            "id": "68211",
+            "metric": "Medicare (current quarter)",
+            "value": "109.0"
+          },
+          {
+            "id": "68208",
+            "metric": "Dual Medicaid/Medicare (current quarter)",
+            "value": "33.0"
+          },
+          {
+            "id": "68209",
+            "metric": "Indian Health Service (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68214",
+            "metric": "Tricare (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "68215",
+            "metric": "Uninsured (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "68216",
+            "metric": "Unknown (current quarter)",
+            "value": "3.0"
+          },
+          {
+            "id": "68212",
+            "metric": "Other (current quarter)",
+            "value": "4.0"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "68240",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "225.0"
+          },
+          {
+            "id": "68241",
+            "metric": "# unduplicated patients (high utilizers) with reduced emergency department use 6 months after Community Paramedic interventions (year-to-date)",
+            "value": "41.0"
+          },
+          {
+            "id": "68241",
+            "metric": "# unduplicated patients (high utilizers( (year-to-date)",
+            "value": "50.0"
+          },
+          {
+            "id": "68319",
+            "metric": "# unduplicated patients (high utilizers) with reduced 911 uses 6 months after Community Paramedicine interventions (year-to-date)",
+            "value": "25.0"
+          },
+          {
+            "id": "68319",
+            "metric": "# unduplicated patients (high utilizers) (year-to-date)",
+            "value": "43.0"
+          },
+          {
+            "id": "68242",
+            "metric": "# of unduplicated patients who receive at least 1 referral of those contacted (year-to-date)",
+            "value": "289.0"
+          },
+          {
+            "id": "68242",
+            "metric": "# unduplicated patients of those who needed a referral (year-to-date)",
+            "value": "289.0"
+          },
+          {
+            "id": "68243",
+            "metric": "# of connections/referrals completed by patient (year-to-date)",
+            "value": "377.0"
+          },
+          {
+            "id": "68243",
+            "metric": "# of connection/referrals made (year-to-date)",
+            "value": "414.0"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "68231",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "18.0"
+          },
+          {
+            "id": "68227",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68226",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68222",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68221",
+            "metric": "98305 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68230",
+            "metric": "98381 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68228",
+            "metric": "98362 (current quarter)",
+            "value": "119.0"
+          },
+          {
+            "id": "68229",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "58.0"
+          },
+          {
+            "id": "68225",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "2.0"
+          },
+          {
+            "id": "68224",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "68223",
+            "metric": "98326 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68233",
+            "metric": "Jail (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68234",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "68232",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "26.0"
+          },
+          {
+            "id": "68236",
+            "metric": "Unknown (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68235",
+            "metric": "Other (current quarter)",
+            "value": "0.0"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "We have become widely used by physician clinics and our own concerned Paramedics and EMTs. This quarter our services have been requested by a variety of new agencies/organizations and we are getting requests for services we have not yet provided. North Olympic Healthcare Network, Peninsula Behavioral Health (PBH), Olympic Medical Center (Olympic Medical Physicians, Cancer Center, Home Health), Elwha Clinic, Jamestown Family Health Clinic, Olympic Peninsula Community Clinic, Olympic Area Agency on Aging are among some of the referral sources. Metrics Beyond what data our partners and grantors request from us, we are able to break down our referrals into other important areas and track age, sex, programs patients belong to in the community, patients w/ substance use disorders, types of procedures and/or services provided, etc. This allows us to visualize what services are being used and revise our Community Paramedicine program to address these areas more efficiently. We have recently implemented a way to query and track hospital admissions for our patients. This helps us to better understand the vulnerable populations we serve. Until now our focus has been on providing better access to care and reducing 911 and Emergency Department usage. With these numbers we are able to explain to our providers, partners, and community members that some of these \"High Utilization\" patients are being admitted to the hospital after being transported to the emergency department. It gives us insight into the complexity of the chronically ill patients."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "Administration of antipsychotic and Vivitrol injections prescribed by Olympic Peninsula Community Clinic, Peninsula Behavioral Health or patient\u0092s PCP. Coordination with the Rediscovery Arrest and Jail Alternative (AJA) team to initiate Vivitrol injections upon leaving jail to break the cycle of drug use when individuals are clean and ready for a fresh start. Preliminary collaboration talks have been initiated with the Clallam County Drug Court to expand these services to individuals enrolled in County AJA programs. Medical Respite Program Medical Respite is a service for individuals who are sick or injured and don't have a safe home to recover but don't qualify for convalescence in a hospital, Skilled Nursing Facility (SNF), or Long Term Care Facility (LTCF). Clallam County does not currently have this service available. The lack of this service became even more apparent in late 2021 when our hospital systems were overwhelmed responding to COVID and there was an increased urgency for discharging patients whose discharge was delayed due to lack of secure housing. PAFD Community Paramedics are collaborating with Clallam County Health and Human Services, Serenity House of Clallam County, Olympic Medical Center, North Olympic Healthcare Network, and Olympic Peninsula Community Clinic to establish a Medical Respite Program. This program will provide the infrastructure to treat patients in place at the shelter. More importantly, it is a safe discharge option allowing vulnerable populations convalescence in a SNF or LTCF."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "We were awarded a $35,000 grant through Olympic Communities of Health. We will be participating in two regional action collaboratives to improve access to care for vulnerable populations and destigmatize substance use disorder. We are still looking for alternate sources of funding. We continue to appeal to the City of Port Angeles for funding. While we do not bring any money (besides grant funds to pay our wages) to the City, we do save a tremendous amount of money to the City and it's taxpayers."
+        },
+        {
+          "question": "Success Stories",
+          "response": "37-year-old Female Multiple sexual abuse cases Substance use disorder - Methamphetamines Schizoaffective disorder Suicidal Ideation w/ multiple suicide attempts 2021 - (27) ED Visits 2022 - (6)  ED Visits This patient is one of our long-term case management patients. She is not a difficult patient and requires very little support, but without it she deteriorates rapidly. We switched her from managing her own medications to getting them from the pharmacy at Peninsula Behavioral Health. She has to walk from her apartment to the pharmacy to get them every day except weekends. She has lost 38 lbs. in the past six months. She has been clean and recovering from Methamphetamine abuse for 8 months. She calls us several times a week for advice. She just needs a little bit of reassurance and this keeps her from calling 911 and visiting the Emergency Department for minor things."
+        }
+      ]
+    },
+    "3": {
+      "metrics": {
+        "services": [
+          {
+            "id": "68204",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "474.0"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "68205",
+            "metric": "# patients (current quarter)",
+            "value": "172.0"
+          },
+          {
+            "id": "68206",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "26.0"
+          }
+        ],
+        "Health Insurance Type": [
+          {
+            "id": "68158",
+            "metric": "Private (current quarter)",
+            "value": "14.0"
+          },
+          {
+            "id": "68152",
+            "metric": "Medicaid (current quarter)",
+            "value": "45.0"
+          },
+          {
+            "id": "68154",
+            "metric": "Medicare (current quarter)",
+            "value": "64.0"
+          },
+          {
+            "id": "68148",
+            "metric": "Dual Medicaid/Medicare (current quarter)",
+            "value": "19.0"
+          },
+          {
+            "id": "68150",
+            "metric": "Indian Health Service (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "68160",
+            "metric": "Tricare (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "68162",
+            "metric": "Uninsured (current quarter)",
+            "value": "3.0"
+          },
+          {
+            "id": "68164",
+            "metric": "Unknown (current quarter)",
+            "value": "3.0"
+          },
+          {
+            "id": "68156",
+            "metric": "Other (current quarter)",
+            "value": "0.0"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "68207",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "165.0"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "68190",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "19.0"
+          },
+          {
+            "id": "68182",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68180",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68172",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68170",
+            "metric": "98305 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68188",
+            "metric": "98381 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68184",
+            "metric": "98362 (current quarter)",
+            "value": "96.0"
+          },
+          {
+            "id": "68186",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "42.0"
+          },
+          {
+            "id": "68178",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "68176",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68174",
+            "metric": "98326 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68194",
+            "metric": "Jail (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68196",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "2.0"
+          },
+          {
+            "id": "68192",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "12.0"
+          },
+          {
+            "id": "68201",
+            "metric": "Unknown (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "68198",
+            "metric": "Other (current quarter)",
+            "value": "0.0"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "We have re-modelled our Community Paramedic data collection tool & database. In the past we have had to spend a tremendous amount of time breaking the data into their atomic parts. It is now completely automated. The database is relational and is much easier to run complex queries on. We did not anticipate this would be necessary until the program evolved and we began offering more procedures to patients. It also helps us decide what is helping patients the most. We are now able to track patient demographics, referrals per patient, and encounters per patient. We can then break down every encounter by type (anti-psychotic injection, treat & release, transport, vaccination, blood draw, track meetings, etc). Another fantastic use for this is by assigning times to each enounter so that we can produce a report for unit/time utilization. The other providers within the fire department can refer patients to us at any time during their shift and they can follow up to get an idea of what's been done for the patient."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "We are working with a data analyst from North Olympic Healthcare Network that has access to Epic. Each quarter she will be taking our patient set and calculating Emergency Department and readmission activity for these patients for us. This action takes an enormous amount of time for Community Paramedics and this helps us tremendously so we spend our time addressing patients needs. We continue to provide COVID-19 and Influenza boosters to Long-term Care Facilities and homebound patients as well as the City of Port Angeles staff members. Our vaccination numbers are rising again as the new bivalent booster is available through Clallam County Health Department. We are in the process of introducing Community Paramedics to advocating for SUD patients in court. Currently, Peninsula Behavioral Health will send a provider to assess patients as they are our area's BHASO. While the City of Port Angeles is committed to helping people get off the streets, engage with services, and enter recovery programs, we feel that more could be done to achieve this. Testifying in court on behalf of patients experiencing SUD or homelessness will be one step closer to definitive care."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "We applied for the OCH \"Expanding the Table\" $35,000 grant and was awarded the full amount to enhance our program further. We will be purchasing an I-Stat machine (with Chem8+ cartridges) which will give us the ability to further improve our in-home evaluation of chronic patients. With i-STAT CHEM8+, healthcare professionals can obtain chemistries, electrolytes, hematocrit and hemoglobin levels in approximately two minutes without leaving the patient's side. Incorporating i-STAT CHEM8+ early in the patient experience may help transform the delivery of care by empowering you to accelerate clinical decision-making and increase operational efficiency and reduce the total cost of care. The i-STAT CHEM8+ cartridge can be used to rapidly assess the metabolic status of patients in a variety of clinical settings including critical care, surgery, radiology, acute and emergency care, and community-based settings. Specifically, the i-STAT Chem 8+ measures Sodium (Na), Potassium (K), Chloride (Cl), TCO2, Anion Gap*, Ionized Calcium (iCa), Glucose (Glu), Urea Nitrogen (BUN)/Urea, Creatinine (Crea), Hematocrit (Hct), Hemoglobin* (Hgb). *Calculated\u0094 With these funds we will also be upgrading software on our portable computers giving us the ability to see CAD information from dispatch as it comes in rather than a short message through Active 911 and relying on radio updates."
+        },
+        {
+          "question": "Success Stories",
+          "response": ""
+        }
+      ]
+    },
+    "4": {
+      "metrics": {
+        "services": [
+          {
+            "id": "68273",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "663"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "68274",
+            "metric": "# patients (current quarter)",
+            "value": "185"
+          },
+          {
+            "id": "68275",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "23"
+          },
+          {
+            "id": "68280",
+            "metric": "# patients (year-to-date)",
+            "value": "748"
+          },
+          {
+            "id": "68281",
+            "metric": "patients with intense case management (year-to-date)",
+            "value": "99"
+          }
+        ],
+        "Health Insurance Type": [
+          {
+            "id": "68249",
+            "metric": "Private (current quarter)",
+            "value": "27"
+          },
+          {
+            "id": "68246",
+            "metric": "Medicaid (current quarter)",
+            "value": "36"
+          },
+          {
+            "id": "68247",
+            "metric": "Medicare (current quarter)",
+            "value": "110"
+          },
+          {
+            "id": "68244",
+            "metric": "Dual Medicaid/Medicare (current quarter)",
+            "value": "14"
+          },
+          {
+            "id": "68245",
+            "metric": "Indian Health Service (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68250",
+            "metric": "Tricare (current quarter)",
+            "value": "1"
+          },
+          {
+            "id": "68251",
+            "metric": "Uninsured (current quarter)",
+            "value": "11"
+          },
+          {
+            "id": "68252",
+            "metric": "Unknown (current quarter)",
+            "value": "15"
+          },
+          {
+            "id": "68248",
+            "metric": "Other (current quarter)",
+            "value": "1"
+          },
+          {
+            "id": "68282",
+            "metric": "Private (year-to-date)",
+            "value": "79"
+          },
+          {
+            "id": "68283",
+            "metric": "Medicaid (year-to-date)",
+            "value": "184"
+          },
+          {
+            "id": "68284",
+            "metric": "Medicare (year-to-date)",
+            "value": "327"
+          },
+          {
+            "id": "68285",
+            "metric": "Dual Medicaid/Medicare (year-to-date)",
+            "value": "73"
+          },
+          {
+            "id": "68286",
+            "metric": "Indian Health Service (year-to-date)",
+            "value": "1"
+          },
+          {
+            "id": "68287",
+            "metric": "Tricare (year-to-date)",
+            "value": "3"
+          },
+          {
+            "id": "68288",
+            "metric": "Uninsured (year-to-date)",
+            "value": "15"
+          },
+          {
+            "id": "68289",
+            "metric": "Unknown (year-to-date)",
+            "value": "92"
+          },
+          {
+            "id": "68290",
+            "metric": "Other (year-to-date)",
+            "value": "5"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "68276",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "185"
+          },
+          {
+            "id": "68277",
+            "metric": "# unduplicated patients (high utilizers) with reduced emergency department use 6 months after Community Paramedic interventions (year-to-date)",
+            "value": "79"
+          },
+          {
+            "id": "68277",
+            "metric": "# unduplicated patients (high utilizers( (year-to-date)",
+            "value": "117"
+          },
+          {
+            "id": "68307",
+            "metric": "# unduplicated patients (high utilizers) with reduced 9-1-1 uses 6 months after Community paramedic interventions (year-to-date)",
+            "value": "124"
+          },
+          {
+            "id": "68307",
+            "metric": "# unduplicated patients (high utilizers) (year-to-date)",
+            "value": "157"
+          },
+          {
+            "id": "68278",
+            "metric": "# of unduplicated patients who receive at least 1 referral of those contacted (year-to-date)",
+            "value": "635"
+          },
+          {
+            "id": "68278",
+            "metric": "# unduplicated patients of those who needed a referral (year-to-date)",
+            "value": "639"
+          },
+          {
+            "id": "68279",
+            "metric": "# of connections/referrals completed by patient (year-to-date)",
+            "value": "0"
+          },
+          {
+            "id": "68279",
+            "metric": "# of connection/referrals made (year-to-date)",
+            "value": "811"
+          },
+          {
+            "id": "68308",
+            "metric": "# of survey responses from partners who answered satisfaction questions positively (year-to-date)",
+            "value": "8"
+          },
+          {
+            "id": "68308",
+            "metric": "# of survey responses from partners answered satisfaction questions (year-to-date)",
+            "value": "8"
+          },
+          {
+            "id": "68309",
+            "metric": "# of calls where Community Paramedicine is able to resolve the issue without the use of further resources (year-to-date)",
+            "value": "133"
+          },
+          {
+            "id": "68309",
+            "metric": "# of calls where Community Paramedicine joins (year-to-date)",
+            "value": "178"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "68267",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "37"
+          },
+          {
+            "id": "68263",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68262",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68258",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68257",
+            "metric": "98305 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68266",
+            "metric": "98381 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68264",
+            "metric": "98362 (current quarter)",
+            "value": "110"
+          },
+          {
+            "id": "68265",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "55"
+          },
+          {
+            "id": "68261",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "1"
+          },
+          {
+            "id": "68260",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68259",
+            "metric": "98326 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68269",
+            "metric": "Jail (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68270",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68268",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "12"
+          },
+          {
+            "id": "68272",
+            "metric": "Unknown (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68271",
+            "metric": "Other (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "68291",
+            "metric": "98382 (includes Jamestown S'Klallam Tribal Land) (year-to-date)",
+            "value": "88"
+          },
+          {
+            "id": "68292",
+            "metric": "98357 (includes Makah Tribal Land) (year-to-date)",
+            "value": "0"
+          },
+          {
+            "id": "68293",
+            "metric": "98350 (includes Quileute Tribal Land) (year-to-date)",
+            "value": "0"
+          },
+          {
+            "id": "68294",
+            "metric": "98324 (Post Office) (year-to-date)",
+            "value": "0"
+          },
+          {
+            "id": "68295",
+            "metric": "98305 (year-to-date)",
+            "value": "0"
+          },
+          {
+            "id": "68296",
+            "metric": "98381 (year-to-date)",
+            "value": "0"
+          },
+          {
+            "id": "68297",
+            "metric": "98362 (year-to-date)",
+            "value": "407"
+          },
+          {
+            "id": "68298",
+            "metric": "98363 (includes Lower Elwah Klallam Tribal Land) (year-to-date)",
+            "value": "201"
+          },
+          {
+            "id": "68299",
+            "metric": "98343 (Post Office) (year-to-date)",
+            "value": "4"
+          },
+          {
+            "id": "68300",
+            "metric": "98331 (includes Hoh Indian Tribal Land) (year-to-date)",
+            "value": "1"
+          },
+          {
+            "id": "68301",
+            "metric": "98326 (year-to-date)",
+            "value": "0"
+          },
+          {
+            "id": "68302",
+            "metric": "Jail (year-to-date)",
+            "value": "0"
+          },
+          {
+            "id": "68303",
+            "metric": "Non-Clallam County ZIP Code (year-to-date)",
+            "value": "4"
+          },
+          {
+            "id": "68304",
+            "metric": "Experiencing homelessness, No current ZIP Code (year-to-date)",
+            "value": "71"
+          },
+          {
+            "id": "68305",
+            "metric": "Unknown (year-to-date)",
+            "value": "1"
+          },
+          {
+            "id": "68306",
+            "metric": "Other (year-to-date)",
+            "value": "1"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "i-STAT 1 Analyzer & Health Data Exchange Software As a result of the OCH grant the Port Angeles Fire Department has been able to purchase the Abbott I-STAT 1 Analyzer, docking station and electronic simulation calibrator.  Additional key implementation accomplishments include approval for use of the I-STAT field blood analyzer by the Clallam County Medical Program Director Danielle Whitley, development of the I-STAT use policies and procedures, training curriculum for new users and purchase of Chem8+ and INR test cartridges.  Currently Port Angeles Fire Department is awaiting the arrival of the Chem8+ and INR cartridges to become fully operational with the I-STAT field blood analyzer program. The range of tests we can perform in the field include blood gases, chemistries and electrolytes, cardiac markers, coagulation, hematology, and endocrinology. While we will still offer blood draws taken to a laboratory, it can sometimes take hours or days for a physician to get results. One example, the i-STAT EC8+ cartridge, returns the following results within two (2) minutes: Sodium (Na), Potassium (K), Chloride (Cl), Anion Gap, Glucose (Glu), (BUN)/Urea Nitrogen, Urea, Hematocrit (Hct), Hemoglobin, pH, PCO2, TCO2, HCO3, and Base Excess (BE). Having access to these lab values so quickly allows us to better determine alternative dispositions for our patients. This service is essential during care planning for our homebound patients. It results in better health outcomes for underserved populations and reduces costs related to caring for them. Through the equipping of ruggedized computers with ESO electronic healthcare reporting software the Port Angeles Fire Department is working to enhance our relationship with Olympic Medical Center Emergency Department staff and Medical Records clerks.  ESO\u0092s Health Data Exchange software will enable Community Paramedics and Emergency Services personnel to send reports directly into OMC\u0092s healthcare reporting system as well as receive outcome information.  This software is HIPAA compliant and will greatly enhance Quality Assurance and Quality Improvement programs through the data sharing process. Additionally, placing the ISTAT field blood analyzer in the hands of our Community Paramedics will continue to strengthen our relationships with local health care teams, clinics and primary care physicians. Data Collection As previously reported, we remodeled our database and data collection software. We have a full quarter of expanded data. It is very exciting to visualize this new data as they offer incredible insight into the services we offer. It will help us prepare accurate proposals to submit to agencies we offer services to in order to help make our program sustainable in the future. March 8, 9, 10 we will be educating our crews to use the new software in order to submit referrals to this system. The system is closed-loop and will offer feedback so crews can track progress on their patient referrals. After some testing, our plan is to open this referral system to other agencies. The difficulty in the past has been ensuring this system is HIPAA compliant outside of our own agency. We believe these issues have been addressed."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "The Association of Washington Cities has awarded the City of Port Angeles a grant that will be used to design an alternative response model for behavioral health and SUD-related 911 calls. We will be the first Fire Department in the nation to model a LEAD-like co-responder program. Historically, Law Enforcement Assisted Diversion (LEAD) has existed within Police Departments. We believe the Emergency Medical System is more prepared to respond to calls of this nature and that we can facilitate a more dignified approach to caring for these patients. In many cases, we already do this and have found alternative dispositions improving patient outcomes. An example is a behavioral health emergency. A paramedic and behavioral health professional to evaluate for medical and psychiatric help is a more appropriate response to a mental health crisis than a law enforcement officer. It reduces trauma related to caring for the patient. In many cases these patients end up in jail or a hospital. Alternatively, we can take them to a crisis center for definitive care. In turn, this frees up the law enforcement officer to handle criminal activity and a bed and other resources at the hospital. We are very excited to be a part of this!"
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "As described previously, we continually look for new sources of funding to expand the services we offer and collaborations with local partner agencies to sustain our program. We continue to be active in Washington State legislative workgroups to ensure Medicare/Medicaid recognizes the benefits of alternative preventative health strategies. This will change the way we are able to bill for service."
+        },
+        {
+          "question": "Success Stories",
+          "response": "Working with a local pharmacy, we have increased availability to Influenza vaccinations tremendously. Our first year of this program we vaccinated roughly 1,000 people against COVID-19 and just three (3) against Influenza. None of the other local pharmacies, clinics, or family physicians had a mechanism in place to vaccinate, or even allow us to vaccinate, homebound patients against anything. A very small number of patients that have been prescribed home health could get vaccinated against Influenza only by a home health nurse during a patient visit with physician's orders. Jim\u0092s Pharmacy allows us to vaccinate the patient while they take care of billing the patient\u0092s insurance company. This has opened up the ability for a physician to refer other types of vaccinations to the Community Paramedicine program. Another success we had this quarter was a case we finally closed with an elderly couple. The couple are in their mid-to-late 80s. Both have severe memory loss. They were living in an apartment with no nearby support from family or friends. One of them is an undocumented immigrant. Access to healthcare, especially medications, was very limited. North Olympic Healthcare Network (NOHN) and Community Paramedicine has been attending to these two patients for the last couple of years. We became involved first with the wife after she had convalesced from an accident that resulted in a broken hip. Later, this patient acquired several infections; UTI, an ear infection that had closed her ear canal completely, and a respiratory infection. Due to her severe memory loss, it was incredibly difficult getting her to take a full course of oral antibiotics to resolve these infections. Working with her physician at NOHN, we were able to continually modify her care plan. There were several changes in antibiotics due to inability to swallow, etc. We were eventually able to take her to (5) short stay appointments at Olympic Medical Center so she could receive IV antibiotics. This resolved these conditions that had been persisting for several months. A couple of months later the husband had a fall and broke his hip and was sent to a convalescent center for rehabilitation. The wife was solely cared for by her husband and living with severe memory problems at home alone. PAFD and PAPD had this patient transported to the hospital where they agreed to keep her in an observation status until her husband was released from physical rehabilitation. Aside from these health-related problems, there were social needs that had to be addressed. We worked with the Canadian Parliament and social workers to find family members. Eventually we learned that there was a family member that had been sending a significant amount of money each month to help toward paying for medications. We contacted this person and they agreed to help pay for assisted living close to their home in Seattle. There are many gaps in our healthcare system. Community Paramedicine is essential in filling these gaps until patients can get definitive care. We have built a wonderful, trusting relationship with our local physicians and behavioral health professionals that work very closely to develop dynamic care plans to fulfill our community\u0092s needs."
+        },
+        {
+          "question": "COMMENTS",
+          "response": "(4000 character limit) space remaining =   4000 68279 We discussed this item in our last meeting and explained the difficulty in reporting an accurate number. Simply saying we know the referrals are being completed isn't good enough. We are not seeing them as often in the 911 system or in the emergency department. Our partner agencies are getting feedback from the patients. But we don't yet have the capacity to follow up with everyone. We hope that by expanding access to the reporting system we use, expanded access to the Epic network.. and adding additional staff such as a case manager, we will truly have a well-rounded, closed-loop referral system in place. This is a priority item and we are continually working toward a solution!"
+        }
+      ]
+    }
+  },
+  "2023": {
+    "1": {
+      "metrics": {
+        "services": [
+          {
+            "id": "79059",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "577.0"
+          },
+          {
+            "id": "87079",
+            "metric": "# of referrals received",
+            "value": ""
+          },
+          {
+            "id": "87080",
+            "metric": "# of referrals initiated",
+            "value": ""
+          },
+          {
+            "id": "87081",
+            "metric": "# of unique services provided",
+            "value": ""
+          }
+        ],
+        "individuals": [
+          {
+            "id": "79060",
+            "metric": "# patients (current quarter)",
+            "value": "110.0"
+          },
+          {
+            "id": "79061",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "28.0"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "79092",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "108.0"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "79086",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "12.0"
+          },
+          {
+            "id": "79082",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79081",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79077",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79076",
+            "metric": "98305 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79085",
+            "metric": "98381 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79083",
+            "metric": "98362 (current quarter)",
+            "value": "52.0"
+          },
+          {
+            "id": "79084",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "26.0"
+          },
+          {
+            "id": "79080",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79079",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79078",
+            "metric": "98326 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79088",
+            "metric": "Jail (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "79089",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "79087",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "18.0"
+          },
+          {
+            "id": "79091",
+            "metric": "Unknown (current quarter)",
+            "value": "0.0"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "We're finally in a position to collect data and report on ED to hospital admissions giving us greater insight into many of our patients who have chronic health conditions. We're also able to run monthly reports on patients who use 911 (3) or more times per quarter. This allows us to be more proactive at improving the health of the community. In the past we have relied on only patients who were referred to us directly by other providers."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies.",
+          "response": "We implemented a first in the nation LEAD-Fire program for patients that fit very strict inclusion criteria. This program uses Community Paramedics, two social worker/case managers, a geriatric care and wound care specialist, and a psychiatric-mental health nurse practitioner. These patients receive intensive case management to reduce the risk of punitive measures."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc.",
+          "response": "We continue to apply for grant-funding opportunities until the City of Port Angeles adds three full-time employee positions into the budget at our fire department. We intend to apply for additional grant funding that would pay salaries for (3) full-time employees over the next three years. This will allow us time to factor these three positions into the City of Port Angeles' budget and will allow them to absorb these positions as city employees."
+        },
+        {
+          "question": "Success Stories:",
+          "response": "Case Study Consideration in Cost Savings: 1. 72-year-old female with Chronic back pain, Congestive Heart Failure, Hypertension, Coronary Artery Disease, GERD, Intractable nausea, Hip fracture w/ frequent falls, Substance abuse (prescription medications and alcohol). This patient was referred to Community Paramedicine by PAFD, NOHN, and OMC ED for having high 911, ED, and Clinical usage. She was admitted during 3 of her prior ED visits. Initially she was calling 911 for minor issues like needing someone to close her fence gate or to check her blood pressure monitor for accuracy. She was also calling her PCP multiple times per day for things like requests for prescription pain medication. She complained frequently that she was being mistreated at the ED and was not being taken seriously by her PCP. Her PCP was overwhelmed with the number of calls and requests from the patient. Community Paramedics worked with each agency to help set up appointments and obtain in-home caregiving services, but the patient continued to cancel all appointments and caregiving services, often the day before they were scheduled. A success came when Community Paramedics determined she may be experiencing side effects from an anti-emetic she was prescribed, worked with her PCP to change her medication, picked the medication up and helped administer it \u0096 all in the same day. The patient avoided calling 911 or visiting the ED for three weeks after that. Challenges: After more than 6 months in the program, the patient began overusing her nausea medication and running out early, which re-initiated her 911 calls and frequent ED utilization. Many months of close contact with family members was unable to change the patient\u0092s behavior. Eventually however, an effective plan was implemented that included more frequent family visits and a reminder that while she could use 911 or the ED for true emergencies, she would incur fines for obstruction for any non-emergency calls/visits, per municipal code enforcement. That motivated her to change her behavior while still getting her needs met. There have been zero 911 calls to this address for two years and only one ED visit in the last two years. ED contact 6 months prior to CPM interventions: 23, After CPM intervention: 1 911 contact 6 months prior to CPM interventions: 47, After CPM intervention: 1 Cost Before                                             Cost After (23) ED visits $17,250                         (1) ED visit $750 (23) 911 (no Transport) $23,000     (0) 911 (no transport) $0 (24) 911 (Transport) $48,000           (1) 911 (transport) $2,002 Total $88,250                                         Total $2,752"
+        },
+        {
+          "question": "COMMENTS",
+          "response": "CPM Contact Count: 576 (/110) = ~5.25 contacts per patient. 108/110 patients in 2022 Quarter 1 received at least one referral to another agency or were managed via CPM case management. Total referrals (131). We have updated the list of services we offer our patients and local healthcare partners to include: \u00b7 Anti-psychotic injectables \u00b7 Blood draws and medication administration, TB testing \u00b7 Medication management and reconciliation \u00b7 Post-surgical follow-up and wound care \u00b7 Telemedicine to assist patients during telehealth appointments with their Primary Care Provider (PCP) \u00b7 Treat & Release in-home or on the street \u00b7 Assist patients with admittance to assisted living and Skilled Nursing Facilities \u00b7 Establish in-home caregiving services \u00b7 Assistance with drug-treatment programs admission \u00b7 Establish patient with primary care \u00b7 Transportation to appointments \u00b7 Fall prevention evaluation and supplies \u00b7 Establish Hospice care for patients \u00b7 Social resources for patients and family \u00b7 Liaising with state-wide providers on behalf of patients \u00b7 Homebound influenza, shingles, and COVID-19 vaccine administration/testing"
+        }
+      ]
+    },
+    "2": {
+      "metrics": {
+        "services": [
+          {
+            "id": "79093",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "665.0"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "79094",
+            "metric": "# patients (current quarter)",
+            "value": "54.0"
+          },
+          {
+            "id": "79095",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "39.0"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "79100",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "54.0"
+          },
+          {
+            "id": "79117",
+            "metric": "# unduplicated patients (high utilizers) with reduced emergency department use 6 months after Community Paramedic interventions (year-to-date)",
+            "value": "47.0"
+          },
+          {
+            "id": "79117",
+            "metric": "# unduplicated patients (high utilizers) (year-to-date)",
+            "value": "51.0"
+          },
+          {
+            "id": "79118",
+            "metric": "# unduplicated patients (high utilizers) with reduced 9-1-1 uses 6 months after Community Paramedic interventions (year-to-date)",
+            "value": "49.0"
+          },
+          {
+            "id": "79118",
+            "metric": "# unduplicated patients (high utilizers) (year-to-date)",
+            "value": "51.0"
+          },
+          {
+            "id": "79119",
+            "metric": "# of unduplicated patients who receive at least 1 referral of those contacted (year-to-date)",
+            "value": "161.0"
+          },
+          {
+            "id": "79119",
+            "metric": "# unduplicated patients of those who needed a referral (year-to-date)",
+            "value": "161.0"
+          },
+          {
+            "id": "79120",
+            "metric": "# of connections/referrals completed by patient (year-to-date)",
+            "value": "258.0"
+          },
+          {
+            "id": "79120",
+            "metric": "# of connections/referrals made (year-to-date)",
+            "value": "261.0"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "79111",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "4.0"
+          },
+          {
+            "id": "79107",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79106",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79102",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79101",
+            "metric": "98305 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79110",
+            "metric": "98381 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79108",
+            "metric": "98362 (current quarter)",
+            "value": "21.0"
+          },
+          {
+            "id": "79109",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "20.0"
+          },
+          {
+            "id": "79105",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "1.0"
+          },
+          {
+            "id": "79104",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79103",
+            "metric": "98326 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79113",
+            "metric": "Jail (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79114",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79112",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "8.0"
+          },
+          {
+            "id": "79116",
+            "metric": "Unknown (current quarter)",
+            "value": "0.0"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "We attribute improved reductions in ED & 911 usage with the ability to spend more time on individual cases this quarter."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "We're currently looking at options to centralize our data and application outside of the City of Port Angeles. We have been limited in the ability to collaborate and it has always been our goal to offer this software to be used freely within our greater community. A tentative solution will be migration of data and software to NOHN's tenant. This will allow us and other agencies that have business agreements within Clallam Care Connection (3C) to track our patients and their referrals. We are querying local physician groups to learn how Point of Care Testing might benefit their patients. Our handheld I-Stat device gives us a look at many lab values within a couple of minutes. We also have the ability to test for pregnancy as well as capillary tubes that can analyze blood without having to start an IV. This current quarter (Q3) we plan to reach out to the Lower Elwha Klallam Tribe to see if we can extend our services to Tribal members. Our focus will be assisting with patients who suffer from substance use and psychiatric disorders. Clallam Care Connection (3C) has grown from its original 4 member agencies to 8. 3C  provides coordinated care to improve the health status of individuals with complex, chronic conditions to deliver a seamless experience of care that is person-centered, cost effective, addresses social determinants of health, and results in improved health and wellness. Connecting weekly, providers from health, social service and community organizations are breaking the silos and moving towards whole-person care. 3C focuses on serving members of the community who are at risk for or experiencing: debilitating mental health and substance use disorder, repeat 911/emergency department use, risk of suicide, transition out of inpatient services or jail/prison; disjointed or discontinuous care."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "Same as previous quarter (Q1)."
+        },
+        {
+          "question": "Success Stories",
+          "response": "91-year-old male with dementia. We were contacted by COPA Utility Department about a citizen that they were concerned about. He was described as being mentally unstable with delusions that the CIA was living under his home and listening to all of his conversations. He had an outstanding balance on his utility bill of $2,900. Washington State had recently discontinued the COVID-19 emergency hold that kept utilities from being shut off and he was given a disconnection notification. We were able to keep his power on and helped him fill out LIHEAP paperwork through OlyCAP for assistance paying his outstanding bill. We also connected him with his family and local assistance to make sure he has food. The City of Port Angeles also applied WA State funds to his account to get it current. --- 38-year-old female with complicated medical history; schizophrenia, methamphetamine and opioid use. We have been working with this patient for almost three years. We helped get her into stable housing, assisted with finding her her own transportation, got her into treatment, and had her switch to a new PCP and psychiatric ARNP. She had a couple of relapses along the way, but she has been clean of illicit drugs for 15 months. She rarely calls 911 now and only uses the emergency department when it is appropriate. When we first started working with her, she had called 911 (63) times and visited the ED (37) times that year."
+        }
+      ]
+    },
+    "3": {
+      "metrics": {
+        "services": [
+          {
+            "id": "79059",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "515"
+          },
+          {
+            "id": "87079",
+            "metric": "# of referrals received",
+            "value": ""
+          },
+          {
+            "id": "87080",
+            "metric": "# of referrals initiated",
+            "value": ""
+          },
+          {
+            "id": "87081",
+            "metric": "# of unique services provided",
+            "value": ""
+          }
+        ],
+        "individuals": [
+          {
+            "id": "79060",
+            "metric": "# patients (current quarter)",
+            "value": "106"
+          },
+          {
+            "id": "79061",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "31"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "79092",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "106"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "79086",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "9"
+          },
+          {
+            "id": "79082",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "79081",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "79077",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "79076",
+            "metric": "98305 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "79085",
+            "metric": "98381 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "79083",
+            "metric": "98362 (current quarter)",
+            "value": "67"
+          },
+          {
+            "id": "79084",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "22"
+          },
+          {
+            "id": "79080",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "79079",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "79078",
+            "metric": "98326 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "79088",
+            "metric": "Jail (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "79089",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "2"
+          },
+          {
+            "id": "79087",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "6"
+          },
+          {
+            "id": "79091",
+            "metric": "Unknown (current quarter)",
+            "value": "0"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "We had a highly disproportionate number of patients over-utilizing 911 services this quarter. Behavioral health-related referrals were much higher than for medical need. Substance use disorder and behavioral health patients have required more of our program resources since the COVID-19 pandemic than anything else. Port Angeles accounts for over 70% of all overdoses in the county. We are taking steps to address this. It is best practice in more wealthy cities to administer Buprenorphine (when indicated) after overdoses or when the patient has been evaluated to be in moderate to severe withdrawals from opioids. Our intent is to develop our program to meet the need in this community by creating an acute- and post-overdose response team. We have identified and researched other programs that are successfully using this strategy.  We will model the team after this and adjust it to fit our community. We have spoken with medical leadership in our EMS region for advice in this area and they have responded very favorably and are excited about the idea. We will have more information by the end of 2023 and hope to operate under a new COP by the beginning of the year. We have found more educational resources for first responders in regard to best practice while responding to behavioral health crises. Our leadership is progressive and is allowing us to attend behavioral health seminars and educational opportunities that align with our mission. The Program Manager for LEAD Fire that was helping analyze data belonged to Olympic Peninsula Community Clinic. The position was vacated in June and has not been filled. We will not have the capacity to collect and analyze hospital readmission data without this resource."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "We have added more agencies, under an updated charter, to Clallam Care Connection (3C) to include neighboring fire districts and SUD treatment providers. Our Community Paramedic Program is now a clinical site for nurses attending Peninsula College's nursing program. They each spend (3) clinical hours with us as we provide care to behavioral health patients in the field."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "We're currently requesting grant resources to help fund the program for two more years. We have gotten the City of Port Angeles to agree to absorb the Community Paramedic Program fully by 2026. If we are able to get the grant for two more years, the City of PA will invest 25% of the program cost in 2024, and 50% of the cost in 2025. We will be fully sustained in 2026."
+        },
+        {
+          "question": "Success Stories",
+          "response": "70 year-old-male w/ Parkinson's disease. Wife unable to lift patient and calling 911 for assistance multiple times per rotation; patient would never agree to be transported to the ED. CPMs evaluated and suspected UTI and finally talked patient into being transported. ED visit revealed patient indeed has a UTI and was admitted for several days and discharged to home. Wife is unable to solely care for patient and is using neighbors and friends to help when she can get it. Her main concern is not being able to get him around the house easily and relying on depends instead of the bathroom. Can't get him out to the vehicle to get him to doctor's appointments, etc. We found a resource in Bremerton with only two days notice of this patient's discharge that helped us procure an electric wheelchair, walker, lift chair, and electric hospital bed. We picked the equipment up, installed it in the patient's home, and educated them how to use it. There have been no 911 calls or ED visits to this address since the beginning of the quarter. She is able to get him to appointments and he is able to get around the house using the new tools."
+        },
+        {
+          "question": "COMMENTS",
+          "response": "CPM Contact Count: 515 (/106) = ~4.9 contacts per patient. 106 patients in 2023 Q3 received at least one referral to another agency or were managed via CPM case management. Percent reduction in ED utilization over baseline: 73% Percent reduction in 911 utilization over baseline: 69%"
+        }
+      ]
+    },
+    "4": {
+      "metrics": {
+        "services": [
+          {
+            "id": "79121",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "555.0"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "79122",
+            "metric": "# patients (current quarter)",
+            "value": ""
+          },
+          {
+            "id": "79123",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "54.0"
+          },
+          {
+            "id": "79149",
+            "metric": "# patients (year-to-date)",
+            "value": "396.0"
+          },
+          {
+            "id": "79150",
+            "metric": "# patients with intense case management (year-to-date)",
+            "value": "152.0"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "79129",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "121.0"
+          },
+          {
+            "id": "79132",
+            "metric": "# unduplicated patients (high utilizers) with reduced emergency department use 6 months after Community Paramedic interventions (year-to-date)",
+            "value": "142.0"
+          },
+          {
+            "id": "79132",
+            "metric": "# unduplicated patients (high utilizers) (year-to-date)",
+            "value": "172.0"
+          },
+          {
+            "id": "79131",
+            "metric": "# unduplicated patients (high utilizers) with reduced 9-1-1 uses 6 months after Community Paramedic interventions (year-to-date)",
+            "value": "158.0"
+          },
+          {
+            "id": "79131",
+            "metric": "# unduplicated patients (high utilizers) (year-to-date)",
+            "value": "175.0"
+          },
+          {
+            "id": "79130",
+            "metric": "# of unduplicated patients who receive at least 1 referral of those contacted (year-to-date)",
+            "value": "316.0"
+          },
+          {
+            "id": "79130",
+            "metric": "# unduplicated patients of those who needed a referral (year-to-date)",
+            "value": "344.0"
+          },
+          {
+            "id": "79128",
+            "metric": "# of connections/referrals completed by patient (year-to-date)",
+            "value": "471.0"
+          },
+          {
+            "id": "79128",
+            "metric": "# of connections/referrals made (year-to-date)",
+            "value": "510.0"
+          },
+          {
+            "id": "79167",
+            "metric": "# of survey responses from partners who answered satisfaction questions positively (year-to-date)",
+            "value": "6.0"
+          },
+          {
+            "id": "79167",
+            "metric": "# of survey responses from partners answered satisfaction questions (year-to-date)",
+            "value": "6.0"
+          },
+          {
+            "id": "79168",
+            "metric": "# of calls where Community Paramedicine is able to resolve the issue without the use of further resources (year-to-date)",
+            "value": "113.0"
+          },
+          {
+            "id": "79168",
+            "metric": "# of calls where Community Paramedicine joins (year-to-date)",
+            "value": "161.0"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "79143",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "9.0"
+          },
+          {
+            "id": "79139",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79138",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79134",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79133",
+            "metric": "98305 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79142",
+            "metric": "98381 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79140",
+            "metric": "98362 (current quarter)",
+            "value": "73.0"
+          },
+          {
+            "id": "79141",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "31.0"
+          },
+          {
+            "id": "79137",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79136",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79135",
+            "metric": "98326 (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79145",
+            "metric": "Jail (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79146",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79144",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "13.0"
+          },
+          {
+            "id": "79148",
+            "metric": "Unknown (current quarter)",
+            "value": "0.0"
+          },
+          {
+            "id": "79151",
+            "metric": "98382 (includes Jamestown S'Klallam Tribal Land) (year-to-date)",
+            "value": "34.0"
+          },
+          {
+            "id": "79152",
+            "metric": "98357 (includes Makah Tribal Land) (year-to-date)",
+            "value": "0.0"
+          },
+          {
+            "id": "79153",
+            "metric": "98350 (includes Quileute Tribal Land) (year-to-date)",
+            "value": "0.0"
+          },
+          {
+            "id": "79154",
+            "metric": "98324 (Post Office) (year-to-date)",
+            "value": "0.0"
+          },
+          {
+            "id": "79155",
+            "metric": "98305 (year-to-date)",
+            "value": "0.0"
+          },
+          {
+            "id": "79156",
+            "metric": "98381 (year-to-date)",
+            "value": "0.0"
+          },
+          {
+            "id": "79157",
+            "metric": "98362 (year-to-date)",
+            "value": "213.0"
+          },
+          {
+            "id": "79158",
+            "metric": "98363 (includes Lower Elwah Klallam Tribal Land) (year-to-date)",
+            "value": "99.0"
+          },
+          {
+            "id": "79159",
+            "metric": "98343 (Post Office) (year-to-date)",
+            "value": "1.0"
+          },
+          {
+            "id": "79160",
+            "metric": "98331 (includes Hoh Indian Tribal Land) (year-to-date)",
+            "value": "0.0"
+          },
+          {
+            "id": "79161",
+            "metric": "98326 (year-to-date)",
+            "value": "0.0"
+          },
+          {
+            "id": "79162",
+            "metric": "Jail (year-to-date)",
+            "value": "1.0"
+          },
+          {
+            "id": "79163",
+            "metric": "Non-Clallam County ZIP Code (year-to-date)",
+            "value": "3.0"
+          },
+          {
+            "id": "79164",
+            "metric": "Experiencing homelessness, No current ZIP code (year-to-date)",
+            "value": "45.0"
+          },
+          {
+            "id": "79165",
+            "metric": "Unknown (year-to-date)",
+            "value": "0.0"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "We spent the majority of this semester focused on research surrounding overdoses in Clallam County. We worked with our Medical Program Director, Dr. Craven and our Public Health Officer, Dr. Berry, we hope to develop a protocol that will allow Community Paramedics to administer Buprenorphine in the field. We determined approximately 70% of all overdose calls were in the city of Port Angeles district. Overdose fatalities almost doubled comparing previously recorded years. This is consistent when looking at similar data throughout the United States. We also understand that EMS may be the last and only entity that a patient experiencing overdose ever sees. There is absolutely no system in place for referral of these patients after they experience an overdose. Current Washington state legislation orders a person caught with an illegal substance be charged with a misdemeanor on the 3rd offense. It used to be a felony on the first offense. Other legislation makes it almost impossible for a law enforcement officer to be willing to ITA patients for fear of litigation. We saw only one case this year where a patient was detained under Ricky's Law and sent to treatment. We transport fewer than 40% of overdoses. The persons transported have been under implied consent or voluntary. It's also difficult to supervise treatment prior to EMS arrival. There are times when patients are given a great amount of Narcan and left on the street or in home with no supervision. We intend to make help more readily available to these patients in the field and home by responding to each overdose or following up with these patients after they have been identified by EMS crews. We will gather details about the event and refer to appropriate agencies that can provide support over the next 72 hours. This will allow us the opportunity to develop a relationship with these patients. If the patient will not agree to transport to the hospital, we will attempt to give them a ride to the shelter or some other safe place where they can be monitored. This reduces the likelihood of a secondary overdose resulting in death. We are creating a \"dashboard\" that anyone will be able to view PAFD Community Paramedicine and overdose specific statistics in the City of Port Angeles. Community Paramedics, and Police and Fire Chiefs will have the ability to view a heat map of overdoses and frequent 911 callers in our area of responsibility. We believe this will give us further insight and allow us to focus our, along with SUD/OUD support specialists, efforts to more specific areas and track transient behavior throughout the year. Heat map data will not be tied to PII. We will not be releasing this view to the public due to local incidents of violence directed at people experiencing homelessness."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "We are prepared to begin using our i-Stat 1 field analyzer and can rapidly test things such as blood gases, chemistries & electrolytes, cardiac markers, coagulation, hematology, and endocrinology. Pregnancy testing is also available. We had to pause this due to a hiccup in software update availability, but we found a solution. We continue to participate in workgroups with the Coresponder Outreach Alliance (CROA) and be evaluated by the University of Washington in order to develop crisis response and de-escalation curricula for first responders. There is currently very little training available to first responders in regard to behavioral health and SUD cases. We are trained to manage medical & behavioral emergencies and not specifically how to manage a behavioral crisis. All of our ability to manage crises is developed through practical experience. There are no cookie-cutter protocols for handling every crisis. Having WA State mandated/approved trainings will give first responders the tools necessary to manage these types of calls and help destigmatize mental illness and substance use disorder. It will allow these patients greater access to the care they desperately need. Collateral work is being done to push legislation that would require WA State to allocate grant funding to coresponse programs."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "We were awarded grant funding by Clallam County made available by the Hargrove Grant. With this award, the City of Port Angeles has agreed to absorb the cost of the program over the next two years and we will be fully sustained by 2026. We, and our residents, are thankful and very excited about a fully sustained Community Paramedic program!"
+        },
+        {
+          "question": "Success Stories",
+          "response": "52 YO Female experiencing homelessness with history of severe alcoholism and illicit drug use. Chronic MRSA infections from IV injection. This patient was referred to us multiple times for medical evaluations. We found her usually on the street close to the stores she bought alcohol at. She would never agree to further evaluation at the hospital or a clinic. She had a huge ulcer on her foot that we'd provide wound care for that would not heal. Eventually the ulcer became infected and she agreed to let us help her. We took pictures of the infection and discussed the case with a physician from the \"free clinic\" who allowed us to monitor her while administering antibiotics. She was distraught over her condition and being unable to walk and would break down crying each time we gave her antibiotics. We were able to use this to advantage by talking her into finally going to treatment for substance abuse. She has been in recovery for almost two years. She has stayed clean, healthy, and housed. She now volunteers time on the streets helping people find their way into recovery."
+        },
+        {
+          "question": "COMMENTS",
+          "response": "CPM Contact Count: 555 (/143) = ~3.9 contacts per patient. 143 patients (some duplicate patients) in 2023 Q4 received at least one referral to another agency or were managed via CPM case management. Unable to make contact with 5 patients this quarter. In the second semester, 248 (105+143) patients have received at least one referral. Five (5) patients were not engaged as they could not be found or did not need a referral. This section is somewhat confusing. The first two categories say unduplicated patients, and the third says only patient. We had a total of 510 referrals for 396 patients. We subtract Influenza and COVID-19 vaccinations from the count because almost all of these patients do not need care planning or require services. That leaves us with 344 patients who needed referrals, 316 (unique patients) of which listened to our advice and we ended up referring to other medical/psychiatric/social services. Many of these patients required multiple referrals to satisfy their need. 79130 79130 79128 79128"
+        }
+      ]
+    }
+  },
+  "2024": {
+    "1": {
+      "metrics": {
+        "services": [
+          {
+            "id": "88272",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "617"
+          },
+          {
+            "id": "88295",
+            "metric": "# of referrals received",
+            "value": "130"
+          },
+          {
+            "id": "88296",
+            "metric": "# of referrals initiated",
+            "value": "202"
+          },
+          {
+            "id": "88297",
+            "metric": "# of unique services provided",
+            "value": "210"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "88273",
+            "metric": "# patients (current quarter)",
+            "value": "90"
+          },
+          {
+            "id": "88274",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "24"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "88294",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "85"
+          },
+          {
+            "id": "88299",
+            "metric": "Percentage of repeat overdoses",
+            "value": "0"
+          },
+          {
+            "id": "88299",
+            "metric": "",
+            "value": "0"
+          },
+          {
+            "id": "88300",
+            "metric": "# of new MAT services",
+            "value": "7"
+          },
+          {
+            "id": "88300",
+            "metric": "",
+            "value": "7"
+          },
+          {
+            "id": "88301",
+            "metric": "# of trainings provided (each quarter)",
+            "value": "47"
+          },
+          {
+            "id": "88301",
+            "metric": "# total number of trainings At the end of the year",
+            "value": "47"
+          },
+          {
+            "id": "88302",
+            "metric": "#: Percentage of high user dependence",
+            "value": "63"
+          },
+          {
+            "id": "88302",
+            "metric": "",
+            "value": "63"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "88289",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "5"
+          },
+          {
+            "id": "88285",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88284",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88280",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88279",
+            "metric": "98305 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88288",
+            "metric": "98381 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88286",
+            "metric": "98362 (current quarter)",
+            "value": "49"
+          },
+          {
+            "id": "88287",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "34"
+          },
+          {
+            "id": "88283",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88282",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "1"
+          },
+          {
+            "id": "88281",
+            "metric": "98326 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88291",
+            "metric": "Jail (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88292",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88290",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "41"
+          },
+          {
+            "id": "88293",
+            "metric": "Unknown (current quarter)",
+            "value": "0"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "We added to our software the ability to track 40 new overdose-specific data points. Developed EMS protocol for community paramedics to administer Suboxone. Developed trainings for Suboxone and Leave-behind Narcan for community members, first responders, patients, family, etc. We\u0092ve successfully trained ~50 people in overdose recognition, Narcan administration, leave-behind Narcan, Suboxone. Through collaborative efforts with the Clallam County Medical Officer and EMS Medical Program Director the PAFD Community Paramedic program received approval from WA State DOH to initiate a 2-year pilot project focusing on overdose response and administration of MOUD in the field setting. Added Suboxone to our formulary and available medications. We delivered two SUVs to Systems for Public Safety to get emergency response packages (lights, sirens, striping, etc.) installed. We expect to have them back in a couple weeks."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "We have been to 9 overdoses during our work hours. One was a fatality. Six were linked to peer support specialists immediately and were supported through the process of getting into detox, inpatient treatment, or enrolling in MAT services. One initially refused any help but reached back out to us requesting assistance and we were able to get them to reengage in services. The last patient was not interested in any services at this time. We know these numbers will fluctuate wildly throughout the year. The important thing is that we can very clearly see the benefit of engaging supportive services at the patient\u0092s point of crisis/contact rather than wait for them to reach out for help. We expect emergency response capable vehicles will allow us to respond to more overdoses, with the potential of responding to nearby County dispatches. We have met with each of the peer support agencies and MAT clinics so that we can better understand capabilities and form a plan to develop best practices when managing overdose cases. We are implementing weekly meetings to discuss cases between all the agencies managing SUD and patients that experience overdose. This will allow everyone to follow these cases as they progress."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "From last report/quarter - \"We were awarded grant funding by Clallam County made available by the Hargrove Grant. With this award, the City of Port Angeles has agreed to absorb the cost of the program over the next two years and we will be fully sustained by 2026. We, and our residents, are thankful and very excited about a fully sustained Community Paramedic program!\" We have applied for grant funds from CROA & University of Washington collaboration to help develop curricula for Fire Department based first responders managing behavioral health calls. Our responsibility would be to establish our Fire Department as a training site for Fire-based first responders, behavioral health providers, and other outreach personnel to receive training in responding to behavioral health calls and interacting with BH patients in non-clinical settings."
+        },
+        {
+          "question": "Success Stories",
+          "response": "30 Year-old Male w/ history of SUD; primarily IV opioids. He was given 12MG Naloxone prior to EMS arrival and was exhibiting s/s of severe withdrawal. [Patient] was referred to Reflections from the scene of his overdose, who followed up with him post-discharge (that night). [Patient] was interested in going to detox, reporting that the reason he had used was that he'd been hit by a car in Yakima 2 days before and was in terrible pain, exacerbated by withdrawal symptoms. Reflections put him up in a motel for the night. The next day we contacted North Olympic Healthcare Network (NOHN) to see if they could start micro-dosing Suboxone prior to intake with their OBOT program due to severe pain and danger of acute re-overdose. NOHN's OBOT met him at his PCP's clinic and got him started on Suboxone, which he currently on and is stabilized. He is currently waiting for a bed date and staying at a local motel. Reflections is checking on him daily. He has remained clean and he has made all his daily OBOT clinic appts. --- 50 Year-old Male w/ history of SUD (alcohol, amphetamines) & behavioral health disorders. We referred this patient to Reflections Counseling from the scene, who met him at the hospital. Once there, Reflections determined that he already had CM through PBH and called them - they then responded to the ED to follow up. [Patient] was held overnight in the ER and discharged to care of his case manager, from the PBH REAL team, the next day. She reports that was the first time he had tried fentanyl - he was drinking heavily and thought he was given methamphetamines, never intending to use opiates. He is back at his camp but comes to town to check in with his case manager every Thursday. He is waiting for an SUD assessment at the Harm Reduction Center, and is hoping to get into SSII for alcohol treatment. No opiate use since OD."
+        },
+        {
+          "question": "COMMENTS",
+          "response": "We implemented a way to delineate between outgoing and incoming referrals. Previously, we've only been tracking incoming referrals and that each patient is getting a referral/connection to services. Over the past semester we realized that we were managing 2-3 outgoing referrals per patient."
+        }
+      ]
+    },
+    "2": {
+      "metrics": {
+        "services": [
+          {
+            "id": "87087",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "749"
+          },
+          {
+            "id": "87110",
+            "metric": "# of referrals received",
+            "value": "156"
+          },
+          {
+            "id": "87111",
+            "metric": "# of referrals initiated",
+            "value": "147"
+          },
+          {
+            "id": "87112",
+            "metric": "# of unique services provided",
+            "value": "199"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "87088",
+            "metric": "# patients (current quarter)",
+            "value": "75"
+          },
+          {
+            "id": "87089",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "44"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "87109",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "71"
+          },
+          {
+            "id": "87113",
+            "metric": "# follow up of overdose survivors successful",
+            "value": "8"
+          },
+          {
+            "id": "87113",
+            "metric": "# contacts made",
+            "value": "16"
+          },
+          {
+            "id": "87114",
+            "metric": "% of repeat overdoses (quarter)",
+            "value": "5"
+          },
+          {
+            "id": "87114",
+            "metric": "% of repeat overdoses (YTD)",
+            "value": "5"
+          },
+          {
+            "id": "87115",
+            "metric": "# of new MAT services (quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87115",
+            "metric": "# of new MAT services (YTD)",
+            "value": "7"
+          },
+          {
+            "id": "87116",
+            "metric": "# of trainings provided (each quarter)",
+            "value": "46"
+          },
+          {
+            "id": "87116",
+            "metric": "# total number of trainings At the end of the year",
+            "value": "93"
+          },
+          {
+            "id": "87117",
+            "metric": "% reduction high utilizers (quarter)",
+            "value": "66"
+          },
+          {
+            "id": "87117",
+            "metric": "% reduction high utilizers (YTD)",
+            "value": "64.5"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "87104",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "5"
+          },
+          {
+            "id": "87100",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "2"
+          },
+          {
+            "id": "87099",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87095",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87094",
+            "metric": "98305 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87103",
+            "metric": "98381 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87101",
+            "metric": "98362 (current quarter)",
+            "value": "70"
+          },
+          {
+            "id": "87102",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "26"
+          },
+          {
+            "id": "87098",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87097",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87096",
+            "metric": "98326 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87106",
+            "metric": "Jail (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87107",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "1"
+          },
+          {
+            "id": "87105",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "49"
+          },
+          {
+            "id": "87108",
+            "metric": "Unknown (current quarter)",
+            "value": "3"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "Implementing a Post Overdose Response Team (PORT) and adding a new medication to our drug formulary posed specific challenges. We had to demonstrate the need to key stakeholders in Port Angeles, including the Fire Chief, Police Chief, City Manager, City Council, County Health Officer, and EMS Medical Program Director. After presenting the data and potential solutions to city leadership, we identified the necessary steps to implement the PORT team and add MAT services to our program. This included petitioning the Washington State Health Department for permission to add a new drug to our EMS formulary. We also required an emergency response-capable vehicle equipped with ALS and Community Paramedic equipment, which is quite costly. Fortunately, we secured funding from two sources to acquire and outfit these vehicles. Another challenge over the past two years has been incorporating a Community Resource Officer from the Port Angeles Police Department into our team as an alternative to traditional law enforcement responses. Staffing fluctuations within the police department made it difficult to assign an experienced officer to this role. We are pleased to announce that this position has recently been filled, and the officer will respond to calls involving the transient population, low-acuity behavioral health, and substance use disorder cases."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "In March, we began responding to every alarm call for a suspected overdose. The data is promising, showing a correlation between our involvement during a crisis and the patient's efforts towards meaningful recovery from substance use disorder. In the first few months, we've seen a 60% increase in patients entering detox, inpatient, or outpatient clinical MAT services. Of the 19 patients we couldn't respond to due to being off-duty or other reasons, only one entered any treatment option."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "We received grant funding from the Co-responder Outreach Alliance (CROA) and the University of Washington to expand our Community Paramedic Program, specifically enhancing our capability to respond to overdoses and provide in-field MAT services. As a result, we are in the process of hiring two additional personnel to establish two independent Community Paramedic units. Furthermore, we have utilized this funding to equip two Community Paramedic vehicles with a comprehensive array of Advanced Life Support (ALS) and Community Paramedic-specific equipment. Funds from the opioid settlement were allocated to enable these two vehicles to respond to emergencies, including the installation of lights and sirens."
+        },
+        {
+          "question": "Success Stories",
+          "response": "Created and implemented a protocol and workflow for Community Paramedics to administer Suboxone in the field. Established a two-year pilot program with the State of Washington Department of Health."
+        },
+        {
+          "question": "COMMENTS",
+          "response": "We are currently monitoring over 50 new data points related to the effectiveness and safety of using Suboxone in the prehospital setting. Additionally, we are gathering further information on overdoses and our Post Overdose Response Team: - Patient consent for MAT/induction with Suboxone and referral services - Previous/current treatment (e.g., Buprenorphine, Suboxone, Methadone, Naltrexone, etc.) - Justification for Suboxone treatment; reasons if not applicable - COWS assessment scores and evaluation times - Suboxone administration details: dosage and times - Other treatments administered to alleviate withdrawal symptoms - Strategies for harm reduction, including provision of Naloxone, training, recommendations for follow-up care, coordination with receiving facilities (emergency department, clinics), connection with specialists in substance use disorder support, transportation to shelters, social support systems, housing, etc."
+        }
+      ]
+    },
+    "3": {
+      "metrics": {
+        "services": [
+          {
+            "id": "88272",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "571"
+          },
+          {
+            "id": "88295",
+            "metric": "# of referrals received",
+            "value": "152"
+          },
+          {
+            "id": "88296",
+            "metric": "# of referrals initiated",
+            "value": "79"
+          },
+          {
+            "id": "88297",
+            "metric": "# of unique services provided",
+            "value": "283"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "88273",
+            "metric": "# patients (current quarter)",
+            "value": "74"
+          },
+          {
+            "id": "88274",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "32"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "88294",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "72"
+          },
+          {
+            "id": "88299",
+            "metric": "Percentage of repeat overdoses",
+            "value": "18"
+          },
+          {
+            "id": "88299",
+            "metric": "",
+            "value": "0"
+          },
+          {
+            "id": "88300",
+            "metric": "# of new MAT services",
+            "value": "0"
+          },
+          {
+            "id": "88300",
+            "metric": "",
+            "value": "0"
+          },
+          {
+            "id": "88301",
+            "metric": "# of trainings provided (each quarter)",
+            "value": "36"
+          },
+          {
+            "id": "88301",
+            "metric": "# total number of trainings At the end of the year",
+            "value": "0"
+          },
+          {
+            "id": "88302",
+            "metric": "#: Percentage of high user dependence",
+            "value": "71"
+          },
+          {
+            "id": "88302",
+            "metric": "",
+            "value": "0"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "88289",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "3"
+          },
+          {
+            "id": "88285",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88284",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88280",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88279",
+            "metric": "98305 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88288",
+            "metric": "98381 (current quarter)",
+            "value": "1"
+          },
+          {
+            "id": "88286",
+            "metric": "98362 (current quarter)",
+            "value": "23"
+          },
+          {
+            "id": "88287",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "11"
+          },
+          {
+            "id": "88283",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88282",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88281",
+            "metric": "98326 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88291",
+            "metric": "Jail (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88292",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "88290",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "36"
+          },
+          {
+            "id": "88293",
+            "metric": "Unknown (current quarter)",
+            "value": "0"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "City approved Community Paramedic/EMT job announcement and descriptions and approved hiring two Community EMTs temporarily through June 2025. We were hoping to push this along more quickly to get the EMTs hired in Quarter 2. It is difficult to move things quickly in a municipality. Administering Buprenorphine in the prehospital setting is new in Washington State. There are currently only 5 programs like ours that are in the process of implementing this. Only three programs have protocols signed and in place, approval from WA State, and have the medicine in supply. We have identified that we need to make significant changes to our protocols: Lower COWS score (Clinical Opioid Withdrawal Scale). It's currently at 8 and we intend to lower it to 5. Remove the restriction of not administering Buprenorphine if the overdose victim is being transported to the hospital. Remove the restriction of not administering Buprenorphine if the overdose victim is pregnant. Allow the CP to adjust the initial dose up to 24mg (from 4mg) to more quickly achieve the desired result. We have also identified that the hospital is not familiar with our protocols which makes a disjointed continuity of care for our patients. If we administer Buprenorphine, we essentially fix the withdrawal symptoms and there is no longer an emergency. We are in the process of streamlining the process between EMS, the hospital, and SUD professionals in order to be on the same page when treating this patient population."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "We ordered two point-of-care ultrasound probes. We will be attending training next month (November) to incorporate the use of these devices into our in-home and prehospital care model. Post-operative assessments, dyspnea assessments, catheter problems, bladder volume calculation, ventricular wall motion (during CPR calls), guided procedures such as IV starts, wound care, obstetric emergencies, etc. We are a training site for nursing students from Peninsula College. The students now spend 7 hours with us during their second year behavioral health module. We are participating in a behavioral health training advisory group hosted by the University of Washington and the Co-responder Outreach Alliance. We are responsible for shaping the curriculum to train fire department-based first responders how to respond to behavioral health crises. We will be helping train instructors at (9) different fire departments in different regions of Washington State so they can train paramedics, and EMTs, and firefighters in their respective regions. It will be an 8-hour course in behavioral health response."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "Nothing new for this narrative section this quarter."
+        },
+        {
+          "question": "Success Stories",
+          "response": "We completed a cost-savings analysis for 2023: Year 2023 (396 total patients) An average of 42% of the patients we saw used 911 services in 2023. Of these patients, 71% (118 patients) had a reduction in 911 usage. If they only called 9-1-1 (1) time less than before CPM intervention, we can conservatively approximate preventing (118) 9-1-1 calls in 2023. Per historic data, approximately 56% of all 911 calls result in a transport to the ED. 66 fewer transports to the ED x $3800 per transport = savings of $250,800 52 fewer calls for 9-1-1 response without transport x $1900 per response = savings of $98,800. An average of 51% of the patients we saw used the ED in 2023. Of these patients, 69% (139) had a reduction in ED usage. If they only visited the ED (1) time less than before CPM intervention, we can conservatively approximate preventing (139) ED visits in 2023. 139 fewer ED admissions x $1,146 (Average cost of ED visit in the State of Washington includes exam and physician \u0096 does not include tests, procedures, medications, etc.) = savings of $159,294. (2023) = $   508,894 (396 unique patients) (2022) = $   572,024 (748) (2021) = $   292,882 (402) -------------------- $1,373,800"
+        },
+        {
+          "question": "COMMENTS",
+          "response": "We still need someone to clear up some confusion in the PROGRESS ON OBJECTIVES section of these reports."
+        }
+      ]
+    },
+    "4": {
+      "metrics": {
+        "services": [
+          {
+            "id": "87118",
+            "metric": "# contacts by office of Community Paramedicine (current quarter)",
+            "value": "536"
+          },
+          {
+            "id": "87141",
+            "metric": "# of referrals received",
+            "value": "125"
+          },
+          {
+            "id": "87142",
+            "metric": "# of referrals initiated",
+            "value": "163"
+          },
+          {
+            "id": "87143",
+            "metric": "# of unique services provided",
+            "value": "314"
+          }
+        ],
+        "individuals": [
+          {
+            "id": "87119",
+            "metric": "# patients (current quarter)",
+            "value": "123"
+          },
+          {
+            "id": "87120",
+            "metric": "# patients with intense case management (current quarter)",
+            "value": "43"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "87140",
+            "metric": "# of unduplicated individuals contacted by the Community Paramedic (current quarter)",
+            "value": "12"
+          },
+          {
+            "id": "87144",
+            "metric": "# follow up of overdose survivors successful",
+            "value": "9"
+          },
+          {
+            "id": "87144",
+            "metric": "# contacts made",
+            "value": "9"
+          },
+          {
+            "id": "87145",
+            "metric": "% of repeat overdoses (quarter)",
+            "value": "16.7"
+          },
+          {
+            "id": "87145",
+            "metric": "% of repeat overdoses (YTD)",
+            "value": "0"
+          },
+          {
+            "id": "87146",
+            "metric": "# of new MAT services (quarter)",
+            "value": "3"
+          },
+          {
+            "id": "87146",
+            "metric": "# of new MAT services (YTD)",
+            "value": "0"
+          },
+          {
+            "id": "87147",
+            "metric": "# of trainings provided (quarter)",
+            "value": "49"
+          },
+          {
+            "id": "87147",
+            "metric": "# of trainings provided (YTD)",
+            "value": "178"
+          },
+          {
+            "id": "87148",
+            "metric": "% reduction high utilizers (quarter)",
+            "value": "60"
+          },
+          {
+            "id": "87148",
+            "metric": "% reduction high utilizers (YTD)",
+            "value": "0"
+          }
+        ],
+        "zip_codes": [
+          {
+            "id": "87135",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (current quarter)",
+            "value": "7"
+          },
+          {
+            "id": "87131",
+            "metric": "98357 (Includes Makah Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87130",
+            "metric": "98350 (Includes Quileute Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87126",
+            "metric": "98324 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87125",
+            "metric": "98305 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87134",
+            "metric": "98381 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87132",
+            "metric": "98362 (current quarter)",
+            "value": "84"
+          },
+          {
+            "id": "87133",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (current quarter)",
+            "value": "16"
+          },
+          {
+            "id": "87129",
+            "metric": "98343 (Post Office) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87128",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87127",
+            "metric": "98326 (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87137",
+            "metric": "Jail (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87138",
+            "metric": "Non-Clallam County ZIP Code (current quarter)",
+            "value": "0"
+          },
+          {
+            "id": "87136",
+            "metric": "Experiencing Homelessness, no current ZIP Code (current quarter)",
+            "value": "17"
+          },
+          {
+            "id": "87139",
+            "metric": "Unknown (current quarter)",
+            "value": "1"
+          }
+        ]
+      },
+      "narratives": [
+        {
+          "question": "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+          "response": "This quarter, we secured approval from the City of Port Angeles to hire two Community EMTs for the remainder of the UW/CROA grant cycle. Interviews are scheduled for January 6, 2025, with an anticipated start date for the selected candidates at the end of January. Significant progress was made in expanding our clinical protocols. Dr. Craven, our Medical Program Director, reviewed and approved updates to our Suboxone protocol. This change aims to reduce barriers for patients considering MAT services, particularly those experiencing withdrawal symptoms. Additionally, we enhanced our program's capabilities by acquiring ultrasound devices, which will be integrated into our Community Paramedic training and service offerings. These advancements reflect our commitment to improving community health outcomes and addressing emerging needs effectively. No objectives went unmet this quarter, and current evaluation methods and scope of work remain appropriate for ongoing program goals."
+        },
+        {
+          "question": "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+          "response": "Last quarter, we collaborated with Peninsula Community College Nursing Program and North Olympic Healthcare Network to enhance community healthcare through collective impact strategies. As part of this effort, 21 RN students and 2 rural track trainee physicians participated in ride-along experiences with our team. This engagement fosters a deeper understanding of how we can work together to provide equitable and coordinated care for our community. We have established a monthly meeting that brings together substance use disorder professionals, MOUD providers, first responders, and medical agencies. This initiative fosters collaboration among key stakeholders, including Olympic Medical Center, North Olympic Healthcare Network, Jamestown Healing Clinic, Port Angeles Police Department, and PenCom dispatch center. As community needs evolve, we remain committed to expanding this network by incorporating additional organizations to enhance our outreach and service effectiveness."
+        },
+        {
+          "question": "Please describe your sustainability planning \u0096 new collaborations, other sources of funding, etc",
+          "response": "As part of our sustainability planning, we are actively seeking new funding sources to extend employment for the Community EMTs we will be hiring in January. Our goal is to secure long-term, sustainable funding to ensure the continuity of the Post Overdose Response Team. Additionally, we are exploring new collaborative opportunities to strengthen financial support and program development and stability."
+        },
+        {
+          "question": "Success Stories",
+          "response": "We have successfully deployed one fully equipped Advanced Life Support (ALS) Community Paramedic vehicle, which is now actively responding to emergencies. A second vehicle is  expected to be outfitted and in service in February, further enhancing our ability to provide critical care and support to the community. With two staffed units, we will be able to reasonably expand our response area into parts of Clallam County Fire Districts #2, #3, and #4. However, this expansion will be contingent on call volume within the City of Port Angeles during our hours of operation."
+        },
+        {
+          "question": "COMMENTS",
+          "response": "We still have some questions about the section \"PROGRESS ON OBJECTIVES\". We would like to review this section with you in order to fully understand the metrics."
+        }
+      ]
+    }
+  }
+}

@@ -6,7 +6,7 @@ from django.test import Client
 @pytest.mark.django_db
 def test_healthz() -> None:
     User = get_user_model()
-    user = User.objects.create_user("testuser", "test@example.com", "password123")
+    user = User.objects.create_user("testuser", "test@example.com", "password123")  # type: ignore[attr-defined]
     client = Client()
     client.force_login(user)
     resp = client.get("/api/healthz/")

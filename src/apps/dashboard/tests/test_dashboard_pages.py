@@ -11,7 +11,7 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture()
 def authenticated_client(client):
     User = get_user_model()
-    user = User.objects.create_user("testuser", "test@example.com", "password123")
+    user = User.objects.create_user("testuser", "test@example.com", "password123")  # type: ignore[attr-defined]
     client.force_login(user)
     return client
 

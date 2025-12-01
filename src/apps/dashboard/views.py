@@ -1480,65 +1480,94 @@ def _build_referrals_chart_insights(df_all: pd.DataFrame) -> dict[str, list[dict
     return insights
 
 
+REFERRALS_RATIONALE_HEADINGS: dict[str, str] = {
+    "age": "Vulnerability Mapping",
+    "insurance": "Financial Reality Check",
+    "referral_agency": "Relationship Health Monitor",
+    "zipcode": "Geographic Access Analysis",
+    "referral_closed_reason": "Intake Friction Report",
+    "sex": "Access Equity Check",
+    "encounter_type_cat1": "Core Function Analysis",
+    "encounter_type_cat2": "Clinical Complexity Drill-Down",
+    "encounter_type_cat3": "Service Nuance & Value",
+    "referrals_counts_quarterly": "Demand Heartbeat & Capacity Warning",
+    "encounters_counts_quarterly": "Efficiency & Workload Analysis",
+    "encounter_type": "Operational Style Profile",
+}
+
 REFERRALS_RATIONALE_MAP: dict[str, str] = {
     "age": (
-        "The majority of referrals fall within the 55–84 age range (highlighted in amber), reflecting a concentration of older adults requiring community paramedicine services. "
-        "This age distribution guides resource allocation and intervention planning—younger referrals may need school or family coordination, "
-        "while older adults often require fall risk assessments, medication reviews, and enhanced care coordination to prevent hospital readmissions."
+        "This distribution acts as a map of vulnerability rather than just a demographic breakdown. A dominance of the 55-84 age bracket "
+        "often signals a system managing frailty, isolation, and chronic disease—patients who may be falling through the cracks of "
+        "traditional primary care. Conversely, spikes in younger cohorts can indicate emerging behavioral health needs or substance use "
+        "challenges. Understanding these shifts allows for more precise resource allocation, whether that means prioritizing fall "
+        "prevention strategies or expanding mental health navigation support."
     ),
     "insurance": (
-        "Coverage reveals access barriers and guides which benefits coordinations to deploy (e.g., Medicaid enrollment assistance, charity care)."
+        "Payer mix serves as a critical financial reality check for the program. A heavy skew towards Medicaid and Uninsured populations "
+        "often highlights gaps in the safety net, suggesting that community paramedics are serving as a de facto medical home for those "
+        "without consistent primary care. Alternatively, higher commercial insurance rates may indicate the program is bridging access "
+        "barriers for insured patients who cannot reach their providers. This insight helps determine whether to focus on enrollment "
+        "assistance and charity care or on coordinating with private systems."
     ),
     "referral_agency": (
-        "The treemap visualization reveals referral source distribution, with NOHN (North Olympic Healthcare Network), OPCC (Olympic Peninsula Community Clinic), 3C (Clallam Care Connection) "
-        "and OMC (Olympic Medical Center) representing major partners. Understanding which agencies generate the most referrals helps strengthen existing partnerships through targeted feedback "
-        "loops and collaborative quality improvement. Identifying underutilized referral sources highlights opportunities for expanded education and outreach to boost appropriate referrals "
-        "across the care continuum."
+        "This histogram functions as a relationship health monitor for the program. Dominance by key partners like NOHN and OMC suggests "
+        "strong clinical integration and trust from the medical community. However, a high volume of 'Self/Family' referrals or low "
+        "participation from expected partners may reveal awareness gaps or friction in the referral pathway. Identifying underrepresented "
+        "sources highlights opportunities to strengthen outreach and ensure all patient populations have a clear pathway to care."
     ),
     "zipcode": (
-        "ZIP code patterns surface geographic access challenges and help route mobile services and targeted outreach."
+        "Geography often dictates access in healthcare. This map reveals where the system may be failing to reach patients, with clusters "
+        "in specific areas potentially correlating with 'food deserts,' transportation barriers, or housing instability. Hotspots in "
+        "remote locations suggest a need for optimized mobile unit routing, while downtown clusters may point to density-driven issues "
+        "like homelessness. Reading the terrain of need allows for more targeted and effective community deployment."
     ),
     "referral_closed_reason": (
-        "Closed reasons explain throughput and friction (unable to contact, declined, no longer in area). Tracking them improves workflows and follow-up scripts."
+        "This chart serves as a 'friction report' for the intake process. While high 'Goals Met' rates are a success metric, significant "
+        "numbers of 'Unable to Contact' or 'Declined' outcomes highlight process challenges rather than patient disinterest. These "
+        "patterns may indicate that intake scripts need refinement or that follow-up timing requires adjustment. addressing these "
+        "friction points ensures that patients who reach out for help don't get lost in the noise of the system."
     ),
     "sex": (
-        "Sex distribution helps scan for imbalances and tailor messaging or scheduling to avoid access gaps."
+        "Gender balance is a subtle but important indicator of access equity. While a balanced distribution is typical, significant skews "
+        "prompt further inquiry into potential blind spots. For instance, are men less likely to accept help, or are women being referred "
+        "more frequently for social needs? Monitoring this balance ensures that referral criteria and provider perceptions remain inclusive "
+        "and do not inadvertently filter out specific demographics."
     ),
     "encounter_type_cat1": (
-        "Encounter types show what’s driving referrals initially; use this to align resources like behavioral health or primary care slots."
+        "This chart clarifies the core function of the program by categorizing the actual work performed. A dominance of 'Medical' "
+        "encounters suggests the program is filling gaps in primary care, while a lead in 'Social' or 'Behavioral' categories indicates "
+        "a strong need for social work capabilities in the field. This distinction is vital for aligning staffing models and job "
+        "descriptions with the reality of patient needs."
     ),
     "encounter_type_cat2": (
-        "Secondary encounter categorization reveals co-occurring needs that impact care plans and handoffs."
+        "Drilling down into secondary categories reveals the complexity of care. Broad labels like 'Medical' are broken down into specifics "
+        "such as 'Wound Care' or 'Medication Management,' exposing the daily clinical skills required by the team. This level of detail "
+        "moves beyond guesswork, allowing for targeted training and resource allocation based on what paramedics are actually encountering "
+        "in the field."
     ),
     "encounter_type_cat3": (
-        "Tertiary categories catch nuances that inform documentation, reporting, and quality improvement."
+        "This granular view captures the nuance of service delivery. Tracking specific interventions—like particular types of education "
+        "or distinct social referrals—provides the detailed evidence needed to demonstrate value to funders and stakeholders. It transforms "
+        "general statements of help into quantifiable data, supporting robust grant reporting and continuous quality improvement initiatives."
     ),
     "referrals_counts_quarterly": (
-        "This chart tracks quarterly referral trends with intelligent color-coded insights. Bar colors dynamically distinguish "
-        "above-average quarters (emerald green) from at or below-average quarters (cyan blue). The baseline average is calculated from "
-        "2021, 2023, and 2024 data—our 'normal' operational years—excluding 2022's Behavioral Health program expansion spike and 2025's "
-        "ongoing growth from adding 2 new Community Paramedics. This selective baseline provides a meaningful reference for evaluating current "
-        "performance against typical referral volumes. Vertical year labels identify key contextual factors affecting referral patterns. "
-        "The dashed white baseline helps quickly assess whether current quarterly activity is trending above or below the normalized average, "
-        "informing capacity planning, partnership engagement, and resource allocation decisions. Subtle year-specific background tinting "
-        "enhances visual segmentation while the hover details reveal each quarter's share of total referrals for proportional context."
+        "This chart tracks the heartbeat of demand, serving as an early warning system for capacity planning. By normalizing against a "
+        "baseline (excluding atypical years), it distinguishes between steady operations and demand surges. Consistent 'above average' "
+        "activity signals high utilization, while 'below average' periods may suggest a need for increased outreach. The moving average "
+        "helps identify trends early, allowing for proactive adjustments before capacity issues arise."
     ),
     "encounters_counts_quarterly": (
-        "This chart tracks quarterly encounter trends using the same color-coded baseline methodology as referrals. Bar colors distinguish "
-        "above-average quarters (emerald green) from at or below-average quarters (cyan blue), calculated from 2021, 2023, and 2024 baseline years. "
-        "Encounters represent the actual service delivery touchpoints—each interaction where community paramedics provided care, conducted assessments, "
-        "or coordinated services. Comparing encounter patterns against referral trends reveals program efficiency, service utilization rates, and capacity constraints. "
-        "The vertical year labels and background tinting provide operational context, while the dashed baseline helps identify periods of high or low service intensity "
-        "that may require staffing adjustments or partnership realignment."
+        "Comparing Workload against Demand offers a clear view of program efficiency. While Referrals represent the 'ask,' Encounters "
+        "show the 'answer.' A divergence where Referrals rise but Encounters remain flat may indicate a capacity ceiling, whereas "
+        "parallel growth suggests successful scaling. Conversely, fewer Referrals with high Encounters points to higher acuity cases. "
+        "Monitoring the gap between these metrics reveals the true efficiency and capacity of the service."
     ),
     "encounter_type": (
-        "This treemap visualizes encounter characteristics across three dimensions, combining data from both Referrals and Encounters to provide "
-        "a comprehensive view of all program interactions. "
-        "**Engagement Method** shows how interactions occurred (in-person visits, phone calls, meetings). "
-        "**Communication Type** reveals the medium used (conversations, emails). "
-        "**Contact Type** identifies who was involved (patients, healthcare teams, social services). "
-        "Box sizes reflect combined encounter counts from both data sources, while hover details show the percentage share within each category. "
-        "This consolidated multi-dimensional view helps identify preferred engagement patterns, communication channels, and key stakeholders across all program touchpoints."
+        "This multidimensional view combines engagement method, communication channel, and contact type to reveal the program's "
+        "operational style. It highlights the balance between high-touch field work and remote coordination, showing whether the team "
+        "operates more as 'boots on the ground' or a coordination hub. Understanding this balance helps ensure that resources are "
+        "deployed effectively to meet patient needs while maintaining operational efficiency."
     ),
 }
 
@@ -2318,6 +2347,7 @@ def referrals_chart_fragment(request, field: str):
         "category_label": "Referrals",
         "insights": chart_insights.get(field),
         "rationale": REFERRALS_RATIONALE_MAP.get(field),
+        "rationale_heading": REFERRALS_RATIONALE_HEADINGS.get(field),
         "meta": None,
         "quick_stats": quick_stats.get(field),
     }
@@ -5236,6 +5266,10 @@ def user_profile(request):
 
 def authentication(request):
     return render(request, "dashboard/authentication.html")
+
+
+def hargrove_grant(request):
+    return render(request, "dashboard/hargrove_grant.html")
 
 
 @login_required

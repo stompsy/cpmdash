@@ -112,20 +112,6 @@ def calculate_coverage_scenarios() -> dict[str, dict]:  # noqa: C901
         "color": "primary",
     }
 
-    # 3x14 Staggered: Crew 1 (Mon–Wed 07:00–21:00), Crew 2 (Thu–Sat 07:00–21:00)
-    crew1_3x14 = [(0, 7, 21), (1, 7, 21), (2, 7, 21)]  # Mon-Wed
-    crew2_3x14 = [(3, 7, 21), (4, 7, 21), (5, 7, 21)]  # Thu-Sat
-    staggered_3x14_mask, staggered_3x14_hours = get_scenario_mask_and_hours(crew1_3x14, crew2_3x14)
-    covered_cases = len(df[staggered_3x14_mask])
-    scenarios["3×14 Staggered"] = {
-        "coverage": (covered_cases / total_overdoses) * 100,
-        "cases_per_year": (covered_cases / total_years),
-        "description": "Crew 1: Mon–Wed 07:00–21:00, Crew 2: Thu–Sat 07:00–21:00",
-        "hours_per_week": staggered_3x14_hours,
-        "shifts": "Crew 1: 3×14h (Mon–Wed), Crew 2: 3×14h (Thu–Sat)",
-        "color": "warning",
-    }
-
     # 3x12 Staggered: Crew 1 (Mon–Wed 08:00–20:00), Crew 2 (Thu–Sat 08:00–20:00)
     crew1_3x12 = [(0, 8, 20), (1, 8, 20), (2, 8, 20)]  # Mon-Wed
     crew2_3x12 = [(3, 8, 20), (4, 8, 20), (5, 8, 20)]  # Thu-Sat
@@ -152,22 +138,6 @@ def calculate_coverage_scenarios() -> dict[str, dict]:  # noqa: C901
         "cases_per_year": (covered_cases / total_years),
         "description": "Crew 1: Mon–Thu 07:00–17:00, Crew 2: Tue–Fri 07:00–17:00",
         "hours_per_week": staggered_4x10a_hours,
-        "shifts": "Crew 1: 4×10h (Mon–Thu), Crew 2: 4×10h (Tue–Fri)",
-        "color": "success",
-    }
-
-    # 4x10 Staggered B: Crew 1 (Mon–Thu 07:00–17:00), Crew 2 (Tue–Fri 09:00–19:00)
-    crew1_4x10b = [(0, 7, 17), (1, 7, 17), (2, 7, 17), (3, 7, 17)]  # Mon-Thu
-    crew2_4x10b = [(1, 9, 19), (2, 9, 19), (3, 9, 19), (4, 9, 19)]  # Tue-Fri
-    staggered_4x10b_mask, staggered_4x10b_hours = get_scenario_mask_and_hours(
-        crew1_4x10b, crew2_4x10b
-    )
-    covered_cases = len(df[staggered_4x10b_mask])
-    scenarios["4×10 Staggered B"] = {
-        "coverage": (covered_cases / total_overdoses) * 100,
-        "cases_per_year": (covered_cases / total_years),
-        "description": "Crew 1: Mon–Thu 07:00–17:00, Crew 2: Tue–Fri 09:00–19:00",
-        "hours_per_week": staggered_4x10b_hours,
         "shifts": "Crew 1: 4×10h (Mon–Thu), Crew 2: 4×10h (Tue–Fri)",
         "color": "success",
     }
@@ -220,10 +190,8 @@ def calculate_coverage_scenarios() -> dict[str, dict]:  # noqa: C901
 
     # When building scenarios, add a 'short_name' for each scenario
     scenarios["5x8 (Current)"]["short_name"] = "5x8 (Current)"
-    scenarios["3×14 Staggered"]["short_name"] = "3x14 Staggered"
     scenarios["3×12 Staggered"]["short_name"] = "3x12 Staggered"
     scenarios["4×10 Staggered A"]["short_name"] = "4x10 Staggered A"
-    scenarios["4×10 Staggered B"]["short_name"] = "4x10 Staggered B"
     scenarios["4×10 Staggered C"]["short_name"] = "4x10 Staggered C"
     scenarios["4×10 Staggered D"]["short_name"] = "4x10 Staggered D"
     scenarios["4×10 Weekend Overlap"]["short_name"] = "4x10 Weekend Overlap"

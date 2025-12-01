@@ -1,0 +1,207 @@
+[
+  {
+    "id": 1,
+    "type": "milestone",
+    "year": "2018",
+    "month": "August",
+    "tagline": "Strategic Foundation",
+    "lead": "Port Angeles Fire Department (PAFD) and Local 656 establish the framework for a Community Paramedic Program.",
+    "bullets": [
+      "Conducted community needs assessment identifying high system utilizers",
+      "Signed MOU with Local 656 to support pilot program",
+      "Developed protocols with Clallam County Medical Program Director",
+      "Secured initial partnerships with OMC, PBH, and NOHN"
+    ],
+    "sections": []
+  },
+  {
+    "id": 2,
+    "type": "impact",
+    "year": "2019",
+    "month": "March",
+    "tagline": "Program Pilot Launch",
+    "lead": "Implemented the Community Paramedic program by reallocating a Firefighter/Paramedic from line staff as a one-year pilot.",
+    "need": "High system utilizers were overusing 9-1-1 and the Emergency Department for non-emergent medical needs, creating strain on emergency resources.",
+    "response": "Launched a one-year pilot program reallocating a Firefighter/Paramedic to focus on bridging healthcare gaps. Established partnerships with OMC, PBH, and NOHN.",
+    "impact": "Successfully established a new care pathway for chronic conditions, reducing immediate pressure on emergency services and proving the viability of the Community Paramedic model.",
+    "bullets": [],
+    "sections": []
+  },
+  {
+    "id": 3,
+    "type": "impact",
+    "year": "2020",
+    "month": "June",
+    "tagline": "Strengthening Sustainability",
+    "lead": "North Olympic Healthcare Network and PAFD collaborated through United Healthcare Fund grant dollars to augment and sustain the program.",
+    "need": "The pilot program demonstrated value but required sustainable funding and staffing to meet growing community demand, especially with the onset of the pandemic.",
+    "response": "Secured United Healthcare Fund grant dollars through NOHN collaboration. Hired three community paramedics and expanded scope to include in-home assessments.",
+    "impact": "Secured program continuity and expanded care coordination capabilities, allowing for robust response during the public health emergency.",
+    "bullets": [],
+    "sections": []
+  },
+  {
+    "id": 4,
+    "type": "event",
+    "year": "2020",
+    "month": "November",
+    "tagline": "Pandemic Response",
+    "lead": "Rapidly adapted scope of practice to support the community during the COVID-19 public health emergency.",
+    "bullets": [
+      "Conducted home visits for vulnerable populations",
+      "Facilitated vaccinations for home-bound individuals",
+      "Provided bridge care to reduce hospital exposure risks",
+      "Implemented harm reduction initiatives including 'Sharps' containers"
+    ],
+    "sections": []
+  },
+  {
+    "id": 5,
+    "type": "impact",
+    "year": "2021",
+    "month": "January",
+    "tagline": "Clinical Expansion & Pandemic Response",
+    "lead": "A pivotal year of growth: hiring full-time staff, launching 'Treat & Release' protocols, and leading regional vaccination efforts.",
+    "need": "The pandemic created urgent gaps in care (vaccinations, home-bound patients) while the program needed to formalize its clinical role to handle higher acuity cases in the field.",
+    "response": "Hired Community Paramedic Brian Gerdes (Jan) and Community Paramedic Kristin Fox (July). Launched 'Treat & Release' protocols for point-of-care labs and IV therapy.",
+    "impact": "Delivered ~600 COVID-19 vaccine doses to home-bound residents, established point-of-care lab testing, and integrated with EPIC EHR for seamless care continuity.",
+    "bullets": [
+      "Hired Community Paramedic Brian Gerdes (Jan) and Community Paramedic Kristin Fox (July)",
+      "Launched 'Treat & Release' protocols for point-of-care labs and IV therapy",
+      "Delivered ~600 COVID-19 vaccine doses to home-bound residents",
+      "Integrated with EPIC EHR for seamless care continuity",
+      "Partnered with OPCC and Rediscovery for street outreach"
+    ],
+    "sections": []
+  },
+  {
+    "id": 6,
+    "type": "impact",
+    "year": "2022",
+    "month": "January",
+    "tagline": "Addressing Behavioral Health",
+    "lead": "Scaled operations to address the rising tide of behavioral health crises and overdose fatalities.",
+    "need": "Identified a sharp increase in overdose fatalities and behavioral health crises in the community, necessitating a more specialized response.",
+    "response": "Secured Clallam County Behavioral Health Advisory Board (BHAB) grant funding. Launched LEAD Fire alternative response program.",
+    "impact": "Expanded service delivery to include long-acting injectables and alternative response pathways, directly targeting the most vulnerable populations.",
+    "bullets": [],
+    "sections": []
+  },
+  {
+    "id": 7,
+    "type": "impact",
+    "year": "2023",
+    "month": "July",
+    "tagline": "Opioid Crisis Response",
+    "lead": "Strategic shift to address the escalating opioid epidemic and high overdose fatality rates.",
+    "need": "Clallam County ranked 4th highest in the state for overdose fatalities. 60% of survivors refused treatment, and there were 0% MOUD referrals.",
+    "response": "Initiated 'Operation Shielding Hope' and secured Opioid Settlement Funds. Began investigating barriers to care and refusal rates.",
+    "impact": "Laid the groundwork for the Post Overdose Response Team (PORT) and secured funding for dedicated emergency response units.",
+    "bullets": [],
+    "sections": []
+  },
+  {
+    "id": 8,
+    "type": "impact",
+    "year": "2024",
+    "month": "March",
+    "tagline": "DOH Pilot Approval",
+    "lead": "Secured historic approval from WA Department of Health to launch the Post Overdose Response Team (PORT) pilot, expanding scope to include field-based Buprenorphine.",
+    "need": "Overdose survivors were refusing transport (60% refusal rate) and getting stuck in a cycle of repeat overdoses due to precipitated withdrawal.",
+    "response": "Obtained DOH approval to expand scope of practice, allowing field administration of Buprenorphine (MOUD) and 24/7 response capability.",
+    "impact": "Enabled 'warm handoffs' to treatment. Achieved 78% linkage to SUD services when CPMs respond, compared to only 3% without them.",
+    "bullets": [
+      "Authorized to administer Buprenorphine (MOUD) in the field to treat precipitated withdrawal",
+      "Established 24/7 response capability for overdose incidents",
+      "Implemented 'warm handoff' protocols with 78% linkage success rate",
+      "Partnered with PAPD Community Resource Officer for co-response"
+    ],
+    "sections": []
+  },
+  {
+    "id": 9,
+    "type": "event",
+    "year": "2024",
+    "month": "April",
+    "tagline": "Referral Program Implementation",
+    "lead": "Systematized the referral process for off-hour overdoses.",
+    "bullets": [
+      "Implemented protocol for on-duty shift personnel to refer survivors",
+      "Ensured 100% of off-hour overdoses are referred to CPM office",
+      "Closed the gap on missed opportunities during nights and weekends"
+    ],
+    "sections": []
+  },
+  {
+    "id": 10,
+    "type": "impact",
+    "year": "2024",
+    "month": "June",
+    "tagline": "UW-CROA Grant Expansion",
+    "lead": "Awarded a $350,000 innovation grant from the University of Washington and Co-responder Outreach Alliance to deploy autonomous response units.",
+    "need": "The demand for overdose response required dedicated resources that wouldn't deplete standard 9-1-1 emergency units.",
+    "response": "Utilized $350,000 grant to hire two Community EMTs and deploy two autonomous Post Overdose Response Units.",
+    "impact": "Broadened 9-1-1 response capability, allowing CPMs to operate independently and relieve pressure on fire engines and ambulances.",
+    "bullets": [
+      "Hired two Community EMTs to staff dedicated response vehicles",
+      "Deployed two autonomous Post Overdose Response Units (non-transport)",
+      "Relieved pressure on 9-1-1 system by handling low-acuity calls independently",
+      "Broadened emergency services response capability for the entire city"
+    ],
+    "sections": []
+  },
+  {
+    "id": 11,
+    "type": "milestone",
+    "year": "2024",
+    "month": "November",
+    "tagline": "BHAB Presentation",
+    "lead": "Presented progress update and SUD program outcomes to the Behavioral Health Advisory Board.",
+    "bullets": [
+      "Highlighted 70% success rate for PORT arrivals",
+      "Reported decreased first responder compassion fatigue",
+      "Outlined future goals for field clearance and MOUD upon discharge"
+    ],
+    "sections": []
+  },
+  {
+    "id": 12,
+    "type": "impact",
+    "year": "2024",
+    "month": "December",
+    "tagline": "Crisis Turnaround",
+    "lead": "Significant reduction in overdose fatalities and improved community health outcomes.",
+    "need": "In early 2024, Clallam County had the 2nd highest overdose death rate in WA (73.3 per 100k). Compassion fatigue was high among first responders.",
+    "response": "Full implementation of PORT with warm handoffs. 100% of off-hour overdoses referred to CPM. 70%+ acceptance into MOUD/MAT services.",
+    "impact": "By Jan 2025, county ranking dropped to 10th (41.2 per 100k). Achieved $524,124 in cost savings and prevented 118 9-1-1 calls.",
+    "bullets": [],
+    "sections": []
+  },
+  {
+    "id": 13,
+    "type": "milestone",
+    "year": "2025",
+    "month": "May",
+    "tagline": "City Council Presentation",
+    "lead": "Presented 'Operation Shielding Hope' outcomes to the Port Angeles City Council.",
+    "bullets": [
+      "Reported 63% decrease in fatal overdoses over 12 months",
+      "Highlighted $1.89M in total estimated cost savings since program inception",
+      "Confirmed 100% referral rate for off-hour overdoses"
+    ],
+    "sections": []
+  },
+  {
+    "id": 14,
+    "type": "impact",
+    "year": "2025",
+    "month": "March",
+    "tagline": "Sustained Results",
+    "lead": "Continued decline in overdose rates and sustained program success.",
+    "need": "The need to maintain momentum in overdose prevention and ensure long-term recovery support for survivors.",
+    "response": "Continued PORT operations and expansion of MOUD services. Strengthened partnerships with jail and hospital systems.",
+    "impact": "County ranking dropped further to 11th (34.8 per 100k). Recorded a 63% decrease in fatal overdoses over a 12-month period.",
+    "bullets": [],
+    "sections": []
+  }
+]

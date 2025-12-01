@@ -5,200 +5,371 @@
 {% block title %}Community Paramedicine Overview{% endblock title %}
 
 {% block page_header %}
-    {% url 'dashboard:odreferrals' as od_dashboard_url %}
     {% url 'cases:timeline' as timeline_url %}
     {% static 'media/data_collection.png' as overview_image %}
-    {% with eyebrow="Community Paramedicine Program" title="Collaborative care for a resilient Port Angeles" description="The Community Paramedicine team combines field medicine, behavioral health, and social support to close gaps between 9-1-1 calls and long-term recovery. Explore the partnerships, timelines, and evidence that guide our mission to meet residents where they are and navigate them toward stability." primary_label="View operational dashboard" primary_url=od_dashboard_url primary_hx_get=od_dashboard_url primary_hx_target="#dashboard-main" primary_hx_select="#dashboard-main" primary_hx_swap="outerHTML" primary_hx_push_url="true" primary_alpine_click="selected = 'Program Overviews'; page = 'od-referrals-overview'" secondary_label="Follow project timeline" secondary_url=timeline_url secondary_hx_get=timeline_url secondary_hx_target="#dashboard-main" secondary_hx_select="#dashboard-main" secondary_hx_swap="outerHTML" secondary_hx_push_url="true" secondary_alpine_click="selected = 'Program Briefings'; page = 'cpmTimeline'" image_src=overview_image image_alt="Community paramedicine overview" image_width="640" image_height="360" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
+    {% with eyebrow="Community Paramedicine Program" title="Collaborative care for a resilient Port Angeles" description="The Community Paramedicine team combines field medicine, behavioral health, and social support to close gaps between 9-1-1 calls and long-term recovery. Explore the partnerships, timelines, and evidence that guide our mission to meet residents where they are and navigate them toward stability." primary_label="Follow project timeline" primary_url=timeline_url primary_hx_get=timeline_url primary_hx_target="#dashboard-main" primary_hx_swap="outerHTML" primary_hx_push_url="true" primary_alpine_click="selected = 'Program Briefings'; page = 'cpmTimeline'" image_src=overview_image image_alt="Community paramedicine overview" image_width="640" image_height="360" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
         {% include "partials/page_header.html" %}
     {% endwith %}
 {% endblock page_header %}
 
 {% block content %}
-    <div class="col-span-12 mx-auto mt-16 w-full max-w-7xl">
+    <div class="col-span-12 mx-auto w-full">
         <span data-page-name="coreOverview" class="hidden" hidden></span>
-        <div class="space-y-16">
-            <section class="col-span-12">
-                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
-                    <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">About the program</p>
-                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">Who we are</h2>
-                    </div>
-                    <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
-                        <div class="flex-1 space-y-6 text-base leading-relaxed text-slate-200">
-                            <p>
-                                The Community Paramedicine program launched in 2019 to meet residents where traditional systems left gaps. Today our team blends field medicine, behavioral health expertise, and care navigation to create a calmer path between a 9-1-1 call and long-term stability. We work shoulder to shoulder with trusted partners so neighbors receive home visits, post-overdose follow-up, chronic disease support, and harm reduction supplies without starting over at every door.
-                            </p>
-                            <p>
-                                Every encounter is relationship-centered. We focus on medication alignment, safety assessments, wound care, vaccinations, and the warm handoffs that keep people connected to services they trust. Our work is as much about restoring confidence as it is about providing care.
-                            </p>
-                        </div>
-                        <aside class="lg:w-80">
-                            <blockquote class="rounded-3xl border border-white/8 bg-gradient-to-br from-white/10 to-white/0 p-8 text-base italic text-slate-100 shadow-[0_22px_45px_rgba(8,47,73,0.3)]">
-                                “Wonderful people, providing exceptional service, to create a safer and healthier Port Angeles.”
-                                <span class="mt-5 block text-xs font-semibold uppercase tracking-[0.35em] text-brand-200">Fire Chief Derrell Sharp</span>
-                            </blockquote>
-                        </aside>
-                    </div>
-                </div>
-            </section>
 
-            <section class="col-span-12">
-                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
-                    <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">How we care</p>
-                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">Guiding residents from crisis to stability</h2>
-                    </div>
-                    <div class="grid gap-6 lg:grid-cols-3">
-                        <article class="flex flex-col gap-5 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/40 to-slate-800/60 p-8 text-[15px] leading-relaxed text-slate-100/90 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
-                            <header class="flex items-center gap-3">
-                                <span class="inline-flex size-10 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </span>
-                                <div>
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-200">Post-overdose stabilization</p>
-                                    <h3 class="text-lg font-semibold text-white">Operation Shielding Hope</h3>
-                                </div>
-                            </header>
-                            <p>
-                                Community Paramedics respond alongside EMS and law enforcement, helping patients stabilize, manage precipitated withdrawal, and enter medication assisted treatment with compassion. Warm handoffs to outreach partners begin before crews clear the scene.
-                            </p>
-                        </article>
-                        <article class="flex flex-col gap-5 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/40 to-slate-800/60 p-8 text-[15px] leading-relaxed text-slate-100/90 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
-                            <header class="flex items-center gap-3">
-                                <span class="inline-flex size-10 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M4 6h16" />
-                                        <path d="M4 12h16" />
-                                        <path d="M4 18h10" />
-                                    </svg>
-                                </span>
-                                <div>
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-200">Continuity at home</p>
-                                    <h3 class="text-lg font-semibold text-white">In-home clinical support</h3>
-                                </div>
-                            </header>
-                            <p>
-                                Residents receive home visits, telehealth touchpoints, and coaching that keep care on track. From medication reconciliation to wound care and chronic disease monitoring, CPMs bridge the gap until long-term providers can step in.
-                            </p>
-                        </article>
-                        <article class="flex flex-col gap-5 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/40 to-slate-800/60 p-8 text-[15px] leading-relaxed text-slate-100/90 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
-                            <header class="flex items-center gap-3">
-                                <span class="inline-flex size-10 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M3 12h18" />
-                                        <path d="M12 3v18" />
-                                    </svg>
-                                </span>
-                                <div>
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-200">Care navigation</p>
-                                    <h3 class="text-lg font-semibold text-white">Bridging to community partners</h3>
-                                </div>
-                            </header>
-                            <p>
-                                A dedicated office tracks referrals, follow-up calls, and data sharing with case managers. We coordinate transportation, documentation, and handoffs so patients arrive where they are expected and feel welcomed when they get there.
-                            </p>
-                        </article>
-                    </div>
-                </div>
-            </section>
+        {# Pure Narrative - Our Story #}
+        <section class="py-20 bg-gradient-to-b from-transparent via-slate-900/30 to-transparent">
+            <div class="w-full">
+                <div class="prose prose-lg prose-invert max-w-none">
+                    <h2 class="mb-8 text-3xl font-bold tracking-tight text-white sm:text-4xl">Meeting residents where they are</h2>
 
-            <section class="col-span-12">
-                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
-                    <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Field rhythm</p>
-                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">What the post-overdose journey feels like</h2>
-                    </div>
-                    <div class="grid gap-8 rounded-3xl border border-white/10 bg-slate-900/70 p-8 text-base leading-relaxed text-slate-200 shadow-[0_24px_50px_rgba(8,47,73,0.35)] lg:grid-cols-2">
-                        <div class="space-y-6">
-                            <p>
-                                When an overdose call goes out, a Community Paramedic unit launches with ALS equipment, buprenorphine, and the time to stay. Once life threats are managed, CPMs gain consent, listen, and prepare next steps while EMS units return to service.
-                            </p>
-                            <ul class="space-y-4 text-[15px]">
-                                <li class="flex items-start gap-3">
-                                    <span class="mt-1 inline-flex size-6 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">1</span>
-                                    <span class="leading-relaxed">911 dispatch alerts EMS, law enforcement, and the PORT unit simultaneously to reduce delays in specialized support.</span>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="mt-1 inline-flex size-6 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">2</span>
-                                    <span class="leading-relaxed">On scene, CPMs manage precipitated withdrawal, provide harm reduction supplies, and invite preferred outreach partners to meet the patient where they are.</span>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="mt-1 inline-flex size-6 items-center justify-center rounded-full bg-brand-500/20 text-brand-100">3</span>
-                                    <span class="leading-relaxed">Within 24 hours, staff confirm referrals, document touchpoints, and coordinate follow-up so the patient is not navigating recovery alone.</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="space-y-6">
-                            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-[15px] text-slate-100">
-                                <p class="text-xs uppercase tracking-[0.28em] text-brand-200">What stays with us</p>
-                                <p class="mt-3 leading-relaxed">
-                                    Zero repeat overdoses among the PORT referrals tracked in early 2025. Families tell us the difference is not a single medication – it is how long we stay and who we bring with us.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="col-span-12">
-                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
-                    <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Partners</p>
-                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">People and organizations in our circle</h2>
-                    </div>
-                    <div class="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
-                        <p class="text-[15px] leading-relaxed text-slate-200">
-                            Our success is built on constant communication and shared response protocols. From monthly overdose review boards to training exchanges, these partners help us remove barriers quickly and respectfully.
+                    <div class="space-y-8 text-lg leading-relaxed text-slate-300">
+                        <p>
+                            Community paramedicine isn't about a single intervention or a checklist. It's about showing up—sometimes in the middle of a crisis, sometimes in the quiet moments of chronic illness—and staying present until we've connected someone to the care they actually need. Port Angeles residents face complex barriers: lack of insurance, transportation challenges, past trauma with the healthcare system, and the isolation that comes from living paycheck to paycheck in a small coastal town. Our job is to bridge those gaps.
                         </p>
-                        <div class="mt-6 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-brand-200">
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">REdisCOVERY</span>
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Reflections Counseling</span>
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Peninsula Behavioral Health REAL Team</span>
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Jamestown Healing Clinic</span>
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Olympic Medical Center</span>
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">North Olympic Healthcare Network</span>
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Clallam County Health & Human Services</span>
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">Harm Reduction Center</span>
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">PAPD Community Resource Officers</span>
-                            <span class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-brand-100">University of Washington / CROA</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
-            <section class="col-span-12">
-                <div class="space-y-8 px-6 sm:px-10 lg:px-16">
-                    <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Contact</p>
-                        <h2 class="mt-2 text-3xl font-semibold text-white sm:text-4xl">Stay connected with our team</h2>
-                    </div>
-                    <div class="grid gap-6 lg:grid-cols-3 items-start">
-                        <div class="col-span-2 space-y-4 text-base leading-relaxed text-slate-200">
-                            <div class="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/50 to-slate-800/60 p-8 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
-                                <p class="text-xs uppercase tracking-[0.28em] text-brand-200">Community Paramedicine Office</p>
-                                <p class="mt-4">Port Angeles Fire Department</p>
-                                <p>102 E 5th St, Port Angeles, WA 98362</p>
-                                <p class="mt-3 text-slate-100">Office hours: Mon–Fri, 9am–5pm</p>
-                                <p class="mt-3">(360) 417-4668</p>
-                                <p><a href="mailto:pafdcpm@cityofpa.us" class="text-brand-200 transition hover:text-brand-100">pafdcpm@cityofpa.us</a></p>
-                                <p class="mt-4 text-slate-200/90">Established in 2019, our team operates from the Port Angeles Fire Department headquarters and welcomes partnership requests, media inquiries, or direct referrals from families and providers. When you reach out, we coordinate the right responder so follow-up begins immediately.</p>
+                        <div class="my-12 border-l-4 border-rose-500/50 pl-6">
+                            <h3 class="mb-4 text-2xl font-bold text-white">Operation Shielding Hope: Post-Overdose Response</h3>
+                            <p class="mb-4">
+                                When someone overdoses in Port Angeles, the clock starts ticking. Not just for their immediate survival—though that's critical—but for the window of receptivity that opens in the aftermath of a near-death experience. That's when our PORT (Post-Overdose Response Team) deploys alongside EMS. We arrive with medication-assisted treatment, harm reduction supplies, and most importantly, time. We don't rush. We sit with people in their worst moments, help manage withdrawal symptoms right there on scene, and start building trust before the sirens stop echoing.
+                            </p>
+                            <p>
+                                The results speak to the power of that human connection: among patients who engage with our PORT team, repeat overdoses in the following weeks drop dramatically. It's not magic—it's consistency, empathy, and refusing to let anyone fall through the cracks between emergency response and long-term recovery. Every person we reach is someone's parent, child, or friend. We treat them that way.
+                            </p>
+                            <div class="mt-6 flex flex-wrap gap-3">
+                                {% url 'cases:opshield' as opsh_url %}
+                                <a href="{{ opsh_url }}" hx-get="{{ opsh_url }}" hx-target="#dashboard-main" hx-select="#dashboard-main" hx-swap="outerHTML" hx-push-url="true" @click="selected = 'Program Briefings'; page = 'operationShieldingHope'" class="inline-flex items-center gap-2 rounded-lg bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">
+                                    Learn about Operation Shielding Hope
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+                                </a>
+                                {% url 'dashboard:odreferrals' as od_dash_url %}
+                                <a href="{{ od_dash_url }}" hx-get="{{ od_dash_url }}" hx-target="#dashboard-main" hx-select="#dashboard-main" hx-swap="outerHTML" hx-push-url="true" @click="selected = 'Program Overviews'; page = 'od-referrals-overview'" class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-rose-500/20 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-rose-500/30">
+                                    View overdose response data
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                </a>
                             </div>
                         </div>
-                        <div class="rounded-3xl border border-white/10 bg-slate-900/70 p-8 text-base leading-relaxed text-slate-200 shadow-[0_24px_50px_rgba(8,47,73,0.35)]">
-                            <p class="text-xs uppercase tracking-[0.28em] text-brand-200">Visit or share directions</p>
-                            <p class="mt-3 text-slate-100">102 E 5th St<br>Port Angeles, WA 98362</p>
-                            <a href="https://www.google.com/maps/search/102+E+5th+St+Port+Angeles+WA+98362" target="_blank" class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-200 transition hover:text-brand-100">Open in Google Maps
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M5 12h14" />
-                                    <path d="m12 5 7 7-7 7" />
-                                </svg>
+
+                        <div class="my-12 border-l-4 border-emerald-500/50 pl-6">
+                            <h3 class="mb-4 text-2xl font-bold text-white">Clinical Care & Navigation: Meeting Chronic Needs</h3>
+                            <p class="mb-4">
+                                Not every crisis arrives with sirens. Many of the residents we serve are managing diabetes, heart disease, or COPD in homes without reliable transportation or the ability to take time off work for medical appointments. They're dealing with medication lists they don't understand, wounds that won't heal, and the grinding stress of trying to stay healthy while barely staying housed. That's where our home visit program creates space for healing.
+                            </p>
+                            <p class="mb-4">
+                                We show up at their door with a blood pressure cuff, wound care supplies, and the expertise to catch problems before they become emergency room visits. We reconcile medications, teach diabetes management, coordinate telehealth appointments with specialists, and ensure that when someone does need to see a doctor, they arrive with context—not just a symptom list scrawled on the back of an envelope. Most importantly, we make warm handoffs. We don't just refer people to services; we walk them through the door, introduce them to the clinician, and follow up to make sure the connection holds.
+                            </p>
+                            <p>
+                                This work is about dignity. About treating a 68-year-old veteran with congestive heart failure like a whole person, not a set of billable codes. About recognizing that healthcare doesn't happen in sterile exam rooms—it happens in living rooms, on front porches, and in conversations where someone finally feels heard.
+                            </p>
+                            <div class="mt-6 flex flex-wrap gap-3">
+                                {% url 'dashboard:patients' as patients_url %}
+                                <a href="{{ patients_url }}" hx-get="{{ patients_url }}" hx-target="#dashboard-main" hx-select="#dashboard-main" hx-swap="outerHTML" hx-push-url="true" @click="selected = 'Program Overviews'; page = 'patientsOverview'" class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-sky-500/20 hover:bg-sky-500/30 text-white px-4 py-2.5 text-sm font-semibold transition">
+                                    Patient profile distributions
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                </a>
+                                {% url 'dashboard:referrals' as referrals_url %}
+                                <a href="{{ referrals_url }}" hx-get="{{ referrals_url }}" hx-target="#dashboard-main" hx-select="#dashboard-main" hx-swap="outerHTML" hx-push-url="true" @click="selected = 'Program Overviews'; page = 'referralsOverview'" class="inline-flex items-center gap-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 px-4 py-2.5 text-sm font-semibold text-white transition">
+                                    Referral profile distributions
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                </a>
+                            </div>
+                        </div>
+
+                        <p>
+                            What unites these efforts—whether we're responding to an overdose or managing chronic disease—is the recognition that healthcare is fundamentally relational. You can't build trust in a 15-minute appointment. You can't address trauma-informed care from behind a desk. You have to meet people in their space, on their terms, and be willing to show up again and again until they believe you're not going anywhere. That's community paramedicine. That's the work.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# Partners Network - Ecosystem Showcase #}
+        <section class="py-24">
+            <div class="w-full">
+                <div class="mb-16 text-center">
+                    <div class="mb-4 inline-block rounded-full bg-indigo-500/10 px-4 py-1.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Collaborative Ecosystem</span>
+                    </div>
+                    <h2 class="mb-6 text-4xl font-bold text-white sm:text-5xl">Our Partners</h2>
+                </div>
+
+                <style>
+                    {% for category in ecosystem_partners.categories %}
+                    .tooltip-bg-{{ category.slug }} {
+                        background: linear-gradient(to right, {{ category.color }}25, transparent);
+                    }
+                    .tooltip-text-{{ category.slug }} {
+                        color: {{ category.color }};
+                    }
+                    {% endfor %}
+                </style>
+
+                <div class="flex flex-wrap justify-center gap-3">
+                    {% for category in ecosystem_partners.categories %}
+                        {% for agency in category.agencies %}
+                            <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                                <div class="cursor-help rounded-full border border-white/10 bg-slate-800/50 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white hover:border-white/20">
+                                    {{ agency.name }}
+                                </div>
+
+                                {# Tooltip #}
+                                <div x-show="open"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 translate-y-2"
+                                     x-transition:enter-end="opacity-100 translate-y-0"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 translate-y-0"
+                                     x-transition:leave-end="opacity-0 translate-y-2"
+                                     class="absolute bottom-full left-1/2 z-20 pb-3 w-72 -translate-x-1/2"
+                                     x-cloak>
+
+                                    <div class="overflow-hidden rounded-xl border border-white/10 bg-slate-900 shadow-2xl ring-1 ring-black/50">
+                                        {# Header with category color #}
+                                        <div class="border-b border-white/5 px-4 py-3 tooltip-bg-{{ category.slug }}">
+                                            <p class="text-xs font-bold uppercase tracking-wider tooltip-text-{{ category.slug }}">{{ category.name }}</p>
+                                            <p class="mt-0.5 text-sm font-semibold text-white">{{ agency.name }}</p>
+                                        </div>
+
+                                        {# Details Body #}
+                                        <div class="space-y-3 p-4 text-left text-sm">
+                                            {% if agency.details.services %}
+                                                <div>
+                                                    <p class="text-xs font-medium text-slate-500">Services</p>
+                                                    <p class="text-slate-300">{{ agency.details.services }}</p>
+                                                </div>
+                                            {% endif %}
+
+                                            {% if agency.details.hours %}
+                                                <div>
+                                                    <p class="text-xs font-medium text-slate-500">Hours</p>
+                                                    <p class="text-slate-300">{{ agency.details.hours }}</p>
+                                                </div>
+                                            {% endif %}
+
+                                            {% if agency.details.phone or agency.details.email or agency.details.website %}
+                                                <div class="pt-2 border-t border-white/5">
+                                                    {% if agency.details.phone %}
+                                                        <div class="flex items-center gap-2 text-slate-300">
+                                                            <svg class="h-3.5 w-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                            {% if "Emergency" in agency.details.phone %}
+                                                                <span>{{ agency.details.phone }}</span>
+                                                            {% else %}
+                                                                <a href="tel:{{ agency.details.phone }}" class="hover:text-white hover:underline transition-colors">{{ agency.details.phone }}</a>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if agency.details.email %}
+                                                        <div class="mt-1 flex items-center gap-2 text-slate-300">
+                                                            <svg class="h-3.5 w-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                            <a href="mailto:{{ agency.details.email }}" class="truncate hover:text-white hover:underline transition-colors">{{ agency.details.email }}</a>
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if agency.details.website %}
+                                                        <div class="mt-2">
+                                                            <a href="{{ agency.details.website }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs font-medium text-sky-400 hover:text-sky-300">
+                                                                Visit Website
+                                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                                            </a>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {# Arrow #}
+                                    <div class="absolute bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b border-r border-white/10 bg-slate-900"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        {# Evidence & Impact - Narrative #}
+        <section class="py-24">
+            <div class="w-full">
+                <div class="mb-16 text-center">
+                    <div class="mb-4 inline-block rounded-full bg-emerald-500/10 px-4 py-1.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Evidence & Impact</span>
+                    </div>
+                    <h2 class="mb-6 text-4xl font-bold text-white sm:text-5xl">Why this works</h2>
+                </div>
+
+                <div class="prose prose-lg prose-invert max-w-none">
+                    <div class="space-y-6 text-lg leading-relaxed text-slate-300">
+                        <p>
+                            The evidence for community paramedicine isn't found in randomized controlled trials—at least not yet. It's found in the faces of people who didn't end up in the emergency room for the third time this month. It's in the phone calls from case managers who say, "I don't know what you did, but she's actually taking her meds now." It's in the data showing reduced 9-1-1 call volumes, fewer hospital readmissions, and overdose survivors who make it to their next birthday.
+                        </p>
+                        <p>
+                            Our case studies document the tangible savings: emergency department diversions that save the system hundreds of thousands of dollars, chronic disease management that prevents costly hospitalizations, and harm reduction interventions that keep people alive long enough to choose recovery. But the real impact isn't measured in dollars—it's measured in relationships sustained, crises averted, and lives stabilized one visit at a time.
+                        </p>
+                        <p>
+                            Since launching in 2019, we've built partnerships across healthcare, behavioral health, law enforcement, and social services. Every referral we make connects to someone we know personally. Every warm handoff means a phone call where we vouch for a patient and ensure they're treated with respect. That's the infrastructure that makes community paramedicine work: trust, not technology.
+                        </p>
+                    </div>
+
+                    <div class="mt-12 grid gap-6 sm:grid-cols-2">
+                        <div class="group rounded-2xl border border-white/10 bg-gradient-to-br from-cyan-500/10 to-slate-900/40 p-10 shadow-xl backdrop-blur-sm transition hover:border-cyan-500/40 hover:shadow-2xl hover:scale-[1.02]">
+                            <div class="mb-6 flex items-center gap-3">
+                                <div class="rounded-xl bg-cyan-500/20 p-3">
+                                    <svg class="h-7 w-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-2xl font-bold text-white">Patient Stories</h3>
+                            </div>
+                            <p class="mb-8 text-base leading-relaxed text-slate-300">Real-world applications documenting cost savings, program outcomes, and the human stories behind the numbers.</p>
+                            {% url 'blog:list' as stories_url %}
+                            <a href="{{ stories_url }}" hx-get="{{ stories_url }}" hx-target="#dashboard-main" hx-select="#dashboard-main" hx-swap="outerHTML" hx-push-url="true" @click="selected = 'Program Briefings'; page = 'patientStories'" class="inline-flex items-center gap-2 rounded-lg bg-cyan-500/20 px-5 py-3 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/30 hover:text-cyan-200">
+                                Explore case studies
+                                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                            </a>
+                        </div>
+
+                        <div class="group rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500/10 to-slate-900/40 p-10 shadow-xl backdrop-blur-sm transition hover:border-violet-500/40 hover:shadow-2xl hover:scale-[1.02]">
+                            <div class="mb-6 flex items-center gap-3">
+                                <div class="rounded-xl bg-violet-500/20 p-3">
+                                    <svg class="h-7 w-7 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-2xl font-bold text-white">Program Timeline</h3>
+                            </div>
+                            <p class="mb-8 text-base leading-relaxed text-slate-300">Follow our evolution from initial concept through funding, implementation, and ongoing program development.</p>
+                            {% url 'timeline:index' as timeline_url %}
+                            <a href="{{ timeline_url }}" hx-get="{{ timeline_url }}" hx-target="#dashboard-main" hx-select="#dashboard-main" hx-swap="outerHTML" hx-push-url="true" @click="selected = 'Program Briefings'; page = 'cpmTimeline'" class="inline-flex items-center gap-2 rounded-lg bg-violet-500/20 px-5 py-3 text-sm font-semibold text-violet-300 transition hover:bg-violet-500/30 hover:text-violet-200">
+                                View timeline
+                                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                             </a>
                         </div>
                     </div>
                 </div>
-            </section>
-        </div>
+            </div>
+        </section>
+
+        {# Contact Section - Integrated Card Layout #}
+        <section class="relative isolate py-24 sm:py-32">
+            <div class="w-full">
+                <div class="mx-auto max-w-2xl lg:max-w-none">
+                    <div class="overflow-hidden rounded-3xl bg-slate-800/50 ring-1 ring-white/10 shadow-md lg:grid lg:grid-cols-2">
+
+                        {# Left Column: Content & Form #}
+                        <div class="px-6 py-12 sm:px-12 lg:px-16 lg:py-16">
+                            <div class="mb-6 inline-block rounded-full bg-sky-500/10 px-4 py-1.5">
+                                <span class="text-xs font-bold uppercase tracking-wider text-sky-400">Contact Us</span>
+                            </div>
+                            <h2 class="mb-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">Get in touch</h2>
+                            <p class="mb-10 text-base leading-relaxed text-slate-300">Have questions about the program? Want to explore data or partnership opportunities? We're here to connect.</p>
+
+                            <form action="#" method="post" class="mt-8">
+                                <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                                    {# First Name #}
+                                    <div>
+                                        <label for="first-name" class="block text-xs font-semibold leading-6 text-white">First name</label>
+                                        <div class="mt-1.5">
+                                            <input id="first-name" type="text" name="first-name" autocomplete="given-name"
+                                                   class="block w-full rounded-md border-0 bg-white/5 px-3 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-sky-500" />
+                                        </div>
+                                    </div>
+
+                                    {# Last Name #}
+                                    <div>
+                                        <label for="last-name" class="block text-xs font-semibold leading-6 text-white">Last name</label>
+                                        <div class="mt-1.5">
+                                            <input id="last-name" type="text" name="last-name" autocomplete="family-name"
+                                                   class="block w-full rounded-md border-0 bg-white/5 px-3 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-sky-500" />
+                                        </div>
+                                    </div>
+
+                                    {# Organization #}
+                                    <div class="sm:col-span-2">
+                                        <label for="organization" class="block text-xs font-semibold leading-6 text-white">Organization</label>
+                                        <div class="mt-1.5">
+                                            <input id="organization" type="text" name="organization" autocomplete="organization"
+                                                   class="block w-full rounded-md border-0 bg-white/5 px-3 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-sky-500" />
+                                        </div>
+                                    </div>
+
+                                    {# Email #}
+                                    <div class="sm:col-span-2">
+                                        <label for="email" class="block text-xs font-semibold leading-6 text-white">Email</label>
+                                        <div class="mt-1.5">
+                                            <input id="email" type="email" name="email" autocomplete="email"
+                                                   class="block w-full rounded-md border-0 bg-white/5 px-3 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-sky-500" />
+                                        </div>
+                                    </div>
+
+                                    {# Phone Number #}
+                                    <div class="sm:col-span-2">
+                                        <label for="phone-number" class="block text-xs font-semibold leading-6 text-white">Phone number</label>
+                                        <div class="mt-1.5">
+                                            <input id="phone-number" type="tel" name="phone-number" autocomplete="tel" placeholder="(360) 123-4567"
+                                                   class="block w-full rounded-md border-0 bg-white/5 px-3 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-sky-500" />
+                                        </div>
+                                    </div>
+
+                                    {# Message #}
+                                    <div class="sm:col-span-2">
+                                        <label for="message" class="block text-xs font-semibold leading-6 text-white">Message</label>
+                                        <div class="mt-1.5">
+                                            <textarea id="message" name="message" rows="3"
+                                                      class="block w-full rounded-md border-0 bg-white/5 px-3 py-2 text-sm text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-sky-500"></textarea>
+                                        </div>
+                                    </div>
+
+                                    {# Privacy Notice #}
+                                    <div class="sm:col-span-2">
+                                        <p class="text-xs leading-5 text-slate-400">
+                                            By submitting this form, you agree that we may contact you regarding your inquiry.
+                                            This form is not to be used to transmit protected or identifiable patient information.
+                                            We respect your privacy and will never share your information with third parties.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6">
+                                    <button type="submit"
+                                            class="block w-full rounded-md bg-sky-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-sky-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 transition">
+                                        Send message
+                                    </button>
+                                </div>
+                            </form>
+
+                            {# Contact Information #}
+                            <div class="mt-10 border-t border-white/10 pt-8">
+                                <h3 class="text-sm font-semibold text-white mb-4">Or reach us directly</h3>
+                                <div class="space-y-2 text-sm text-slate-400">
+                                    <div class="flex gap-2">
+                                        <span class="font-semibold text-slate-300">Phone:</span>
+                                        <a href="tel:+13604174668" class="text-sky-400 hover:text-sky-300 transition">(360) 417-4668</a>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="font-semibold text-slate-300">Email:</span>
+                                        <a href="mailto:pafdcpm@cityofpa.us" class="text-sky-400 hover:text-sky-300 transition">pafdcpm@cityofpa.us</a>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="font-semibold text-slate-300">Office Hours:</span>
+                                        <span>Monday–Friday, 8:00am – 6:00pm</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Right Column: Image #}
+                        <div class="relative h-full min-h-[300px] w-full lg:h-auto lg:[clip-path:polygon(10%_0,100%_0,100%_100%,0_100%)]">
+                            <img src="{% static 'media/brian_kneeling_dark.png' %}" alt="Port Angeles Fire Department Community Paramedicine Team" width="800" height="600" class="absolute inset-0 h-full w-full object-cover lg:rounded-r-3xl">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/20 to-transparent lg:bg-gradient-to-l"></div>
+
+                            {# Optional: Overlay Text on Image #}
+                            <div class="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
+                                <blockquote class="border-l-2 border-sky-500 pl-4">
+                                    <p class="text-lg font-medium italic text-white">"We don't just refer people to services; we walk them through the door."</p>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 {% endblock content %}

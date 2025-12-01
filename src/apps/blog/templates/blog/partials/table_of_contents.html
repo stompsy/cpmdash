@@ -1,74 +1,95 @@
-<aside class="toc-wrapper hidden lg:block lg:w-72 xl:w-80">
-  <div class="sticky top-28 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur-lg dark:border-white/10">
-    <div class="flex items-center justify-between">
-      <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-200">On this page</h2>
-      <button type="button" class="text-xs font-medium text-brand-200/70 hover:text-brand-200 transition" data-toc-collapse aria-expanded="true">
-        Collapse
-      </button>
-    </div>
-    <nav id="generated-toc" class="mt-5 space-y-2 text-sm text-gray-300" aria-label="Table of contents"></nav>
-  </div>
-</aside>
+<div class="hidden lg:block">
+  <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">On this page</h2>
+  <nav id="generated-toc" class="relative border-l border-white/10" aria-label="Table of contents"></nav>
+</div>
+
 <script>
   (function () {
     if (window.__blogTocInitialized) return;
     window.__blogTocInitialized = true;
+
     const article = document.querySelector("[data-article-root]");
     const toc = document.getElementById("generated-toc");
+
     if (!article || !toc) return;
+
     const headings = Array.from(article.querySelectorAll("h2, h3"));
-    const collapseBtn = document.querySelector("[data-toc-collapse]");
+
     if (!headings.length) {
-      toc.innerHTML = '<p class="text-xs text-gray-500">No sections available.</p>';
-      if (collapseBtn) {
-        collapseBtn.classList.add("hidden");
-      }
+      toc.innerHTML = '<p class="pl-4 text-xs text-slate-500">No sections available.</p>';
       return;
     }
+
     const slugify = (text) =>
       text
         .toLowerCase()
         .trim()
-        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/[^a-z0-9\s-]/g, "")
         .replace(/\s+/g, "-");
-    const fragment = document.createDocumentFragment();
+
     headings.forEach((heading) => {
       if (!heading.id) {
         heading.id = slugify(heading.textContent || "section");
       }
-      heading.classList.add("scroll-mt-28");
+      heading.classList.add("scroll-mt-32"); // Add scroll margin for sticky header
+
       const link = document.createElement("a");
       link.href = `#${heading.id}`;
       link.textContent = heading.textContent || heading.id;
-      link.className = `group flex items-start gap-2 rounded-lg px-3 py-2 transition ${heading.tagName === "H3" ? "pl-6 text-[13px]" : "text-sm"}`;
-      const bullet = document.createElement("span");
-      bullet.setAttribute("aria-hidden", "true");
-      bullet.className = "mt-1 h-1.5 w-1.5 rounded-full bg-brand-400/50 group-hover:bg-brand-300";
+
+      // Base classes for all links
+      let className = "block border-l border-transparent -ml-px py-1.5 text-sm transition-colors hover:border-slate-400 hover:text-slate-200";
+
+      // Indentation for H3
       if (heading.tagName === "H3") {
-        bullet.classList.add("opacity-60");
+        className += " pl-8 text-slate-500";
+      } else {
+        className += " pl-4 text-slate-400";
       }
-      link.prepend(bullet);
-      fragment.appendChild(link);
+
+      link.className = className;
+      link.dataset.targetId = heading.id;
+
+      toc.appendChild(link);
     });
-    toc.appendChild(fragment);
-    toc.addEventListener("click", (event) => {
-      const target = event.target.closest("a");
-      if (!target) return;
-      event.preventDefault();
-      const el = document.getElementById(target.hash.slice(1));
-      if (!el) {
-        window.location.hash = target.hash;
-        return;
-      }
-      window.history.replaceState(null, "", target.hash);
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    if (collapseBtn) {
-      collapseBtn.setAttribute("aria-expanded", "true");
-      collapseBtn.addEventListener("click", () => {
-        const hidden = toc.classList.toggle("hidden");
-        collapseBtn.setAttribute("aria-expanded", hidden ? "false" : "true");
-        collapseBtn.textContent = hidden ? "Expand" : "Collapse";
+
+    // Scroll Spy Implementation
+    const observerOptions = {
+      root: null,
+      rootMargin: "-100px 0px -66%",
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const activeId = entry.target.id;
+          updateActiveLink(activeId);
+        }
+      });
+    }, observerOptions);
+
+    headings.forEach((heading) => observer.observe(heading));
+
+    function updateActiveLink(id) {
+      const links = toc.querySelectorAll("a");
+      links.forEach((link) => {
+        const isTarget = link.dataset.targetId === id;
+
+        if (isTarget) {
+          link.classList.remove("border-transparent", "text-slate-400", "text-slate-500");
+          link.classList.add("border-brand-400", "text-brand-300", "font-medium");
+        } else {
+          link.classList.add("border-transparent");
+          link.classList.remove("border-brand-400", "text-brand-300", "font-medium");
+
+          // Restore original text color based on hierarchy
+          if (link.classList.contains("pl-8")) { // H3
+            link.classList.add("text-slate-500");
+          } else { // H2
+            link.classList.add("text-slate-400");
+          }
+        }
       });
     }
   })();

@@ -103,7 +103,7 @@ def build_chart_repeats_scatter(theme):
     df["days_since_last_od"] = df.groupby("merged_label", observed=False)["od_date"].diff().dt.days
     df["days_since_last_od"] = df["days_since_last_od"].fillna("First OD")
 
-    # Assign darker color palette
+    # Assign darker color palette and preserve explicit category order for y-axis
     color_palette = px.colors.qualitative.Pastel
     unique_labels = df["merged_label"].cat.categories
     color_map = {
@@ -180,11 +180,11 @@ def build_chart_repeats_scatter(theme):
                 mode="markers+lines",
                 marker=dict(
                     color=marker_colors,
-                    size=10,
+                    size=9,
                     symbol="circle",
-                    line=dict(color=marker_line_colors, width=1.5),
+                    line=dict(color=marker_line_colors, width=1.2),
                 ),
-                line=dict(color=color_map[label], width=1),
+                line=dict(color=color_map[label], width=0.8),
                 name=label,
                 hoverlabel=dict(namelength=-1),
                 hovertemplate="%{text}<extra></extra>",
@@ -213,6 +213,8 @@ def build_chart_repeats_scatter(theme):
         showgrid=True,  # Show horizontal grid lines
         gridcolor="rgba(128,128,128,0.25)",  # Darker gray grid lines matching Patients page
         ticklabelstandoff=10,  # ~1/8 inch gap between y-axis labels and chart
+        categoryorder="array",  # Respect our explicit ordering
+        categoryarray=list(unique_labels),  # Ensure every patient row is rendered
     )
 
     return plot(fig, output_type="div", config=fig._config)

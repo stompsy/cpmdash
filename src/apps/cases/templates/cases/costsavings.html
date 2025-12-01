@@ -8,217 +8,173 @@
     {% include "partials/page_header.html" with eyebrow="System case studies" title="Cost savings analysis" description="Quantify avoided 911 calls, ambulance transports, and emergency visits to demonstrate how community paramedic care bends the healthcare cost curve." image_src=cost_savings_header_image image_alt="Community paramedics reviewing financial impact charts" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
 {% endblock page_header %}
 {% block content %}
-<div class="col-span-12 mx-auto w-full max-w-7xl">
+<div class="col-span-12 mx-auto w-full">
     <span data-page-name="costSavings" class="hidden" hidden></span>
+    <div class="w-full py-20 space-y-40">
 
     {# Introduction Section #}
-    <section class="mt-12 mb-16">
-        <div class="mx-auto max-w-4xl">
-            <div class="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-8 shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
-                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-                    Measuring Community Impact Through Cost Avoidance
-                </h2>
-                <div class="mt-6 space-y-4 text-base leading-relaxed text-gray-700 dark:text-gray-300">
-                    <p>
-                        Our community paramedic program reduces emergency system strain by connecting high-utilizers with appropriate care pathways. By comparing emergency service use before and after enrollment, we quantify real-world impact on 911 calls, ambulance transports, and ED visits.
-                    </p>
-                    <p>
-                        The metrics below represent <strong class="font-semibold text-gray-900 dark:text-white">observed reductions in emergency service utilization</strong> and their associated cost savings using conservative unit rates. These figures demonstrate how proactive, community-based care delivery generates measurable value for both patients and the healthcare system.
-                    </p>
+    <section class="mx-auto max-w-7xl">
+        <p class="text-base leading-7 text-gray-700 dark:text-slate-300 sm:text-lg">
+            Our community paramedic program reduces emergency system strain by connecting <span class="font-semibold text-gray-900 dark:text-white">high-utilizers</span> with appropriate care pathways. By comparing emergency service use before and after enrollment, we quantify real-world impact on <span class="font-semibold text-gray-900 dark:text-white">911 calls</span>, <span class="font-semibold text-gray-900 dark:text-white">ambulance transports</span>, and <span class="font-semibold text-gray-900 dark:text-white">ED visits</span>.
+        </p>
+
+        <dl class="mt-10 space-y-6">
+            <div class="relative pl-8">
+                <dt class="inline font-semibold text-gray-900 dark:text-white">
+                    <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
+                    Observed Reductions.
+                </dt>
+                <dd class="inline text-gray-600 dark:text-slate-400"> The metrics below represent observed reductions in emergency service utilization and their associated cost savings using conservative unit rates.</dd>
+            </div>
+
+            <div class="relative pl-8">
+                <dt class="inline font-semibold text-gray-900 dark:text-white">
+                    <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
+                    Measurable Value.
+                </dt>
+                <dd class="inline text-gray-600 dark:text-slate-400"> These figures demonstrate how proactive, community-based care delivery generates measurable value for both patients and the healthcare system.</dd>
+            </div>
+        </dl>
+    </section>
+
+    {# Narrative Data Story #}
+    <section class="relative">
+        <div class="absolute left-8 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-800 md:left-1/2 md:-ml-px"></div>
+
+        <div class="space-y-32">
+            {# 1. 911 Calls #}
+            <div class="relative grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
+                <div class="pl-16 md:pl-0 md:text-right md:pr-12">
+                    <div class="sticky top-24">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">It starts with the call</h3>
+                        <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                            High utilizers often rely on 911 as their primary access point for healthcare. By providing a direct line to a community paramedic, we intercept these requests before they become emergency dispatches.
+                        </p>
+                        <div class="mt-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 md:justify-end">
+                            <span class="h-px w-8 bg-slate-300"></span>
+                            <span>Comparison of 6-month pre/post enrollment volume</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative pl-16 md:pl-12">
+                    <div class="absolute left-0 top-2 md:-top-4 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-slate-100 dark:border-slate-900 dark:bg-slate-800 md:left-0 md:-ml-14">
+                        <span class="text-xl font-bold text-slate-500">1</span>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-5xl font-bold tracking-tight text-gray-900 dark:text-white">{{ cost_metrics.calls_prevented }}</span>
+                            <span class="text-xl font-medium text-gray-500">calls prevented</span>
+                        </div>
+                        <div class="mt-6 border-t border-slate-100 pt-6 dark:border-slate-700">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-sm font-medium text-gray-500 uppercase tracking-wider">Operational Savings</span>
+                                <span class="text-2xl font-bold text-green-600 dark:text-green-400">${{ cost_metrics.savings_breakdown.911_non_transport|intcomma }}</span>
+                            </div>
+                            <div class="mt-4 rounded-lg bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-900/50 dark:text-slate-400">
+                                <p class="mb-2">
+                                    <span class="font-semibold text-slate-900 dark:text-slate-200">Estimation Rationale:</span>
+                                    Based on historical data where 42% of patients utilize 911 services, with 71% demonstrating reduced usage post-enrollment.
+                                </p>
+                                <p class="text-xs text-slate-500">Savings estimated at ~$1,900 per non-transport response.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# 2. Transports #}
+            <div class="relative grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
+                <div class="order-2 md:order-1 relative pl-16 md:pl-0 md:text-right md:pr-12">
+                     <div class="absolute left-0 top-2 md:-top-4 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-slate-100 dark:border-slate-900 dark:bg-slate-800 md:left-auto md:right-0 md:-mr-14">
+                        <span class="text-xl font-bold text-slate-500">2</span>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                        <div class="flex items-baseline gap-2 md:justify-end">
+                            <span class="text-5xl font-bold tracking-tight text-gray-900 dark:text-white">{{ cost_metrics.transports_averted }}</span>
+                            <span class="text-xl font-medium text-gray-500">transports averted</span>
+                        </div>
+                        <div class="mt-6 border-t border-slate-100 pt-6 dark:border-slate-700">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-sm font-medium text-gray-500 uppercase tracking-wider">Transport Savings</span>
+                                <span class="text-2xl font-bold text-green-600 dark:text-green-400">${{ cost_metrics.savings_breakdown.transports|intcomma }}</span>
+                            </div>
+                            <div class="mt-4 rounded-lg bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-900/50 dark:text-slate-400 md:text-right">
+                                <p class="mb-2">
+                                    <span class="font-semibold text-slate-900 dark:text-slate-200">Estimation Rationale:</span>
+                                    Calculated from the 56% of 911 calls that typically result in transport to an emergency department.
+                                </p>
+                                <p class="text-xs text-slate-500">Savings estimated at ~$3,800 per ambulance transport.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 md:order-2 pl-16 md:pl-12">
+                    <div class="sticky top-24">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Reducing the ride</h3>
+                        <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                            When 911 is called, transport is often the default. We provide treat-in-place options and alternative destinations, keeping ambulances available for life-threatening emergencies.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {# 3. ED Visits #}
+            <div class="relative grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
+                <div class="pl-16 md:pl-0 md:text-right md:pr-12">
+                    <div class="sticky top-24">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Keeping beds open</h3>
+                        <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                            The ER is for emergencies, not chronic care management. By managing conditions like diabetes and COPD at home, we prevent the acute exacerbations that lead to hospital visits.
+                        </p>
+                    </div>
+                </div>
+                <div class="relative pl-16 md:pl-12">
+                    <div class="absolute left-0 top-2 md:-top-4 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-slate-100 dark:border-slate-900 dark:bg-slate-800 md:left-0 md:-ml-14">
+                        <span class="text-xl font-bold text-slate-500">3</span>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-5xl font-bold tracking-tight text-gray-900 dark:text-white">{{ cost_metrics.ed_visits_avoided }}</span>
+                            <span class="text-xl font-medium text-gray-500">ED visits avoided</span>
+                        </div>
+                        <div class="mt-6 border-t border-slate-100 pt-6 dark:border-slate-700">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-sm font-medium text-gray-500 uppercase tracking-wider">Hospital Savings</span>
+                                <span class="text-2xl font-bold text-green-600 dark:text-green-400">${{ cost_metrics.savings_breakdown.ed_visits|intcomma }}</span>
+                            </div>
+                            <div class="mt-4 rounded-lg bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-900/50 dark:text-slate-400">
+                                <p class="mb-2">
+                                    <span class="font-semibold text-slate-900 dark:text-slate-200">Estimation Rationale:</span>
+                                    Based on 51% patient ED utilization rate, with 69% showing reduced visits after engagement.
+                                </p>
+                                <p class="text-xs text-slate-500">Savings estimated at ~$1,146 per ED encounter.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    {# Key Performance Indicators Section #}
-    <section class="mb-16">
-        <div class="relative mb-12">
-            <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                <div class="w-full border-t border-slate-300/70 dark:border-slate-700/70"></div>
+    {# Total Impact #}
+    <section class="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-24 shadow-2xl sm:px-12">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-800/50 via-slate-900 to-slate-900"></div>
+        <div class="relative mx-auto max-w-2xl text-center">
+            <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Total System Impact</h2>
+            <p class="mt-4 text-lg text-slate-400">
+                By intervening upstream, we've generated significant cost avoidance across the local healthcare ecosystem.
+            </p>
+            <div class="mt-10 flex items-center justify-center">
+                <span class="text-6xl font-bold tracking-tight text-green-400 sm:text-7xl">${{ cost_metrics.total_savings|intcomma }}</span>
             </div>
-            <div class="relative flex justify-start">
-                <div class="bg-white pr-8 dark:bg-gray-900">
-                    <div class="flex items-center gap-4">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/30">
-                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Key Performance Indicators</h2>
-                            <p class="text-sm text-gray-600 dark:text-slate-400">Total avoided costs and utilization reductions</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {# KPI Cards Grid #}
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-12">
-            {# 911 Calls Prevented Card #}
-            <article class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80">
-                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 dark:border-slate-700/50 dark:from-slate-800/30">
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 ring-4 ring-red-50 dark:bg-red-500/20 dark:ring-red-900/30">
-                                <svg class="h-5 w-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-red-600/80 dark:text-red-400/80">Emergency Calls</p>
-                                <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">911 Calls Prevented</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="mb-4">
-                        <p class="text-5xl font-bold tabular-nums text-gray-900 dark:text-white">{{ cost_metrics.calls_prevented }}</p>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">calls avoided through intervention</p>
-                    </div>
-                    <div class="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">Cost Avoided</p>
-                        <p class="mt-1 text-2xl font-bold tabular-nums text-green-900 dark:text-green-300">${{ cost_metrics.savings_breakdown.911_non_transport|intcomma }}</p>
-                    </div>
-                    <p class="mt-4 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                        Based on observed pre/post reductions. Unit rate ≈ $1,900 per non-transport call response.
-                    </p>
-                </div>
-            </article>
-
-            {# Ambulance Transports Averted Card #}
-            <article class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80">
-                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 dark:border-slate-700/50 dark:from-slate-800/30">
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-100 ring-4 ring-orange-50 dark:bg-orange-500/20 dark:ring-orange-900/30">
-                                <svg class="h-5 w-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-orange-600/80 dark:text-orange-400/80">Ambulance</p>
-                                <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">Transports Averted</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="mb-4">
-                        <p class="text-5xl font-bold tabular-nums text-gray-900 dark:text-white">{{ cost_metrics.transports_averted }}</p>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">unnecessary transports prevented</p>
-                    </div>
-                    <div class="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">Cost Avoided</p>
-                        <p class="mt-1 text-2xl font-bold tabular-nums text-green-900 dark:text-green-300">${{ cost_metrics.savings_breakdown.transports|intcomma }}</p>
-                    </div>
-                    <p class="mt-4 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                        CPM intervention prevented transports. Unit cost ≈ $3,800 per ambulance transport to ED.
-                    </p>
-                </div>
-            </article>
-
-            {# ED Visits Avoided Card #}
-            <article class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80">
-                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 dark:border-slate-700/50 dark:from-slate-800/30">
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 ring-4 ring-blue-50 dark:bg-blue-500/20 dark:ring-blue-900/30">
-                                <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-blue-600/80 dark:text-blue-400/80">Hospital</p>
-                                <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">ED Visits Avoided</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="mb-4">
-                        <p class="text-5xl font-bold tabular-nums text-gray-900 dark:text-white">{{ cost_metrics.ed_visits_avoided }}</p>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">emergency department encounters prevented</p>
-                    </div>
-                    <div class="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">Cost Avoided</p>
-                        <p class="mt-1 text-2xl font-bold tabular-nums text-green-900 dark:text-green-300">${{ cost_metrics.savings_breakdown.ed_visits|intcomma }}</p>
-                    </div>
-                    <p class="mt-4 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                        Observed reductions in ED utilization post-enrollment. Unit cost ≈ $1,146 per ED encounter.
-                    </p>
-                </div>
-            </article>
-        </div>
-
-        {# Total System Savings - Highlight Card #}
-        <div class="mx-auto max-w-3xl mb-12">
-            <div class="relative overflow-hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-8 shadow-2xl shadow-green-500/20 dark:border-green-700/50 dark:from-green-900/30 dark:to-emerald-900/30 dark:shadow-green-900/40">
-                <div class="absolute right-0 top-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-green-400/20 blur-3xl"></div>
-                <div class="relative">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-600 shadow-lg">
-                            <svg class="h-7 w-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold uppercase tracking-wider text-green-700 dark:text-green-400">Total System Savings</p>
-                            <p class="text-xs text-green-600 dark:text-green-500">Combined avoided costs across all metrics</p>
-                        </div>
-                    </div>
-                    <p class="text-6xl font-bold tabular-nums text-green-900 dark:text-green-300">${{ cost_metrics.total_savings|intcomma }}</p>
-                </div>
-            </div>
-        </div>
-
-        {# Methodology Card #}
-        <div class="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
-            <div class="flex items-start gap-3 mb-6">
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 ring-4 ring-indigo-50 dark:bg-indigo-500/20 dark:ring-indigo-900/30">
-                    <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Methodology</h3>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Pre–post within-person comparison design</p>
-                </div>
-            </div>
-            <ul class="space-y-3 text-base text-gray-700 dark:text-gray-300">
-                <li class="flex gap-3">
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Equal-length observation windows (e.g., 6 months) before and after enrollment for each patient</span>
-                </li>
-                <li class="flex gap-3">
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Tracked metrics: 911 call volume, ambulance transport events, and emergency department encounters</span>
-                </li>
-                <li class="flex gap-3">
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Utilization changes linked to documented community paramedic contacts within observation period</span>
-                </li>
-                <li class="flex gap-3">
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Cost calculations use conservative base unit rates; does not include additional procedures, diagnostics, or downstream care</span>
-                </li>
-            </ul>
+            <p class="mt-4 text-sm font-medium text-slate-500">Cumulative savings from all avoided utilization</p>
         </div>
     </section>
-    <section>
+    <section class="mx-auto max-w-7xl">
         {# Yearly Savings Table #}
-        <div class="rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div
-                class="relative flex flex-col w-full overflow-x-auto"
+                class="w-full overflow-x-auto"
                 x-data="(() => {
                     const el = document.getElementById('yearly-breakdown-data');
                     const rows = el ? JSON.parse(el.textContent) : [];
@@ -253,99 +209,100 @@
                     {% endfor %}
                     ]
                 </script>
-                <table class="w-full text-left table-auto">
-                    <thead>
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                    <thead class="bg-slate-50 dark:bg-slate-800/50">
                         <tr>
-                            <th class="p-4 sm:pl-6 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300" :aria-sort="sortKey==='year' ? (sortDir==='asc' ? 'ascending' : 'descending') : 'none'">
-                                <button type="button" class="w-full flex items-center justify-between gap-2 text-sm font-medium leading-none cursor-pointer select-none" @click="setSort('year')">
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 cursor-pointer select-none group" @click="setSort('year')">
+                                <div class="flex items-center gap-2">
                                     <span>Year</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="w-4 h-4 opacity-60" :class="{'rotate-180': sortKey==='year' && sortDir==='asc'}">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                    </svg>
-                                </button>
+                                    <span class="rounded text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 p-0.5 transition-colors">
+                                        <svg viewBox="0 0 24 24" x-bind:class="`h-4 w-4 transition-transform stroke-2 stroke-current fill-none ${sortKey==='year' && sortDir==='asc' ? 'rotate-180' : ''} ${sortKey==='year' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
-                            <th class="p-4 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300" :aria-sort="sortKey==='patients' ? (sortDir==='asc' ? 'ascending' : 'descending') : 'none'">
-                                <button type="button" class="w-full flex items-center justify-between gap-2 text-sm font-medium leading-none cursor-pointer select-none" @click="setSort('patients')">
+                            <th scope="col" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 cursor-pointer select-none group" @click="setSort('patients')">
+                                <div class="flex items-center justify-end gap-2">
                                     <span>Patients</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="w-4 h-4 opacity-60" :class="{'rotate-180': sortKey==='patients' && sortDir==='asc'}">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                    </svg>
-                                </button>
+                                    <span class="rounded text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 p-0.5 transition-colors">
+                                        <svg viewBox="0 0 24 24" x-bind:class="`h-4 w-4 transition-transform stroke-2 stroke-current fill-none ${sortKey==='patients' && sortDir==='asc' ? 'rotate-180' : ''} ${sortKey==='patients' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
-                            <th class="p-4 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300" :aria-sort="sortKey==='calls' ? (sortDir==='asc' ? 'ascending' : 'descending') : 'none'">
-                                <button type="button" class="w-full flex items-center justify-between gap-2 text-sm font-medium leading-none cursor-pointer select-none" @click="setSort('calls')">
-                                    <span>911</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="w-4 h-4 opacity-60" :class="{'rotate-180': sortKey==='calls' && sortDir==='asc'}">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                    </svg>
-                                </button>
+                            <th scope="col" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 cursor-pointer select-none group" @click="setSort('calls')">
+                                <div class="flex items-center justify-end gap-2">
+                                    <span>911 Calls</span>
+                                    <span class="rounded text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 p-0.5 transition-colors">
+                                        <svg viewBox="0 0 24 24" x-bind:class="`h-4 w-4 transition-transform stroke-2 stroke-current fill-none ${sortKey==='calls' && sortDir==='asc' ? 'rotate-180' : ''} ${sortKey==='calls' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
-                            <th class="p-4 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300" :aria-sort="sortKey==='transports' ? (sortDir==='asc' ? 'ascending' : 'descending') : 'none'">
-                                <button type="button" class="w-full flex items-center justify-between gap-2 text-sm font-medium leading-none cursor-pointer select-none" @click="setSort('transports')">
+                            <th scope="col" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 cursor-pointer select-none group" @click="setSort('transports')">
+                                <div class="flex items-center justify-end gap-2">
                                     <span>Transports</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="w-4 h-4 opacity-60" :class="{'rotate-180': sortKey==='transports' && sortDir==='asc'}">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                    </svg>
-                                </button>
+                                    <span class="rounded text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 p-0.5 transition-colors">
+                                        <svg viewBox="0 0 24 24" x-bind:class="`h-4 w-4 transition-transform stroke-2 stroke-current fill-none ${sortKey==='transports' && sortDir==='asc' ? 'rotate-180' : ''} ${sortKey==='transports' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
-                            <th class="p-4 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300" :aria-sort="sortKey==='ed' ? (sortDir==='asc' ? 'ascending' : 'descending') : 'none'">
-                                <button type="button" class="w-full flex items-center justify-between gap-2 text-sm font-medium leading-none cursor-pointer select-none" @click="setSort('ed')">
-                                    <span>ED</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="w-4 h-4 opacity-60" :class="{'rotate-180': sortKey==='ed' && sortDir==='asc'}">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                    </svg>
-                                </button>
+                            <th scope="col" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 cursor-pointer select-none group" @click="setSort('ed')">
+                                <div class="flex items-center justify-end gap-2">
+                                    <span>ED Visits</span>
+                                    <span class="rounded text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 p-0.5 transition-colors">
+                                        <svg viewBox="0 0 24 24" x-bind:class="`h-4 w-4 transition-transform stroke-2 stroke-current fill-none ${sortKey==='ed' && sortDir==='asc' ? 'rotate-180' : ''} ${sortKey==='ed' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
-                            <th class="p-4 border-b border-gray-200/60 bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-gray-300" :aria-sort="sortKey==='total' ? (sortDir==='asc' ? 'ascending' : 'descending') : 'none'">
-                                <button type="button" class="w-full flex items-center justify-between gap-2 text-sm font-medium leading-none cursor-pointer select-none" @click="setSort('total')">
-                                    <span>Total</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="w-4 h-4 opacity-60" :class="{'rotate-180': sortKey==='total' && sortDir==='asc'}">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                    </svg>
-                                </button>
+                            <th scope="col" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 cursor-pointer select-none group" @click="setSort('total')">
+                                <div class="flex items-center justify-end gap-2">
+                                    <span>Total Savings</span>
+                                    <span class="rounded text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 p-0.5 transition-colors">
+                                        <svg viewBox="0 0 24 24" x-bind:class="`h-4 w-4 transition-transform stroke-2 stroke-current fill-none ${sortKey==='total' && sortDir==='asc' ? 'rotate-180' : ''} ${sortKey==='total' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
                         <template x-for="row in sortedRows()" :key="row.year">
-                            <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.06]">
-                                <td class="p-4 sm:pl-6 border-b border-gray-200/60 dark:border-white/10">
-                                    <p class="block text-sm text-gray-900 dark:text-white font-medium" x-text="row.year"></p>
-                                </td>
-                                <td class="p-4 border-b border-gray-200/60 dark:border-white/10">
-                                    <p class="block text-sm text-gray-800 dark:text-gray-200 text-right tabular-nums" x-text="formatNumber(row.patients)"></p>
-                                </td>
-                                <td class="p-4 border-b border-gray-200/60 dark:border-white/10">
-                                    <p class="block text-sm text-gray-800 dark:text-gray-200 text-right tabular-nums" x-text="formatNumber(row.calls)"></p>
-                                </td>
-                                <td class="p-4 border-b border-gray-200/60 dark:border-white/10">
-                                    <p class="block text-sm text-gray-800 dark:text-gray-200 text-right tabular-nums" x-text="formatNumber(row.transports)"></p>
-                                </td>
-                                <td class="p-4 border-b border-gray-200/60 dark:border-white/10">
-                                    <p class="block text-sm text-gray-800 dark:text-gray-200 text-right tabular-nums" x-text="formatNumber(row.ed)"></p>
-                                </td>
-                                <td class="p-4 border-b border-gray-200/60 dark:border-white/10">
-                                    <p class="block text-sm text-gray-900 dark:text-white text-right font-semibold tabular-nums" x-text="formatCurrency(row.total)"></p>
-                                </td>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900 dark:text-white" x-text="row.year"></td>
+                                <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-600 dark:text-slate-300 tabular-nums" x-text="formatNumber(row.patients)"></td>
+                                <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-600 dark:text-slate-300 tabular-nums" x-text="formatNumber(row.calls)"></td>
+                                <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-600 dark:text-slate-300 tabular-nums" x-text="formatNumber(row.transports)"></td>
+                                <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-600 dark:text-slate-300 tabular-nums" x-text="formatNumber(row.ed)"></td>
+                                <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-bold text-green-600 dark:text-green-400 tabular-nums" x-text="formatCurrency(row.total)"></td>
                             </tr>
                         </template>
                         <tr x-show="rows.length === 0">
-                            <td colspan="6" class="p-4 text-center text-xs text-gray-500 dark:text-gray-500">No yearly data available.</td>
+                            <td colspan="6" class="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">No yearly data available.</td>
                         </tr>
                     </tbody>
-                    <tfoot>
-                        <tr class="bg-gray-50 dark:bg-white/[0.04]">
-                            <th class="p-4 sm:pl-6 border-t border-gray-200/60 dark:border-white/10 text-left text-gray-900 dark:text-white font-medium">Totals</th>
-                            <th class="p-4 border-t border-gray-200/60 dark:border-white/10 text-right text-gray-900 dark:text-white font-semibold tabular-nums">{{ cost_metrics.total_patients }}</th>
-                            <th class="p-4 border-t border-gray-200/60 dark:border-white/10 text-right text-gray-900 dark:text-white font-semibold tabular-nums">{{ cost_metrics.calls_prevented }}</th>
-                            <th class="p-4 border-t border-gray-200/60 dark:border-white/10 text-right text-gray-900 dark:text-white font-semibold tabular-nums">{{ cost_metrics.transports_averted }}</th>
-                            <th class="p-4 border-t border-gray-200/60 dark:border-white/10 text-right text-gray-900 dark:text-white font-semibold tabular-nums">{{ cost_metrics.ed_visits_avoided }}</th>
-                            <th class="p-4 border-t border-gray-200/60 dark:border-white/10 text-right text-gray-900 dark:text-white font-semibold tabular-nums">${{ cost_metrics.total_savings|intcomma }}</th>
+                    <tfoot class="bg-slate-50 dark:bg-slate-800/50">
+                        <tr>
+                            <td class="px-6 py-4 text-left text-sm font-bold text-slate-900 dark:text-white">Totals</td>
+                            <td class="px-6 py-4 text-right text-sm font-bold text-slate-900 dark:text-white tabular-nums">{{ cost_metrics.total_patients }}</td>
+                            <td class="px-6 py-4 text-right text-sm font-bold text-slate-900 dark:text-white tabular-nums">{{ cost_metrics.calls_prevented }}</td>
+                            <td class="px-6 py-4 text-right text-sm font-bold text-slate-900 dark:text-white tabular-nums">{{ cost_metrics.transports_averted }}</td>
+                            <td class="px-6 py-4 text-right text-sm font-bold text-slate-900 dark:text-white tabular-nums">{{ cost_metrics.ed_visits_avoided }}</td>
+                            <td class="px-6 py-4 text-right text-sm font-bold text-green-600 dark:text-green-400 tabular-nums">${{ cost_metrics.total_savings|intcomma }}</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
         </div>
     </section>
+    </div>
 </div>
 {% endblock content %}

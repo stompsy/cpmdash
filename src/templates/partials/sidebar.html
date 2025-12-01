@@ -94,9 +94,9 @@
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
-                fill="none"
+                stroke-width="2"
                 stroke="currentColor"
-                stroke-width="1.5"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
@@ -193,183 +193,10 @@
           <!-- End Menu Item Program Overviews -->
 
 
-          <!-- Menu Item Program Insights -->
-          <li>
-            <a
-              href="{% url 'dashboard:odreferrals_insights' %}"
-              @click.prevent="selected = (selected === 'Program Insights' ? '' : 'Program Insights')"
-              class="menu-item group"
-              :class="(selected === 'Program Insights') || ['od-referrals-insights'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
-            >
-              <svg
-                :class="(selected === 'Program Insights') || ['od-referrals-insights'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M12 3v4.5m0 9V21m4.5-9H21M3 12h4.5m11.91 4.91-3.182-3.182m-6.456 0L6.09 16.91m0-9.82 3.182 3.182m6.456 0L17.91 7.09"
-                />
-              </svg>
-
-              <span
-                class="menu-item-text"
-                :class="sidebarToggle ? 'lg:hidden' : ''"
-              >
-                Program Insights
-              </span>
-
-              <svg
-                class="menu-item-arrow"
-                :class="[(selected === 'Program Insights') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585"
-                  stroke=""
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </a>
-
-            <!-- Dropdown Menu -->
-            <div
-              class="overflow-hidden transform translate"
-              :class="(selected === 'Program Insights') ? 'block' : 'hidden'"
-            >
-              <ul
-                :class="sidebarToggle ? 'lg:hidden' : 'flex'"
-                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
-              >
-                <li>
-                  <a
-                    href="{% url 'dashboard:odreferrals_insights' %}"
-                    hx-get="{% url 'dashboard:odreferrals_insights' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    @click="page = 'od-referrals-insights'; if (window.innerWidth < 1024) sidebarToggle = false"
-                    class="menu-dropdown-item group"
-                    :class="page === 'od-referrals-insights' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    OD Referrals Insights
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <!-- End Dropdown Menu -->
-          </li>
-          <!-- End Menu Item Program Insights -->
+                    <!-- End Menu Item Program Overviews -->
 
 
-          <!-- Menu Item OD Referral Deep Dives -->
-          <li>
-            <a
-              href="{% url 'dashboard:odreferrals_shift_coverage' %}"
-              @click.prevent="selected = (selected === 'OD Referral Deep Dives' ? '' : 'OD Referral Deep Dives')"
-              class="menu-item group"
-              :class="(selected === 'OD Referral Deep Dives') || ['od-referrals-shift-coverage','od-referrals-hotspots','odreferralsMonthly'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
-            >
-              <svg
-                :class="(selected === 'OD Referral Deep Dives') || ['od-referrals-shift-coverage','od-referrals-hotspots','odreferralsMonthly','operationShieldingHope'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM3 6.75A3.75 3.75 0 0 1 6.75 3h10.5A3.75 3.75 0 0 1 21 6.75v10.5A3.75 3.75 0 0 1 17.25 21H6.75A3.75 3.75 0 0 1 3 17.25V6.75Zm9 4.5v6"
-                />
-              </svg>
-
-              <span
-                class="menu-item-text"
-                :class="sidebarToggle ? 'lg:hidden' : ''"
-              >
-                OD Referral Deep Dives
-              </span>
-
-              <svg
-                class="menu-item-arrow"
-                :class="[(selected === 'OD Referral Deep Dives') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585"
-                  stroke=""
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </a>
-
-            <!-- Dropdown Menu -->
-            <div
-              class="overflow-hidden transform translate"
-              :class="(selected === 'OD Referral Deep Dives') ? 'block' : 'hidden'"
-            >
-              <ul
-                :class="sidebarToggle ? 'lg:hidden' : 'flex'"
-                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
-              >
-                <li>
-                  <a
-                    href="{% url 'dashboard:odreferrals_shift_coverage' %}"
-                    hx-get="{% url 'dashboard:odreferrals_shift_coverage' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    class="menu-dropdown-item group"
-                    :class="page === 'od-referrals-shift-coverage' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                    @click="page = 'od-referrals-shift-coverage'; if (window.innerWidth < 1024) sidebarToggle = false"
-                  >
-                    Shift Coverage
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'dashboard:odreferrals_hotspots' %}"
-                    hx-get="{% url 'dashboard:odreferrals_hotspots' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    class="menu-dropdown-item group"
-                    :class="page === 'od-referrals-hotspots' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                    @click="page = 'od-referrals-hotspots'; if (window.innerWidth < 1024) sidebarToggle = false"
-                  >
-                    Hotspot Map
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <!-- End Dropdown Menu -->
-          </li>
-          <!-- End Menu Item OD Referral Deep Dives -->
+          <!-- Menu Item System Case Studies -->
         </ul>
       </div>
       <!-- End Menu Group Dashboard -->
@@ -403,13 +230,13 @@
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="1.5"
+                stroke-width="2"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="M12 6v6m0 6h.01M4.5 12a7.5 7.5 0 1 1 15 0 7.5 7.5 0 0 1-15 0Z"
+                  d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
                 />
               </svg>
 
@@ -423,8 +250,8 @@
           </li>
             <li>
               <a
-                href="{% url 'cases:timeline' %}"
-                hx-get="{% url 'cases:timeline' %}"
+                href="{% url 'timeline:index' %}"
+                hx-get="{% url 'timeline:index' %}"
                 hx-target="#dashboard-main"
                 hx-select="#dashboard-main"
                 hx-swap="outerHTML"
@@ -440,13 +267,13 @@
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="1.5"
+                  stroke-width="2"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    d="M5.25 3v5.25M8.25 5.25h-6M18.75 3v5.25M21.75 5.25h-6M4.5 12H2.25m19.5 0H19.5m-7.5 9v-6m0 0 2.25 2.25M12 15l-2.25 2.25M7.5 21h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 5.25 9.75v9A2.25 2.25 0 0 0 7.5 21Z"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                   />
                 </svg>
 
@@ -517,10 +344,10 @@
               href="{% url 'cases:opshield' %}"
               @click.prevent="selected = (selected === 'System Case Studies' ? '' : 'System Case Studies')"
               class="menu-item group"
-              :class="(selected === 'System Case Studies') || page === 'costSavings' ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="(selected === 'System Case Studies') || ['costSavings','od-referrals-shift-coverage'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'System Case Studies') || page === 'costSavings' ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
+                :class="(selected === 'System Case Studies') || ['costSavings','od-referrals-shift-coverage'].includes(page) ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -586,6 +413,21 @@
                     Cost Savings Analysis
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="{% url 'dashboard:odreferrals_shift_coverage' %}"
+                    hx-get="{% url 'dashboard:odreferrals_shift_coverage' %}"
+                    hx-target="#dashboard-main"
+                    hx-select="#dashboard-main"
+                    hx-swap="outerHTML"
+                    hx-push-url="true"
+                    class="menu-dropdown-item group"
+                    :class="page === 'od-referrals-shift-coverage' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+                    @click="page = 'od-referrals-shift-coverage'; if (window.innerWidth < 1024) sidebarToggle = false"
+                  >
+                    Shift Coverage Analysis
+                  </a>
+                </li>
               </ul>
             </div>
             <!-- End Dropdown Menu -->
@@ -605,9 +447,42 @@
           </h3>
           <ul class="flex flex-col gap-4 mb-6">
             <li>
+                <a
+                    href="{% url 'dashboard:hargrove_grant' %}"
+                    hx-get="{% url 'dashboard:hargrove_grant' %}"
+                    hx-target="#dashboard-main"
+                    hx-select="#dashboard-main"
+                    hx-swap="outerHTML show:top"
+                    hx-push-url="true"
+                    @click="selected = 'Administration'; page = 'hargrove-grant'; if (window.innerWidth < 1024) sidebarToggle = false"
+                    class="menu-item group"
+                    :class="page === 'hargrove-grant' ? 'menu-item-active' : 'menu-item-inactive'"
+                >
+                    <svg
+                    :class="page === 'hargrove-grant' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+
+                    <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">Hargrove Grant</span>
+                </a>
+            </li>
+            <li>
               <a
                 href="{% url 'dashboard:user_profile' %}"
-                @click="selected = 'Administration'"
+                hx-get="{% url 'dashboard:user_profile' %}"
+                hx-target="#dashboard-main"
+                hx-select="#dashboard-main"
+                hx-swap="outerHTML show:top"
+                hx-push-url="true"
+                @click="selected = 'Administration'; page = 'profile'; if (window.innerWidth < 1024) sidebarToggle = false"
                 class="menu-item group"
                 :class="page === 'profile' ? 'menu-item-active' : 'menu-item-inactive'"
               >
@@ -630,7 +505,12 @@
             <li>
               <a
                 href="{% url 'tasks:list' %}"
-                @click="selected = 'Administration'"
+                hx-get="{% url 'tasks:list' %}"
+                hx-target="#dashboard-main"
+                hx-select="#dashboard-main"
+                hx-swap="outerHTML show:top"
+                hx-push-url="true"
+                @click="selected = 'Administration'; page = 'tasks'; if (window.innerWidth < 1024) sidebarToggle = false"
                 class="menu-item group"
                 :class="page === 'tasks' ? 'menu-item-active' : 'menu-item-inactive'"
               >
@@ -641,7 +521,7 @@
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="1.5"
+                  stroke-width="2"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M3.75 6A2.25 2.25 0 0 1 6 3.75h12A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6Z" />

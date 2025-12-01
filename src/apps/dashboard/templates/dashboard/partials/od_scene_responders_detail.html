@@ -1,81 +1,110 @@
 {# Scene Responder Detail Modal Content #}
-<div class="p-6 sm:p-8">
-    {# Header - Full Width #}
-    <div class="mb-6">
-        <div class="flex items-center gap-3 mb-2">
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-100 ring-4 ring-rose-50 dark:bg-rose-500/20 dark:ring-rose-900/30">
-                <svg class="h-5 w-5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-            </div>
+<div class="flex h-full flex-col bg-white dark:bg-slate-900">
+    {# Content Header doubles as card header; solid, neutral tone #}
+    <div class="sticky top-0 z-20 flex items-start justify-between border-b border-slate-200/80 bg-slate-50 px-6 py-5 text-sm leading-6 dark:border-slate-800 dark:bg-slate-900/95">
+        <div class="flex items-start gap-4">
             <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Scene Responder Analysis</h3>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-700/90 dark:text-slate-300/80">OD Referrals</p>
+                <h3 class="mt-1 text-lg font-semibold leading-snug text-slate-900 dark:text-white">Scene Responder Analysis</h3>
+                <p class="mt-2 max-w-2xl text-sm text-slate-700 dark:text-slate-300/90">
+                    Who actually shows up at overdose scenes—EMS, police, peers, bystanders—and what that mix
+                    means for engagement, safety, and stigma.
+                </p>
             </div>
         </div>
-        <p class="text-sm text-gray-600 dark:text-slate-400 ml-13">Understanding multi-disciplinary response patterns at overdose scenes</p>
+        <button
+            type="button"
+            class="group ml-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-600 shadow-sm transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-rose-900/50 dark:hover:bg-rose-900/20 dark:hover:text-rose-400 dark:focus:ring-offset-slate-900"
+            onclick="document.getElementById('od-scene-responders-modal-overlay').classList.add('hidden')"
+            aria-label="Close detail"
+        >
+            <span>Close</span>
+            <svg class="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
 
-    {# Quick Stats Grid - Full Width #}
-    {% if responder_stats %}
-    <div class="mb-8">
-        <h4 class="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-rose-600 dark:text-rose-400">Average Responders Per Scene</h4>
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {% for stat in responder_stats %}
-                <div class="group/metric relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-4 py-3 transition-all duration-200 hover:border-rose-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-rose-500/50">
-                    <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-rose-500/5 transition-all duration-300 group-hover/metric:scale-150 dark:bg-rose-400/5"></div>
+    <div class="flex-1 overflow-y-auto">
+        {# Key Metrics - Full Width Band #}
+        {% if responder_stats %}
+        <div class="border-b border-slate-100 bg-slate-50/60 px-6 py-8 dark:border-slate-800 dark:bg-slate-800/40">
+            <h4 class="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-800 dark:text-slate-100">Key metrics</h4>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {% for stat in responder_stats %}
+                <div class="group/metric relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white px-4 py-3 transition-all duration-200 hover:border-rose-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/50 dark:hover:border-rose-500/60">
+                    <div class="absolute -right-4 -top-6 h-14 w-14 rounded-full bg-rose-500/5 transition-transform duration-300 group-hover/metric:scale-150 dark:bg-rose-400/10"></div>
                     <div class="relative">
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stat.value }}</p>
-                        <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-slate-400">{{ stat.label }}</p>
-                        <p class="mt-1 text-xs text-gray-600 dark:text-slate-400">{{ stat.description }}</p>
+                        <dt class="truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">{{ stat.label }}</dt>
+                        <dd class="mt-1 text-2xl font-semibold leading-snug text-slate-900 dark:text-white">{{ stat.value }}</dd>
+                        <dd class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ stat.description }}</dd>
                     </div>
                 </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    {# Chart and Insights Layout - Wider Chart, Narrower Insights #}
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-start">
-        {# Chart - Takes 3 columns on large screens (60%) #}
-        <div class="lg:col-span-3">
-            <h4 class="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-rose-600 dark:text-rose-400">Responder Distribution by Type</h4>
-            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800/50 flex items-center justify-center">
-                <div class="plotly-chart-wrapper relative w-full overflow-hidden rounded-xl">
-                    {% autoescape off %}{{ responder_chart|safe }}{% endautoescape %}
-                </div>
+        {# Chart Section #}
+        <div class="px-6 py-8">
+            <div class="mb-4 flex items-center justify-between text-sm">
+                <h4 class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-700 dark:text-slate-300">Responder distribution</h4>
+            </div>
+            <div class="plotly-chart-wrapper w-full">
+                {% autoescape off %}{{ responder_chart|safe }}{% endautoescape %}
             </div>
         </div>
 
-        {# Strategic Insights - Takes 2 columns on large screens (40%) #}
-        <div class="lg:col-span-2">
-            <h4 class="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-rose-600 dark:text-rose-400">Strategic Insights</h4>
-            <div class="rounded-xl border border-slate-200 bg-gradient-to-br from-rose-50 to-white p-6 dark:border-slate-700 dark:from-rose-900/20 dark:to-slate-800/50 flex flex-col">
-                <div class="flex items-start gap-3">
-                    <svg class="h-5 w-5 mt-0.5 shrink-0 text-rose-600 dark:text-rose-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                    </svg>
+        {# Insights Section #}
+        <div class="border-t border-amber-100 bg-amber-50/50 px-6 py-8 dark:border-amber-900/30 dark:bg-amber-900/10">
+            <div class="flex gap-4">
+                <div class="shrink-0">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="space-y-4">
                     <div>
-                        <h5 class="font-semibold text-gray-900 dark:text-white mb-3">Why This Matters</h5>
-                        <div class="space-y-3 text-sm leading-relaxed text-gray-600 dark:text-slate-400">
-                            <p>
-                                <strong>Multi-Disciplinary Response Reality:</strong> Overdose scenes are complex emergencies involving EMS, law enforcement, peer support specialists, and bystanders. Understanding who shows up—and in what numbers—reveals your response ecosystem's structure. High EMS presence indicates strong medical response capacity. Police presence patterns inform trauma-informed care strategies. Peer support deployment shows recovery-oriented system integration.
-                            </p>
-                            <p>
-                                <strong>Resource Allocation Intelligence:</strong> Average responder counts per scene drive staffing and deployment models. If most scenes have 2-3 EMS personnel but 4-5 police officers, that's a policy conversation about whether law enforcement is the right primary responder. If peer support averages below 1 per scene, that's evidence for expanding peer programs. Data-driven resource reallocation beats anecdotes every time.
-                            </p>
-                            <p>
-                                <strong>Scene Chaos vs. Coordination:</strong> Too many responders creates scene chaos—commands conflict, patients feel overwhelmed, privacy evaporates. Too few means inadequate care and safety risks. The distribution chart shows whether your scenes are understaffed, overstaffed, or right-sized. Standardize response protocols based on these patterns: who dispatches when, and why.
-                            </p>
-                            <p>
-                                <strong>Stigma and Engagement Impact:</strong> Law enforcement presence at overdose scenes significantly impacts whether individuals accept follow-up services. Heavy police presence (especially multiple officers for non-criminal ODs) reinforces stigma and reduces CPM engagement rates. Tracking this metric alongside engagement outcomes reveals whether your response model helps or hinders recovery connections.
-                            </p>
-                            <p>
-                                <strong>Peer Support Opportunity:</strong> Peer support specialists have unique credibility and rapport-building capacity—but only if they're actually on scene. Low peer presence suggests underutilization of a powerful resource. High presence indicates mature recovery-oriented systems. Compare peer presence to engagement rates: the correlation is often striking.
-                            </p>
-                            <p class="pt-2 border-t border-slate-200 dark:border-slate-700">
-                                <strong>Action Items:</strong> Advocate for scene response protocols that prioritize medical/peer responses over law enforcement for non-violent ODs, train cross-disciplinary teams on role clarity and trauma-informed approaches, track responder presence against engagement outcomes to prove what works, and expand peer specialist dispatch integration.
+                        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Why This Matters</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                            Overdose scenes are complex emergencies involving EMS, law enforcement, peer support specialists, and bystanders. Understanding who shows up—and in what numbers—reveals your response ecosystem's structure.
+                        </p>
+                    </div>
+
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-medium text-slate-900 dark:text-white">Resource Allocation</h4>
+                            <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                                Average responder counts per scene drive staffing and deployment models. If most scenes have 2-3 EMS personnel but 4-5 police officers, that's a policy conversation about whether law enforcement is the right primary responder.
                             </p>
                         </div>
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-medium text-slate-900 dark:text-white">Scene Dynamics</h4>
+                            <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                                Too many responders creates scene chaos—commands conflict, patients feel overwhelmed, privacy evaporates. Too few means inadequate care and safety risks. The distribution chart shows whether your scenes are understaffed, overstaffed, or right-sized.
+                            </p>
+                        </div>
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-medium text-slate-900 dark:text-white">Stigma & Engagement</h4>
+                            <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                                Law enforcement presence at overdose scenes significantly impacts whether individuals accept follow-up services. Heavy police presence (especially multiple officers for non-criminal ODs) reinforces stigma and reduces CPM engagement rates.
+                            </p>
+                        </div>
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-medium text-slate-900 dark:text-white">Peer Support Opportunity</h4>
+                            <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                                Peer support specialists have unique credibility and rapport-building capacity—but only if they're actually on scene. Low peer presence suggests underutilization of a powerful resource. High presence indicates mature recovery-oriented systems.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+                        <h4 class="text-sm font-semibold text-amber-900 dark:text-amber-200">Strategic Action</h4>
+                        <p class="mt-1 text-sm text-amber-800 dark:text-amber-300">
+                            Advocate for scene response protocols that prioritize medical/peer responses over law enforcement for non-violent ODs, train cross-disciplinary teams on role clarity and trauma-informed approaches, and track responder presence against engagement outcomes.
+                        </p>
                     </div>
                 </div>
             </div>

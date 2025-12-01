@@ -5,14 +5,35 @@
 
 <script>
 (function() {
+    function initMap() {
+        if (typeof L === 'undefined') {
+            setTimeout(initMap, 50);
+            return;
+        }
+
     // Cache buster: {{ timestamp }}
-    // Initialize map
-    var map = L.map('{{ map_id }}').setView([48.1125, -123.4550], 12);
+    // Initialize map with authentication-aware zoom behavior
+    var isRestricted = {% if zoom_mode == "restricted" %}true{% else %}false{% endif %};
+
+    var mapOptions = {};
+    if (isRestricted) {
+        mapOptions = {
+            // United States-ish bounds: roughly continental US
+            maxBounds: L.latLngBounds(
+                L.latLng(24.396308, -124.848974), // Southwest (Hawaii/AK excluded on purpose)
+                L.latLng(49.384358, -66.885444)   // Northeast
+            ),
+            minZoom: 4,  // Zoomed out to national view
+            maxZoom: 12, // Restricted to city/neighborhood level to protect privacy
+        };
+    }
+
+    var map = L.map('{{ map_id }}', mapOptions).setView([48.1125, -123.4550], isRestricted ? 8 : 12);
 
     // Add Esri NatGeo basemap
     L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
         attribution: '© Esri, National Geographic',
-        maxZoom: 18
+        maxZoom: isRestricted ? 12 : 18
     }).addTo(map);
 
     // Jurisdictions GeoJSON data
@@ -205,5 +226,7 @@
         }
     `;
     document.head.appendChild(style);
+    }
+    initMap();
 })();
 </script>

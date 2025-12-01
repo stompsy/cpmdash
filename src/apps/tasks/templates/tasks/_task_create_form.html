@@ -4,19 +4,55 @@
   hx-post=""
   hx-target="#tasks-list > ul"
   hx-swap="afterbegin"
-  class="flex flex-col gap-3"
-  x-data="{ expanded: false }"
+  @htmx:after-request="if($event.detail.successful) { showTaskModal = false; $el.reset(); }"
+  class="space-y-4"
 >
   {% csrf_token %}
-  <div class="flex items-center gap-3">
-    <div class="grow">{{ form.title }}</div>
-    <button class="shrink-0 inline-flex items-center gap-2 rounded-full bg-brand-500 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-brand-500/30 transition hover:bg-brand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-300">Add</button>
+
+  <!-- Form Errors -->
+  {% if form.non_field_errors %}
+    <div class="rounded-xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <!-- Title -->
+  <div>
+    <label for="id_title" class="block text-sm font-medium text-slate-200 mb-2">
+      Task Title <span class="text-rose-400">*</span>
+    </label>
+    {{ form.title }}
+    {% if form.title.errors %}
+      <p class="mt-1.5 text-xs text-rose-300">{{ form.title.errors|join:", " }}</p>
+    {% endif %}
   </div>
-  <div class="grid grid-cols-12 gap-3">
-    <div class="col-span-3">{{ form.priority }}</div>
-    <div class="col-span-3">{{ form.due_date }}</div>
-    <div class="col-span-6">{{ form.assignee }}</div>
+
+  <!-- Description (Optional) -->
+  <div>
+    <label for="id_description" class="block text-sm font-medium text-slate-200 mb-2">Description <span class="text-xs text-slate-400">(optional)</span></label>
+    {{ form.description }}
+    {% if form.description.errors %}
+      <p class="mt-1.5 text-xs text-rose-300">{{ form.description.errors|join:", " }}</p>
+    {% endif %}
   </div>
-  <div x-show="expanded" x-collapse class="w-full">{{ form.description }}</div>
-  <button type="button" @click="expanded = !expanded" class="self-start text-xs text-brand-200/90 hover:text-brand-100" x-text="expanded ? 'Hide details' : 'Add details'"></button>
+
+  <!-- Add Task Button -->
+  <div class="flex items-center justify-end gap-3 pt-2">
+    <button
+      type="button"
+      @click="showTaskModal = false"
+      class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all duration-200 hover:shadow-xl hover:shadow-brand-500/40 hover:scale-[1.02] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-400"
+    >
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+      </svg>
+      Add Task
+    </button>
+  </div>
 </form>

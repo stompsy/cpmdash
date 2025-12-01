@@ -1,0 +1,304 @@
+{
+  "health_social_services": [
+    {
+      "id": "clallam_hhs",
+      "name": "Clallam County Health & Human Services",
+      "short_name": "Clallam HHS",
+      "category": "Health & Social Services",
+      "address": "111 E 3rd St, Port Angeles, WA 98362",
+      "phone": "(360) 417-2303",
+      "hours": {
+        "main": "Monday-Friday 8:00 AM - 4:30 PM",
+        "forks": "Tuesday, Thursday, Friday 8:30 AM - noon & 1:00 PM - 4:00 PM"
+      },
+      "additional_contacts": {
+        "forks_phone": "(360) 374-3121"
+      },
+      "website": "https://www.clallam.net/HHS",
+      "services": "Public health, environmental health, vital records"
+    },
+    {
+      "id": "dshs",
+      "name": "WA Department of Social and Health Services",
+      "short_name": "DSHS",
+      "category": "Health & Social Services",
+      "address": "Port Angeles, WA 98362",
+      "phone": "(360) 565-2240",
+      "toll_free": "(877) 501-2233",
+      "hours": {
+        "main": "Monday-Friday 8:00 AM - 5:00 PM",
+        "office_services": "8:00 AM - 2:00 PM for interviews"
+      },
+      "website": "https://www.dshs.wa.gov/location/dshs-cso-005",
+      "services": "Cash assistance, food assistance, medical programs"
+    },
+    {
+      "id": "olycap",
+      "name": "Olympic Community Action Programs",
+      "short_name": "OlyCAP",
+      "category": "Health & Social Services",
+      "locations": [
+        {
+          "name": "Port Angeles",
+          "address": "228 W 1st St, Suite J, Port Angeles, WA 98363",
+          "phone": "(360) 452-4726",
+          "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        },
+        {
+          "name": "Port Townsend",
+          "address": "2120 W Sims Way, Port Townsend, WA 98368",
+          "phone": "(360) 385-2571",
+          "hours": "Opens 9:00 AM Monday"
+        }
+      ],
+      "website": "https://www.olycap.org",
+      "services": "Housing assistance, energy assistance, early childhood education"
+    },
+    {
+      "id": "o3a",
+      "name": "Olympic Area Agency on Aging",
+      "short_name": "O3A",
+      "category": "Health & Social Services",
+      "locations": [
+        {
+          "name": "Sequim",
+          "address": "609 W Washington St, Suite 16, Sequim, WA 98382",
+          "phone": "(360) 452-3221"
+        },
+        {
+          "name": "Port Townsend",
+          "address": "2500 W Sims Way, Suite 203, Port Townsend, WA 98368",
+          "phone": "(360) 385-2552"
+        },
+        {
+          "name": "Forks",
+          "address": "481 5th Avenue, Forks, WA 98331",
+          "phone": "(360) 374-9496"
+        }
+      ],
+      "toll_free": "(888) 571-6559",
+      "hours": {
+        "main": "Monday-Friday 7:30 AM - 4:00 PM"
+      },
+      "website": "https://www.o3a.org",
+      "services": "Senior services, caregiver support, information & assistance"
+    },
+    {
+      "id": "salvation_army",
+      "name": "Salvation Army Port Angeles",
+      "short_name": "Salvation Army",
+      "category": "Health & Social Services",
+      "address": "202 S Peabody St, Port Angeles, WA 98362",
+      "phone": "(360) 452-7679",
+      "hours": {
+        "main": "Open until 2:00 PM",
+        "breakfast": "8:00 AM - 9:00 AM",
+        "lunch": "Noon - 1:00 PM"
+      },
+      "website": "https://portangeles.salvationarmy.org",
+      "services": "Food assistance, holiday programs, emergency services"
+    },
+    {
+      "id": "clallam_care_connection",
+      "name": "Clallam Care Connection",
+      "short_name": "Care Connection",
+      "category": "Health & Social Services",
+      "phone": "1-833-453-0336",
+      "email": "care@olympicch.org",
+      "additional_contacts": {
+        "phone_alt": "(360) 302-6046"
+      },
+      "hours": {
+        "main": "Varies - call for availability"
+      },
+      "services": "Care coordination, resource connection, COVID-19 support"
+    },
+    {
+      "id": "healthy_families",
+      "name": "Healthy Families of Clallam County",
+      "short_name": "Healthy Families",
+      "category": "Health & Social Services",
+      "address": "1210 E Front Street, Suite C, Port Angeles, WA 98362",
+      "phone": "(360) 452-3811",
+      "crisis_line": "(360) 452-4357",
+      "fax": "(360) 452-8243",
+      "hours": {
+        "main": "Monday-Friday 9:00 AM - 4:00 PM",
+        "crisis": "24/7/365 Crisis Line",
+        "note": "Walk-ins welcome, appointments encouraged"
+      },
+      "website": "https://www.healthyfam.org",
+      "services": "Domestic violence support, crisis intervention, family services"
+    },
+    {
+      "id": "aps",
+      "name": "Adult Protective Services",
+      "short_name": "APS",
+      "category": "Health & Social Services",
+      "address": "235 W 1st St, Port Angeles, WA 98362",
+      "phone": "(360) 565-2160",
+      "statewide": "1-877-734-6277",
+      "email": "apscentralintake@dshs.wa.gov",
+      "hours": {
+        "main": "Monday-Friday (standard business hours)"
+      },
+      "website": "https://www.dshs.wa.gov/altsa/adult-protective-services",
+      "services": "Vulnerable adult protection, abuse investigation, support services"
+    },
+    {
+      "id": "reflections_counseling",
+      "name": "Reflections Counseling Services",
+      "short_name": "Reflections",
+      "category": "Health & Social Services",
+      "address": "3430 E Highway 101, Port Angeles, WA 98362",
+      "phone": "(360) 452-4062",
+      "hours": {
+        "walk_in": "10:00 AM - 11:00 AM & 1:00 PM - 2:00 PM",
+        "office": "Monday-Friday 9:00 AM - 5:00 PM (by appointment)"
+      },
+      "website": "https://reflectionscounselingservicesgroup.org",
+      "services": "Substance use counseling, outpatient treatment, REAL Team services"
+    },
+    {
+      "id": "serenity_house",
+      "name": "Serenity House of Clallam County",
+      "short_name": "Serenity House",
+      "category": "Health & Social Services",
+      "locations": [
+        {
+          "name": "Main Office",
+          "address": "2203 W 18th St, Port Angeles, WA 98363",
+          "phone": "(360) 452-7224",
+          "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        },
+        {
+          "name": "24/7 Adult Shelter",
+          "address": "2321 W 18th St, Port Angeles, WA 98363",
+          "phone": "(360) 452-7221",
+          "hours": "Open 24 hours"
+        }
+      ],
+      "email": "housinghelp@serenityhouseclallam.org",
+      "website": "https://serenityhouseclallam.org",
+      "services": "Homeless shelter, housing assistance, transitional housing"
+    },
+    {
+      "id": "concerned_citizens",
+      "name": "Concerned Citizens",
+      "short_name": "Concerned Citizens",
+      "category": "Health & Social Services",
+      "locations": [
+        {
+          "name": "Port Angeles",
+          "address": "1601 E Front St #2A, Port Angeles, WA 98362",
+          "phone": "(360) 452-2396",
+          "hours": "Opens 9:00 AM"
+        },
+        {
+          "name": "Forks",
+          "address": "945 S Forks Avenue, Forks, WA 98331",
+          "phone": "(360) 374-9340",
+          "hours": "Monday-Friday 8:00 AM - 5:00 PM"
+        }
+      ],
+      "website": "https://ccpnw.org",
+      "services": "Early intervention, employment services, family support"
+    },
+    {
+      "id": "kwa",
+      "name": "Korean Women's Association In-Home Care",
+      "short_name": "KWA",
+      "category": "Health & Social Services",
+      "address": "616 E Front St, Port Angeles, WA 98362",
+      "phone": "(360) 452-2129",
+      "toll_free": "(888) 508-2780",
+      "main_office": "(253) 535-4202",
+      "email": "jjames@kwacares.org",
+      "hours": {
+        "main": "Monday-Friday 8:30 AM - 5:00 PM"
+      },
+      "website": "https://www.kwacares.org",
+      "services": "In-home care, Medicaid services, multilingual support",
+      "languages": ["Korean", "Spanish", "Russian", "Portuguese", "Chinese"]
+    }
+  ],
+  "emergency_services": [
+    {
+      "id": "fire_district_2",
+      "name": "Clallam County Fire District 2",
+      "short_name": "Fire District 2",
+      "category": "Emergency Services",
+      "emergency": "911",
+      "hours": {
+        "main": "24/7 Emergency Response"
+      },
+      "services": "Fire suppression, emergency medical response, rescue services"
+    },
+    {
+      "id": "fire_district_3",
+      "name": "Clallam County Fire District 3",
+      "short_name": "Fire District 3",
+      "category": "Emergency Services",
+      "emergency": "911",
+      "hours": {
+        "main": "24/7 Emergency Response"
+      },
+      "services": "Fire suppression, emergency medical response, rescue services"
+    },
+    {
+      "id": "fire_district_4",
+      "name": "Clallam County Fire District 4",
+      "short_name": "Fire District 4",
+      "category": "Emergency Services",
+      "emergency": "911",
+      "hours": {
+        "main": "24/7 Emergency Response"
+      },
+      "services": "Fire suppression, emergency medical response, rescue services"
+    },
+    {
+      "id": "olympic_ambulance",
+      "name": "Olympic Ambulance",
+      "short_name": "Olympic Ambulance",
+      "category": "Emergency Services",
+      "emergency": "911",
+      "hours": {
+        "main": "24/7 Emergency Response"
+      },
+      "services": "Emergency medical transport, ambulance services"
+    },
+    {
+      "id": "port_angeles_pd",
+      "name": "Port Angeles Police Department",
+      "short_name": "PAPD",
+      "category": "Emergency Services",
+      "emergency": "911",
+      "hours": {
+        "main": "24/7 Emergency Response"
+      },
+      "services": "Law enforcement, emergency response, community policing"
+    },
+    {
+      "id": "clallam_sheriff",
+      "name": "Clallam County Sheriff's Office",
+      "short_name": "Sheriff",
+      "category": "Emergency Services",
+      "emergency": "911",
+      "hours": {
+        "main": "24/7 Emergency Response"
+      },
+      "services": "Law enforcement, jail operations, civil process, emergency management"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-11-14",
+    "total_agencies": 18,
+    "counties_served": ["Clallam County", "Jefferson County"],
+    "notes": [
+      "All emergency services: Dial 911",
+      "24/7 Crisis Support: Healthy Families (360) 452-4357",
+      "Care Connect WA: 1-833-453-0336",
+      "Multilingual services available through KWA"
+    ]
+  }
+}

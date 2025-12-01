@@ -6,51 +6,44 @@ from django import forms
 
 from .models import Task
 
+# Modern Tailwind form styling with enhanced visual design
+INPUT_CLASS = (
+    "block w-full rounded-xl border-0 bg-white/10 px-4 py-3 text-base text-white "
+    "placeholder:text-slate-400 shadow-sm ring-1 ring-inset ring-white/10 "
+    "transition duration-200 "
+    "hover:ring-white/20 "
+    "focus:ring-2 focus:ring-inset focus:ring-brand-400 focus:outline-none "
+    "disabled:cursor-not-allowed disabled:bg-white/5 disabled:text-slate-500"
+)
+
+TEXTAREA_CLASS = (
+    "block w-full rounded-xl border-0 bg-white/10 px-4 py-3 text-base text-white "
+    "placeholder:text-slate-400 shadow-sm ring-1 ring-inset ring-white/10 "
+    "transition duration-200 resize-none "
+    "hover:ring-white/20 "
+    "focus:ring-2 focus:ring-inset focus:ring-brand-400 focus:outline-none"
+)
+
 
 class TaskForm(forms.ModelForm):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        # Allow omitting priority to use model default
-        if "priority" in self.fields:
-            self.fields["priority"].required = False
-            try:
-                from .models import Task as TaskModel
-
-                self.fields["priority"].initial = TaskModel.Priority.MEDIUM
-            except Exception:
-                self.fields["priority"].initial = 2
 
     class Meta:
         model = Task
-        fields = ["title", "description", "priority", "due_date", "assignee"]
+        fields = ["title", "description"]
         widgets = {
             "title": forms.TextInput(
                 attrs={
-                    "class": "w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400/60",
-                    "placeholder": "Task title",
+                    "class": INPUT_CLASS,
+                    "placeholder": "What needs to be done?",
                 }
             ),
             "description": forms.Textarea(
                 attrs={
-                    "rows": 3,
-                    "class": "w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400/60",
-                    "placeholder": "Optional description",
-                }
-            ),
-            "priority": forms.Select(
-                attrs={
-                    "class": "w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-400/60",
-                }
-            ),
-            "due_date": forms.DateInput(
-                attrs={
-                    "type": "date",
-                    "class": "w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400/60",
-                }
-            ),
-            "assignee": forms.Select(
-                attrs={
-                    "class": "w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-400/60",
+                    "rows": 4,
+                    "class": TEXTAREA_CLASS,
+                    "placeholder": "Add more details about this task (optional)",
                 }
             ),
         }

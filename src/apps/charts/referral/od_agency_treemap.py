@@ -38,7 +38,7 @@ def build_chart_od_agency_treemap(theme: str) -> str:
         "neutral",
         "stone",
     ]
-    # Split the complex list comprehension to avoid mypy internal error
+
     shades = (600, 500, 400, 300)
     tokens: list[str] = []
     for hue in families:
@@ -50,8 +50,8 @@ def build_chart_od_agency_treemap(theme: str) -> str:
 
     fig = px.treemap(
         top100,
-        path=["referral_agency"],  # <-- uses that column
-        values="count",  # <-- and this column
+        path=["referral_agency"],
+        values="count",
         color="referral_agency",
         hover_data={"count": True},
         color_discrete_sequence=color_sequence,

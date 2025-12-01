@@ -132,7 +132,7 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
         s = s.fillna("").replace({None: ""}).astype(str).str.strip()
         s = s.replace({"": "Unknown", "NA": "Unknown", "None": "Unknown"})
 
-    if _is_numeric_series(df[field]):
+    if _is_numeric_series(df[field]) or field == "age":
         # Special-case medically common age bands
         if field == "age":
             # Create stacked bar chart by sex

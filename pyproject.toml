@@ -28,6 +28,8 @@ dependencies = [
     "Markdown>=3.7",
     "defusedxml>=0.7.1",
     "geopandas>=0.14.0",
+    "openpyxl>=3.1.5",
+    "scipy>=1.16.3",
 ]
 
 [project.optional-dependencies]

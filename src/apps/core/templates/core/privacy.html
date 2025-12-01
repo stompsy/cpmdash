@@ -9,124 +9,114 @@
 {% endblock page_header %}
 
 {% block content %}
-<div class="col-span-12">
-    <div class="rounded-2xl border border-white/5 bg-slate-900/40 px-6 py-16 backdrop-blur-sm sm:px-10 lg:px-16">
-        <div class="mx-auto max-w-6xl">
-            <div class="max-w-3xl space-y-8">
-                {# Last Updated #}
-                <div class="flex flex-wrap items-center gap-4 text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
-                    <span class="inline-flex items-center gap-2">
-                        <svg class="h-4 w-4 text-brand-200/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M7 2v3"/><path d="M17 2v3"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M7 12h10"/>
-                        </svg>
-                        <time datetime="2025-10-27">October 27, 2025</time>
-                    </span>
-                </div>
+    <div class="col-span-12 mx-auto w-full">
+        <section class="py-20 bg-gradient-to-b from-transparent via-slate-900/30 to-transparent">
+            <div class="mx-auto max-w-6xl px-6">
+                <div class="prose prose-lg prose-invert max-w-none">
+                    {# Last Updated #}
+                    <div class="flex flex-wrap items-center gap-4 text-xs font-semibold uppercase tracking-[0.28em] text-slate-400 not-prose mb-8">
+                        <span class="inline-flex items-center gap-2">
+                            <svg class="h-4 w-4 text-brand-200/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M7 2v3"/><path d="M17 2v3"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M7 12h10"/>
+                            </svg>
+                            <time datetime="2025-11-19">November 19, 2025</time>
+                        </span>
+                    </div>
 
-                {# Introduction #}
-                <p class="text-base leading-relaxed text-slate-200/90 sm:text-lg">
-                    The City of Port Angeles Fire Department ("we," "us," or "our") is committed to protecting the privacy and security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you access the CPM Metrics dashboard.
-                </p>
+                    {# Introduction #}
+                    <p class="lead text-xl text-slate-300 mb-8">
+                        The City of Port Angeles Fire Department ("we," "us," or "our") is committed to protecting the privacy and security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you access the CPM Metrics dashboard.
+                    </p>
 
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Information We Collect</h2>
+                    <h2 class="text-2xl font-bold text-white mt-12 mb-6">Information We Collect</h2>
 
-                <h3 class="text-xl font-semibold text-white">Account Information</h3>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    When you create an account or use our services, we may collect:
-                </p>
-                <ul class="space-y-2 text-base leading-relaxed text-slate-200/90">
-                    <li>Name and contact information (email address)</li>
-                    <li>Job title and department affiliation</li>
-                    <li>Authentication credentials</li>
-                    <li>User preferences and settings</li>
-                </ul>
+                    <h3 class="text-xl font-bold text-white mt-8 mb-4">Account Information</h3>
+                    <p class="text-slate-300 mb-6">
+                        When you create an account or use our services, we may collect:
+                    </p>
+                    <ul class="list-disc pl-6 space-y-2 text-slate-300 mb-6">
+                        <li>Name and contact information (email address)</li>
+                        <li>Job title and department affiliation</li>
+                        <li>Authentication credentials</li>
+                        <li>User preferences and settings</li>
+                    </ul>
 
-                <h3 class="text-xl font-semibold text-white">Usage Data</h3>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    We automatically collect certain information about your device and how you interact with our dashboard:
-                </p>
-                <ul class="space-y-2 text-base leading-relaxed text-slate-200/90">
-                    <li>IP address and browser type</li>
-                    <li>Pages viewed and features accessed</li>
-                    <li>Time and date of visits</li>
-                    <li>Referring website addresses</li>
-                </ul>
+                    <h3 class="text-xl font-bold text-white mt-8 mb-4">Usage Data</h3>
+                    <p class="text-slate-300 mb-6">
+                        We automatically collect certain information about your device and how you interact with our dashboard:
+                    </p>
+                    <ul class="list-disc pl-6 space-y-2 text-slate-300 mb-6">
+                        <li>IP address and browser type</li>
+                        <li>Pages viewed and features accessed</li>
+                        <li>Time and date of visits</li>
+                        <li>Referring website addresses</li>
+                    </ul>
 
-                <h3 class="text-xl font-semibold text-white">Patient Data</h3>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    The dashboard displays de-identified and aggregated patient data for analytical purposes. We do not collect, store, or display personally identifiable patient information (PII) such as names, addresses, or social security numbers in the dashboard interface.
-                </p>
+                    <h3 class="text-xl font-bold text-white mt-8 mb-4">Patient Data</h3>
+                    <p class="text-slate-300 mb-6">
+                        The dashboard displays de-identified and aggregated patient data for analytical purposes. We do not collect, store, or display personally identifiable patient information (PII) such as names, addresses, or social security numbers in the dashboard interface.
+                    </p>
 
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">How We Use Your Information</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">We use the information we collect to:</p>
-                <ul class="space-y-2 text-base leading-relaxed text-slate-200/90">
-                    <li>Provide, maintain, and improve our dashboard services</li>
-                    <li>Authenticate users and manage access controls</li>
-                    <li>Generate analytics and insights for community paramedicine programs</li>
-                    <li>Communicate with you about system updates and important notices</li>
-                    <li>Ensure security and prevent unauthorized access</li>
-                    <li>Comply with legal obligations and respond to lawful requests</li>
-                </ul>
+                    <h2 class="text-2xl font-bold text-white mt-12 mb-6">How We Use Your Information</h2>
+                    <p class="text-slate-300 mb-6">We use the information we collect to:</p>
+                    <ul class="list-disc pl-6 space-y-2 text-slate-300 mb-6">
+                        <li>Provide, maintain, and improve our dashboard services</li>
+                        <li>Authenticate users and manage access controls</li>
+                        <li>Generate analytics and insights for community paramedicine programs</li>
+                        <li>Communicate with you about system updates and important notices</li>
+                        <li>Ensure security and prevent unauthorized access</li>
+                        <li>Comply with legal obligations and respond to lawful requests</li>
+                    </ul>
 
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Data Security</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    We implement appropriate technical and organizational measures to protect your information against unauthorized access, alteration, disclosure, or destruction. These measures include:
-                </p>
-                <ul class="space-y-2 text-base leading-relaxed text-slate-200/90">
-                    <li>Encrypted data transmission (SSL/TLS)</li>
-                    <li>Secure authentication mechanisms</li>
-                    <li>Regular security audits and updates</li>
-                    <li>Access controls and role-based permissions</li>
-                    <li>Data backup and disaster recovery procedures</li>
-                </ul>
+                    <h2 class="text-2xl font-bold text-white mt-12 mb-6">Data Security</h2>
+                    <p class="text-slate-300 mb-6">
+                        We implement appropriate technical and organizational measures to protect your information against unauthorized access, alteration, disclosure, or destruction. These measures include:
+                    </p>
+                    <ul class="list-disc pl-6 space-y-2 text-slate-300 mb-6">
+                        <li>Encrypted data transmission (SSL/TLS)</li>
+                        <li>Secure authentication mechanisms</li>
+                        <li>Regular security audits and updates</li>
+                        <li>Access controls and role-based permissions</li>
+                        <li>Data backup and disaster recovery procedures</li>
+                    </ul>
 
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Data Sharing and Disclosure</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    We do not sell, trade, or rent your personal information to third parties. We may share information only in the following circumstances:
-                </p>
-                <ul class="space-y-2 text-base leading-relaxed text-slate-200/90">
-                    <li>With authorized City of Port Angeles personnel who need access to perform their official duties</li>
-                    <li>When required by law or in response to valid legal processes</li>
-                    <li>To protect the rights, property, or safety of our organization, users, or the public</li>
-                    <li>With service providers who assist in operating our dashboard (subject to confidentiality agreements)</li>
-                </ul>
+                    <h2 class="text-2xl font-bold text-white mt-12 mb-6">Data Sharing and Disclosure</h2>
+                    <p class="text-slate-300 mb-6">
+                        We do not sell, trade, or rent your personal information to third parties. We may share information only in the following circumstances:
+                    </p>
+                    <ul class="list-disc pl-6 space-y-2 text-slate-300 mb-6">
+                        <li>With authorized City of Port Angeles personnel who need access to perform their official duties</li>
+                        <li>When required by law or in response to valid legal processes</li>
+                        <li>To protect the rights, property, or safety of our organization, users, or the public</li>
+                        <li>With service providers who assist in operating our dashboard (subject to confidentiality agreements)</li>
+                    </ul>
 
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Your Rights and Choices</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">You have the right to:</p>
-                <ul class="space-y-2 text-base leading-relaxed text-slate-200/90">
-                    <li>Access and review your personal information</li>
-                    <li>Request corrections to inaccurate data</li>
-                    <li>Request deletion of your account (subject to legal retention requirements)</li>
-                    <li>Opt out of non-essential communications</li>
-                    <li>Withdraw consent where processing is based on consent</li>
-                </ul>
+                    <h2 class="text-2xl font-bold text-white mt-12 mb-6">Your Rights and Choices</h2>
+                    <p class="text-slate-300 mb-6">You have the right to:</p>
+                    <ul class="list-disc pl-6 space-y-2 text-slate-300 mb-6">
+                        <li>Access and review your personal information</li>
+                        <li>Request corrections to inaccurate data</li>
+                        <li>Request deletion of your account (subject to legal retention requirements)</li>
+                        <li>Opt out of non-essential communications</li>
+                        <li>Withdraw consent where processing is based on consent</li>
+                    </ul>
 
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Data Retention</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    We retain your information for as long as necessary to fulfill the purposes outlined in this policy, unless a longer retention period is required or permitted by law. Aggregated and de-identified data may be retained indefinitely for analytical purposes.
-                </p>
+                    <h2 class="text-2xl font-bold text-white mt-12 mb-6">Changes to This Policy</h2>
+                    <p class="text-slate-300 mb-6">
+                        We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date. You are advised to review this Privacy Policy periodically for any changes.
+                    </p>
 
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Children's Privacy</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    This dashboard is not intended for use by individuals under the age of 18. We do not knowingly collect personal information from children.
-                </p>
-
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Changes to This Policy</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    We may update this Privacy Policy from time to time. We will notify users of any material changes by posting the new policy on this page and updating the "Last updated" date.
-                </p>
-
-                <h2 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Contact Us</h2>
-                <p class="text-base leading-relaxed text-slate-200/90">
-                    If you have questions or concerns about this Privacy Policy or our data practices, please contact us:
-                </p>
-                <div class="mt-6 rounded-lg border border-white/10 bg-slate-800/50 p-6">
-                    <p class="font-semibold text-white">City of Port Angeles Fire Department</p>
-                    <p class="mt-2 text-slate-300">102 E 5th St.<br>Port Angeles, WA 98362</p>
-                    <p class="mt-2 text-slate-300">Email: <a href="mailto:cpm@cityofpa.us" class="text-brand-400 hover:text-brand-300">cpm@cityofpa.us</a></p>
+                    <h2 class="text-2xl font-bold text-white mt-12 mb-6">Contact Us</h2>
+                    <p class="text-slate-300 mb-6">
+                        If you have any questions about this Privacy Policy, please contact us:
+                    </p>
+                    <ul class="list-disc pl-6 space-y-2 text-slate-300 mb-6">
+                        <li><strong>Email:</strong> <a href="mailto:pafdcpm@cityofpa.us" class="text-sky-400 hover:text-sky-300">pafdcpm@cityofpa.us</a></li>
+                        <li><strong>Phone:</strong> (360) 417-4655</li>
+                        <li><strong>Address:</strong> 102 E 5th St, Port Angeles, WA 98362</li>
+                    </ul>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
-</div>
 {% endblock content %}

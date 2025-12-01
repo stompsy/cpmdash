@@ -25,17 +25,19 @@ Expected context variables:
     image_position: Optional background-position for the header image (defaults to "center center")
 {% endcomment %}
 <section
-    class="relative overflow-hidden rounded-2xl bg-slate-950 px-6 py-16 text-white shadow-2xl shadow-slate-900/20 sm:px-10 lg:px-16 dark:shadow-slate-950/40"
+    class="relative overflow-hidden bg-slate-950 py-16 text-white shadow-lg shadow-slate-900/10 dark:shadow-slate-950/30"
     {% if image_src %}
         style="background-image: linear-gradient(95deg, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.88) 35%, rgba(15,23,42,0.44) 70%, rgba(15,23,42,0.15) 90%, rgba(15,23,42,0) 100%), radial-gradient(circle at top left, rgba(94,234,212,0.12), rgba(94,234,212,0) 60%), url('{{ image_src|escape }}'); background-size: 100% 100%, 100% 100%, cover; background-position: center center, left top, {% if image_position %}{{ image_position }}{% else %}center center{% endif %}; background-repeat: no-repeat;"
     {% endif %}
 >
+    {# Bottom fade overlay #}
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-gray-900 dark:via-gray-900/60"></div>
+
     {# Decorative gradient blob #}
     <div class="pointer-events-none absolute right-[-18%] top-[-28%] h-[30rem] w-[30rem] rounded-full bg-brand-400/16 blur-[140px]"></div>
 
     {# Hash overlay pattern with fade and rotation #}
     <style>
-    /* Moved from inline style to a class to avoid inline styles (H021) */
     .page-header-hash-overlay {
         background-image: repeating-linear-gradient(
             45deg,
@@ -60,7 +62,7 @@ Expected context variables:
 
     <div class="pointer-events-none absolute inset-0 opacity-30 page-header-hash-overlay"></div>
 
-    <div class="relative mx-auto max-w-7xl space-y-8">
+    <div class="relative mx-auto max-w-7xl space-y-8 px-6">
         {% if breadcrumbs %}
             <nav class="text-[10px] font-semibold uppercase tracking-[0.45em] text-slate-400" aria-label="Breadcrumb">
                 <ol class="flex flex-wrap items-center gap-3">
@@ -80,7 +82,7 @@ Expected context variables:
             </nav>
         {% endif %}
 
-        <div class="max-w-3xl space-y-8">
+        <div class="max-w-4xl space-y-8">
             {% if eyebrow %}
                 <p class="inline-flex items-center gap-2 rounded-lg bg-white/5 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-brand-200/90">
                     {{ eyebrow }}
@@ -129,8 +131,8 @@ Expected context variables:
                             {% if primary_hx_select %} hx-select="{{ primary_hx_select }}"{% endif %}
                             {% if primary_hx_swap %} hx-swap="{{ primary_hx_swap }}"{% endif %}
                             {% if primary_hx_push_url %} hx-push-url="{{ primary_hx_push_url }}"{% endif %}
-                            {% if primary_alpine_click %} @click="{{ primary_alpine_click }}"{% endif %}
-                            class="inline-flex items-center justify-center gap-2 rounded-full bg-brand-500/80 px-6 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-brand-400"
+                            {% if primary_alpine_click %} @click.prevent="{{ primary_alpine_click }}"{% endif %}
+                            class="inline-flex items-center justify-center gap-2 rounded-full bg-brand-500/80 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-400"
                         >
                             {{ primary_label }}
                             {% if primary_icon|default:'arrow' != 'none' %}
