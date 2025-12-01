@@ -8,6 +8,7 @@ import pandas as pd
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -49,6 +50,14 @@ from ..core.models import Encounters, ODReferrals, Patients, Referrals
 
 OD_HOTSPOT_CONTEXT_PATH = (
     Path(settings.BASE_DIR) / "src" / "static" / "data" / "od_hotspot_context.json"
+)
+HARGROVE_METRICS_PATH = (
+    Path(settings.BASE_DIR)
+    / "src"
+    / "static"
+    / "data"
+    / "hargrove_grant"
+    / "historical_metrics.json"
 )
 
 
@@ -2280,7 +2289,7 @@ def patients(request):
         "story_sections": _build_patients_story_sections(),
         "yearly_accordions": _build_yearly_accordions(),
     }
-    updated_on = date(2025, 10, 17)
+    updated_on = date(2025, 11, 30)
     context.update(
         {
             "page_header_updated_at": updated_on,
@@ -2407,7 +2416,7 @@ def referrals(request):
         "theme": theme,
         "story_cards": REFERRALS_STORY_CARDS,
     }
-    updated_on = date(2025, 10, 17)
+    updated_on = date(2025, 11, 30)
     context.update(
         {
             "page_header_updated_at": updated_on,
@@ -2453,7 +2462,7 @@ def odreferrals_shift_coverage(request):
         "proposed_coverage": coverage_stats["proposed"],
         "total_cases": coverage_stats["total"],
     }
-    updated_on = date(2025, 10, 17)
+    updated_on = date(2025, 11, 30)
     context.update(
         {
             "page_header_updated_at": updated_on,
@@ -2561,7 +2570,7 @@ def odreferrals_hotspots(request):
         "hotspot_insights": insights,
         "document_metrics": document_metrics,
     }
-    updated_on = date(2025, 10, 17)
+    updated_on = date(2025, 11, 30)
     context.update(
         {
             "page_header_updated_at": updated_on,
@@ -3889,7 +3898,7 @@ def odreferrals(request):
         "theme": theme,
         "story_cards": OD_REFERRALS_STORY_CARDS,
     }
-    updated_on = date(2025, 10, 17)
+    updated_on = date(2025, 11, 30)
     context.update(
         {
             "page_header_updated_at": updated_on,
@@ -5114,7 +5123,7 @@ def od_transport_detail(request):
 
 def odreferrals_insights(request):
     context = _prepare_odreferrals_insights_context()
-    updated_on = date(2025, 10, 17)
+    updated_on = date(2025, 11, 30)
     context.update(
         {
             "page_header_updated_at": updated_on,
@@ -5268,8 +5277,282 @@ def authentication(request):
     return render(request, "dashboard/authentication.html")
 
 
+def _build_historical_hargrove_metrics(year_metrics: dict, str_q: str) -> list[dict[str, object]]:
+    """Build metrics from historical JSON data."""
+    q_data = year_metrics[str_q]
+    metrics = q_data.get("metrics", {})
+    narratives = q_data.get("narratives", [])
+
+    # 1. Patient Demographics
+    demo_rows = []
+    if "individuals" in metrics:
+        demo_rows.extend(metrics["individuals"])
+    if "Health Insurance Type" in metrics:
+        demo_rows.extend(metrics["Health Insurance Type"])
+    if "zip_codes" in metrics:
+        demo_rows.extend(metrics["zip_codes"])
+
+    # 4. Outcomes
+    outcome_rows = []
+    if "services" in metrics:
+        outcome_rows.extend(metrics["services"])
+    if "objectives" in metrics:
+        outcome_rows.extend(metrics["objectives"])
+
+    return [
+        {
+            "title": "1. Patient Demographics",
+            "type": "table",
+            "columns": ["ID", "Metric", "Value", "Notes"],
+            "rows": demo_rows if demo_rows else [],
+        },
+        {
+            "title": "2. Substance Use Disorder (SUD)",
+            "type": "table",
+            "columns": ["ID", "Metric", "Value", "Notes"],
+            "rows": [],
+        },
+        {
+            "title": "3. Behavioral Health",
+            "type": "table",
+            "columns": ["ID", "Metric", "Value", "Notes"],
+            "rows": [],
+        },
+        {
+            "title": "4. Outcomes",
+            "type": "table",
+            "columns": ["ID", "Metric", "Value", "Notes"],
+            "rows": outcome_rows if outcome_rows else [],
+        },
+        {
+            "title": "5. Narrative",
+            "type": "narrative",
+            "questions_responses": narratives,
+        },
+    ]
+
+
+def _build_2025_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
+    """Build dynamic metrics for 2025 from database."""
+    start_date = date(year, (q - 1) * 3 + 1, 1)
+    if q == 4:
+        end_date = date(year, 12, 31)
+    else:
+        end_date = date(year, q * 3 + 1, 1) - timezone.timedelta(days=1)
+
+    # 1. Patient Demographics
+    served_patient_ids = (
+        Encounters.objects.filter(encounter_date__range=(start_date, end_date))
+        .values_list("patient_ID", flat=True)
+        .distinct()
+    )
+    total_served = len(served_patient_ids)
+    new_enrollments = Patients.objects.filter(created_date__range=(start_date, end_date)).count()
+    served_patients = Patients.objects.filter(id__in=served_patient_ids)
+
+    # Insurance
+    insurance_counts = served_patients.values("insurance").annotate(count=Count("id"))
+    insurance_rows = [
+        {
+            "id": "-",
+            "metric": f"Insurance: {item['insurance'] or 'Unknown'}",
+            "value": str(item["count"]),
+            "notes": "",
+        }
+        for item in insurance_counts
+    ]
+
+    # Zip Codes
+    zip_counts = served_patients.values("zip_code").annotate(count=Count("id"))
+    zip_rows = [
+        {
+            "id": "-",
+            "metric": f"Zip: {item['zip_code'] or 'Unknown'}",
+            "value": str(item["count"]),
+            "notes": "",
+        }
+        for item in zip_counts
+    ]
+
+    demo_rows = (
+        [
+            {
+                "id": "-",
+                "metric": "Total Patients Served",
+                "value": str(total_served),
+                "notes": "Patients with encounters in quarter",
+            },
+            {
+                "id": "-",
+                "metric": "New Enrollments",
+                "value": str(new_enrollments),
+                "notes": "Created in quarter",
+            },
+        ]
+        + insurance_rows
+        + zip_rows
+    )
+
+    # 2. SUD
+    sud_patients = served_patients.filter(sud=True).count()
+    sud_referrals = ODReferrals.objects.filter(
+        od_date__range=(start_date, end_date), referral_to_sud_agency=True
+    ).count()
+    sud_rows = [
+        {
+            "id": "-",
+            "metric": "SUD Flagged Patients",
+            "value": str(sud_patients),
+            "notes": "Subset of served patients",
+        },
+        {
+            "id": "-",
+            "metric": "Referrals to SUD Agency",
+            "value": str(sud_referrals),
+            "notes": "From OD Referrals",
+        },
+    ]
+
+    # 3. Behavioral Health
+    bh_patients = served_patients.filter(behavioral_health=True).count()
+    bh_rows = [
+        {
+            "id": "-",
+            "metric": "Behavioral Health Flagged",
+            "value": str(bh_patients),
+            "notes": "Subset of served patients",
+        },
+    ]
+
+    # 4. Outcomes
+    total_encounters = Encounters.objects.filter(
+        encounter_date__range=(start_date, end_date)
+    ).count()
+    total_referrals = Referrals.objects.filter(date_received__range=(start_date, end_date)).count()
+    outcome_rows = [
+        {
+            "id": "-",
+            "metric": "Total Encounters",
+            "value": str(total_encounters),
+            "notes": "",
+        },
+        {"id": "-", "metric": "Referrals Made", "value": str(total_referrals), "notes": ""},
+    ]
+
+    return [
+        {
+            "title": "1. Patient Demographics",
+            "type": "table",
+            "columns": ["ID", "Metric", "Value", "Notes"],
+            "rows": demo_rows,
+        },
+        {
+            "title": "2. Substance Use Disorder (SUD)",
+            "type": "table",
+            "columns": ["ID", "Metric", "Value", "Notes"],
+            "rows": sud_rows,
+        },
+        {
+            "title": "3. Behavioral Health",
+            "type": "table",
+            "columns": ["ID", "Metric", "Value", "Notes"],
+            "rows": bh_rows,
+        },
+        {
+            "title": "4. Outcomes",
+            "type": "table",
+            "columns": ["ID", "Metric", "Value", "Notes"],
+            "rows": outcome_rows,
+        },
+        {
+            "title": "5. Narrative",
+            "type": "narrative",
+            "questions_responses": [
+                {
+                    "question": "Narrative",
+                    "response": "Data aggregation for the current year is automated. Narrative inputs are not yet available.",
+                }
+            ],
+        },
+    ]
+
+
+def _build_hargrove_accordions() -> list[dict[str, object]]:
+    """Build accordion data for Hargrove Grant reporting."""
+    # Load historical data
+    historical_data = {}
+    try:
+        with HARGROVE_METRICS_PATH.open(encoding="utf-8") as fp:
+            historical_data = json.load(fp)
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+
+    years_data = []
+    # Years to display: 2025 down to 2019
+    target_years = range(2025, 2018, -1)
+
+    for year in target_years:
+        str_year = str(year)
+        quarters = []
+
+        # Determine if we have data for this year
+        year_metrics = historical_data.get(str_year)
+
+        # Generate 4 quarters for each year
+        for q in range(1, 5):
+            str_q = str(q)
+            label = f"Q{q}"
+            date_range = ""
+            if q == 1:
+                date_range = f"Jan - Mar {year}"
+            elif q == 2:
+                date_range = f"Apr - Jun {year}"
+            elif q == 3:
+                date_range = f"Jul - Sep {year}"
+            elif q == 4:
+                date_range = f"Oct - Dec {year}"
+
+            sections = []
+
+            if year_metrics and str_q in year_metrics:
+                sections = _build_historical_hargrove_metrics(year_metrics, str_q)
+            elif year == 2025:
+                sections = _build_2025_hargrove_metrics(year, q)
+            else:
+                # Placeholder for missing historical years (2019-2021)
+                sections = [
+                    {
+                        "title": "Data Archive",
+                        "type": "table",
+                        "columns": ["ID", "Metric", "Value", "Notes"],
+                        "rows": [
+                            {
+                                "id": "-",
+                                "metric": "Status",
+                                "value": "Archived",
+                                "notes": "Data for this period is archived.",
+                            }
+                        ],
+                    }
+                ]
+
+            quarters.append({"label": label, "date_range": date_range, "sections": sections})
+
+        years_data.append({"year": year, "is_current": year == 2025, "quarters": quarters})
+
+    return years_data
+
+
 def hargrove_grant(request):
-    return render(request, "dashboard/hargrove_grant.html")
+    years_data = _build_hargrove_accordions()
+    updated_on = date(2025, 11, 30)
+    context = {
+        "years_data": years_data,
+        "page_header_updated_at": updated_on,
+        "page_header_updated_at_iso": updated_on.isoformat(),
+        "page_header_read_time": "5 min read",
+    }
+    return render(request, "dashboard/hargrove_grant.html", context)
 
 
 @login_required

@@ -119,20 +119,16 @@ dev = [
 ]
 
 [tool.semantic_release]
-version_variable = "src/config/__init__.py:__version__"
-branch = "main"
+version_variables = ["src/config/__init__.py:__version__"]
+version_toml = ["pyproject.toml:project.version"]
+branches = ["main"]
 build_command = "uv build"
 upload_to_pypi = false
 changelog_file = "CHANGELOG.md"
 tag_format = "v{version}"
 commit_message = "chore(release): {version}"
-
-# Map commit types to release levels
-# - feat -> minor
-# - fix, refactor, perf -> patch
-# - BREAKING CHANGE or ! -> major
-minor_types = ["feat"]
-patch_types = ["fix", "refactor", "perf"]
-
-# Treat exclamation-mark commits as breaking; also respect BREAKING CHANGE: footer
 major_on_zero = false
+
+[tool.semantic_release.commit_parser_options]
+minor_tags = ["feat"]
+patch_tags = ["fix", "refactor", "perf"]
