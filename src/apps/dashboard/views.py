@@ -5057,7 +5057,15 @@ def od_transport_detail(request):
             total_cases = len(df)
 
             # Cases with transport location data
-            has_location = len(df[df["transport_to_location"].notna()])
+            # Only count specific destinations as "transported"
+            valid_destinations = {"hospital", "home", "jail", "shelter"}
+            if "transport_to_location" in df.columns:
+                # Normalize to lowercase and strip whitespace for comparison
+                transport_locs = df["transport_to_location"].astype(str).str.lower().str.strip()
+                has_location = len(df[transport_locs.isin(valid_destinations)])
+            else:
+                has_location = 0
+
             location_pct = round((has_location / total_cases) * 100, 1) if total_cases > 0 else 0
 
             # Most common transport location
@@ -5080,14 +5088,6 @@ def od_transport_detail(request):
                 most_common_method = "N/A"
                 method_count = 0
 
-            # Fatal cases with transport data
-            fatal_transported = len(
-                df[
-                    (df["disposition"].isin(["CPR attempted", "DOA"]))
-                    & (df["transport_to_location"].notna())
-                ]
-            )
-
             transport_stats = [
                 {
                     "label": "Transport Rate",
@@ -5103,11 +5103,6 @@ def od_transport_detail(request):
                     "label": "Primary Method",
                     "value": str(most_common_method),
                     "description": f"{method_count} cases",
-                },
-                {
-                    "label": "Fatal Transported",
-                    "value": str(fatal_transported),
-                    "description": "DOA/CPR w/ transport",
                 },
             ]
 
