@@ -58,7 +58,9 @@ class TaskListCreateView(LoginRequiredMixin, ListView):
                     "tasks/_task_item.html", {"task": task}, request=request
                 )
                 badges_html = _render_badges_oob(request)
-                return HttpResponse(row_html + badges_html)
+                response = HttpResponse(row_html + badges_html)
+                response["HX-Trigger"] = "task-created"
+                return response
         else:
             messages.error(request, "Please correct the errors.")
         # If HTMX invalid, return the form fragment OOB to replace the form
@@ -69,7 +71,7 @@ class TaskListCreateView(LoginRequiredMixin, ListView):
                 "tasks/_task_create_form.html", {"form": form}, request=request
             )
             # Mark as out-of-band so it replaces the form while target is UL
-            replaced_html: str = str(form_html).replace("<form ", '<form hx-swap-oob="true" ')
+            replaced_html: str = str(form_html).replace("<form", '<form hx-swap-oob="true"', 1)
             return HttpResponse(replaced_html)
         return redirect("tasks:list")
 

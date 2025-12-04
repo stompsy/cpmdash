@@ -1,10 +1,11 @@
 <form
+  id="task-create-form"
   method="post"
   action=""
   hx-post=""
-  hx-target="#tasks-list > ul"
+  hx-target="#tasks-ul"
   hx-swap="afterbegin"
-  @htmx:after-request="if($event.detail.successful) { showTaskModal = false; $el.reset(); }"
+  @task-created.window="showTaskModal = false; $el.reset();"
   class="space-y-4"
 >
   {% csrf_token %}

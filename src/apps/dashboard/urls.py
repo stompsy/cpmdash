@@ -4,7 +4,6 @@ from .views import (
     age_chart_variations_demo,
     authentication,
     hargrove_grant,
-    od_cpm_disposition_detail,
     od_cpm_notification_detail,
     od_cpr_administered_detail,
     od_disposition_detail,
@@ -60,11 +59,6 @@ urlpatterns = [
         "odreferrals/suspected-drug-detail/",
         od_suspected_drug_detail,
         name="od_suspected_drug_detail",
-    ),
-    path(
-        "odreferrals/cpm-disposition-detail/",
-        od_cpm_disposition_detail,
-        name="od_cpm_disposition_detail",
     ),
     path(
         "odreferrals/living-situation-detail/",

@@ -562,26 +562,6 @@
         </div>
     </div>
 
-    {# CPM Disposition Modal #}
-    <div
-        id="od-cpm-disposition-modal-overlay"
-        class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
-        onclick="if(event.target === this) this.classList.add('hidden')"
-    >
-        <div class="flex min-h-screen items-center justify-center p-4 sm:p-6 lg:p-8">
-            <div
-                class="relative flex h-[calc(100vh-3rem)] w-full max-w-7xl animate-in fade-in zoom-in-95 duration-300 sm:h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)]"
-                onclick="event.stopPropagation()"
-            >
-                <div class="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl ring-1 ring-black/5 dark:border-slate-700/50 dark:bg-slate-900 dark:shadow-slate-950/50 dark:ring-white/10">
-                    <div id="od-cpm-disposition-modal-content" class="flex-1 overflow-y-auto">
-                        {# Content will be loaded here via HTMX #}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {# Living Situation Modal #}
     <div
         id="od-living-situation-modal-overlay"

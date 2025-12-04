@@ -331,21 +331,11 @@ def build_narcan_stats() -> list[dict[str, str]]:
     df_compare = pd.DataFrame.from_records(list(queryset_compare))
     df_compare["narcan_doses_prior_to_ems"] = df_compare["narcan_doses_prior_to_ems"].fillna(0)
     df_compare["narcan_doses_by_ems"] = df_compare["narcan_doses_by_ems"].fillna(0)
-    bystander_led = len(
-        df_compare[df_compare["narcan_doses_prior_to_ems"] > df_compare["narcan_doses_by_ems"]]
-    )
-
-    bystander_led_pct = (bystander_led / narcan_given_count * 100) if narcan_given_count > 0 else 0
 
     return [
         {
             "label": "Narcan administered",
             "value": f"{narcan_given_count:,}",
             "description": f"{narcan_rate:.0f}% of all overdose referrals",
-        },
-        {
-            "label": "Bystander-first cases",
-            "value": f"{bystander_led:,}",
-            "description": f"{bystander_led_pct:.0f}% had bystanders give more doses than EMS",
         },
     ]

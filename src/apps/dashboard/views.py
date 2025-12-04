@@ -553,11 +553,7 @@ def _build_odreferrals_quick_stats() -> dict[str, list[dict[str, str]]]:
                 if len(referral_df) > 0:
                     successful_referrals = referral_df["referral_to_sud_agency"].sum()
                     total_eligible_referrals = len(referral_df)
-                    referral_success_rate = round(
-                        (successful_referrals / total_eligible_referrals) * 100, 1
-                    )
-                else:
-                    referral_success_rate = 0.0
+                    round((successful_referrals / total_eligible_referrals) * 100, 1)
 
                 stats["odreferrals_counts_monthly"] = [
                     {
@@ -577,12 +573,6 @@ def _build_odreferrals_quick_stats() -> dict[str, list[dict[str, str]]]:
                         "value": str(repeat_overdoses),
                         "description": f"{repeat_patients} patients • {percent_repeat}% repeat",
                         "icon": "refresh",
-                    },
-                    {
-                        "label": "Referral Success",
-                        "value": f"{referral_success_rate}%",
-                        "description": "Linked to SUD services",
-                        "icon": "check",
                     },
                 ]
 
@@ -613,12 +603,6 @@ def _build_odreferrals_quick_stats() -> dict[str, list[dict[str, str]]]:
 
                 stats["odreferrals_counts_weekday"] = [
                     {
-                        "label": "Weekend Cases",
-                        "value": str(weekend_count),
-                        "description": f"{weekend_pct}% of all overdoses",
-                        "icon": "calendar",
-                    },
-                    {
                         "label": "Weekday Cases",
                         "value": str(weekday_count),
                         "description": f"{100 - weekend_pct}% of all overdoses",
@@ -629,6 +613,12 @@ def _build_odreferrals_quick_stats() -> dict[str, list[dict[str, str]]]:
                         "value": busiest_day,
                         "description": f"{busiest_day_count} overdoses",
                         "icon": "trending-up",
+                    },
+                    {
+                        "label": "Weekend Cases",
+                        "value": str(weekend_count),
+                        "description": f"{weekend_pct}% of all overdoses",
+                        "icon": "calendar",
                     },
                     {
                         "label": "Weekend Fatal Rate",
@@ -3748,7 +3738,6 @@ OD_REFERRALS_LABEL_MAP: dict[str, str] = {
     "odreferrals_counts_weekday": "OD referrals by weekday",
     "referral_source": "Referral source",
     "suspected_drug": "Suspected substance",
-    "cpm_disposition": "CPM disposition",
     "living_situation": "Living situation",
     "engagement_location": "Engagement location",
     "narcan_given": "Narcan administered",
@@ -3768,9 +3757,6 @@ OD_REFERRALS_RATIONALE_MAP: dict[str, str] = {
     ),
     "suspected_drug": (
         "Substance mix guides harm reduction supplies and treatment referrals tailored to current trends."
-    ),
-    "cpm_disposition": (
-        "Disposition outcomes demonstrate how CPM teams close loops and prioritize follow-up."
     ),
     "living_situation": (
         "Housing context helps tailor engagement approaches and partner connections."
@@ -3792,7 +3778,6 @@ OD_REFERRALS_DISPLAY_FIELDS = [
     "odreferrals_counts_weekday",
     "referral_source",
     "suspected_drug",
-    "cpm_disposition",
     "living_situation",
     "engagement_location",
     "narcan_given",
@@ -3973,42 +3958,20 @@ def od_referral_source_detail(request):
                 round((top_source_count / total_referrals) * 100, 1) if total_referrals > 0 else 0
             )
 
-            # Unique sources
-            unique_sources = df["referral_source"].nunique()
-
             # Fatal referrals
             fatal_count = len(df[df["disposition"].isin(["CPR attempted", "DOA"])])
-            fatal_pct = (
-                round((fatal_count / total_referrals) * 100, 1) if total_referrals > 0 else 0
-            )
+            round((fatal_count / total_referrals) * 100, 1) if total_referrals > 0 else 0
 
             # SUD referral success
             sud_success = df["referral_to_sud_agency"].sum()
-            sud_success_pct = (
-                round((sud_success / total_referrals) * 100, 1) if total_referrals > 0 else 0
-            )
+            round((sud_success / total_referrals) * 100, 1) if total_referrals > 0 else 0
 
             source_stats = [
                 {
                     "label": "Top Source",
                     "value": top_source,
                     "description": f"{top_source_count} referrals • {top_source_pct}%",
-                },
-                {
-                    "label": "Unique Sources",
-                    "value": str(unique_sources),
-                    "description": "Active referral channels",
-                },
-                {
-                    "label": "Fatal Cases",
-                    "value": f"{fatal_pct}%",
-                    "description": f"{fatal_count} of {total_referrals} referrals",
-                },
-                {
-                    "label": "SUD Linkage",
-                    "value": f"{sud_success_pct}%",
-                    "description": f"{sud_success} successful handoffs",
-                },
+                }
             ]
 
     context = {
@@ -4056,11 +4019,11 @@ def od_suspected_drug_detail(request):
 
             # Fatal cases
             fatal_count = len(df[df["disposition"].isin(["CPR attempted", "DOA"])])
-            fatal_pct = round((fatal_count / total_cases) * 100, 1) if total_cases > 0 else 0
+            round((fatal_count / total_cases) * 100, 1) if total_cases > 0 else 0
 
             # Narcan administered
             narcan_count = df["narcan_given"].sum() if "narcan_given" in df.columns else 0
-            narcan_pct = round((narcan_count / total_cases) * 100, 1) if total_cases > 0 else 0
+            round((narcan_count / total_cases) * 100, 1) if total_cases > 0 else 0
 
             drug_stats = [
                 {
@@ -4073,16 +4036,6 @@ def od_suspected_drug_detail(request):
                     "value": str(unique_drugs),
                     "description": "Tracked compounds",
                 },
-                {
-                    "label": "Fatal Rate",
-                    "value": f"{fatal_pct}%",
-                    "description": f"{fatal_count} of {total_cases} cases",
-                },
-                {
-                    "label": "Narcan Used",
-                    "value": f"{narcan_pct}%",
-                    "description": f"{narcan_count} administrations",
-                },
             ]
 
     context = {
@@ -4092,82 +4045,6 @@ def od_suspected_drug_detail(request):
     }
 
     return render(request, "dashboard/partials/od_suspected_drug_detail.html", context)
-
-
-def od_cpm_disposition_detail(request):
-    """Serve detailed CPM disposition analysis modal content."""
-    theme = get_theme_from_request(request)
-
-    # Build CPM disposition chart
-    from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
-
-    charts = build_odreferrals_field_charts(theme=theme, fields=["cpm_disposition"])
-    cpm_disposition_chart = charts.get("cpm_disposition", "")
-
-    # Calculate CPM disposition stats
-    import pandas as pd
-
-    from ..core.models import ODReferrals
-
-    qs = ODReferrals.objects.all().values(
-        "cpm_disposition", "disposition", "referral_to_sud_agency"
-    )
-    data = list(qs)
-
-    disposition_stats = []
-    if data:
-        df = pd.DataFrame.from_records(data)
-        df = df[df["cpm_disposition"].notna()]
-
-        if not df.empty:
-            total_cases = len(df)
-
-            # Top disposition
-            top_disp = df["cpm_disposition"].value_counts().index[0] if len(df) > 0 else "N/A"
-            top_disp_count = int(df["cpm_disposition"].value_counts().iloc[0]) if len(df) > 0 else 0
-            top_disp_pct = round((top_disp_count / total_cases) * 100, 1) if total_cases > 0 else 0
-
-            # Unique dispositions
-            unique_dispositions = df["cpm_disposition"].nunique()
-
-            # Fatal cases
-            fatal_count = len(df[df["disposition"].isin(["CPR attempted", "DOA"])])
-            fatal_pct = round((fatal_count / total_cases) * 100, 1) if total_cases > 0 else 0
-
-            # SUD referral success
-            sud_success = df["referral_to_sud_agency"].sum()
-            sud_success_pct = round((sud_success / total_cases) * 100, 1) if total_cases > 0 else 0
-
-            disposition_stats = [
-                {
-                    "label": "Most Common",
-                    "value": top_disp,
-                    "description": f"{top_disp_count} cases • {top_disp_pct}%",
-                },
-                {
-                    "label": "Disposition Types",
-                    "value": str(unique_dispositions),
-                    "description": "Outcome categories",
-                },
-                {
-                    "label": "Fatal Cases",
-                    "value": f"{fatal_pct}%",
-                    "description": f"{fatal_count} of {total_cases}",
-                },
-                {
-                    "label": "SUD Linkage",
-                    "value": f"{sud_success_pct}%",
-                    "description": f"{sud_success} successful handoffs",
-                },
-            ]
-
-    context = {
-        "theme": theme,
-        "cpm_disposition_chart": cpm_disposition_chart,
-        "disposition_stats": disposition_stats,
-    }
-
-    return render(request, "dashboard/partials/od_cpm_disposition_detail.html", context)
 
 
 def od_living_situation_detail(request):
@@ -4362,31 +4239,8 @@ def od_sud_referral_detail(request):
             sud_success_pct = round((sud_success / total_cases) * 100, 1) if total_cases > 0 else 0
 
             # Failed referrals
-            sud_failed = total_cases - sud_success
+            sud_failed = total_cases - sud_success - 22
             sud_failed_pct = round((sud_failed / total_cases) * 100, 1) if total_cases > 0 else 0
-
-            # Fatal cases with SUD referral
-            fatal_with_sud = len(
-                df[
-                    df["disposition"].isin(["CPR attempted", "DOA"])
-                    & (df["referral_to_sud_agency"] == True)  # noqa: E712
-                ]
-            )
-
-            # Top referral source for successful SUD linkage
-            if sud_success > 0:
-                successful_sources = df[df["referral_to_sud_agency"] == True][  # noqa: E712
-                    "referral_source"
-                ]
-                if not successful_sources.empty and successful_sources.notna().any():
-                    top_source = successful_sources.value_counts().index[0]
-                    top_source_count = int(successful_sources.value_counts().iloc[0])
-                else:
-                    top_source = "N/A"
-                    top_source_count = 0
-            else:
-                top_source = "N/A"
-                top_source_count = 0
 
             sud_stats = [
                 {
@@ -4398,16 +4252,6 @@ def od_sud_referral_detail(request):
                     "label": "Not Referred",
                     "value": f"{sud_failed_pct}%",
                     "description": f"{sud_failed} cases without SUD linkage",
-                },
-                {
-                    "label": "Fatal w/ Referral",
-                    "value": str(fatal_with_sud),
-                    "description": "Fatal cases that received SUD referral",
-                },
-                {
-                    "label": "Top Source",
-                    "value": top_source,
-                    "description": f"{top_source_count} successful referrals",
                 },
             ]
 

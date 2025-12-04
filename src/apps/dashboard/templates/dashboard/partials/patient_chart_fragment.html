@@ -127,20 +127,6 @@
                     <button
                         type="button"
                         class="group/deep relative flex w-full flex-col items-start gap-1.5 overflow-hidden rounded-xl border border-slate-700/70 bg-slate-800/90 px-4 py-3 text-left text-sm shadow-sm transition-all duration-200 hover:border-rose-500/40 hover:bg-slate-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:ring-offset-2 focus:ring-offset-slate-900 dark:border-slate-600/70 dark:bg-slate-800 dark:hover:border-rose-500/50 dark:hover:bg-slate-800/95"
-                        hx-get="{% url 'dashboard:od_cpm_disposition_detail' %}"
-                        hx-target="#od-cpm-disposition-modal-content"
-                        hx-swap="innerHTML"
-                        onclick="document.getElementById('od-cpm-disposition-modal-overlay').classList.remove('hidden')"
-                    >
-                        <div>
-                            <p class="font-semibold text-gray-900 dark:text-white">CPM Disposition</p>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Outcomes of paramedic interventions.</p>
-                        </div>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="group/deep relative flex w-full flex-col items-start gap-1.5 overflow-hidden rounded-xl border border-slate-700/70 bg-slate-800/90 px-4 py-3 text-left text-sm shadow-sm transition-all duration-200 hover:border-rose-500/40 hover:bg-slate-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:ring-offset-2 focus:ring-offset-slate-900 dark:border-slate-600/70 dark:bg-slate-800 dark:hover:border-rose-500/50 dark:hover:bg-slate-800/95"
                         hx-get="{% url 'dashboard:od_living_situation_detail' %}"
                         hx-target="#od-living-situation-modal-content"
                         hx-swap="innerHTML"
