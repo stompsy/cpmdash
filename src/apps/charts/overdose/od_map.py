@@ -55,8 +55,8 @@ OD_MAP_TEMPLATE = """
                 L.latLng(24.396308, -124.848974), // Southwest (Hawaii/AK excluded on purpose)
                 L.latLng(49.384358, -66.885444)   // Northeast
             ),
-            minZoom: 4,  // Zoomed out to national view
-            maxZoom: 13, // Restricted to city/neighborhood level to protect privacy
+            minZoom: 10,  // Zoomed out to national view
+            maxZoom: 12, // Restricted to city/neighborhood level to protect privacy
         };
     }
 

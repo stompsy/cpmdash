@@ -2530,7 +2530,8 @@ def _compute_hotspot_stats() -> dict[str, object]:
 
 def odreferrals_hotspots(request):
     theme = get_theme_from_request(request)
-    fig_od_map = _chart_html(build_chart_od_map(theme=theme))
+    zoom_mode = "full" if request.user.is_authenticated else "restricted"
+    fig_od_map = _chart_html(build_chart_od_map(theme=theme, zoom_mode=zoom_mode))
     stats = _compute_hotspot_stats()
     document_metrics = _load_hotspot_context()
 
@@ -3879,7 +3880,8 @@ def odreferrals(request):
     fig_repeats_scatter = _chart_html(build_chart_repeats_scatter(theme=theme))
 
     # Add hotspot map and statistics
-    fig_od_map = _chart_html(build_chart_od_map(theme=theme))
+    zoom_mode = "full" if request.user.is_authenticated else "restricted"
+    fig_od_map = _chart_html(build_chart_od_map(theme=theme, zoom_mode=zoom_mode))
     hotspot_stats = _compute_hotspot_stats()
 
     # Add Narcan administration analysis

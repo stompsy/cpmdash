@@ -22,7 +22,7 @@ defusedxml==0.7.1
     # via cpmdash (pyproject.toml)
 dj-database-url==3.0.1
     # via cpmdash (pyproject.toml)
-django==5.2.8
+django==5.2.9
     # via
     #   cpmdash (pyproject.toml)
     #   dj-database-url
@@ -46,6 +46,8 @@ djangorestframework==3.16.1
     #   drf-spectacular
 drf-spectacular==0.28.0
     # via cpmdash (pyproject.toml)
+et-xmlfile==2.0.0
+    # via openpyxl
 geopandas==1.1.1
     # via cpmdash (pyproject.toml)
 gunicorn==23.0.0
@@ -71,7 +73,10 @@ numpy==2.3.2
     #   geopandas
     #   pandas
     #   pyogrio
+    #   scipy
     #   shapely
+openpyxl==3.1.5
+    # via cpmdash (pyproject.toml)
 packaging==25.0
     # via
     #   geopandas
@@ -114,6 +119,8 @@ rpds-py==0.27.1
     # via
     #   jsonschema
     #   referencing
+scipy==1.16.3
+    # via cpmdash (pyproject.toml)
 shapely==2.1.2
     # via geopandas
 six==1.17.0
