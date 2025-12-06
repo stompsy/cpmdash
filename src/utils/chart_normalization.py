@@ -27,11 +27,17 @@ def add_share_columns(
             df[label_col] = ["0.0%"] * len(df)
         return df
 
+    # Ensure count column is numeric to prevent errors
+    df[count_col] = pd.to_numeric(df[count_col], errors="coerce").fillna(0)
+
     total = float(df[count_col].sum())
     if total <= 0:
         df[share_col] = 0.0
     else:
         df[share_col] = (df[count_col] / total) * 100.0
+
+    # Ensure share column is clean
+    df[share_col] = df[share_col].fillna(0.0)
 
     if label_col:
         df[label_col] = df[share_col].apply(lambda value: f"{value:.{precision}f}%")

@@ -4212,10 +4212,17 @@ def od_sud_referral_detail(request):
     theme = get_theme_from_request(request)
 
     # Build SUD referral chart
+    import plotly.express as px
+    from plotly.offline import plot
+
+    from utils.chart_colors import CHART_COLORS_VIBRANT
+    from utils.plotly import style_plotly_layout
+
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
     charts = build_odreferrals_field_charts(theme=theme, fields=["referral_to_sud_agency"])
     sud_referral_chart = charts.get("referral_to_sud_agency", "")
+    non_referral_chart = ""
 
     # Calculate SUD referral stats
     import pandas as pd
@@ -4223,7 +4230,18 @@ def od_sud_referral_detail(request):
     from ..core.models import ODReferrals
 
     qs = ODReferrals.objects.all().values(
-        "referral_to_sud_agency", "disposition", "referral_source", "cpm_disposition"
+        "referral_to_sud_agency",
+        "disposition",
+        "referral_source",
+        "cpm_disposition",
+        "referral_rediscovery",
+        "referral_reflections",
+        "referral_pbh",
+        "referral_other",
+        "accepted_rediscovery",
+        "accepted_reflections",
+        "accepted_pbh",
+        "accepted_other",
     )
     data = list(qs)
 
@@ -4233,13 +4251,14 @@ def od_sud_referral_detail(request):
 
         if not df.empty:
             total_cases = len(df)
+            fatal_cases = len(df[df["disposition"].isin(["CPR attempted", "DOA"])])
 
             # Successful referrals
-            sud_success = df["referral_to_sud_agency"].sum()
+            sud_success = int(df["referral_to_sud_agency"].fillna(0).sum())
             sud_success_pct = round((sud_success / total_cases) * 100, 1) if total_cases > 0 else 0
 
             # Failed referrals
-            sud_failed = total_cases - sud_success - 22
+            sud_failed = max(total_cases - sud_success - 22, 0)
             sud_failed_pct = round((sud_failed / total_cases) * 100, 1) if total_cases > 0 else 0
 
             sud_stats = [
@@ -4255,10 +4274,91 @@ def od_sud_referral_detail(request):
                 },
             ]
 
+            # Build "Why Not Referred/Accepted" donut
+            referral_cols = [
+                "referral_rediscovery",
+                "referral_reflections",
+                "referral_pbh",
+                "referral_other",
+            ]
+            accepted_cols = [
+                "accepted_rediscovery",
+                "accepted_reflections",
+                "accepted_pbh",
+                "accepted_other",
+            ]
+
+            numeric_df = df.copy()
+            numeric_df[referral_cols + accepted_cols] = numeric_df[
+                referral_cols + accepted_cols
+            ].fillna(0)
+
+            rediscovery_not_accepted = int(
+                (
+                    (numeric_df["referral_rediscovery"] > 0)
+                    & (numeric_df["accepted_rediscovery"] <= 0)
+                ).sum()
+            )
+            reflections_not_accepted = int(
+                (
+                    (numeric_df["referral_reflections"] > 0)
+                    & (numeric_df["accepted_reflections"] <= 0)
+                ).sum()
+            )
+            pbh_not_accepted = int(
+                ((numeric_df["referral_pbh"] > 0) & (numeric_df["accepted_pbh"] <= 0)).sum()
+            )
+            other_not_accepted = int(
+                ((numeric_df["referral_other"] > 0) & (numeric_df["accepted_other"] <= 0)).sum()
+            )
+
+            reasons = [
+                {"Reason": "Fatal Overdose", "Count": fatal_cases},
+                {"Reason": "Not Accepted - Rediscovery", "Count": rediscovery_not_accepted},
+                {"Reason": "Not Accepted - Reflections", "Count": reflections_not_accepted},
+                {"Reason": "Not Accepted - PBH", "Count": pbh_not_accepted},
+                {"Reason": "Not Accepted - Other", "Count": other_not_accepted},
+                {"Reason": "Outside Fire District", "Count": 22},
+            ]
+
+            reasons_df = pd.DataFrame(reasons)
+            reasons_df = reasons_df[reasons_df["Count"] > 0]
+
+            if not reasons_df.empty:
+                fig = px.pie(
+                    reasons_df,
+                    names="Reason",
+                    values="Count",
+                    hole=0.55,
+                    color_discrete_sequence=CHART_COLORS_VIBRANT,
+                )
+
+                fig = style_plotly_layout(
+                    fig,
+                    theme=theme,
+                    height=380,
+                    margin=dict(l=0, r=0, t=20, b=0),
+                )
+
+                fig.update_layout(legend_title_text="")
+
+                fig.update_traces(textposition="inside", textinfo="percent")
+
+                non_referral_chart = plot(
+                    fig,
+                    include_plotlyjs=False,
+                    output_type="div",
+                    config={
+                        "displayModeBar": False,
+                        "responsive": True,
+                    },
+                )
+
     context = {
         "theme": theme,
         "sud_referral_chart": sud_referral_chart,
         "sud_stats": sud_stats,
+        "non_referral_chart": non_referral_chart,
     }
 
     return render(request, "dashboard/partials/od_sud_referral_detail.html", context)
@@ -4524,6 +4624,8 @@ def od_scene_responders_detail(request):
         df = pd.DataFrame.from_records(data)
 
         if not df.empty:
+            total_scenes = len(df)
+
             # Average responders per scene (excluding scenes where count is 0)
             # Only average when responders were actually present
             avg_nonems = df[df["number_of_nonems_onscene"] > 0]["number_of_nonems_onscene"].mean()
@@ -4543,6 +4645,9 @@ def od_scene_responders_detail(request):
             total_peers = df["number_of_peers_onscene"].sum()
             total_police = df["number_of_police_onscene"].sum()
 
+            avg_nonems_per_scene = (total_nonems / total_scenes) if total_scenes else 0
+            avg_peers_per_scene = (total_peers / total_scenes) if total_scenes else 0
+
             # Scenes where each responder type was present
             scenes_with_nonems = len(df[df["number_of_nonems_onscene"] > 0])
             scenes_with_ems = len(df[df["number_of_ems_onscene"] > 0])
@@ -4552,7 +4657,7 @@ def od_scene_responders_detail(request):
             # Build simple horizontal bar chart showing average responders by type
             chart_data = [
                 {
-                    "Responder Type": "EMS/Paramedics",
+                    "Responder Type": "Fire/EMS",
                     "Average per Scene": round(avg_ems, 2),
                     "Total Across All Scenes": int(total_ems),
                     "Scenes with Presence": scenes_with_ems,
@@ -4639,14 +4744,14 @@ def od_scene_responders_detail(request):
                     "description": f"{total_police:.0f} total officers",
                 },
                 {
-                    "label": "Avg Peer Support",
-                    "value": f"{avg_peers:.1f}",
-                    "description": f"{total_peers:.0f} total peer responders",
+                    "label": "Avg Peer Support/Scene",
+                    "value": f"{avg_peers_per_scene:.1f}",
+                    "description": f"{total_peers:.0f} total peer responders across {total_scenes} scenes",
                 },
                 {
-                    "label": "Avg Non-EMS",
-                    "value": f"{avg_nonems:.1f}",
-                    "description": f"{total_nonems:.0f} total non-EMS personnel",
+                    "label": "Avg Non-EMS/Scene",
+                    "value": f"{avg_nonems_per_scene:.1f}",
+                    "description": f"{total_nonems:.0f} total non-EMS personnel across {total_scenes} scenes",
                 },
             ]
 

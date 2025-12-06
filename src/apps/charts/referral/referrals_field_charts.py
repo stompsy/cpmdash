@@ -34,6 +34,7 @@ COLOR_SEQUENCE = CHART_COLORS_VIBRANT
 
 def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, theme: str) -> str:
     vc_df = add_share_columns(vc_df, value_col)
+    vc_df["share_pct_rounded"] = vc_df["share_pct"].round(1)
     fig = px.pie(
         vc_df,
         names=label_col,
@@ -41,11 +42,12 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
         hole=0.55,
         color=label_col,
         color_discrete_sequence=COLOR_SEQUENCE,
+        custom_data=["share_pct_rounded"],
     )
     fig.update_traces(
         textposition="inside",
-        textinfo="percent",
-        hovertemplate="%{label}<br>Share: %{percent}<extra></extra>",
+        texttemplate="%{customdata[0]:.1f}%",
+        hovertemplate="%{label}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
         marker=dict(line=dict(color="white", width=1)),
     )
     fig = style_plotly_layout(
@@ -132,6 +134,10 @@ def _build_donut_chart_top_legend(
     )  # Keep original for hover BEFORE truncation
     vc_df[label_col] = vc_df[label_col].apply(truncate_label)  # Now apply truncation
 
+    # Pre-compute share percentages to avoid Plotly NaN percent behavior
+    vc_df = add_share_columns(vc_df, value_col)
+    vc_df["share_pct_rounded"] = vc_df["share_pct"].fillna(0.0).round(1)
+
     # Use go.Pie for more control over hover behavior
     fig = go.Figure(
         data=[
@@ -141,10 +147,11 @@ def _build_donut_chart_top_legend(
                 hole=0.55,
                 marker=dict(colors=COLOR_SEQUENCE[: len(vc_df)], line=dict(color="white", width=1)),
                 textposition="outside",
-                textinfo="label+percent",
+                textinfo="none",  # texttemplate provides the label and share
                 textfont=dict(size=11),
-                customdata=vc_df["full_label"].values,  # Pass full labels
-                hovertemplate="<b>%{customdata}</b><br>Share: %{percent}<extra></extra>",  # Show only full label
+                customdata=vc_df[["full_label", "share_pct_rounded"]].values,
+                texttemplate="%{label}<br>%{customdata[1]:.1f}%",
+                hovertemplate="<b>%{customdata[0]}</b><br>Share: %{customdata[1]:.1f}%<extra></extra>",
             )
         ]
     )

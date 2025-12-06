@@ -46,11 +46,37 @@
             <div class="mb-4 flex items-center justify-between text-sm">
                 <div>
                     <h4 class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-700 dark:text-slate-300">Source distribution</h4>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Relative volume of overdose referrals by source agency or channel.</p>
                 </div>
             </div>
             <div class="plotly-chart-wrapper w-full">
                 {% autoescape off %}{{ referral_source_chart|safe }}{% endautoescape %}
+            </div>
+
+            <div class="mt-8 grid grid-cols-1 gap-6 border-t border-slate-100 pt-6 sm:grid-cols-3 dark:border-slate-800">
+                <div>
+                    <dt class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                        911
+                    </dt>
+                    <dd class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                        Direct referrals from emergency calls and dispatch.
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                        Referral
+                    </dt>
+                    <dd class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                        Incoming requests from outside partner agencies.
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                        Other
+                    </dt>
+                    <dd class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                        Proactive cases initiated by community paramedics or research.
+                    </dd>
+                </div>
             </div>
         </div>
 

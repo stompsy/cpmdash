@@ -56,6 +56,7 @@ def _build_donut_chart(
     legend_filter: str | None = None,
 ) -> str:
     vc_df = add_share_columns(vc_df, value_col)
+    vc_df["share_pct_rounded"] = vc_df["share_pct"].fillna(0.0).round(1)
     fig = px.pie(
         vc_df,
         names=label_col,
@@ -63,15 +64,15 @@ def _build_donut_chart(
         hole=0.5,
         color=label_col,
         color_discrete_sequence=COLOR_SEQUENCE,
+        custom_data=vc_df["share_pct_rounded"].to_numpy(),
     )
     fig.update_traces(
         textposition="inside",
-        textinfo="percent",
         textfont=dict(size=16, color="#1e293b", family="Arial, sans-serif"),
-        hovertemplate="%{label}<br>%{percent}<extra></extra>",
+        hovertemplate="%{label}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
         insidetextorientation="radial",
         marker=dict(line=dict(color="white", width=1)),
-        texttemplate="%{percent}",
+        texttemplate="%{customdata[0]:.1f}%",
     )
 
     # If legend_filter is specified, hide all legend items except the specified one

@@ -43,6 +43,7 @@ def _clean_series(series: pd.Series) -> pd.Series:
 
 def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, theme: str) -> str:
     vc_df = add_share_columns(vc_df, value_col)
+    vc_df["share_pct_rounded"] = vc_df["share_pct"].fillna(0.0).round(1)
     fig = px.pie(
         vc_df,
         names=label_col,
@@ -50,12 +51,12 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
         hole=0.55,
         color=label_col,
         color_discrete_sequence=COLOR_SEQUENCE,
-        custom_data=[vc_df["share_pct"].round(1)],
+        custom_data=vc_df["share_pct_rounded"].to_numpy(),
     )
     fig.update_traces(
         textposition="outside",
-        textinfo="label+percent",
-        hovertemplate="%{label}<br>Count: %{value}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
+        texttemplate="%{label}<br>%{customdata[0]:.1f}%",
+        hovertemplate="%{label}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
         marker=dict(line=dict(color="white", width=1)),
     )
     fig = style_plotly_layout(
