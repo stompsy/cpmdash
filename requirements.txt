@@ -32,7 +32,7 @@ django==5.2.9
     #   django-filter
     #   djangorestframework
     #   drf-spectacular
-django-allauth==65.11.2
+django-allauth==65.13.1
     # via cpmdash (pyproject.toml)
 django-browser-reload==1.18.0
     # via cpmdash (pyproject.toml)

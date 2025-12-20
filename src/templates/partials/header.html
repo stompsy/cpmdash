@@ -790,12 +790,13 @@
           >
             Sign in
           </a>
-          <a
-            href="{% url 'account_signup' %}"
-            class="text-theme-sm rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+          <span
+            aria-disabled="true"
+            title="Sign up is currently disabled"
+            class="text-theme-sm cursor-not-allowed rounded-lg bg-indigo-600/50 px-4 py-2 font-medium text-white/70 opacity-60 dark:bg-indigo-500/40"
           >
             Sign up
-          </a>
+          </span>
         </div>
       {% endif %}
       <!-- User Area -->

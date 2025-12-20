@@ -64,7 +64,7 @@ def _build_donut_chart(
         hole=0.5,
         color=label_col,
         color_discrete_sequence=COLOR_SEQUENCE,
-        custom_data=vc_df["share_pct_rounded"].to_numpy(),
+        custom_data=["share_pct_rounded"],
     )
     fig.update_traces(
         textposition="inside",

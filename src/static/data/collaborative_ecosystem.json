@@ -121,15 +121,6 @@
       "color": "#a855f7",
       "agencies": [
         {
-          "name": "Peninsula Behavioral Health",
-          "details": {
-            "services": "Mental health, substance use disorder counseling, crisis intervention",
-            "phone": "(360) 457-0431",
-            "website": "https://peninsulabehavioral.org/",
-            "hours": "M-Th 8am-6pm, F 8am-5pm"
-          }
-        },
-        {
           "name": "Healthy Families of Clallam County",
           "details": {
             "services": "Domestic violence support, crisis intervention, family services",
@@ -147,6 +138,25 @@
             "email": "info@jamestownhealingclinic.org",
             "website": "https://jamestownhealingclinic.org/",
             "hours": "M-F 6:00am – 2:00pm"
+          }
+        },
+        {
+          "name": "Peninsula Behavioral Health",
+          "details": {
+            "services": "Mental health, substance use disorder counseling, crisis intervention",
+            "phone": "(360) 457-0431",
+            "website": "https://peninsulabehavioral.org/",
+            "hours": "M-Th 8am-6pm, F 8am-5pm"
+          }
+        },
+        {
+          "name": "Reflections Counseling Services Group",
+          "details": {
+            "services": "Substance use counseling, outpatient treatment, REAL Team services",
+            "address": "3430 E Highway 101, Port Angeles, WA 98362",
+            "phone": "(360) 452-4062",
+            "website": "https://reflectionscounselingservicesgroup.org",
+            "hours": "Walk_In: 10:00 AM - 11:00 AM & 1:00 PM - 2:00 PM | Office: Monday-Friday 9:00 AM - 5:00 PM (by appointment)"
           }
         }
       ]
@@ -270,16 +280,6 @@
       "description": "Trusted navigators and culturally specific partners who close the loop after we step off the street or out of the living room.",
       "color": "#34d399",
       "agencies": [
-        {
-          "name": "Reflections Counseling Services Group",
-          "details": {
-            "services": "Substance use counseling, outpatient treatment, REAL Team services",
-            "address": "3430 E Highway 101, Port Angeles, WA 98362",
-            "phone": "(360) 452-4062",
-            "website": "https://reflectionscounselingservicesgroup.org",
-            "hours": "Walk_In: 10:00 AM - 11:00 AM & 1:00 PM - 2:00 PM | Office: Monday-Friday 9:00 AM - 5:00 PM (by appointment)"
-          }
-        },
         {
           "name": "Olympic Community of Health - North West Region",
           "details": {
