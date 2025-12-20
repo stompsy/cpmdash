@@ -14,9 +14,35 @@ load_dotenv(BASE_DIR / ".env")
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t")
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
+
+def _split_env_csv(name: str) -> list[str]:
+    raw = os.environ.get(name, "")
+    return [item.strip() for item in raw.split(",") if item.strip() and item.strip() != "."]
+
+
+def _normalize_csrf_trusted_origins(origins: list[str]) -> list[str]:
+    normalized: list[str] = []
+    for origin in origins:
+        origin = origin.strip()
+        if not origin or origin == ".":
+            continue
+
+        if origin.startswith("http://") or origin.startswith("https://"):
+            normalized.append(origin)
+            continue
+
+        if origin.startswith(".") and len(origin) > 1:
+            origin = f"*.{origin.lstrip('.')}"
+
+        scheme = "http" if ("localhost" in origin or origin.startswith("127.0.0.1")) else "https"
+        normalized.append(f"{scheme}://{origin}")
+
+    return normalized
+
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "dummy-key-for-pre-commit-checks")
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+ALLOWED_HOSTS = _split_env_csv("ALLOWED_HOSTS")
+CSRF_TRUSTED_ORIGINS = _normalize_csrf_trusted_origins(_split_env_csv("CSRF_TRUSTED_ORIGINS"))
 JAWG_ACCESS_TOKEN = os.environ.get("JAWG_ACCESS_TOKEN", "")
 
 INSTALLED_APPS = [
