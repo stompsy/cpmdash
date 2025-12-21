@@ -1,9 +1,10 @@
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from plotly.offline import plot
 
 from utils.chart_colors import CHART_COLORS_VIBRANT
-from utils.plotly import style_plotly_layout
+from utils.plotly import get_theme_colors, style_plotly_layout
 
 from ...core.models import Patients
 
@@ -95,22 +96,78 @@ def build_patients_age_by_race_boxplot(theme: str) -> str:
     # Order by count (descending)
     order = df["race"].value_counts().sort_values(ascending=False).index.tolist()
 
-    # Use horizontal orientation (swap x and y) for better label visibility on narrow screens
-    fig = px.box(
+    # We keep the visual traces the same (box + jittered points), but split hover behavior:
+    # - Points: show age only
+    # - Box glyphs: show min/q1/median/q3/max (no race; it's already on the axis)
+    points_fig = px.box(
         df,
-        y="race",  # Race on y-axis (vertical labels have more room)
-        x="age",  # Age on x-axis
+        y="race",
+        x="age",
         color="race",
         points="all",
-        orientation="h",  # Horizontal boxplots
+        orientation="h",
         category_orders={"race": order},
-        color_discrete_sequence=PATIENT_CHART_COLORS,  # Use standardized colors
+        color_discrete_sequence=PATIENT_CHART_COLORS,
     )
+
+    box_fig = px.box(
+        df,
+        y="race",
+        x="age",
+        color="race",
+        points=False,
+        orientation="h",
+        category_orders={"race": order},
+        color_discrete_sequence=PATIENT_CHART_COLORS,
+    )
+
+    colors = get_theme_colors(theme)
+
+    # Configure points layer: keep jittered points, hide box visuals, hover shows age only.
+    points_fig.update_traces(
+        hoveron="points",
+        hovertemplate="Age: %{x}<extra></extra>",
+        showlegend=False,
+        line=dict(width=0),
+        fillcolor="rgba(0,0,0,0)",
+        hoverlabel=dict(
+            bgcolor=colors["hover_bg"],
+            bordercolor=colors["hover_border"],
+            font=dict(color=colors["hover_font"], family="Arial, sans-serif", size=14),
+            align="left",
+            namelength=-1,
+        ),
+    )
+
+    # Configure box layer: box-only, hover shows stats only.
+    box_fig.update_traces(
+        hoveron="boxes",
+        hovertemplate=(
+            "Min: %{lowerfence:.0f}<br>"
+            "Q1: %{q1:.0f}<br>"
+            "Median: %{median:.0f}<br>"
+            "Q3: %{q3:.0f}<br>"
+            "Max: %{upperfence:.0f}"
+            "<extra></extra>"
+        ),
+        hoverlabel=dict(
+            bgcolor=colors["hover_bg"],
+            bordercolor=colors["hover_border"],
+            font=dict(color=colors["hover_font"], family="Arial, sans-serif", size=14),
+            align="left",
+            namelength=-1,
+        ),
+    )
+
+    # Combine traces: points first (behind), then boxes (on top).
+    fig = go.Figure()
+    fig.add_traces(points_fig.data)
+    fig.add_traces(box_fig.data)
 
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        x_title="Age",  # Swapped labels
+        x_title="Age",
         y_title="Race",
         scroll_zoom=False,
         margin={
@@ -118,7 +175,7 @@ def build_patients_age_by_race_boxplot(theme: str) -> str:
             "l": 20,
             "r": 20,
             "b": 60,
-        },  # Minimal margins, let automargin and ticklabelstandoff control spacing
+        },
     )
 
     # Configure x-axis to constrain gridlines to plot area
@@ -133,6 +190,8 @@ def build_patients_age_by_race_boxplot(theme: str) -> str:
         showgrid=False,  # No horizontal gridlines for categorical y-axis
         automargin=True,  # Let Plotly calculate needed space for labels
         ticklabelstandoff=2,  # Minimal gap (~1/8 inch at 96 DPI) between labels and axis
+        categoryorder="array",
+        categoryarray=list(reversed(order)),
     )
 
     return plot(

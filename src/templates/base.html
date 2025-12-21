@@ -36,12 +36,38 @@
             'sidebarToggle': false,
             'scrollTop': false,
             'isProfileInfoModal': false,
-            'isProfileAddressModal': false
+            'isProfileAddressModal': false,
+
+            'disclaimerCookieName': 'cpmdash_beta_disclaimer_accepted',
+            'disclaimerOpen': false,
+            'cookieNoticeOpen': false,
+
+            getCookieValue(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            },
+            setCookie(name, value, days = 365) {
+                const maxAge = days * 24 * 60 * 60;
+                const secure = (window.location && window.location.protocol === 'https:') ? '; Secure' : '';
+                document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
+            },
+            initDisclaimer() {
+                const accepted = this.getCookieValue(this.disclaimerCookieName) === '1';
+                this.disclaimerOpen = !accepted;
+            },
+            acceptDisclaimer() {
+                this.setCookie(this.disclaimerCookieName, '1');
+                this.disclaimerOpen = false;
+                this.cookieNoticeOpen = true;
+            }
         }"
         x-init="
             darkMode = true;
             localStorage.setItem('darkMode', JSON.stringify(true));
-            $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+            $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)));
+            initDisclaimer();"
         :class="{'dark bg-gray-900': darkMode === true}"
     >
         <!-- ===== Preloader Start ===== -->
@@ -130,6 +156,77 @@
         {% include "partials/profile/profile-info-modal.html" %}
         {% include "partials/profile/profile-address-modal.html" %}
         <!-- END MODAL -->
+
+        <!-- BEGIN BETA DISCLAIMER MODAL -->
+        <div
+            x-cloak
+            x-show="disclaimerOpen"
+            class="fixed inset-0 z-[200000] flex items-center justify-center p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Beta release disclaimer"
+        >
+            <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
+            <div class="relative w-full max-w-xl overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 p-8 shadow-2xl ring-1 ring-black/40 backdrop-blur">
+                <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-200">
+                    Beta Release
+                </div>
+                <h2 class="text-2xl font-bold tracking-tight text-white">Data accuracy disclaimer</h2>
+                <p class="mt-4 text-sm leading-relaxed text-slate-300">
+                    This dashboard is a beta release. While the data is intended to be as accurate as possible, it may contain mistakes.
+                    By accepting, you acknowledge this limitation and agree to proceed.
+                </p>
+
+                <div class="mt-8 flex items-center justify-end">
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center rounded-md bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                        @click="acceptDisclaimer()"
+                    >
+                        I accept
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- END BETA DISCLAIMER MODAL -->
+
+        <!-- BEGIN COOKIE NOTICE (bottom-right) -->
+        <div
+            x-cloak
+            x-show="cookieNoticeOpen"
+            x-transition.opacity.duration.200ms
+            class="fixed bottom-4 right-4 z-[190000] w-full max-w-sm px-4 sm:px-0"
+            role="status"
+            aria-live="polite"
+        >
+            <div class="relative rounded-2xl border border-white/10 bg-slate-900/80 px-5 py-4 text-sm text-slate-100 shadow-xl backdrop-blur">
+                <div class="flex items-start gap-3">
+                    <div class="mt-0.5 shrink-0" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" class="h-7 w-7">
+                            <circle cx="12" cy="12" r="9" class="text-amber-300" fill="currentColor" />
+                            <circle cx="9" cy="10" r="1" class="text-slate-900/60" fill="currentColor" />
+                            <circle cx="14" cy="9" r="1.2" class="text-slate-900/60" fill="currentColor" />
+                            <circle cx="15.5" cy="13" r="0.9" class="text-slate-900/60" fill="currentColor" />
+                            <circle cx="10.5" cy="14.5" r="1.1" class="text-slate-900/60" fill="currentColor" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 leading-relaxed text-slate-200">
+                        This site uses a cookie to remember that you accepted the beta disclaimer.
+                    </div>
+                    <button
+                        type="button"
+                        class="shrink-0 rounded-full p-1 text-slate-200/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                        @click="cookieNoticeOpen = false"
+                        aria-label="Dismiss cookie notice"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 0 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- END COOKIE NOTICE -->
 
         <script>
             // Ensure HTMX requests include CSRF token

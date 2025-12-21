@@ -1,14 +1,13 @@
 {# Quick Stat Content for Modal Header - wrapped for HTMX selection #}
 <div id="quick-stat-content">
     <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1.5">
-            <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ total_types }}</span>
-            <span class="text-xs font-medium text-indigo-700 dark:text-indigo-300">types</span>
+        <div class="inline-flex items-center gap-1.5 rounded-md border border-indigo-200/70 bg-white/70 px-2.5 py-1 dark:border-indigo-500/20 dark:bg-slate-950/30">
+            <span class="text-2xl font-bold leading-none text-indigo-600 dark:text-indigo-400">{{ total_types }}</span>
+            <span class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">types</span>
         </div>
-        <span class="text-slate-300 dark:text-slate-600">|</span>
-        <div class="flex items-center gap-1.5">
-            <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ total_referrals }}</span>
-            <span class="text-xs font-medium text-indigo-700 dark:text-indigo-300">total</span>
+        <div class="inline-flex items-center gap-1.5 rounded-md border border-indigo-200/70 bg-white/70 px-2.5 py-1 dark:border-indigo-500/20 dark:bg-slate-950/30">
+            <span class="text-2xl font-bold leading-none text-indigo-600 dark:text-indigo-400">{{ total_referrals }}</span>
+            <span class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">total</span>
         </div>
     </div>
 </div>
@@ -19,9 +18,20 @@
         <div class="flex flex-col gap-4">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Referral breakdown</p>
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 max-w-2xl">
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 w-full">
                     Combined view of all referral types across Referral Type 1-5 fields. Grouped by category and sorted by count within each group.
                 </p>
+                <div class="mt-4 flex items-start gap-4 w-full">
+                    <div class="shrink-0">
+                        <span class="inline-flex items-center rounded-md bg-yellow-400/10 px-2 py-1 text-xs font-medium text-yellow-500 inset-ring inset-ring-yellow-400/20">Attention:</span>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 w-full">
+                        We didn’t start tracking individual referrals (and their detailed attributes) until Q4 2022.
+                        Also, a single referral can include multiple services/types over time.
+                        For example: one referral may start as a medical evaluation, then later that same referral can have additional types added (blood draw, medication administration, home health, durable medical equipment).
+                        So the total “referrals” count will often be lower than the total “referral types” counted here.
+                    </p>
+                </div>
             </div>
         </div>
     </div>

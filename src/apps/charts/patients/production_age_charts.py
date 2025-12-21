@@ -104,6 +104,15 @@ def build_simplified_age_bar_chart(theme: str) -> str:
     male_counts = male_df["age_group"].value_counts().reindex(labels, fill_value=0)
     female_counts = female_df["age_group"].value_counts().reindex(labels, fill_value=0)
 
+    male_total = int(male_counts.sum())
+    female_total = int(female_counts.sum())
+    male_pct = [
+        ((count / male_total) * 100.0) if male_total else 0.0 for count in male_counts.values
+    ]
+    female_pct = [
+        ((count / female_total) * 100.0) if female_total else 0.0 for count in female_counts.values
+    ]
+
     fig = go.Figure()
 
     # Add male bars
@@ -113,9 +122,8 @@ def build_simplified_age_bar_chart(theme: str) -> str:
             y=male_counts.values,
             name="Male",
             marker_color=TAILWIND_COLORS["blue-500"],
-            text=[f"{count}" if count > 0 else "" for count in male_counts.values],
-            textposition="inside",
-            hovertemplate="Age: %{x}<br>Male: %{y}<extra></extra>",
+            customdata=male_pct,
+            hovertemplate="Age: %{x}<br>Male: %{customdata:.1f}%<extra></extra>",
         )
     )
 
@@ -126,9 +134,8 @@ def build_simplified_age_bar_chart(theme: str) -> str:
             y=female_counts.values,
             name="Female",
             marker_color=TAILWIND_COLORS["pink-500"],
-            text=[f"{count}" if count > 0 else "" for count in female_counts.values],
-            textposition="inside",
-            hovertemplate="Age: %{x}<br>Female: %{y}<extra></extra>",
+            customdata=female_pct,
+            hovertemplate="Age: %{x}<br>Female: %{customdata:.1f}%<extra></extra>",
         )
     )
 

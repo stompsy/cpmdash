@@ -141,9 +141,10 @@ def manager_user(django_user_model):
 class TestCaseStudyCrud:
     def test_create_requires_permission(self, client, django_user_model):
         url = reverse("blog:create")
-        # GlobalLoginRequiredMiddleware blocks anonymous users with 403
+        # Anonymous users are redirected to login.
         resp = client.get(url)
-        assert resp.status_code == 403
+        assert resp.status_code == 302
+        assert "/accounts/login/" in resp["Location"]
         # Authenticated users without permission also get 403
         user = django_user_model.objects.create_user("viewer", "viewer@example.com", "pass1234")
         client.force_login(user)

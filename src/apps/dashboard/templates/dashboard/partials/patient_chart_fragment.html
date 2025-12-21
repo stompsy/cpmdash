@@ -38,6 +38,15 @@
                 <div>
                     <h4 class="text-xs font-bold uppercase tracking-[0.15em] text-indigo-600 dark:text-indigo-400">Deep Dive</h4>
                     <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">Explore detailed breakdowns and insights</p>
+                    {% if item.field == 'encounters_counts_quarterly' %}
+                        <div class="mt-3 flex items-start gap-3">
+                            <span class="shrink-0 inline-flex items-center rounded-md bg-yellow-400/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-yellow-500 inset-ring inset-ring-yellow-400/20">Note</span>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                                Encounter-level tracking did not begin until Q4 2022. Any earlier quarters are incomplete by definition (they may be missing entirely or undercounted), so don’t treat them as a baseline.
+                                For apples-to-apples trend reading, start with Q4 2022 and move forward.
+                            </p>
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     {% if item.field == 'patient_counts_quarterly' %}

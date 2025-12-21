@@ -56,7 +56,9 @@ def _build_donut_chart(
     legend_filter: str | None = None,
 ) -> str:
     vc_df = add_share_columns(vc_df, value_col)
-    vc_df["share_pct_rounded"] = vc_df["share_pct"].fillna(0.0).round(1)
+    # Plotly's numeric formatting can surface "NaN%" in pie text/hover in some edge cases.
+    # Pre-format as strings so the browser never has to do numeric formatting.
+    vc_df["share_text"] = vc_df["share_pct"].fillna(0.0).apply(lambda v: f"{v:.1f}%")
     fig = px.pie(
         vc_df,
         names=label_col,
@@ -64,15 +66,15 @@ def _build_donut_chart(
         hole=0.5,
         color=label_col,
         color_discrete_sequence=COLOR_SEQUENCE,
-        custom_data=["share_pct_rounded"],
     )
     fig.update_traces(
         textposition="inside",
         textfont=dict(size=16, color="#1e293b", family="Arial, sans-serif"),
-        hovertemplate="%{label}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
+        text=vc_df["share_text"],
+        texttemplate="%{text}",
+        hovertemplate="%{label}<br>Share: %{text}<extra></extra>",
         insidetextorientation="radial",
         marker=dict(line=dict(color="white", width=1)),
-        texttemplate="%{customdata[0]:.1f}%",
     )
 
     # If legend_filter is specified, hide all legend items except the specified one
@@ -164,6 +166,17 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
             male_counts = male_df["age_group"].value_counts().reindex(labels, fill_value=0)
             female_counts = female_df["age_group"].value_counts().reindex(labels, fill_value=0)
 
+            male_total = int(male_counts.sum())
+            female_total = int(female_counts.sum())
+            male_pct = [
+                ((count / male_total) * 100.0) if male_total else 0.0
+                for count in male_counts.values
+            ]
+            female_pct = [
+                ((count / female_total) * 100.0) if female_total else 0.0
+                for count in female_counts.values
+            ]
+
             # Create stacked bar chart
             fig = go.Figure()
 
@@ -174,9 +187,8 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                     y=male_counts.values,
                     name="Male",
                     marker_color=PATIENT_CHART_COLORS[0],  # Violet - non-gendered
-                    text=[f"{count}" if count > 0 else "" for count in male_counts.values],
-                    textposition="inside",
-                    hovertemplate="Age: %{x}<br>Male: %{y}<extra></extra>",
+                    customdata=male_pct,
+                    hovertemplate="Age: %{x}<br>Male: %{customdata:.1f}%<extra></extra>",
                 )
             )
 
@@ -187,9 +199,8 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                     y=female_counts.values,
                     name="Female",
                     marker_color=PATIENT_CHART_COLORS[3],  # Amber - non-gendered
-                    text=[f"{count}" if count > 0 else "" for count in female_counts.values],
-                    textposition="inside",
-                    hovertemplate="Age: %{x}<br>Female: %{y}<extra></extra>",
+                    customdata=female_pct,
+                    hovertemplate="Age: %{x}<br>Female: %{customdata:.1f}%<extra></extra>",
                 )
             )
 

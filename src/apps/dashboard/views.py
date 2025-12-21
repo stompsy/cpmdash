@@ -781,15 +781,14 @@ def _build_encounters_quarterly_quick_stats() -> dict[str, list[dict[str, str]]]
     stats: dict[str, list[dict[str, str]]] = {}
 
     try:
-        from ..core.models import Encounters, Referrals
+        from ..core.models import Encounters, ODReferrals, Referrals
 
         # Get data
-        encounters_data = list(
-            Encounters.objects.all().values("encounter_date", "port_referral_ID")
-        )
+        encounters_data = list(Encounters.objects.all().values("encounter_date"))
         referrals_data = list(Referrals.objects.all().values("date_received"))
+        od_referrals_data = list(ODReferrals.objects.all().values("od_date"))
 
-        if not encounters_data and not referrals_data:
+        if not encounters_data and not referrals_data and not od_referrals_data:
             return stats
 
         # Convert to DataFrames
@@ -800,10 +799,38 @@ def _build_encounters_quarterly_quick_stats() -> dict[str, list[dict[str, str]]]
             pd.DataFrame.from_records(referrals_data) if referrals_data else pd.DataFrame()
         )
 
+        od_referrals_df = (
+            pd.DataFrame.from_records(od_referrals_data) if od_referrals_data else pd.DataFrame()
+        )
+
         # Process each data type into quarterly counts
         referrals_qdf = _process_referrals_quarterly(referrals_df)
-        port_qdf = _process_port_referrals_quarterly(encounters_df)
-        encounters_qdf = _process_regular_encounters_quarterly(encounters_df)
+        # Match the Encounters-by-Quarter chart logic:
+        # - Encounters: all encounters by encounter_date (no PORT filtering)
+        # - PORT Referrals: ODReferrals by od_date
+        if not encounters_df.empty and "encounter_date" in encounters_df.columns:
+            dates = pd.to_datetime(encounters_df["encounter_date"], errors="coerce")
+            encounters_qdf = pd.DataFrame(
+                {"year": dates.dt.year, "quarter": dates.dt.quarter}
+            ).dropna()
+            encounters_qdf = (
+                encounters_qdf.groupby(["year", "quarter"], dropna=True)
+                .size()
+                .reset_index(name="encounters_count")
+            )
+        else:
+            encounters_qdf = pd.DataFrame(columns=["year", "quarter", "encounters_count"])
+
+        if not od_referrals_df.empty and "od_date" in od_referrals_df.columns:
+            dates = pd.to_datetime(od_referrals_df["od_date"], errors="coerce")
+            port_qdf = pd.DataFrame({"year": dates.dt.year, "quarter": dates.dt.quarter}).dropna()
+            port_qdf = (
+                port_qdf.groupby(["year", "quarter"], dropna=True)
+                .size()
+                .reset_index(name="port_referrals_count")
+            )
+        else:
+            port_qdf = pd.DataFrame(columns=["year", "quarter", "port_referrals_count"])
 
         # Merge all quarterly data
         qdf = _merge_quarterly_data(referrals_qdf, port_qdf, encounters_qdf)
@@ -833,7 +860,7 @@ def _build_encounters_quarterly_quick_stats() -> dict[str, list[dict[str, str]]]
             {
                 "label": "Total Encounters",
                 "value": f"{total_combined:,}",
-                "description": "Encounters + Referrals + PORT Referrals",
+                "description": "Encounters + Referrals + PORT Referrals (OD)",
                 "icon": "activity",
             },
             {

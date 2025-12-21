@@ -47,7 +47,7 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
     fig.update_traces(
         textposition="inside",
         texttemplate="%{customdata[0]:.1f}%",
-        hovertemplate="%{label}<br>Share: %{customdata[0]:.1f}%<extra></extra>",
+        hovertemplate="%{label}<br>%{customdata[0]:.1f}%<extra></extra>",
         marker=dict(line=dict(color="white", width=1)),
     )
     fig = style_plotly_layout(
@@ -134,10 +134,6 @@ def _build_donut_chart_top_legend(
     )  # Keep original for hover BEFORE truncation
     vc_df[label_col] = vc_df[label_col].apply(truncate_label)  # Now apply truncation
 
-    # Pre-compute share percentages to avoid Plotly NaN percent behavior
-    vc_df = add_share_columns(vc_df, value_col)
-    vc_df["share_pct_rounded"] = vc_df["share_pct"].fillna(0.0).round(1)
-
     # Use go.Pie for more control over hover behavior
     fig = go.Figure(
         data=[
@@ -149,9 +145,9 @@ def _build_donut_chart_top_legend(
                 textposition="outside",
                 textinfo="none",  # texttemplate provides the label and share
                 textfont=dict(size=11),
-                customdata=vc_df[["full_label", "share_pct_rounded"]].values,
-                texttemplate="%{label}<br>%{customdata[1]:.1f}%",
-                hovertemplate="<b>%{customdata[0]}</b><br>Share: %{customdata[1]:.1f}%<extra></extra>",
+                hovertext=vc_df["full_label"],
+                texttemplate="%{label}<br>%{percent}",
+                hovertemplate="<b>%{hovertext}</b><br>Share: %{percent}<extra></extra>",
             )
         ]
     )
@@ -330,46 +326,37 @@ def _render_zipcode_chart(vc: pd.DataFrame, theme: str) -> str:
 
 
 def _build_sex_stacked_bar_chart(df: pd.DataFrame, theme: str) -> str:
-    """Build stacked bar chart for sex field - stacked by age groups."""
-    # Define age bins and labels
-    ages = pd.to_numeric(df["age"], errors="coerce")
-    bins = [-1, 17, 24, 34, 44, 54, 64, 74, 84, float("inf")]
-    labels = ["0–17", "18–24", "25–34", "35–44", "45–54", "55–64", "65–74", "75–84", "85+"]
+    """Build a sex distribution chart using percentages only."""
 
-    # Create a temporary dataframe with age groups and sex
-    temp_df = df[["age", "sex"]].copy()
-    temp_df["age_group"] = pd.cut(ages, bins=bins, labels=labels, include_lowest=True, right=True)
+    if df.empty or "sex" not in df.columns:
+        return ""
 
-    # Separate by sex
-    male_df = temp_df[temp_df["sex"].str.lower().isin(["male", "m"])]
-    female_df = temp_df[temp_df["sex"].str.lower().isin(["female", "f"])]
+    sex_raw = df["sex"].fillna("").astype(str).str.strip().str.lower()
 
-    # Count by age group for each sex
-    male_counts = male_df["age_group"].value_counts().reindex(labels, fill_value=0)
-    female_counts = female_df["age_group"].value_counts().reindex(labels, fill_value=0)
+    def normalize_sex(value: str) -> str:
+        if value in {"male", "m"}:
+            return "Male"
+        if value in {"female", "f"}:
+            return "Female"
+        if value in {"", "unknown", "none", "nan"}:
+            return "Unknown"
+        return "Unknown"
 
-    # Create stacked bar chart
+    sex_norm = sex_raw.apply(normalize_sex)
+    # Percent-only view, excluding Unknown from the denominator and display.
+    counts = sex_norm.value_counts().reindex(["Male", "Female"], fill_value=0)
+    total = int(counts.sum())
+    if total == 0:
+        return ""
+    share_pct = [((int(v) / total) * 100.0) for v in counts.tolist()]
+
     fig = go.Figure()
-
-    # Add male bars
     fig.add_trace(
         go.Bar(
-            x=["Male"],
-            y=[male_counts.sum()],
-            name="Male",
-            marker_color=COLOR_SEQUENCE[0],
-            hovertemplate="Male<br>Count: %{y}<extra></extra>",
-        )
-    )
-
-    # Add female bars
-    fig.add_trace(
-        go.Bar(
-            x=["Female"],
-            y=[female_counts.sum()],
-            name="Female",
-            marker_color=COLOR_SEQUENCE[3],
-            hovertemplate="Female<br>Count: %{y}<extra></extra>",
+            x=counts.index.tolist(),
+            y=share_pct,
+            marker_color=[COLOR_SEQUENCE[0], COLOR_SEQUENCE[3]],
+            hovertemplate="%{x}<br>Share: %{y:.1f}%<extra></extra>",
         )
     )
 
@@ -378,7 +365,7 @@ def _build_sex_stacked_bar_chart(df: pd.DataFrame, theme: str) -> str:
         theme=theme,
         height=500,  # Match referral_closed_reason chart height
         x_title="Sex",
-        y_title="Referral Count",
+        y_title="Percentage",
         margin={"t": 40, "l": 80, "r": 20, "b": 50},
         show_legend=False,
     )
@@ -388,6 +375,7 @@ def _build_sex_stacked_bar_chart(df: pd.DataFrame, theme: str) -> str:
         showgrid=True,
         gridcolor="rgba(128,128,128,0.15)",
         ticklabelstandoff=10,
+        ticksuffix="%",
     )
     fig.update_layout(
         bargap=0.15,
@@ -862,30 +850,26 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                 for _, row in vc.iterrows()
             ]
 
-            # No text labels above bars
-            fig = px.bar(
-                vc,
-                x="age_group",
-                y="count",
-                custom_data=vc[["count", "share_pct"]],
-            )
+            # Percent-only view (no counts in bars or hover)
+            fig = px.bar(vc, x="age_group", y="share_pct")
             fig.update_traces(
                 marker_color=colors,
-                hovertemplate="Age group: %{x}<br>Count: %{customdata[0]}<br>Share: %{customdata[1]:.1f}%<extra></extra>",
+                hovertemplate="Age group: %{x}<br>Share: %{y:.1f}%<extra></extra>",
             )
             fig = style_plotly_layout(
                 fig,
                 theme=theme,
                 height=360,
                 x_title="Age group",
-                y_title="Count",
+                y_title="Percentage",
                 margin={"t": 30, "l": 60, "r": 10, "b": 40},  # Consistent margins
             )
             fig.update_xaxes(showgrid=False)
             fig.update_yaxes(
                 showgrid=False,
                 showticklabels=True,
-                title="Count",
+                title="Percentage",
+                ticksuffix="%",
                 ticklabelposition="outside",
                 automargin=True,
             )
@@ -937,9 +921,9 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                 [vc, pd.DataFrame([{field: "Other", "count": other_count}])], ignore_index=True
             )
 
-        # If very few categories, try special chart types for certain fields
-        # Always check for sex and insurance fields which need special treatment
-        if not few_cats or field in {"sex", "insurance"}:
+        # If very few categories, try special chart types for certain fields.
+        # Always check for fields that should remain percent-first visualizations.
+        if not few_cats or field in {"sex", "insurance", "referral_closed_reason"}:
             special_chart = _build_special_chart(df, vc, field, theme)
             if special_chart is not None:
                 return special_chart

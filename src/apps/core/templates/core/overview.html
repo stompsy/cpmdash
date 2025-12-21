@@ -100,6 +100,14 @@
                     .tooltip-text-{{ category.slug }} {
                         color: {{ category.color }};
                     }
+                    .pill-{{ category.slug }} {
+                        border-color: {{ category.color }}1f !important;
+                        background-color: {{ category.color }}08 !important;
+                    }
+                    .pill-{{ category.slug }}:hover {
+                        border-color: {{ category.color }}33 !important;
+                        background-color: {{ category.color }}0f !important;
+                    }
                     {% endfor %}
                 </style>
 
@@ -107,7 +115,7 @@
                     {% for category in ecosystem_partners.categories %}
                         {% for agency in category.agencies %}
                             <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
-                                <div class="cursor-help rounded-full border border-white/10 bg-slate-800/50 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white hover:border-white/20">
+                                <div class="pill-{{ category.slug }} cursor-help rounded-full border border-white/10 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:text-white hover:border-white/20">
                                     {{ agency.name }}
                                 </div>
 
@@ -181,6 +189,14 @@
                             </div>
                         {% endfor %}
                     {% endfor %}
+                </div>
+
+                <div class="mt-10 flex items-center justify-center gap-4">
+                    <div class="h-px w-16 bg-white/10"></div>
+                    <p class="text-sm font-medium text-slate-400">
+                        Plus many more community partners
+                    </p>
+                    <div class="h-px w-16 bg-white/10"></div>
                 </div>
             </div>
         </section>
@@ -358,11 +374,15 @@
 
                         {# Right Column: Image #}
                         <div class="relative h-full min-h-[300px] w-full lg:h-auto lg:[clip-path:polygon(10%_0,100%_0,100%_100%,0_100%)]">
-                            <img src="{% static 'media/get_in_touch.png' %}" alt="Port Angeles Fire Department Community Paramedicine Team" width="800" height="600" class="absolute inset-0 h-full w-full object-cover lg:rounded-r-3xl">
+                            <img src="{% static 'media/eddie-zhou-3b2cee2IyMU-unsplash.jpg' %}" alt="Port Angeles Fire Department Community Paramedicine Team" width="800" height="600" class="absolute inset-0 h-full w-full object-cover lg:rounded-r-3xl">
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/20 to-transparent lg:bg-gradient-to-l"></div>
 
+                            <div class="absolute bottom-3 right-3 z-20 max-w-[85%] rounded-md bg-slate-900/50 px-2 py-1 text-xs leading-4 text-slate-300 backdrop-blur-sm [&_a]:text-sky-300 [&_a]:underline [&_a]:decoration-white/30 hover:[&_a]:text-sky-200">
+                                Photo by <a target="_blank" href="https://unsplash.com/@eddwz?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Eddie Zhou</a> on <a target="_blank" href="https://unsplash.com/photos/a-group-of-hikers-hiking-in-the-woods-3b2cee2IyMU?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+                            </div>
+
                             {# Optional: Overlay Text on Image #}
-                            <div class="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
+                            <div class="absolute bottom-8 left-0 right-0 p-8 lg:bottom-10 lg:p-12">
                                 <blockquote class="border-l-2 border-sky-500 pl-4">
                                     <p class="text-lg font-medium italic text-white">"We don't just refer people to services; we walk them through the door."</p>
                                 </blockquote>

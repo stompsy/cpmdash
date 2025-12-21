@@ -114,51 +114,30 @@ def build_chart_od_density_heatmap(theme):
     )
 
     # Add text annotations to show values in each cell (matplotlib-style)
-    # Also add custom hour labels since we disabled default tick labels
-    for hour in range(24):
-        annotations.append(
-            dict(
-                x=hour,
-                y=-1.0,  # Position below the heatmap
-                text=f"{hour:02d}",
-                xref="x",
-                yref="y",
-                showarrow=False,
-                font=dict(
-                    color="gray" if theme == "light" else "lightgray", size=14, family="Roboto"
-                ),
-                xanchor="center",
-                yanchor="top",
-            )
-        )
-
     fig.update_layout(annotations=annotations)
 
     # Customize axes to match matplotlib style - no titles
+    # Show hours (00–23) as real x-axis ticks so viewers can clearly map each label to its column.
     fig.update_xaxes(
-        showticklabels=False,  # Completely hide default tick labels
+        showticklabels=True,
+        tickmode="array",
+        tickvals=list(range(24)),
+        ticktext=[f"{h:02d}" for h in range(24)],
+        ticks="outside",
+        ticklen=6,
+        tickwidth=1,
+        ticklabelstandoff=8,
+        tickfont=dict(size=13, family="Roboto"),
         showgrid=True,
         gridwidth=1,
         gridcolor="rgba(128,128,128,0.3)",
-        # Aggressively disable ALL default ticks and tick marks
-        ticks="",
-        ticklen=0,
-        tickwidth=0,
-        linewidth=0,  # Remove axis line
-        mirror=False,  # Don't mirror to opposite side
-        showline=False,  # Remove axis line completely
-        zeroline=False,  # Remove zero line
-        # Override automatic tick placement with explicit range
-        range=[-0.5, 23.5],  # Set explicit range to match data
-        tickmode="array",
-        tickvals=[],  # Empty array = no ticks
-        ticktext=[],  # Empty array = no labels
-        # Additional properties to completely disable all automatic ticks
-        autorange=False,  # Disable auto range to prevent automatic ticks
-        dtick=None,  # Disable automatic tick spacing
-        tick0=None,  # Disable tick starting point
-        nticks=0,  # Set number of ticks to 0
-        fixedrange=True,  # Prevent zooming which might trigger tick regeneration
+        linewidth=0,
+        mirror=False,
+        showline=False,
+        zeroline=False,
+        range=[-0.5, 23.5],
+        autorange=False,
+        fixedrange=True,
     )
 
     fig.update_yaxes(
@@ -183,64 +162,6 @@ def build_chart_od_density_heatmap(theme):
         layer="above",
     )
 
-    # Add fork-like tick marks for hour boundaries
-    tick_color = "gray"
-    tick_width = 1
-    tick_height = 0.2
-    bottom_y = -0.5  # Bottom of heatmap
-
-    for hour in range(24):
-        # Left L-shaped tick (start of hour)
-        fig.add_shape(
-            type="line",
-            x0=hour - 0.5,
-            y0=bottom_y,
-            x1=hour - 0.5,
-            y1=bottom_y - tick_height,
-            line=dict(color=tick_color, width=tick_width),
-            layer="above",
-        )
-        fig.add_shape(
-            type="line",
-            x0=hour - 0.5,
-            y0=bottom_y - tick_height,
-            x1=hour,
-            y1=bottom_y - tick_height,
-            line=dict(color=tick_color, width=tick_width),
-            layer="above",
-        )
-
-        # Right backwards L-shaped tick (end of hour)
-        fig.add_shape(
-            type="line",
-            x0=hour + 0.5,
-            y0=bottom_y,
-            x1=hour + 0.5,
-            y1=bottom_y - tick_height,
-            line=dict(color=tick_color, width=tick_width),
-            layer="above",
-        )
-        fig.add_shape(
-            type="line",
-            x0=hour + 0.5,
-            y0=bottom_y - tick_height,
-            x1=hour,
-            y1=bottom_y - tick_height,
-            line=dict(color=tick_color, width=tick_width),
-            layer="above",
-        )
-
-        # Central vertical tick from bottom of L's to hour label
-        fig.add_shape(
-            type="line",
-            x0=hour,
-            y0=bottom_y - tick_height,
-            x1=hour,
-            y1=bottom_y - tick_height - 0.2,
-            line=dict(color=tick_color, width=tick_width),
-            layer="above",
-        )
-
     # Apply theme styling
     fig = style_plotly_layout(
         fig,
@@ -248,9 +169,7 @@ def build_chart_od_density_heatmap(theme):
         scroll_zoom=False,
         x_title=None,  # Remove x-axis title
         y_title=None,  # Remove y-axis title
-        margin=dict(
-            t=45, l=50, r=40, b=15
-        ),  # Match daily totals style with space for custom elements
+        margin=dict(t=45, l=50, r=40, b=55),
         hovermode_unified=False,
     )
 
@@ -258,12 +177,9 @@ def build_chart_od_density_heatmap(theme):
     fig.update_layout(
         title=None,  # Remove title
         hovermode="closest",
-        plot_bgcolor="rgba(255,255,255,0.2)"
-        if theme == "light"
-        else "rgba(31,41,55,0.2)",  # Match container bg
-        paper_bgcolor="rgba(255,255,255,0.2)"
-        if theme == "light"
-        else "rgba(31,41,55,0.2)",  # Match container bg
+        # Fully transparent backgrounds so the chart reads as "on top of" the page.
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
     )
 
     chart_config = {
