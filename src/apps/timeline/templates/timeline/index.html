@@ -52,157 +52,168 @@
                                     </p>
                                 </div>
 
-                                <!-- Document Links -->
-                                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm overflow-hidden">
-                                    <div class="divide-y divide-slate-200 dark:divide-slate-800">
-                                        <!-- Annual Report -->
-                                        <a href="{% static 'documents/Annual Report 2024 Draft 1.docx' %}"
-                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                           download>
-                                            <svg class="h-5 w-5 flex-none text-sky-600 dark:text-sky-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
-                                            </svg>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                    Annual Report 2024
-                                                </p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                                                    Program overview & outcomes
-                                                </p>
-                                            </div>
-                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                            </svg>
-                                        </a>
+                                {% if user.is_authenticated %}
+                                    <!-- Document Links -->
+                                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm overflow-hidden">
+                                        <div class="divide-y divide-slate-200 dark:divide-slate-800">
+                                            <!-- Annual Report -->
+                                            <a href="{% static 'documents/Annual Report 2024 Draft 1.docx' %}"
+                                               class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                               download>
+                                                <svg class="h-5 w-5 flex-none text-sky-600 dark:text-sky-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                                </svg>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                        Annual Report 2024
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                        Program overview & outcomes
+                                                    </p>
+                                                </div>
+                                                <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                </svg>
+                                            </a>
 
-                                        <!-- PORT PowerPoint -->
-                                        <a href="{% static 'documents/PORT Powerpoint.docx' %}"
-                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                           download>
-                                            <svg class="h-5 w-5 flex-none text-orange-600 dark:text-orange-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M23 3H1a1 1 0 00-1 1v16a1 1 0 001 1h22a1 1 0 001-1V4a1 1 0 00-1-1zm-1 16H2V5h20v14zM5 7h6v2H5V7zm0 4h6v2H5v-2zm0 4h6v2H5v-2zm8-8h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2z"/>
-                                            </svg>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                    PORT Presentation
-                                                </p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                                                    Post Overdose Response Team
-                                                </p>
-                                            </div>
-                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                            </svg>
-                                        </a>
+                                            <!-- PORT PowerPoint -->
+                                            <a href="{% static 'documents/PORT Powerpoint.docx' %}"
+                                               class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                               download>
+                                                <svg class="h-5 w-5 flex-none text-orange-600 dark:text-orange-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M23 3H1a1 1 0 00-1 1v16a1 1 0 001 1h22a1 1 0 001-1V4a1 1 0 00-1-1zm-1 16H2V5h20v14zM5 7h6v2H5V7zm0 4h6v2H5v-2zm0 4h6v2H5v-2zm8-8h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2z"/>
+                                                </svg>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                        PORT Presentation
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                        Post Overdose Response Team
+                                                    </p>
+                                                </div>
+                                                <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                </svg>
+                                            </a>
 
-                                        <!-- UW CROA Grant -->
-                                        <a href="{% static 'documents/UW-CROA_MOUD_Expansion.docx' %}"
-                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                           download>
-                                            <svg class="h-5 w-5 flex-none text-emerald-600 dark:text-emerald-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
-                                            </svg>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                    UW-CROA MOUD Expansion
-                                                </p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                                                    Grant & program expansion
-                                                </p>
-                                            </div>
-                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                            </svg>
-                                        </a>
+                                            <!-- UW CROA Grant -->
+                                            <a href="{% static 'documents/UW-CROA_MOUD_Expansion.docx' %}"
+                                               class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                               download>
+                                                <svg class="h-5 w-5 flex-none text-emerald-600 dark:text-emerald-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                                </svg>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                        UW-CROA MOUD Expansion
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                        Grant & program expansion
+                                                    </p>
+                                                </div>
+                                                <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                </svg>
+                                            </a>
 
-                                        <!-- Naloxone Protocol -->
-                                        <a href="{% static 'documents/Naloxone Leave-Behind Protocol.docx' %}"
-                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                           download>
-                                            <svg class="h-5 w-5 flex-none text-rose-600 dark:text-rose-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
-                                            </svg>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                    Naloxone Leave-Behind Protocol
-                                                </p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                                                    Overdose response guidelines
-                                                </p>
-                                            </div>
-                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                            </svg>
-                                        </a>
+                                            <!-- Naloxone Protocol -->
+                                            <a href="{% static 'documents/Naloxone Leave-Behind Protocol.docx' %}"
+                                               class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                               download>
+                                                <svg class="h-5 w-5 flex-none text-rose-600 dark:text-rose-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                                </svg>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                        Naloxone Leave-Behind Protocol
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                        Overdose response guidelines
+                                                    </p>
+                                                </div>
+                                                <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                </svg>
+                                            </a>
 
-                                        <!-- Q1 2025 Report -->
-                                        <a href="{% static 'documents/2025 Q1 Hargrove Report.docx' %}"
-                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                           download>
-                                            <svg class="h-5 w-5 flex-none text-purple-600 dark:text-purple-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
-                                            </svg>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                    2025 Q1 Hargrove Report
-                                                </p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                                                    Quarterly program report
-                                                </p>
-                                            </div>
-                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                            </svg>
-                                        </a>
+                                            <!-- Q1 2025 Report -->
+                                            <a href="{% static 'documents/2025 Q1 Hargrove Report.docx' %}"
+                                               class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                               download>
+                                                <svg class="h-5 w-5 flex-none text-purple-600 dark:text-purple-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                                </svg>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                        2025 Q1 Hargrove Report
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                        Quarterly program report
+                                                    </p>
+                                                </div>
+                                                <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                </svg>
+                                            </a>
 
-                                        <!-- Q2 2025 Report -->
-                                        <a href="{% static 'documents/2025 Q2 Hargrove Report.docx' %}"
-                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                           download>
-                                            <svg class="h-5 w-5 flex-none text-purple-600 dark:text-purple-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
-                                            </svg>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                    2025 Q2 Hargrove Report
-                                                </p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                                                    Quarterly program report
-                                                </p>
-                                            </div>
-                                            <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                            </svg>
-                                        </a>
+                                            <!-- Q2 2025 Report -->
+                                            <a href="{% static 'documents/2025 Q2 Hargrove Report.docx' %}"
+                                               class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                               download>
+                                                <svg class="h-5 w-5 flex-none text-purple-600 dark:text-purple-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 18h10v2H7zm0-4h10v2H7zm12-4H5V8h14m0-6H5c-1.11 0-2 .89-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                                </svg>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                        2025 Q2 Hargrove Report
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                        Quarterly program report
+                                                    </p>
+                                                </div>
+                                                <svg class="h-4 w-4 flex-none text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                </svg>
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <!-- External Links Section -->
-                                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm overflow-hidden">
-                                    <div class="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                                        <h4 class="text-xs font-semibold uppercase tracking-[0.25em] text-gray-600 dark:text-gray-400">
-                                            External Resources
-                                        </h4>
+                                    <!-- External Links Section -->
+                                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm overflow-hidden">
+                                        <div class="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                            <h4 class="text-xs font-semibold uppercase tracking-[0.25em] text-gray-600 dark:text-gray-400">
+                                                External Resources
+                                            </h4>
+                                        </div>
+                                        <div class="divide-y divide-slate-200 dark:divide-slate-800">
+                                            <a href="https://www.doh.wa.gov/"
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                               class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                                <svg class="h-5 w-5 flex-none text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+                                                </svg>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                        WA Dept. of Health
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                                        State health resources
+                                                    </p>
+                                                </div>
+                                            </a>
+                                        </div>
                                     </div>
-                                    <div class="divide-y divide-slate-200 dark:divide-slate-800">
-                                        <a href="https://www.doh.wa.gov/"
-                                           target="_blank"
-                                           rel="noopener noreferrer"
-                                           class="group flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                            <svg class="h-5 w-5 flex-none text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
-                                            </svg>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                    WA Dept. of Health
-                                                </p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                                                    State health resources
-                                                </p>
-                                            </div>
-                                        </a>
+                                {% else %}
+                                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm p-4">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            Log in to access resources
+                                        </p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                            Program documents and reference links are available to signed-in users.
+                                        </p>
                                     </div>
-                                </div>
+                                {% endif %}
                             </div>
                         </aside>
                     </div>

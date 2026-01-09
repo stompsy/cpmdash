@@ -41,12 +41,10 @@ htmlcov/
 assets/
 db.sqlite3
 notes.txt
-2025-10-14_*.csv
-2025-10-16_*.csv
-2025-11-05_*.csv
 docs/*.md
 *.docx
 xcollage/
 copilot-instructions.md
 compress_images.py
 src/static/data/hargrove_grant/202*.csv
+src/static/data/*.csv

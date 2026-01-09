@@ -801,6 +801,7 @@ def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
         "98381": "Sekiu",
         "98326": "Clallam Bay",
         "98331": "Forks",
+        "98343": "Joyce",
         "Homeless/Transient": "Transient",
         "Non-Clallam County ZIP Code": "Transient",
         "Other": "Transient",
@@ -819,6 +820,7 @@ def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
         "Sekiu": ["98381"],
         "Clallam Bay": ["98326"],
         "Forks": ["98331"],
+        "Joyce": ["98343"],
     }
 
     # Assign colors to groups
@@ -828,6 +830,7 @@ def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
         "Sekiu": PATIENT_CHART_COLORS[2],  # Emerald
         "Clallam Bay": PATIENT_CHART_COLORS[3],  # Amber
         "Forks": PATIENT_CHART_COLORS[4],  # Blue
+        "Joyce": PATIENT_CHART_COLORS[6],  # Teal
     }
 
     # Map ZIP codes to display names
@@ -858,10 +861,8 @@ def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
     vc["group"] = vc["zip_code"].apply(lambda z: zip_to_group.get(z, "Port Angeles"))
     vc = add_share_columns(vc, "count")
 
-    # Sort by group, then by count within group
-    group_order = ["Port Angeles", "Sequim", "Sekiu", "Clallam Bay", "Forks"]
-    vc["group_order"] = vc["group"].apply(lambda g: group_order.index(g) if g in group_order else 0)
-    vc = vc.sort_values(["group_order", "count"], ascending=[True, False])
+    # Sort globally by count so the bars run largest → smallest.
+    vc = vc.sort_values(["count", "display_name"], ascending=[False, True])
 
     # Assign colors based on group
     vc["color"] = vc["group"].map(group_colors)
@@ -897,6 +898,8 @@ def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
     fig.update_xaxes(
         showgrid=False,
         tickangle=0,  # Horizontal labels
+        categoryorder="array",
+        categoryarray=vc["display_name"].tolist(),
     )
     fig.update_yaxes(
         showgrid=True,  # Enable horizontal gridlines
