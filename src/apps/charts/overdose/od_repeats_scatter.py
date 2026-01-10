@@ -141,13 +141,23 @@ def build_repeat_overdose_quick_stats() -> list[dict[str, str]]:
     second_dates = dt.groupby("merged_label", observed=False)["od_date"].nth(1)
     days_to_second = (second_dates - first_dates).dt.days.dropna()
 
-    median_days = int(round(float(days_to_second.median()))) if not days_to_second.empty else 0
-    pct_30 = (
-        round(float(days_to_second.le(30).mean() * 100.0), 1) if not days_to_second.empty else 0.0
-    )
-    pct_90 = (
-        round(float(days_to_second.le(90).mean() * 100.0), 1) if not days_to_second.empty else 0.0
-    )
+    if days_to_second.empty:
+        median_days_display = "—"
+        repeat_window_display = "—"
+    else:
+        # Median can legitimately be 0 if repeats occur the same day.
+        median_raw = days_to_second.median()
+        try:
+            median_days_display = str(int(round(float(median_raw))))
+        except Exception:
+            median_days_display = "—"
+
+        try:
+            pct_30 = round(float(days_to_second.le(30).mean() * 100.0), 1)
+            pct_90 = round(float(days_to_second.le(90).mean() * 100.0), 1)
+            repeat_window_display = f"{pct_30:.1f}% / {pct_90:.1f}%"
+        except Exception:
+            repeat_window_display = "—"
 
     df_season = df.copy()
     df_season["rank"] = df_season.groupby("merged_label", observed=False)["od_date"].rank(
@@ -161,8 +171,8 @@ def build_repeat_overdose_quick_stats() -> list[dict[str, str]]:
     return [
         {"label": "Repeat patients", "value": f"{patients:,}"},
         {"label": "Repeat events", "value": f"{repeat_events:,}"},
-        {"label": "Median days to 2nd OD", "value": f"{median_days}" if median_days else "—"},
-        {"label": "Repeat within 30/90 days", "value": f"{pct_30:.1f}% / {pct_90:.1f}%"},
+        {"label": "Median days to 2nd OD", "value": median_days_display},
+        {"label": "Repeat within 30/90 days", "value": repeat_window_display},
         {"label": "Top repeat season", "value": top_season},
     ]
 
