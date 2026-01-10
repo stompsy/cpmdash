@@ -162,8 +162,19 @@
                     </div>
                 </div>
 
-                {# Quick Stats - if you have any for repeats, otherwise remove this section #}
-                {# For now, keeping the structure but you can add stats later if needed #}
+                {# Quick Stats #}
+                {% if repeat_overdose_stats %}
+                    <div class="border-b border-slate-200/60 bg-slate-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
+                        <dl class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                            {% for stat in repeat_overdose_stats %}
+                                <div class="rounded-xl border border-slate-200/70 bg-white/80 p-4 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                                    <dt class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600 dark:text-slate-400">{{ stat.label }}</dt>
+                                    <dd class="mt-2 text-xl font-bold text-slate-900 dark:text-white">{{ stat.value }}</dd>
+                                </div>
+                            {% endfor %}
+                        </dl>
+                    </div>
+                {% endif %}
 
                 {# Narrative Context #}
                 <div class="border-b border-slate-200/60 bg-amber-50/30 px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:bg-amber-900/5">
@@ -177,12 +188,45 @@
                         <p class="text-base leading-7 text-gray-700 dark:text-slate-300">
                             <span class="font-semibold text-gray-900 dark:text-white">This timeline reveals failure patterns.</span> Clusters show when the system breaks down. Rapid recurrence (days or weeks) suggests immediate post-reversal gaps — no warm handoff, no MAT access, no stable housing. Longer intervals might indicate treatment dropout or life disruption events. Each vertical line is a person we need to reach differently.
                         </p>
+                        <p class="text-base leading-7 text-gray-700 dark:text-slate-300">
+                            <span class="font-semibold text-gray-900 dark:text-white">Below the full timeline are three focused views:</span> an aligned timeline (everyone starts at day 0), a histogram of days between overdoses, and a seasonality snapshot. Same data, different angles — because one chart rarely tells the whole story.
+                        </p>
                     </div>
                 </div>
 
                 {# Chart Content #}
-                <div class="p-6 sm:p-8">
-                    {{ fig_repeats_scatter|safe }}
+                <div class="p-6 sm:p-8 space-y-10">
+                    <div>
+                        {{ fig_repeats_scatter|safe }}
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                        <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                            <div class="border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 dark:border-slate-700/50 dark:bg-slate-800/20">
+                                <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Aligned Timeline (Day 0 = First OD)</h4>
+                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">This answers: “How fast do repeat overdoses happen?”</p>
+                            </div>
+                            <div class="p-5">{{ fig_repeats_aligned|safe }}</div>
+                        </div>
+
+                        <div class="space-y-8">
+                            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                                <div class="border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 dark:border-slate-700/50 dark:bg-slate-800/20">
+                                    <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Days Between Overdoses</h4>
+                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">This shows: “Are repeats happening immediately, or months later?”</p>
+                                </div>
+                                <div class="p-5">{{ fig_repeat_interval_hist|safe }}</div>
+                            </div>
+
+                            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                                <div class="border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 dark:border-slate-700/50 dark:bg-slate-800/20">
+                                    <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Repeat Seasonality</h4>
+                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">This helps plan outreach timing and staffing.</p>
+                                </div>
+                                <div class="p-5">{{ fig_repeat_seasonality|safe }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {# Footer Insights - colored bar, no vertical line or icon #}
@@ -204,7 +248,7 @@
                         <p>
                             The people with three or more overdoses on their line are your highest-risk group. They rarely
                             need a "better lecture" in the emergency department; they need someone who stays with them
-                            across timeconsistent outreach, help navigating benefits, rides to treatment, and someone who
+                            across time—consistent outreach, help navigating benefits, rides to treatment, and someone who
                             notices when they disappear. This bar is here to remind you that the timeline is less about
                             dots on a screen and more about which people need a different kind of relationship to finally
                             break the cycle.

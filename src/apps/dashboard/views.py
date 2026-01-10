@@ -36,7 +36,11 @@ from ..charts.overdose.od_hourly_breakdown import (  # noqa: F401 - re-export fo
 )
 from ..charts.overdose.od_map import build_chart_od_map
 from ..charts.overdose.od_repeats_scatter import (  # noqa: F401 - re-export for tests monkeypatch
+    build_chart_repeat_interval_hist,
+    build_chart_repeat_seasonality,
+    build_chart_repeats_aligned_timeline,
     build_chart_repeats_scatter,
+    build_repeat_overdose_quick_stats,
 )
 from ..charts.overdose.od_shift_scenarios import (  # noqa: F401 - re-export for tests monkeypatch
     build_chart_cost_benefit_analysis,
@@ -2325,7 +2329,23 @@ def patients_chart_fragment(request, field: str):
     if field not in valid_fields:
         raise Http404
 
-    charts = build_patients_field_charts(theme=theme, fields=[field])
+    toggle_fields = {"insurance", "zip_code"}
+
+    # These charts should never show missing buckets.
+    forced_known_only_fields = {"age", "race_age_boxplot", "veteran_status", "pcp_agency"}
+    if field in forced_known_only_fields:
+        include_missing = False
+    elif field in toggle_fields:
+        include_missing = request.GET.get("include_missing") != "0"
+    else:
+        include_missing = True
+    zip_include_missing = field == "zip_code" and include_missing
+    charts = build_patients_field_charts(
+        theme=theme,
+        fields=[field],
+        zip_include_missing=zip_include_missing,
+        include_missing=include_missing,
+    )
     chart_html = charts.get(field, "")
     has_chart = bool(chart_html)
     age_insights = _compute_age_insights(df_all)
@@ -2343,6 +2363,7 @@ def patients_chart_fragment(request, field: str):
         "rationale": PATIENT_CHART_RATIONALE.get(field),
         "meta": chart_meta.get(field),
         "quick_stats": quick_stats.get(field),
+        "include_missing": include_missing,
     }
 
     return render(request, "dashboard/partials/patient_chart_fragment.html", {"item": item})
@@ -3774,7 +3795,14 @@ OD_REFERRALS_LABEL_MAP: dict[str, str] = {
 
 OD_REFERRALS_RATIONALE_MAP: dict[str, str] = {
     "odreferrals_counts_monthly": (
-        "Monthly trends show when overdose activity spikes so you can staff CPM and partner teams accordingly."
+        "Read these two charts together:\n\n"
+        "• The monthly bars show when total overdose referrals rise/fall and whether the fatal vs. non-fatal mix is shifting. "
+        "A sustained climb across multiple months is a real trend; a single tall month can be a short-lived event. "
+        "The day-level markers help you spot whether a month is inflated by a handful of extreme days versus a steady drumbeat.\n\n"
+        "• The ‘Top 5 suspected drugs by month’ area chart below explains what’s driving the volume. "
+        "If a monthly spike lines up with one drug’s band expanding, you likely have a specific supply/contamination problem. "
+        "If total volume rises while the mix stays roughly the same, you’re looking at broad increased exposure/risk rather than one new culprit.\n\n"
+        "Use the combination to plan staffing and outreach for rising months, and to tune naloxone/supplies, messaging, and treatment partner capacity toward the substances growing fastest."
     ),
     "odreferrals_counts_weekday": (
         "Day-of-week patterns highlight when overdose referrals peak, informing shift coverage and outreach campaigns."
@@ -3888,8 +3916,12 @@ def odreferrals(request):
         for field in ordered_fields
     ]
 
-    # Add the repeat overdoses timeline chart
+    # Repeat overdoses: timeline + aligned view + interval/season summaries
     fig_repeats_scatter = _chart_html(build_chart_repeats_scatter(theme=theme))
+    fig_repeats_aligned = _chart_html(build_chart_repeats_aligned_timeline(theme=theme))
+    fig_repeat_interval_hist = _chart_html(build_chart_repeat_interval_hist(theme=theme))
+    fig_repeat_seasonality = _chart_html(build_chart_repeat_seasonality(theme=theme))
+    repeat_overdose_stats = build_repeat_overdose_quick_stats()
 
     # Add hotspot map and statistics
     zoom_mode = "full" if request.user.is_authenticated else "restricted"
@@ -3904,6 +3936,10 @@ def odreferrals(request):
     context = {
         "chart_cards": chart_cards,
         "fig_repeats_scatter": fig_repeats_scatter,
+        "fig_repeats_aligned": fig_repeats_aligned,
+        "fig_repeat_interval_hist": fig_repeat_interval_hist,
+        "fig_repeat_seasonality": fig_repeat_seasonality,
+        "repeat_overdose_stats": repeat_overdose_stats,
         "fig_od_map": fig_od_map,
         "hotspot_stats": hotspot_stats,
         "narcan_grid_chart": narcan_grid_chart,

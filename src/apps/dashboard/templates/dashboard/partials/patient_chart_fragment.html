@@ -1,4 +1,8 @@
-<article class="relative flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50" aria-busy="false">
+<article
+    id="{% if item.category_label == 'Patients' %}patient-chart-{{ item.field }}{% elif item.category_label == 'Referrals' %}referral-chart-{{ item.field }}{% elif item.category_label == 'OD Referrals' %}odreferral-chart-{{ item.field }}{% else %}chart-{{ item.field }}{% endif %}"
+    class="relative flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50"
+    aria-busy="false"
+>
     {# Card Header #}
     <div class="shrink-0 border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
         <div class="flex items-center justify-between gap-3">
@@ -265,6 +269,120 @@
 
     {# Chart Content #}
     <div class="flex-grow p-6 sm:p-8">
+        {% if item.category_label == 'Patients' and item.field == 'zip_code' %}
+            {% if item.include_missing %}
+                {% with zip_toggle_on=True %}
+                    <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-xs font-medium text-slate-600 dark:text-slate-400">ZIP data mode</p>
+                        <div class="inline-flex overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/60"
+                                hx-get="{% url 'dashboard:patients_chart_fragment' item.field %}?include_missing=0"
+                                hx-target="#patient-chart-{{ item.field }}"
+                                hx-swap="outerHTML"
+                                aria-pressed="false"
+                            >
+                                Known ZIPs only
+                            </button>
+                            <button
+                                type="button"
+                                class="bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
+                                hx-get="{% url 'dashboard:patients_chart_fragment' item.field %}?include_missing=1"
+                                hx-target="#patient-chart-{{ item.field }}"
+                                hx-swap="outerHTML"
+                                aria-pressed="true"
+                            >
+                                Include missing ZIPs
+                            </button>
+                        </div>
+                    </div>
+                {% endwith %}
+            {% else %}
+                <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs font-medium text-slate-600 dark:text-slate-400">ZIP data mode</p>
+                    <div class="inline-flex overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                        <button
+                            type="button"
+                            class="bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
+                            hx-get="{% url 'dashboard:patients_chart_fragment' item.field %}?include_missing=0"
+                            hx-target="#patient-chart-{{ item.field }}"
+                            hx-swap="outerHTML"
+                            aria-pressed="true"
+                        >
+                            Known ZIPs only
+                        </button>
+                        <button
+                            type="button"
+                            class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/60"
+                            hx-get="{% url 'dashboard:patients_chart_fragment' item.field %}?include_missing=1"
+                            hx-target="#patient-chart-{{ item.field }}"
+                            hx-swap="outerHTML"
+                            aria-pressed="false"
+                        >
+                            Include missing ZIPs
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if item.category_label == 'Patients' and item.field == 'insurance' %}
+            {% if item.include_missing %}
+                <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Data mode</p>
+                    <div class="inline-flex overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                        <button
+                            type="button"
+                            class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/60"
+                            hx-get="{% url 'dashboard:patients_chart_fragment' item.field %}?include_missing=0"
+                            hx-target="#patient-chart-{{ item.field }}"
+                            hx-swap="outerHTML"
+                            aria-pressed="false"
+                        >
+                            Known values only
+                        </button>
+                        <button
+                            type="button"
+                            class="bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
+                            hx-get="{% url 'dashboard:patients_chart_fragment' item.field %}?include_missing=1"
+                            hx-target="#patient-chart-{{ item.field }}"
+                            hx-swap="outerHTML"
+                            aria-pressed="true"
+                        >
+                            Include missing values
+                        </button>
+                    </div>
+                </div>
+            {% else %}
+                <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Data mode</p>
+                    <div class="inline-flex overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                        <button
+                            type="button"
+                            class="bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
+                            hx-get="{% url 'dashboard:patients_chart_fragment' item.field %}?include_missing=0"
+                            hx-target="#patient-chart-{{ item.field }}"
+                            hx-swap="outerHTML"
+                            aria-pressed="true"
+                        >
+                            Known values only
+                        </button>
+                        <button
+                            type="button"
+                            class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/60"
+                            hx-get="{% url 'dashboard:patients_chart_fragment' item.field %}?include_missing=1"
+                            hx-target="#patient-chart-{{ item.field }}"
+                            hx-swap="outerHTML"
+                            aria-pressed="false"
+                        >
+                            Include missing values
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
         {% if item.has_chart %}
             <div class="plotly-chart-wrapper relative w-full overflow-hidden rounded-xl">
                 {% autoescape off %}{{ item.chart|safe }}{% endautoescape %}

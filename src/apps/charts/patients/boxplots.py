@@ -74,15 +74,33 @@ def build_patients_age_by_sex_boxplot(theme: str) -> str:
     )
 
 
-def build_patients_age_by_race_boxplot(theme: str) -> str:
-    qs = Patients.objects.all().values("age", "race")
-    df = pd.DataFrame.from_records(list(qs))
+def _build_patients_age_by_race_boxplot(
+    *,
+    theme: str,
+    df: pd.DataFrame,
+    include_missing: bool,
+) -> str:
     if df.empty:
         return ""
-    df = df.dropna(subset=["age", "race"]).copy()
-    # Filter out undesired labels
-    df["race"] = df["race"].astype(str).str.strip()
-    df = df[~df["race"].str.lower().isin({"not disclosed", "single"})]
+
+    missing_label = "Missing"
+    missing_tokens = {"unknown", "not disclosed", "no data", "na", "none", "nan"}
+
+    df = df.copy()
+    df["age"] = pd.to_numeric(df["age"], errors="coerce")
+    df = df.dropna(subset=["age"]).copy()
+    if df.empty:
+        return ""
+
+    df["race"] = df["race"].fillna("").astype(str).str.strip()
+    race_lower = df["race"].str.lower()
+    missing_mask = df["race"].eq("") | race_lower.isin(missing_tokens)
+    if include_missing:
+        df.loc[missing_mask, "race"] = missing_label
+    else:
+        df = df[~missing_mask].copy()
+    if df.empty:
+        return ""
 
     # Wrap long race labels for better display
     race_label_mapping = {
@@ -215,3 +233,9 @@ def build_patients_age_by_race_boxplot(theme: str) -> str:
             ],
         },
     )
+
+
+def build_patients_age_by_race_boxplot(theme: str, *, include_missing: bool = False) -> str:
+    qs = Patients.objects.all().values("age", "race")
+    df = pd.DataFrame.from_records(list(qs))
+    return _build_patients_age_by_race_boxplot(theme=theme, df=df, include_missing=include_missing)

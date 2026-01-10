@@ -8,6 +8,7 @@ from plotly.offline import plot
 from utils.chart_colors import CHART_COLORS_VIBRANT
 from utils.chart_normalization import add_share_columns
 from utils.plotly import style_plotly_layout
+from utils.tailwind_colors import TAILWIND_COLORS
 
 from ...core.models import Patients
 from ..od_utils import get_quarterly_patient_counts
@@ -48,6 +49,40 @@ PATIENT_CHART_COLORS = [
 COLOR_SEQUENCE = PATIENT_CHART_COLORS
 
 
+MISSING_LABEL = "Missing"
+ZIP_MISSING_LABEL = "Missing ZIP"
+_MISSING_TOKENS = {"unknown", "not disclosed", "no data", "na", "none", "nan"}
+
+
+def _top_n_counts_with_other_and_missing(
+    s: pd.Series,
+    field: str,
+    *,
+    top_n: int = 8,
+    include_other: bool = True,
+    missing_label: str = MISSING_LABEL,
+    include_missing: bool = True,
+) -> pd.DataFrame:
+    vc_full = s.value_counts()
+    missing_count = int(vc_full.get(missing_label, 0))
+    vc_ranked = vc_full.drop(labels=[missing_label], errors="ignore")
+    vc_top = vc_ranked.head(top_n)
+    other_count = int(vc_ranked.iloc[top_n:].sum()) if vc_ranked.size > top_n else 0
+
+    vc = vc_top.reset_index()
+    vc.columns = [field, "count"]
+    if include_other and other_count > 0:
+        vc = pd.concat(
+            [vc, pd.DataFrame([{field: "Other", "count": other_count}])], ignore_index=True
+        )
+    if include_missing and missing_count > 0:
+        vc = pd.concat(
+            [vc, pd.DataFrame([{field: missing_label, "count": missing_count}])],
+            ignore_index=True,
+        )
+    return vc
+
+
 def _build_donut_chart(
     vc_df: pd.DataFrame,
     label_col: str,
@@ -86,7 +121,7 @@ def _build_donut_chart(
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=400,  # Increased to accommodate bottom legend
+        height=460,  # Keep donuts consistent and larger
         x_title=None,
         y_title=None,
         margin={"t": 40, "l": 20, "r": 20, "b": 80},  # Extra bottom margin for legend
@@ -128,12 +163,17 @@ def _build_donut_chart(
     )
 
 
-def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
+def _build_chart_for_field(
+    df: pd.DataFrame,
+    field: str,
+    theme: str,
+    *,
+    include_missing: bool = True,
+) -> str:
     s = df[field]
     # Clean values for categoricals
     if not _is_numeric_series(s):
         s = s.fillna("").replace({None: ""}).astype(str).str.strip()
-        s = s.replace({"": "Unknown", "NA": "Unknown", "None": "Unknown"})
 
     if _is_numeric_series(df[field]) or field == "age":
         # Special-case medically common age bands
@@ -152,6 +192,7 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                 "75–84",
                 "85+",
             ]
+            x_labels = labels + (["Missing age"] if include_missing else [])
 
             # Create a temporary dataframe with age groups and sex
             temp_df = df[["age", "sex"]].copy()
@@ -159,15 +200,31 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                 ages, bins=bins, labels=labels, include_lowest=True, right=True
             )
 
-            # Separate by sex
-            male_df = temp_df[temp_df["sex"].str.lower().isin(["male", "m"])]
-            female_df = temp_df[temp_df["sex"].str.lower().isin(["female", "f"])]
+            if include_missing:
+                temp_df["age_group"] = (
+                    temp_df["age_group"].cat.add_categories(["Missing age"]).fillna("Missing age")
+                )
 
-            male_counts = male_df["age_group"].value_counts().reindex(labels, fill_value=0)
-            female_counts = female_df["age_group"].value_counts().reindex(labels, fill_value=0)
+            sex_lower = temp_df["sex"].fillna("").astype(str).str.strip().str.lower()
+            male_mask = sex_lower.isin(["male", "m"])
+            female_mask = sex_lower.isin(["female", "f"])
+            missing_sex_mask = ~(male_mask | female_mask)
+
+            male_df = temp_df[male_mask]
+            female_df = temp_df[female_mask]
+            missing_sex_df = temp_df[missing_sex_mask] if include_missing else temp_df.iloc[0:0]
+
+            male_counts = male_df["age_group"].value_counts().reindex(x_labels, fill_value=0)
+            female_counts = female_df["age_group"].value_counts().reindex(x_labels, fill_value=0)
+            missing_sex_counts = (
+                missing_sex_df["age_group"].value_counts().reindex(x_labels, fill_value=0)
+                if include_missing
+                else pd.Series([0] * len(x_labels), index=x_labels)
+            )
 
             male_total = int(male_counts.sum())
             female_total = int(female_counts.sum())
+            missing_sex_total = int(missing_sex_counts.sum())
             male_pct = [
                 ((count / male_total) * 100.0) if male_total else 0.0
                 for count in male_counts.values
@@ -176,6 +233,10 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                 ((count / female_total) * 100.0) if female_total else 0.0
                 for count in female_counts.values
             ]
+            missing_sex_pct = [
+                ((count / missing_sex_total) * 100.0) if missing_sex_total else 0.0
+                for count in missing_sex_counts.values
+            ]
 
             # Create stacked bar chart
             fig = go.Figure()
@@ -183,7 +244,7 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
             # Add male bars with standardized color
             fig.add_trace(
                 go.Bar(
-                    x=labels,
+                    x=x_labels,
                     y=male_counts.values,
                     name="Male",
                     marker_color=PATIENT_CHART_COLORS[0],  # Violet - non-gendered
@@ -195,7 +256,7 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
             # Add female bars with standardized color
             fig.add_trace(
                 go.Bar(
-                    x=labels,
+                    x=x_labels,
                     y=female_counts.values,
                     name="Female",
                     marker_color=PATIENT_CHART_COLORS[3],  # Amber - non-gendered
@@ -203,6 +264,18 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
                     hovertemplate="Age: %{x}<br>Female: %{customdata:.1f}%<extra></extra>",
                 )
             )
+
+            if include_missing and missing_sex_total > 0:
+                fig.add_trace(
+                    go.Bar(
+                        x=x_labels,
+                        y=missing_sex_counts.values,
+                        name="Missing",
+                        marker_color=TAILWIND_COLORS["slate-500"],
+                        customdata=missing_sex_pct,
+                        hovertemplate="Age: %{x}<br>Missing: %{customdata:.1f}%<extra></extra>",
+                    )
+                )
 
             fig = style_plotly_layout(
                 fig,
@@ -238,8 +311,8 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
             )
         elif field in {"sud", "behavioral_health"}:
             # Donut for boolean health flags
-            s2 = df[field].map({True: "Yes", False: "No"}).fillna("Unknown")
-            vc = s2.value_counts().reindex(["Yes", "No", "Unknown"], fill_value=0).reset_index()
+            s2 = df[field].map({True: "Yes", False: "No"}).fillna(MISSING_LABEL)
+            vc = s2.value_counts().reindex(["Yes", "No", MISSING_LABEL], fill_value=0).reset_index()
             vc.columns = ["label", "count"]
             return _build_donut_chart(vc, "label", "count", theme)
         else:
@@ -271,19 +344,24 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
             fig.update_layout(bargap=0.15)  # Add gap between bars
     else:
         # Categorical: use creative chart types by field
-        s_clean = s[~s.str.lower().isin({"not disclosed", "single"})]
-        vc_full = s_clean.value_counts()
-        # Build top list + "Other" for legibility
-        top_n = 8
-        vc_top = vc_full.head(top_n)
-        other_count = int(vc_full.iloc[top_n:].sum()) if vc_full.size > top_n else 0
-        vc = vc_top.reset_index()
-        vc.columns = [field, "count"]
-        # Don't add "Other" category for pcp_agency field
-        if other_count > 0 and field != "pcp_agency":
-            vc = pd.concat(
-                [vc, pd.DataFrame([{field: "Other", "count": other_count}])], ignore_index=True
+        s_clean = s.astype(str).str.strip()
+        s_lower = s_clean.str.lower()
+        missing_mask = s_clean.eq("") | s_lower.isin(_MISSING_TOKENS)
+        if field == "pcp_agency":
+            s_clean = s_clean[~missing_mask]
+        else:
+            s_clean = (
+                s_clean.mask(missing_mask, MISSING_LABEL)
+                if include_missing
+                else s_clean[~missing_mask]
             )
+
+        vc = _top_n_counts_with_other_and_missing(
+            s_clean,
+            field,
+            include_other=(field != "pcp_agency"),
+            include_missing=include_missing,
+        )
 
         # Choose chart by field
         if field in {"insurance", "marital_status", "veteran_status"}:
@@ -373,18 +451,34 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
 
 
 def _patient_chart_html(
-    df: pd.DataFrame, field: str, theme: str, categorical_overrides: set[str]
+    df: pd.DataFrame,
+    field: str,
+    theme: str,
+    categorical_overrides: set[str],
+    *,
+    zip_include_missing: bool,
+    include_missing: bool,
 ) -> str:
     try:
         if field in categorical_overrides:
-            return _render_categorical_override(df[field], field, theme)
-        return _build_chart_for_field(df, field, theme)
+            return _render_categorical_override(
+                df[field],
+                field,
+                theme,
+                zip_include_missing=zip_include_missing,
+                include_missing=include_missing,
+            )
+        return _build_chart_for_field(df, field, theme, include_missing=include_missing)
     except Exception:
         return ""
 
 
 def build_patients_field_charts(
-    theme: str, fields: Collection[str] | None = None
+    theme: str,
+    fields: Collection[str] | None = None,
+    *,
+    zip_include_missing: bool = False,
+    include_missing: bool = True,
 ) -> dict[str, str]:
     """
     Build a chart (HTML div) for each relevant field in Patients.
@@ -419,7 +513,14 @@ def build_patients_field_charts(
     for field in (col for col in df.columns if col not in skip_fields):
         if not wants(field):
             continue
-        chart_html = _patient_chart_html(df, field, theme, categorical_overrides)
+        chart_html = _patient_chart_html(
+            df,
+            field,
+            theme,
+            categorical_overrides,
+            zip_include_missing=zip_include_missing,
+            include_missing=include_missing,
+        )
         if chart_html:
             charts[field] = chart_html
 
@@ -435,7 +536,12 @@ def build_patients_field_charts(
 
     add_chart("patient_counts_quarterly", _build_quarterly_patient_bar)
     # Removed sex_age_boxplot - redundant with stacked age chart
-    add_chart("race_age_boxplot", build_patients_age_by_race_boxplot)
+    add_chart(
+        "race_age_boxplot",
+        lambda theme_arg: build_patients_age_by_race_boxplot(
+            theme_arg, include_missing=include_missing
+        ),
+    )
 
     # Add enhanced production charts
     from .production_age_charts import build_enhanced_age_referral_sankey
@@ -682,32 +788,45 @@ def _build_quarterly_patient_bar(theme: str) -> str | None:  # noqa: C901
     )
 
 
-def _render_categorical_override(series: pd.Series, field: str, theme: str) -> str:
+def _render_categorical_override(
+    series: pd.Series,
+    field: str,
+    theme: str,
+    *,
+    zip_include_missing: bool = False,
+    include_missing: bool = True,
+) -> str:
     # Special handling for boolean health flags
     if field in {"sud", "behavioral_health"}:
-        s2 = series.map({True: "Yes", False: "No"}).fillna("Unknown")
-        vc = s2.value_counts().reindex(["Yes", "No", "Unknown"], fill_value=0).reset_index()
+        s2 = series.map({True: "Yes", False: "No"}).fillna(MISSING_LABEL)
+        vc = s2.value_counts().reindex(["Yes", "No", MISSING_LABEL], fill_value=0).reset_index()
         vc.columns = ["label", "count"]
         return _build_donut_chart(vc, "label", "count", theme)
 
     s = series.fillna("").astype(str).str.strip()
-    s = s.replace({"": "Unknown"})
-    s = s[~s.str.lower().isin({"not disclosed", "single"})]
-    vc_full = s.value_counts()
-    # Aggregate beyond top N as 'Other'
-    top_n = 8
-    vc_top = vc_full.head(top_n)
-    other_count = int(vc_full.iloc[top_n:].sum()) if vc_full.size > top_n else 0
-    vc = vc_top.reset_index()
-    vc.columns = [field, "count"]
-    if other_count > 0:
-        vc = pd.concat(
-            [vc, pd.DataFrame([{field: "Other", "count": other_count}])], ignore_index=True
-        )
 
-    if field in {"sud", "behavioral_health"}:
-        vc2 = vc.rename(columns={field: "label"})
-        return _build_donut_chart(vc2, "label", "count", theme)
+    # Special handling for ZIP code chart: allow toggling missing ZIP values on/off.
+    if field == "zip_code":
+        missing_label = ZIP_MISSING_LABEL
+        s_lower = s.str.lower()
+        missing_mask = s.eq("") | s_lower.isin(_MISSING_TOKENS)
+        s = s.mask(missing_mask, missing_label)
+
+        # Some datasets appear to contain a stray "single" value; keep the existing behavior.
+        s = s[~s.str.lower().isin({"single"})]
+        if not zip_include_missing:
+            s = s[s != missing_label]
+        vc = _top_n_counts_with_other_and_missing(
+            s,
+            field,
+            missing_label=missing_label,
+            include_missing=zip_include_missing,
+        )
+    else:
+        s_lower = s.str.lower()
+        missing_mask = s.eq("") | s_lower.isin(_MISSING_TOKENS)
+        s = s.mask(missing_mask, MISSING_LABEL) if include_missing else s[~missing_mask]
+        vc = _top_n_counts_with_other_and_missing(s, field, include_missing=include_missing)
 
     # Special handling for ZIP codes with geographic grouping
     if field == "zip_code":
@@ -805,6 +924,7 @@ def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
         "Homeless/Transient": "Transient",
         "Non-Clallam County ZIP Code": "Transient",
         "Other": "Transient",
+        ZIP_MISSING_LABEL: "Missing ZIP",
     }
 
     # Define geographic groups for coloring
@@ -816,6 +936,7 @@ def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
             "Non-Clallam County ZIP Code",
             "Other",
         ],
+        "Missing": [ZIP_MISSING_LABEL],
         "Sequim": ["98382"],
         "Sekiu": ["98381"],
         "Clallam Bay": ["98326"],
@@ -831,6 +952,7 @@ def _render_zip_code_chart(vc: pd.DataFrame, theme: str) -> str:
         "Clallam Bay": PATIENT_CHART_COLORS[3],  # Amber
         "Forks": PATIENT_CHART_COLORS[4],  # Blue
         "Joyce": PATIENT_CHART_COLORS[6],  # Teal
+        "Missing": TAILWIND_COLORS["slate-500"],
     }
 
     # Map ZIP codes to display names
