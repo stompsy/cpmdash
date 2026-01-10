@@ -137,8 +137,12 @@ def build_repeat_overdose_quick_stats() -> list[dict[str, str]]:
     repeat_events = max(0, events - patients)
 
     dt = df[["merged_label", "od_date"]].sort_values(["merged_label", "od_date"]).copy()
-    first_dates = dt.groupby("merged_label", observed=False)["od_date"].nth(0)
-    second_dates = dt.groupby("merged_label", observed=False)["od_date"].nth(1)
+    # NOTE: don't subtract `groupby().nth()` results directly.
+    # `nth()` preserves the original row index, so subtraction aligns on row index (not patient),
+    # producing all-NaN and empty stats.
+    dt["event_rank"] = dt.groupby("merged_label", observed=False)["od_date"].rank(method="first")
+    first_dates = dt[dt["event_rank"] == 1].set_index("merged_label")["od_date"]
+    second_dates = dt[dt["event_rank"] == 2].set_index("merged_label")["od_date"]
     days_to_second = (second_dates - first_dates).dt.days.dropna()
 
     if days_to_second.empty:
