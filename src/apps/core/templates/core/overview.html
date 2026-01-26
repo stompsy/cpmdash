@@ -17,7 +17,7 @@
         <span data-page-name="coreOverview" class="hidden" hidden></span>
 
         {# Pure Narrative - Our Story #}
-        <section class="py-20 bg-gradient-to-b from-transparent via-slate-900/30 to-transparent">
+        <section class="py-16 bg-gradient-to-b from-transparent via-slate-900/30 to-transparent">
             <div class="w-full">
                 <div class="prose prose-lg prose-invert max-w-none">
                     <h2 class="mb-8 text-3xl font-bold tracking-tight text-white sm:text-4xl">Meeting residents where they are</h2>
@@ -83,7 +83,7 @@
         </section>
 
         {# Partners Network - Ecosystem Showcase #}
-        <section class="py-24">
+        <section class="py-16">
             <div class="w-full">
                 <div class="mb-16 text-center">
                     <div class="mb-4 inline-block rounded-full bg-indigo-500/10 px-4 py-1.5">
@@ -202,7 +202,7 @@
         </section>
 
         {# Evidence & Impact - Narrative #}
-        <section class="py-24">
+        <section class="py-16">
             <div class="w-full">
                 <div class="mb-16 text-center">
                     <div class="mb-4 inline-block rounded-full bg-emerald-500/10 px-4 py-1.5">
@@ -264,212 +264,257 @@
         </section>
 
         {# Services Provided #}
-        <section class="py-24">
-            <div class="w-full">
+        <section class="py-16">
+            <div class="mx-auto w-full max-w-6xl px-6">
                 <div class="mb-16 text-center">
                     <div class="mb-4 inline-block rounded-full bg-sky-500/10 px-4 py-1.5">
                         <span class="text-xs font-bold uppercase tracking-wider text-sky-400">Services</span>
                     </div>
                     <h2 class="mb-6 text-4xl font-bold text-white sm:text-5xl">Services Provided</h2>
                     <p class="mx-auto max-w-3xl text-base leading-relaxed text-slate-300 sm:text-lg">
-                        What community paramedics actually do all day (besides get blamed for everything). This is the
-                        operational menu we deliver in the field—medical, behavioral health, post-overdose follow-up,
-                        and the glue work that keeps people from cycling back through 911 and the ED.
+                        An overview of the core service areas delivered by the Community Paramedicine team in the
+                        field and in the community—clinical care, behavioral health response, post-overdose follow-up,
+                        care coordination, and connection to local resources.
                     </p>
                 </div>
 
-                <div class="grid gap-6 lg:grid-cols-2">
-                    <div class="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-500/10 to-slate-900/40 p-8 shadow-xl backdrop-blur-sm">
-                        <div class="mb-4 flex items-center gap-3">
-                            <div class="rounded-xl bg-emerald-500/20 p-3">
-                                <svg class="h-6 w-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h6m8 0h2M12 4v6m0 8v2m-4-8h8"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Medical Care &amp; Clinical Services</h3>
-                        </div>
-                        <ul class="space-y-2 text-sm leading-6 text-slate-300">
-                            <li class="flex gap-3"><span class="text-emerald-300">•</span>In-home and field-based medical assessments</li>
-                            <li class="flex gap-3"><span class="text-emerald-300">•</span>Chronic disease management (CHF, COPD, diabetes, complex multimorbidity)</li>
-                            <li class="flex gap-3"><span class="text-emerald-300">•</span>Medication reconciliation and adherence support</li>
-                            <li class="flex gap-3"><span class="text-emerald-300">•</span>Medication administration (including injectables per protocol)</li>
-                            <li class="flex gap-3"><span class="text-emerald-300">•</span>Wound care (acute and chronic, including unhoused outreach care)</li>
-                            <li class="flex gap-3"><span class="text-emerald-300">•</span>Vital signs monitoring, EKGs, specimen collection, and lab blood draws</li>
-                            <li class="flex gap-3"><span class="text-emerald-300">•</span>Post-hospital and post-ED discharge follow-up</li>
-                            <li class="flex gap-3"><span class="text-emerald-300">•</span>Vaccinations (COVID-19, influenza, and other indicated vaccines)</li>
-                            <li class="flex gap-3"><span class="text-emerald-300">•</span>Medical equipment assistance, setup, and patient training</li>
-                        </ul>
-                    </div>
+                <div class="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/20 shadow-sm backdrop-blur-sm">
+                    <div class="divide-y divide-white/10">
 
-                    <div class="rounded-2xl border border-white/10 bg-gradient-to-br from-rose-500/10 to-slate-900/40 p-8 shadow-xl backdrop-blur-sm">
-                        <div class="mb-4 flex items-center gap-3">
-                            <div class="rounded-xl bg-rose-500/20 p-3">
-                                <svg class="h-6 w-6 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                </svg>
+                        <div class="group grid gap-6 px-6 py-10 md:grid-cols-12 md:gap-10 hover:bg-white/5">
+                            <div class="md:col-span-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 rounded-xl bg-sky-500/10 p-3 ring-1 ring-white/10">
+                                        <svg class="h-6 w-6 text-sky-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm10-6a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H7a1 1 0 1 1 0-2h4V7a1 1 0 0 1 1-1Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Medical Care &amp; Clinical Services</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-400">Assessments, chronic disease management, and post-discharge follow-up.</p>
+                                    </div>
+                                </div>
                             </div>
-                            <h3 class="text-xl font-bold text-white">Post-Overdose &amp; Substance Use Disorder Services</h3>
-                        </div>
-                        <ul class="space-y-2 text-sm leading-6 text-slate-300">
-                            <li class="flex gap-3"><span class="text-rose-300">•</span>911-dispatched overdose response by Community Paramedics</li>
-                            <li class="flex gap-3"><span class="text-rose-300">•</span>Post-Overdose Response Team (PORT) follow-up within 72 hours</li>
-                            <li class="flex gap-3"><span class="text-rose-300">•</span>Field assessment and treatment of precipitated withdrawal</li>
-                            <li class="flex gap-3"><span class="text-rose-300">•</span>MOUD administration in the field (Buprenorphine, per DOH approval)</li>
-                            <li class="flex gap-3"><span class="text-rose-300">•</span>Naloxone education and distribution (patients, families, bystanders)</li>
-                            <li>
-                                <div class="flex gap-3 text-sm leading-6 text-slate-300"><span class="text-rose-300">•</span><span>Warm handoffs to:</span></div>
-                                <ul class="mt-2 space-y-1 pl-6 text-sm leading-6 text-slate-300">
-                                    <li class="flex gap-3"><span class="text-rose-300">–</span>Medication Assisted Treatment (MAT) programs</li>
-                                    <li class="flex gap-3"><span class="text-rose-300">–</span>Detox and inpatient/outpatient treatment</li>
-                                    <li class="flex gap-3"><span class="text-rose-300">–</span>Substance Use Disorder Professionals and case management</li>
-                                </ul>
-                            </li>
-                            <li class="flex gap-3"><span class="text-rose-300">•</span>Closed-loop follow-up with EMS crews and medical partners</li>
-                        </ul>
-                    </div>
-
-                    <div class="rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500/10 to-slate-900/40 p-8 shadow-xl backdrop-blur-sm">
-                        <div class="mb-4 flex items-center gap-3">
-                            <div class="rounded-xl bg-violet-500/20 p-3">
-                                <svg class="h-6 w-6 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-2v13"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 8v13"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18a2 2 0 104 0 2 2 0 00-4 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 16a2 2 0 104 0 2 2 0 00-4 0z"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Behavioral Health &amp; Crisis Response</h3>
-                        </div>
-                        <ul class="space-y-2 text-sm leading-6 text-slate-300">
-                            <li class="flex gap-3"><span class="text-violet-300">•</span>Behavioral health crisis assessment and de-escalation</li>
-                            <li class="flex gap-3"><span class="text-violet-300">•</span>Dementia and cognitive decline evaluations</li>
-                            <li class="flex gap-3"><span class="text-violet-300">•</span>Welfare checks and high-risk follow-ups</li>
-                            <li class="flex gap-3"><span class="text-violet-300">•</span>Alternative response for psychiatric and behavioral health calls</li>
-                            <li class="flex gap-3"><span class="text-violet-300">•</span>Co-response with behavioral health clinicians and outreach teams</li>
-                            <li class="flex gap-3"><span class="text-violet-300">•</span>Support for patients experiencing psychosis, mood instability, or suicidality</li>
-                        </ul>
-                    </div>
-
-                    <div class="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-500/10 to-slate-900/40 p-8 shadow-xl backdrop-blur-sm">
-                        <div class="mb-4 flex items-center gap-3">
-                            <div class="rounded-xl bg-amber-500/20 p-3">
-                                <svg class="h-6 w-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 10V6a5 5 0 0110 0v4"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l1 10h12l1-10"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Home Safety &amp; Functional Support</h3>
-                        </div>
-                        <ul class="space-y-2 text-sm leading-6 text-slate-300">
-                            <li class="flex gap-3"><span class="text-amber-300">•</span>Home safety evaluations (fall risk, fire hazards, environmental risks)</li>
-                            <li class="flex gap-3"><span class="text-amber-300">•</span>Assistance with activities of daily living barriers</li>
-                            <li class="flex gap-3"><span class="text-amber-300">•</span>Coordination for home help, home health, or placement needs</li>
-                            <li class="flex gap-3"><span class="text-amber-300">•</span>Identification of unsafe living conditions requiring intervention</li>
-                            <li class="flex gap-3"><span class="text-amber-300">•</span>Advocacy during housing, placement, or eviction-related safety concerns</li>
-                        </ul>
-                    </div>
-
-                    <div class="rounded-2xl border border-white/10 bg-gradient-to-br from-sky-500/10 to-slate-900/40 p-8 shadow-xl backdrop-blur-sm">
-                        <div class="mb-4 flex items-center gap-3">
-                            <div class="rounded-xl bg-sky-500/20 p-3">
-                                <svg class="h-6 w-6 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-4-4h-1"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20H4v-2a4 4 0 014-4h1"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12a4 4 0 100-8 4 4 0 000 8z"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Care Coordination &amp; Case Management</h3>
-                        </div>
-                        <ul class="space-y-2 text-sm leading-6 text-slate-300">
-                            <li class="flex gap-3"><span class="text-sky-300">•</span>Navigation of medical, behavioral health, and social service systems</li>
-                            <li class="flex gap-3"><span class="text-sky-300">•</span>Case management for high-utilizer and high-risk patients</li>
-                            <li class="flex gap-3"><span class="text-sky-300">•</span>Appointment scheduling and appointment transport assistance</li>
-                            <li class="flex gap-3"><span class="text-sky-300">•</span>Prescription pickup and medication access support</li>
-                            <li class="flex gap-3"><span class="text-sky-300">•</span>Direct communication with primary care, specialists, and hospitals</li>
-                            <li class="flex gap-3"><span class="text-sky-300">•</span>Closed-loop communication with EMS, hospitals, and law enforcement</li>
-                        </ul>
-                    </div>
-
-                    <div class="rounded-2xl border border-white/10 bg-gradient-to-br from-cyan-500/10 to-slate-900/40 p-8 shadow-xl backdrop-blur-sm">
-                        <div class="mb-4 flex items-center gap-3">
-                            <div class="rounded-xl bg-cyan-500/20 p-3">
-                                <svg class="h-6 w-6 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Social Services &amp; Community Resource Linkage</h3>
-                        </div>
-                        <ul class="space-y-2 text-sm leading-6 text-slate-300">
-                            <li>
-                                <div class="flex gap-3 text-sm leading-6 text-slate-300"><span class="text-cyan-300">•</span><span>Connection to:</span></div>
-                                <ul class="mt-2 space-y-1 pl-6 text-sm leading-6 text-slate-300">
-                                    <li class="flex gap-3"><span class="text-cyan-300">–</span>Housing and shelter resources</li>
-                                    <li class="flex gap-3"><span class="text-cyan-300">–</span>Food access and nutrition support</li>
-                                    <li class="flex gap-3"><span class="text-cyan-300">–</span>Transportation services</li>
-                                    <li class="flex gap-3"><span class="text-cyan-300">–</span>Insurance and healthcare coverage</li>
-                                    <li class="flex gap-3"><span class="text-cyan-300">–</span>Legal and older adult services</li>
-                                </ul>
-                            </li>
-                            <li class="flex gap-3"><span class="text-cyan-300">•</span>LEAD Fire participation and diversion-based support</li>
-                            <li class="flex gap-3"><span class="text-cyan-300">•</span>Outreach to unhoused individuals and encampments</li>
-                            <li class="flex gap-3"><span class="text-cyan-300">•</span>Harm reduction supply distribution (wound kits, hygiene items, seasonal supplies)</li>
-                        </ul>
-                    </div>
-
-                    <div class="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-500/10 to-slate-900/40 p-8 shadow-xl backdrop-blur-sm">
-                        <div class="mb-4 flex items-center gap-3">
-                            <div class="rounded-xl bg-slate-500/20 p-3">
-                                <svg class="h-6 w-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l7 4v6c0 5-3 9-7 10-4-1-7-5-7-10V6l7-4z"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Public Safety &amp; System Support</h3>
-                        </div>
-                        <ul class="space-y-2 text-sm leading-6 text-slate-300">
-                            <li class="flex gap-3"><span class="text-slate-300">•</span>Reduction of non-emergent 911 and ED utilization</li>
-                            <li class="flex gap-3"><span class="text-slate-300">•</span>Follow-up on frequent EMS callers and repeat crisis users</li>
-                            <li class="flex gap-3"><span class="text-slate-300">•</span>Backfill and support for 911 operations during peak demand</li>
-                            <li class="flex gap-3"><span class="text-slate-300">•</span>Collaboration with law enforcement to reduce repeat welfare checks</li>
-                            <li class="flex gap-3"><span class="text-slate-300">•</span>Sharps container monitoring and public safety hazard mitigation</li>
-                        </ul>
-                    </div>
-
-                    <div class="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-500/10 to-slate-900/40 p-8 shadow-xl backdrop-blur-sm lg:col-span-2">
-                        <div class="mb-4 flex items-center gap-3">
-                            <div class="rounded-xl bg-indigo-500/20 p-3">
-                                <svg class="h-6 w-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422A12.083 12.083 0 0121 12.5c0 4.418-4.03 8-9 8s-9-3.582-9-8c0-.55.06-1.09.174-1.61L12 14z"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Education &amp; Training</h3>
-                        </div>
-                        <div class="grid gap-6 lg:grid-cols-2">
-                            <div>
-                                <p class="text-sm font-semibold text-slate-200">First responder training in:</p>
-                                <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-300">
-                                    <li class="flex gap-3"><span class="text-indigo-300">•</span>Behavioral health crisis response</li>
-                                    <li class="flex gap-3"><span class="text-indigo-300">•</span>Overdose response best practices</li>
-                                    <li class="flex gap-3"><span class="text-indigo-300">•</span>De-escalation and trauma-informed care</li>
-                                </ul>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-slate-200">Community education:</p>
-                                <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-300">
-                                    <li class="flex gap-3"><span class="text-indigo-300">•</span>CPR, choking, and first aid</li>
-                                    <li class="flex gap-3"><span class="text-indigo-300">•</span>Overdose recognition and naloxone use</li>
-                                    <li class="flex gap-3"><span class="text-indigo-300">•</span>Cross-agency training with healthcare and public safety partners</li>
+                            <div class="md:col-span-8">
+                                <ul class="mt-1 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300 marker:text-sky-400 sm:columns-2 sm:[column-gap:2.5rem]">
+                                    <li class="break-inside-avoid">In-home and field-based medical assessments</li>
+                                    <li class="break-inside-avoid">Chronic disease management (CHF, COPD, diabetes, complex multimorbidity)</li>
+                                    <li class="break-inside-avoid">Medication reconciliation and adherence support</li>
+                                    <li class="break-inside-avoid">Medication administration (including injectables per protocol)</li>
+                                    <li class="break-inside-avoid">Wound care (acute and chronic, including unhoused outreach care)</li>
+                                    <li class="break-inside-avoid">Vital signs monitoring, EKGs, specimen collection, and lab blood draws</li>
+                                    <li class="break-inside-avoid">Post-hospital and post-ED discharge follow-up</li>
+                                    <li class="break-inside-avoid">Vaccinations (COVID-19, influenza, and other indicated vaccines)</li>
+                                    <li class="break-inside-avoid">Medical equipment assistance, setup, and patient training</li>
                                 </ul>
                             </div>
                         </div>
+
+                        <div class="group grid gap-6 px-6 py-10 md:grid-cols-12 md:gap-10 hover:bg-white/5">
+                            <div class="md:col-span-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 rounded-xl bg-sky-500/10 p-3 ring-1 ring-white/10">
+                                        <svg class="h-6 w-6 text-sky-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M10.5 2.25a.75.75 0 0 1 .75.75V4.5h1.5V3a.75.75 0 0 1 1.5 0v1.5h1.5a.75.75 0 0 1 0 1.5h-1.5v1.5h1.5a.75.75 0 0 1 0 1.5h-1.5v1.5h1.5a.75.75 0 0 1 0 1.5h-1.5v1.5h1.5a.75.75 0 0 1 0 1.5h-1.5V21a.75.75 0 0 1-1.5 0v-1.5h-1.5V21a.75.75 0 0 1-1.5 0v-1.5H9a.75.75 0 0 1 0-1.5h1.5V16.5H9a.75.75 0 0 1 0-1.5h1.5V13.5H9a.75.75 0 0 1 0-1.5h1.5V10.5H9A.75.75 0 0 1 9 9h1.5V7.5H9A.75.75 0 0 1 9 6h1.5V4.5H9a.75.75 0 0 1 0-1.5h1.5V3a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Post-Overdose &amp; Substance Use Disorder Services</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-400">Overdose response, rapid follow-up, and connection to treatment and supports.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-8">
+                                <ul class="mt-1 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300 marker:text-sky-400 sm:columns-2 sm:[column-gap:2.5rem]">
+                                    <li class="break-inside-avoid">911-dispatched overdose response by Community Paramedics</li>
+                                    <li class="break-inside-avoid">Post-Overdose Response Team (PORT) follow-up within 72 hours</li>
+                                    <li class="break-inside-avoid">Field assessment and treatment of precipitated withdrawal</li>
+                                    <li class="break-inside-avoid">MOUD administration in the field (Buprenorphine, per DOH approval)</li>
+                                    <li class="break-inside-avoid">Naloxone education and distribution (patients, families, bystanders)</li>
+                                    <li class="break-inside-avoid">Warm handoffs to MAT programs, detox, and inpatient/outpatient treatment</li>
+                                    <li class="break-inside-avoid">Connection to SUD professionals and case management</li>
+                                    <li class="break-inside-avoid">Closed-loop follow-up with EMS crews and medical partners</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="group grid gap-6 px-6 py-10 md:grid-cols-12 md:gap-10 hover:bg-white/5">
+                            <div class="md:col-span-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 rounded-xl bg-sky-500/10 p-3 ring-1 ring-white/10">
+                                        <svg class="h-6 w-6 text-sky-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M7.5 3.75A4.5 4.5 0 0 0 3 8.25v3.879a3 3 0 0 0 1.215 2.414l2.91 2.18a.75.75 0 0 1 .3.6v1.927a.75.75 0 0 0 1.2.6l2.003-1.502a1.5 1.5 0 0 1 .9-.3H16.5A4.5 4.5 0 0 0 21 13.5V8.25a4.5 4.5 0 0 0-4.5-4.5h-9Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Behavioral Health &amp; Crisis Response</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-400">Crisis assessment, de-escalation, and co-response support.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-8">
+                                <ul class="mt-1 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300 marker:text-sky-400 sm:columns-2 sm:[column-gap:2.5rem]">
+                                    <li class="break-inside-avoid">Behavioral health crisis assessment and de-escalation</li>
+                                    <li class="break-inside-avoid">Dementia and cognitive decline evaluations</li>
+                                    <li class="break-inside-avoid">Welfare checks and high-risk follow-ups</li>
+                                    <li class="break-inside-avoid">Alternative response for psychiatric and behavioral health calls</li>
+                                    <li class="break-inside-avoid">Co-response with behavioral health clinicians and outreach teams</li>
+                                    <li class="break-inside-avoid">Support for patients experiencing psychosis, mood instability, or suicidality</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="group grid gap-6 px-6 py-10 md:grid-cols-12 md:gap-10 hover:bg-white/5">
+                            <div class="md:col-span-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 rounded-xl bg-sky-500/10 p-3 ring-1 ring-white/10">
+                                        <svg class="h-6 w-6 text-sky-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M12 2.25a.75.75 0 0 1 .53.22l8.25 8.25a.75.75 0 0 1-1.06 1.06L19.5 11.56V20.25a1.5 1.5 0 0 1-1.5 1.5H15a.75.75 0 0 1-.75-.75V16.5a1.5 1.5 0 0 0-1.5-1.5h-1.5a1.5 1.5 0 0 0-1.5 1.5V21a.75.75 0 0 1-.75.75H6a1.5 1.5 0 0 1-1.5-1.5v-8.69l-.22.22a.75.75 0 1 1-1.06-1.06l8.25-8.25a.75.75 0 0 1 .53-.22Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Home Safety &amp; Functional Support</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-400">Home safety evaluations and support for daily living barriers.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-8">
+                                <ul class="mt-1 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300 marker:text-sky-400 sm:columns-2 sm:[column-gap:2.5rem]">
+                                    <li class="break-inside-avoid">Home safety evaluations (fall risk, fire hazards, environmental risks)</li>
+                                    <li class="break-inside-avoid">Assistance with activities of daily living barriers</li>
+                                    <li class="break-inside-avoid">Coordination for home help, home health, or placement needs</li>
+                                    <li class="break-inside-avoid">Identification of unsafe living conditions requiring intervention</li>
+                                    <li class="break-inside-avoid">Advocacy during housing, placement, or eviction-related safety concerns</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="group grid gap-6 px-6 py-10 md:grid-cols-12 md:gap-10 hover:bg-white/5">
+                            <div class="md:col-span-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 rounded-xl bg-sky-500/10 p-3 ring-1 ring-white/10">
+                                        <svg class="h-6 w-6 text-sky-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M15.75 2.25a.75.75 0 0 1 .75.75v2.25h2.25a.75.75 0 0 1 0 1.5H16.5V9a.75.75 0 0 1-1.5 0V6.75h-2.25a.75.75 0 0 1 0-1.5H15V3a.75.75 0 0 1 .75-.75ZM6.75 6a.75.75 0 0 1 .75.75V9h2.25a.75.75 0 0 1 0 1.5H7.5v2.25a.75.75 0 0 1-1.5 0V10.5H3.75a.75.75 0 0 1 0-1.5H6V6.75A.75.75 0 0 1 6.75 6Zm7.53 6.22a.75.75 0 0 1 .75.75V15h2.25a.75.75 0 0 1 0 1.5H15.03v2.03a.75.75 0 0 1-1.5 0V16.5H11.5a.75.75 0 0 1 0-1.5h2.03v-2.03a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Care Coordination &amp; Case Management</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-400">System navigation, follow-through, and closed-loop communication.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-8">
+                                <ul class="mt-1 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300 marker:text-sky-400 sm:columns-2 sm:[column-gap:2.5rem]">
+                                    <li class="break-inside-avoid">Navigation of medical, behavioral health, and social service systems</li>
+                                    <li class="break-inside-avoid">Case management for high-utilizer and high-risk patients</li>
+                                    <li class="break-inside-avoid">Appointment scheduling and appointment transport assistance</li>
+                                    <li class="break-inside-avoid">Prescription pickup and medication access support</li>
+                                    <li class="break-inside-avoid">Direct communication with primary care, specialists, and hospitals</li>
+                                    <li class="break-inside-avoid">Closed-loop communication with EMS, hospitals, and law enforcement</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="group grid gap-6 px-6 py-10 md:grid-cols-12 md:gap-10 hover:bg-white/5">
+                            <div class="md:col-span-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 rounded-xl bg-sky-500/10 p-3 ring-1 ring-white/10">
+                                        <svg class="h-6 w-6 text-sky-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v.878a2.25 2.25 0 0 1 1.657 1.657h.878a.75.75 0 0 1 0 1.5h-.878a2.25 2.25 0 0 1-1.657 1.657v.878a.75.75 0 0 1-1.5 0v-.878a2.25 2.25 0 0 1-1.657-1.657H8.816a.75.75 0 0 1 0-1.5h.878A2.25 2.25 0 0 1 11.35 3.88V3a.75.75 0 0 1 .75-.75ZM6.27 9.53a.75.75 0 0 1 1.06 0l1.69 1.69a.75.75 0 0 1 0 1.06l-1.69 1.69a.75.75 0 1 1-1.06-1.06l.72-.72H3.75a.75.75 0 0 1 0-1.5h3.24l-.72-.72a.75.75 0 0 1 0-1.06Zm11.46 0a.75.75 0 0 1 0 1.06l-.72.72h3.24a.75.75 0 0 1 0 1.5h-3.24l.72.72a.75.75 0 1 1-1.06 1.06l-1.69-1.69a.75.75 0 0 1 0-1.06l1.69-1.69a.75.75 0 0 1 1.06 0ZM12 14.25a.75.75 0 0 1 .75.75v.878a2.25 2.25 0 0 1 1.657 1.657h.878a.75.75 0 0 1 0 1.5h-.878a2.25 2.25 0 0 1-1.657 1.657v.878a.75.75 0 0 1-1.5 0v-.878a2.25 2.25 0 0 1-1.657-1.657H8.816a.75.75 0 0 1 0-1.5h.878a2.25 2.25 0 0 1 1.657-1.657V15a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Social Services &amp; Community Resource Linkage</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-400">Housing, food access, coverage navigation, outreach, and harm reduction supports.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-8">
+                                <ul class="mt-1 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300 marker:text-sky-400 sm:columns-2 sm:[column-gap:2.5rem]">
+                                    <li class="break-inside-avoid">Connection to housing and shelter resources</li>
+                                    <li class="break-inside-avoid">Food access and nutrition support</li>
+                                    <li class="break-inside-avoid">Transportation services</li>
+                                    <li class="break-inside-avoid">Insurance and healthcare coverage navigation</li>
+                                    <li class="break-inside-avoid">Legal and older adult services linkage</li>
+                                    <li class="break-inside-avoid">LEAD Fire participation and diversion-based support</li>
+                                    <li class="break-inside-avoid">Outreach to unhoused individuals and encampments</li>
+                                    <li class="break-inside-avoid">Harm reduction supply distribution (wound kits, hygiene items, seasonal supplies)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="group grid gap-6 px-6 py-10 md:grid-cols-12 md:gap-10 hover:bg-white/5">
+                            <div class="md:col-span-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 rounded-xl bg-sky-500/10 p-3 ring-1 ring-white/10">
+                                        <svg class="h-6 w-6 text-sky-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v.878a2.25 2.25 0 0 1 1.657 1.657h.878a.75.75 0 0 1 0 1.5h-.878a2.25 2.25 0 0 1-1.657 1.657v.878a.75.75 0 0 1-1.5 0v-.878a2.25 2.25 0 0 1-1.657-1.657H8.816a.75.75 0 0 1 0-1.5h.878A2.25 2.25 0 0 1 11.35 3.88V3a.75.75 0 0 1 .75-.75Zm-3.2 10.2a.75.75 0 0 1 1.06 0l2.14 2.14 2.14-2.14a.75.75 0 1 1 1.06 1.06l-2.14 2.14 2.14 2.14a.75.75 0 1 1-1.06 1.06l-2.14-2.14-2.14 2.14a.75.75 0 1 1-1.06-1.06l2.14-2.14-2.14-2.14a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Public Safety &amp; System Support</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-400">Reducing repeat crises and supporting response system capacity.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-8">
+                                <ul class="mt-1 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300 marker:text-sky-400 sm:columns-2 sm:[column-gap:2.5rem]">
+                                    <li class="break-inside-avoid">Reduction of non-emergent 911 and ED utilization</li>
+                                    <li class="break-inside-avoid">Follow-up on frequent EMS callers and repeat crisis users</li>
+                                    <li class="break-inside-avoid">Backfill and support for 911 operations during peak demand</li>
+                                    <li class="break-inside-avoid">Collaboration with law enforcement to reduce repeat welfare checks</li>
+                                    <li class="break-inside-avoid">Sharps container monitoring and public safety hazard mitigation</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="group grid gap-6 px-6 py-10 md:grid-cols-12 md:gap-10 hover:bg-white/5">
+                            <div class="md:col-span-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 rounded-xl bg-sky-500/10 p-3 ring-1 ring-white/10">
+                                        <svg class="h-6 w-6 text-sky-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M12 2.25c.345 0 .675.12.938.34l7.5 6.25a.75.75 0 0 1-.48 1.33H19.5v6.33a2.25 2.25 0 0 1-2.25 2.25h-1.5a.75.75 0 0 1-.75-.75V15a.75.75 0 0 0-.75-.75h-4.5A.75.75 0 0 0 9 15v4.5a.75.75 0 0 1-.75.75H6.75A2.25 2.25 0 0 1 4.5 18v-6.33h-.458a.75.75 0 0 1-.48-1.33l7.5-6.25c.263-.22.593-.34.938-.34Zm-2.25 20.25a.75.75 0 0 1-.75-.75V18a1.5 1.5 0 0 1 1.5-1.5h3a1.5 1.5 0 0 1 1.5 1.5v3.75a.75.75 0 0 1-.75.75h-4.5Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Education &amp; Training</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-400">Training for responders and community partners.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-8">
+                                <div class="grid gap-6 sm:grid-cols-2">
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-200">First responder training in:</p>
+                                        <ul class="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300 marker:text-sky-400">
+                                            <li>Behavioral health crisis response</li>
+                                            <li>Overdose response best practices</li>
+                                            <li>De-escalation and trauma-informed care</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-200">Community education:</p>
+                                        <ul class="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300 marker:text-sky-400">
+                                            <li>CPR, choking, and first aid</li>
+                                            <li>Overdose recognition and naloxone use</li>
+                                            <li>Cross-agency training with healthcare and public safety partners</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+
+                <p class="mt-8 text-center text-sm leading-6 text-slate-400">
+                    Services are tailored to patient needs, safety considerations, and partner capacity.
+                </p>
             </div>
         </section>
 
         {# Contact Section - Integrated Card Layout #}
-        <section class="relative isolate py-24 sm:py-32">
+        <section class="relative isolate sm:py-16">
             <div class="w-full">
                 <div class="mx-auto max-w-2xl lg:max-w-none">
                     <div class="overflow-hidden rounded-3xl bg-slate-800/50 ring-1 ring-white/10 shadow-md lg:grid lg:grid-cols-2">
