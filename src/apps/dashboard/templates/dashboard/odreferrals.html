@@ -189,7 +189,7 @@
                             <span class="font-semibold text-gray-900 dark:text-white">This timeline reveals failure patterns.</span> Clusters show when the system breaks down. Rapid recurrence (days or weeks) suggests immediate post-reversal gaps — no warm handoff, no MAT access, no stable housing. Longer intervals might indicate treatment dropout or life disruption events. Each vertical line is a person we need to reach differently.
                         </p>
                         <p class="text-base leading-7 text-gray-700 dark:text-slate-300">
-                            <span class="font-semibold text-gray-900 dark:text-white">Below the full timeline are three focused views:</span> an aligned timeline (everyone starts at day 0), a histogram of days between overdoses, and a seasonality snapshot. Same data, different angles — because one chart rarely tells the whole story.
+                            <span class="font-semibold text-gray-900 dark:text-white">Below the full timeline are three focused views:</span> an aligned timeline (everyone starts at day 0), a seasonality snapshot, and a histogram of days between overdoses. Same data, different angles — because one chart rarely tells the whole story.
                         </p>
                     </div>
                 </div>
@@ -212,20 +212,28 @@
                         <div class="space-y-8">
                             <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
                                 <div class="border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 dark:border-slate-700/50 dark:bg-slate-800/20">
-                                    <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Days Between Overdoses</h4>
-                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">This shows: “Are repeats happening immediately, or months later?”</p>
-                                </div>
-                                <div class="p-5">{{ fig_repeat_interval_hist|safe }}</div>
-                            </div>
-
-                            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
-                                <div class="border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 dark:border-slate-700/50 dark:bg-slate-800/20">
                                     <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Repeat Seasonality</h4>
                                     <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">This helps plan outreach timing and staffing.</p>
                                 </div>
                                 <div class="p-5">{{ fig_repeat_seasonality|safe }}</div>
                             </div>
+
+                            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                                <div class="border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 dark:border-slate-700/50 dark:bg-slate-800/20">
+                                    <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Days Between Overdoses</h4>
+                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">This shows: “Are repeats happening immediately, or months later?”</p>
+                                </div>
+                                <div class="p-5">{{ fig_repeat_interval_hist|safe }}</div>
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                        <div class="border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 dark:border-slate-700/50 dark:bg-slate-800/20">
+                            <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Repeat Overdose Rates by Quarter</h4>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Quarter-over-quarter trend for 2024–2025 (same-quarter and next-event windows).</p>
+                        </div>
+                        <div class="p-5">{{ fig_repeat_overdose_quarterly_trend|safe }}</div>
                     </div>
                 </div>
 

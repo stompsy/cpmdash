@@ -1,5 +1,189 @@
 # Hargrove Grant Metrics Insights
 
+**Document Version:** 3.0
+**Last Updated:** January 29, 2026
+**Status:** Updated to match the current “Hargrove Grant Quarterly Reporting” dashboard implementation
+
+This document explains what the Hargrove Grant Quarterly Reporting page is calculating, where the numbers come from, and the practical gotchas we’ve learned along the way.
+
+If you’re looking at the dashboard and thinking “why is this number what it is?”, this is the answer key.
+
+---
+
+## What the dashboard is actually doing
+
+The Hargrove Grant page is an **accordion by year → quarter**.
+
+There are **two data modes**:
+
+1) **Historical years (legacy export)**
+- Source file: `src/static/data/hargrove_grant/historical_metrics.json`
+- The dashboard loads these metrics as-is and renders them into the table UI.
+- Narrative responses (when present) also come from this file.
+
+2) **Current year (computed from the database)**
+- Source tables: `Patients`, `Encounters`, `Referrals`, `ODReferrals`
+- The dashboard computes quarterly slices and builds the same UI sections from live data.
+
+Why split it this way? Because the older grant reporting lived in spreadsheets/exports, while the newer reporting is meant to be automated.
+
+---
+
+## Quarterly date range logic
+
+Each quarter is treated as an **inclusive** date range:
+
+- Q1: Jan 1 → Mar 31
+- Q2: Apr 1 → Jun 30
+- Q3: Jul 1 → Sep 30
+- Q4: Oct 1 → Dec 31
+
+Mechanically, the app builds:
+
+- `start_date = date(year, (q - 1) * 3 + 1, 1)`
+- `end_date = last day of the quarter` (computed by “first day of next quarter minus one day”, except Q4 which hard-ends on Dec 31)
+
+**Gotcha:** `Encounters.encounter_date` and `Referrals.date_received` are typical date fields, but `ODReferrals.od_date` is often a datetime. If the field is a datetime, always be careful that “range with dates” does what you think it does (it usually does, but timezone/naive datetimes can surprise you).
+
+---
+
+## Sections and metric definitions (current dashboard)
+
+The page renders five sections per quarter:
+
+### 1) Patient Demographics
+
+#### Total Patients Served
+
+**Definition:** Count of unique patients with at least one encounter in the quarter.
+
+**Implementation pattern:**
+- Query encounters in-quarter
+- Pull distinct `patient_ID`
+- Count how many unique IDs exist
+
+**Important detail:** This is encounter-driven. If a patient only appears in referrals but never has an encounter, they will not show up here (by design in the current implementation).
+
+#### New Enrollments
+
+**Definition:** Patients created in the quarter.
+
+**Implementation pattern:** `Patients.created_date` within the quarter.
+
+**Gotcha:** This assumes `created_date` is populated consistently. If the data load/import doesn’t set it, this metric becomes garbage.
+
+#### Insurance breakdown
+
+**Definition:** Counts by `Patients.insurance` for the “served patients” cohort.
+
+**Implementation pattern:**
+- Filter `Patients` to the served cohort
+- `values("insurance").annotate(count=Count("id"))`
+
+**Gotcha:** Insurance values are only as clean as your upstream data entry. You will get multiple buckets for near-duplicates (e.g., “Medicaid” vs “Medicaid “). If you want reporting-grade categories, normalize upstream.
+
+#### ZIP code breakdown
+
+**Definition:** Counts by `Patients.zip_code` for the “served patients” cohort.
+
+**Implementation pattern:**
+- Filter `Patients` to the served cohort
+- `values("zip_code").annotate(count=Count("id"))`
+
+**Gotcha:** Same story as insurance: unnormalized strings produce messy buckets.
+
+---
+
+### 2) Substance Use Disorder (SUD)
+
+#### SUD Flagged Patients
+
+**Definition:** Served patients where `Patients.sud == True`.
+
+**Implementation pattern:** filter the served cohort.
+
+#### Referrals to SUD Agency
+
+**Definition:** Number of OD referrals in the quarter where `ODReferrals.referral_to_sud_agency == True`.
+
+**Why this matters:** It’s a strong signal of “SUD workflow engaged”, without trying to infer intent from free-text.
+
+**Gotcha:** This only counts OD referrals, not referral slots from the non-OD referral model.
+
+---
+
+### 3) Behavioral Health
+
+#### Behavioral Health Flagged
+
+**Definition:** Served patients where `Patients.behavioral_health == True`.
+
+**Implementation pattern:** filter the served cohort.
+
+---
+
+### 4) Outcomes
+
+#### Total Encounters
+
+**Definition:** Total number of encounters in the quarter (not deduplicated by patient).
+
+**Implementation pattern:** count of `Encounters` in-quarter.
+
+#### Referrals Made
+
+**Definition:** Total number of referrals received in the quarter, including both standard referrals and overdose referrals.
+
+**Implementation pattern:**
+- Count of `Referrals` where `date_received` is in-quarter
+- Plus count of `ODReferrals` where `od_date` is in-quarter
+
+**Gotcha:** `ODReferrals.od_date` is often a datetime; if you ever see off-by-one weirdness around quarter boundaries, this is the first place to validate date vs datetime filtering behavior.
+
+---
+
+### 5) Narrative
+
+There are two modes:
+
+- **Historical years:** narratives are loaded from the historical JSON file.
+- **Current-year computed quarters:** the dashboard currently shows a placeholder (“manual entry not available”).
+
+If you want narrative entry to be editable in-app, that’s a separate feature (storage model + UI + permissions).
+
+---
+
+## How this maps to historical exports
+
+The legacy JSON export uses the same five-section UI shell, but it only reliably fills:
+
+- Patient demographics (individuals / insurance / ZIP)
+- Outcomes (services / objectives)
+- Narrative (when present)
+
+SUD and Behavioral Health sections are often empty historically because the export format didn’t include them as discrete fields.
+
+---
+
+## Known “watch your step” items
+
+- **Patient identifiers:** The dashboard assumes `Encounters.patient_ID` corresponds to `Patients.id`. If those keys ever diverge, everything downstream goes sideways.
+- **Distinct counting:** In Django, `len(queryset)` pulls the whole thing into memory. For large data, use `queryset.count()` where possible.
+- **Datetime vs date ranges:** If OD dates are datetimes with timezone behavior, verify quarterly boundaries with test fixtures.
+- **Categorical cleanup:** Insurance + ZIP values should ideally be normalized before they’re used for reporting.
+
+---
+
+## If you’re updating the page for a new year
+
+You’ll typically touch two places:
+
+1) The year selection logic in the dashboard view (which years are considered “current” vs “historical”).
+2) The computed-metrics builder (so the current year is computed from live tables).
+
+If you want, I can make the year handling fully dynamic (always compute “this year” without hardcoding 2025) and update the page header “updated on” date to stop lying to everyone.
+# Hargrove Grant Metrics Insights
+
 **Document Version:** 2.0
 **Last Updated:** December 19, 2024
 **Status:** Complete - All 29 automated metrics documented with Q1 2025 narrative examples

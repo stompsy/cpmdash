@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from contextlib import suppress
 from datetime import date
 from pathlib import Path
@@ -24,6 +25,7 @@ from ..charts.odreferrals.narcan_charts import (
     build_narcan_stats,
 )
 from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
+from ..charts.odreferrals.repeat_overdose_charts import build_chart_repeat_overdose_quarterly_trend
 from ..charts.overdose.od_all_cases_scatter import (
     build_chart_all_cases_scatter,  # noqa: F401 - re-export for tests monkeypatch
 )
@@ -3902,6 +3904,223 @@ def _ordered_odreferral_fields(df: pd.DataFrame) -> list[str]:
     return fields
 
 
+def _quarter_bounds(year: int, quarter: int) -> tuple[date, date]:
+    from datetime import timedelta
+
+    start_date = date(year, (quarter - 1) * 3 + 1, 1)
+    end_date = (
+        date(year, 12, 31) if quarter == 4 else date(year, quarter * 3 + 1, 1) - timedelta(days=1)
+    )
+    return start_date, end_date
+
+
+def _pct_str(numerator: int, denominator: int) -> str:
+    if denominator <= 0:
+        return "—"
+    return f"{(numerator / denominator) * 100:.1f}%"
+
+
+def _load_od_patient_dates(years: set[int]) -> tuple[dict[int, list[date]], date | None]:
+    """Load OD dates grouped by patient for the requested calendar years."""
+    od_rows = list(
+        ODReferrals.objects.exclude(od_date__isnull=True)
+        .exclude(patient_id__isnull=True)
+        .values_list("patient_id", "od_date")
+    )
+
+    patient_dates: dict[int, list[date]] = defaultdict(list)
+    max_data_date: date | None = None
+
+    for patient_id, od_dt in od_rows:
+        if od_dt is None:
+            continue
+        od_day = od_dt.date() if hasattr(od_dt, "date") else od_dt
+        if getattr(od_day, "year", None) not in years:
+            continue
+        pid = int(patient_id)
+        patient_dates[pid].append(od_day)
+        max_data_date = od_day if max_data_date is None else max(max_data_date, od_day)
+
+    for pid in list(patient_dates.keys()):
+        patient_dates[pid].sort()
+
+    return patient_dates, max_data_date
+
+
+def _quarter_event_map(
+    patient_dates: dict[int, list[date]],
+    years: set[int],
+) -> dict[tuple[int, int], dict[int, list[date]]]:
+    """Map (year, quarter) -> {patient_id: [od_dates_in_quarter]} for selected years."""
+    quarter_events: dict[tuple[int, int], dict[int, list[date]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+
+    for pid, dates in patient_dates.items():
+        for od_day in dates:
+            if od_day.year not in years:
+                continue
+            quarter = (od_day.month - 1) // 3 + 1
+            quarter_events[(od_day.year, quarter)][pid].append(od_day)
+
+    return quarter_events
+
+
+def _is_window_censored(max_data_date: date | None, quarter_end: date, window_days: int) -> bool:
+    from datetime import timedelta
+
+    if max_data_date is None:
+        return True
+    return max_data_date < (quarter_end + timedelta(days=window_days))
+
+
+def _next_event_repeat_patients(
+    patient_dates: dict[int, list[date]],
+    quarter_events_by_patient: dict[int, list[date]],
+    window_days: int,
+) -> set[int]:
+    """Patients with a next OD within window_days after any OD in the quarter."""
+    from bisect import bisect_right
+
+    repeats: set[int] = set()
+
+    for pid, quarter_dates in quarter_events_by_patient.items():
+        all_dates = patient_dates.get(pid, [])
+        if not all_dates:
+            continue
+        for od_day in quarter_dates:
+            idx = bisect_right(all_dates, od_day)
+            if idx >= len(all_dates):
+                continue
+            if (all_dates[idx] - od_day).days <= window_days:
+                repeats.add(pid)
+                break
+
+    return repeats
+
+
+def _build_repeat_overdose_quarterly_rates(years: list[int]) -> list[dict[str, object]]:
+    """Quarterly repeat overdose rates for the requested years.
+
+    Definitions:
+    - Within-quarter repeat %: % of unique OD patients in the quarter with >1 OD in that quarter.
+    - 30/90-day repeat %: % of unique OD patients in the quarter whose *next* OD after an OD in
+      that quarter occurs within 30/90 days (next event can fall outside the quarter).
+
+    Notes:
+    - Uses date-normalized OD dates (handles DateField/DateTimeField).
+    - 30/90-day metrics can be right-censored if the dataset does not extend far enough beyond
+      the quarter end.
+    """
+    if not years:
+        return []
+
+    min_year = min(years)
+    max_year = max(years)
+    follow_years = {year for year in range(min_year, max_year + 2)}
+
+    patient_dates, max_data_date = _load_od_patient_dates(follow_years)
+    if not patient_dates:
+        # Still return a table scaffold so the UI can render a stable layout.
+        rows: list[dict[str, object]] = []
+        for year in sorted(years):
+            for quarter in range(1, 5):
+                _, end_date = _quarter_bounds(year, quarter)
+                rows.append(
+                    {
+                        "year": year,
+                        "quarter": quarter,
+                        "label": f"{year} Q{quarter}",
+                        "total_ods": 0,
+                        "unique_patients": 0,
+                        "repeat_patients": 0,
+                        "repeat_pct_value": None,
+                        "repeat_pct": "—",
+                        "repeat_30d_patients": 0,
+                        "repeat_30d_pct_value": None,
+                        "repeat_30d_pct": "—",
+                        "repeat_90d_patients": 0,
+                        "repeat_90d_pct_value": None,
+                        "repeat_90d_pct": "—",
+                        "repeat_180d_patients": 0,
+                        "repeat_180d_pct_value": None,
+                        "repeat_180d_pct": "—",
+                        "repeat_365d_patients": 0,
+                        "repeat_365d_pct_value": None,
+                        "repeat_365d_pct": "—",
+                        "censored_30d": _is_window_censored(max_data_date, end_date, 30),
+                        "censored_90d": _is_window_censored(max_data_date, end_date, 90),
+                        "censored_180d": _is_window_censored(max_data_date, end_date, 180),
+                        "censored_365d": _is_window_censored(max_data_date, end_date, 365),
+                    }
+                )
+        return rows
+
+    quarter_events = _quarter_event_map(patient_dates, set(years))
+
+    rows: list[dict[str, object]] = []
+
+    for year in sorted(years):
+        for quarter in range(1, 5):
+            _, end_date = _quarter_bounds(year, quarter)
+            events_by_patient = quarter_events.get((year, quarter), {})
+
+            total_ods = sum(len(dates) for dates in events_by_patient.values())
+            unique_patient_count = len(events_by_patient)
+            repeat_patients = {pid for pid, dates in events_by_patient.items() if len(dates) > 1}
+
+            repeat_30_patients = _next_event_repeat_patients(patient_dates, events_by_patient, 30)
+            repeat_90_patients = _next_event_repeat_patients(patient_dates, events_by_patient, 90)
+            repeat_180_patients = _next_event_repeat_patients(patient_dates, events_by_patient, 180)
+            repeat_365_patients = _next_event_repeat_patients(patient_dates, events_by_patient, 365)
+
+            censored_30 = _is_window_censored(max_data_date, end_date, 30)
+            censored_90 = _is_window_censored(max_data_date, end_date, 90)
+            censored_180 = _is_window_censored(max_data_date, end_date, 180)
+            censored_365 = _is_window_censored(max_data_date, end_date, 365)
+
+            repeat_pct_value = _pct(len(repeat_patients), unique_patient_count)
+            repeat_30d_pct_value = _pct(len(repeat_30_patients), unique_patient_count)
+            repeat_90d_pct_value = _pct(len(repeat_90_patients), unique_patient_count)
+            repeat_180d_pct_value = _pct(len(repeat_180_patients), unique_patient_count)
+            repeat_365d_pct_value = _pct(len(repeat_365_patients), unique_patient_count)
+
+            rows.append(
+                {
+                    "year": year,
+                    "quarter": quarter,
+                    "label": f"{year} Q{quarter}",
+                    "total_ods": total_ods,
+                    "unique_patients": unique_patient_count,
+                    "repeat_patients": len(repeat_patients),
+                    "repeat_pct_value": repeat_pct_value if unique_patient_count else None,
+                    "repeat_pct": _pct_str(len(repeat_patients), unique_patient_count),
+                    "repeat_30d_patients": len(repeat_30_patients),
+                    "repeat_30d_pct_value": repeat_30d_pct_value if unique_patient_count else None,
+                    "repeat_30d_pct": _pct_str(len(repeat_30_patients), unique_patient_count),
+                    "repeat_90d_patients": len(repeat_90_patients),
+                    "repeat_90d_pct_value": repeat_90d_pct_value if unique_patient_count else None,
+                    "repeat_90d_pct": _pct_str(len(repeat_90_patients), unique_patient_count),
+                    "repeat_180d_patients": len(repeat_180_patients),
+                    "repeat_180d_pct_value": repeat_180d_pct_value
+                    if unique_patient_count
+                    else None,
+                    "repeat_180d_pct": _pct_str(len(repeat_180_patients), unique_patient_count),
+                    "repeat_365d_patients": len(repeat_365_patients),
+                    "repeat_365d_pct_value": repeat_365d_pct_value
+                    if unique_patient_count
+                    else None,
+                    "repeat_365d_pct": _pct_str(len(repeat_365_patients), unique_patient_count),
+                    "censored_30d": censored_30,
+                    "censored_90d": censored_90,
+                    "censored_180d": censored_180,
+                    "censored_365d": censored_365,
+                }
+            )
+
+    return rows
+
+
 def odreferrals(request):
     theme = get_theme_from_request(request)
     df_all = _load_odreferrals_dataframe()
@@ -3922,6 +4141,13 @@ def odreferrals(request):
     fig_repeat_interval_hist = _chart_html(build_chart_repeat_interval_hist(theme=theme))
     fig_repeat_seasonality = _chart_html(build_chart_repeat_seasonality(theme=theme))
     repeat_overdose_stats = build_repeat_overdose_quick_stats()
+    repeat_overdose_quarterly_rates = _build_repeat_overdose_quarterly_rates([2024, 2025])
+    fig_repeat_overdose_quarterly_trend = _chart_html(
+        build_chart_repeat_overdose_quarterly_trend(
+            theme=theme,
+            quarterly_rows=repeat_overdose_quarterly_rates,
+        )
+    )
 
     # Add hotspot map and statistics
     zoom_mode = "full" if request.user.is_authenticated else "restricted"
@@ -3940,6 +4166,8 @@ def odreferrals(request):
         "fig_repeat_interval_hist": fig_repeat_interval_hist,
         "fig_repeat_seasonality": fig_repeat_seasonality,
         "repeat_overdose_stats": repeat_overdose_stats,
+        "repeat_overdose_quarterly_rates": repeat_overdose_quarterly_rates,
+        "fig_repeat_overdose_quarterly_trend": fig_repeat_overdose_quarterly_trend,
         "fig_od_map": fig_od_map,
         "hotspot_stats": hotspot_stats,
         "narcan_grid_chart": narcan_grid_chart,
@@ -5342,7 +5570,17 @@ def _build_historical_hargrove_metrics(year_metrics: dict, str_q: str) -> list[d
 
 
 def _build_2025_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
-    """Build dynamic metrics for 2025 from database."""
+    """Back-compat wrapper for the dynamic Hargrove metrics builder.
+
+    Historically this dashboard computed live metrics only for 2025. The reporting
+    logic is year-agnostic (it slices by quarter date range), so we now compute
+    live metrics for whatever the current year is.
+    """
+    return _build_dynamic_hargrove_metrics(year, q)
+
+
+def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
+    """Build dynamic quarterly metrics from database."""
     from datetime import timedelta
 
     start_date = date(year, (q - 1) * 3 + 1, 1)
@@ -5437,6 +5675,8 @@ def _build_2025_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
         encounter_date__range=(start_date, end_date)
     ).count()
     total_referrals = Referrals.objects.filter(date_received__range=(start_date, end_date)).count()
+    total_od_referrals = ODReferrals.objects.filter(od_date__range=(start_date, end_date)).count()
+    total_referrals_all = total_referrals + total_od_referrals
     outcome_rows = [
         {
             "id": "-",
@@ -5444,7 +5684,12 @@ def _build_2025_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
             "value": str(total_encounters),
             "notes": "",
         },
-        {"id": "-", "metric": "Referrals Made", "value": str(total_referrals), "notes": ""},
+        {
+            "id": "-",
+            "metric": "Referrals Made",
+            "value": str(total_referrals_all),
+            "notes": "Referrals + OD referrals",
+        },
     ]
 
     return [
@@ -5496,8 +5741,17 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
         pass
 
     years_data = []
-    # Years to display: 2025 down to 2019
-    target_years = range(2025, 2018, -1)
+
+    current_year = timezone.localdate().year
+    min_year = 2019
+
+    historical_years: list[int] = []
+    with suppress(ValueError, TypeError):
+        historical_years = [int(y) for y in historical_data]
+
+    max_year = max([current_year, *historical_years], default=current_year)
+    # Years to display: current year down to 2019 (plus any future-dated historical years, if any).
+    target_years = range(max_year, min_year - 1, -1)
 
     for year in target_years:
         str_year = str(year)
@@ -5524,8 +5778,8 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
 
             if year_metrics and str_q in year_metrics:
                 sections = _build_historical_hargrove_metrics(year_metrics, str_q)
-            elif year == 2025:
-                sections = _build_2025_hargrove_metrics(year, q)
+            elif year == current_year:
+                sections = _build_dynamic_hargrove_metrics(year, q)
             else:
                 # Placeholder for missing historical years (2019-2021)
                 sections = [
@@ -5546,14 +5800,14 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
 
             quarters.append({"label": label, "date_range": date_range, "sections": sections})
 
-        years_data.append({"year": year, "is_current": year == 2025, "quarters": quarters})
+        years_data.append({"year": year, "is_current": year == current_year, "quarters": quarters})
 
     return years_data
 
 
 def hargrove_grant(request):
     years_data = _build_hargrove_accordions()
-    updated_on = date(2025, 11, 30)
+    updated_on = timezone.localdate()
     context = {
         "years_data": years_data,
         "page_header_updated_at": updated_on,
