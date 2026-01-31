@@ -1,4 +1,4 @@
-.PHONY: setup lint fmt type test run migrate shell age65 insurance
+.PHONY: setup lint fmt type test run migrate shell analyze-initiated-referrals analyze-initiated-referrals-db
 setup:
 	uv sync --dev
 	pre-commit install || uvx pre-commit install

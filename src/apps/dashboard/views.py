@@ -1,19 +1,22 @@
 import json
-from collections import defaultdict
+import re
+from collections import Counter, defaultdict
 from contextlib import suppress
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
-from typing import TypedDict
+from typing import Any, TypedDict
 
 import pandas as pd
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Sum
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET
+from markdown import markdown as render_markdown
 
 from apps.accounts.forms import ProfileForm
 from utils.theme import get_theme_from_request
@@ -64,6 +67,10 @@ HARGROVE_METRICS_PATH = (
     / "data"
     / "hargrove_grant"
     / "historical_metrics.json"
+)
+
+HARGROVE_NARRATIVES_PATH = (
+    Path(settings.BASE_DIR) / "src" / "static" / "data" / "hargrove_grant_narratives.json"
 )
 
 
@@ -431,6 +438,7 @@ def _insights_quarterly() -> list[dict[str, object]] | None:
         return None
 
 
+@lru_cache(maxsize=1)
 def _build_patient_quick_stats() -> dict[str, list[dict[str, str]]]:
     """Build quick stat cards for patient charts."""
     stats: dict[str, list[dict[str, str]]] = {}
@@ -466,6 +474,7 @@ def _build_patient_quick_stats() -> dict[str, list[dict[str, str]]]:
     return stats
 
 
+@lru_cache(maxsize=1)
 def _build_referral_quick_stats() -> dict[str, list[dict[str, str]]]:
     """Build quick stat cards for referral charts."""
     stats: dict[str, list[dict[str, str]]] = {}
@@ -480,13 +489,9 @@ def _build_referral_quick_stats() -> dict[str, list[dict[str, str]]]:
             df = pd.DataFrame.from_records(data)
             df["date_received"] = pd.to_datetime(df["date_received"], errors="coerce")
 
-            # Group by year and quarter
-            qdf = pd.DataFrame(
-                {
-                    "year": df["date_received"].dt.year,
-                    "quarter": df["date_received"].dt.quarter,
-                }
-            ).dropna()
+            # Group by year and quarter (use DatetimeIndex to satisfy pandas-stubs typing)
+            date_index = pd.DatetimeIndex(df["date_received"])
+            qdf = pd.DataFrame({"year": date_index.year, "quarter": date_index.quarter}).dropna()
             qdf = qdf.groupby(["year", "quarter"], dropna=True).size().reset_index(name="count")
 
             if not qdf.empty:
@@ -520,6 +525,7 @@ def _build_referral_quick_stats() -> dict[str, list[dict[str, str]]]:
     return stats
 
 
+@lru_cache(maxsize=1)
 def _build_odreferrals_quick_stats() -> dict[str, list[dict[str, str]]]:
     """Build quick stat cards for OD referral charts."""
     stats: dict[str, list[dict[str, str]]] = {}
@@ -583,7 +589,8 @@ def _build_odreferrals_quick_stats() -> dict[str, list[dict[str, str]]]:
                 ]
 
                 # Weekday stats (calculate day-of-week patterns)
-                df["weekday"] = df["od_date"].dt.day_name()
+                # pandas-stubs doesn't always type `.dt.day_name()` correctly, but DatetimeIndex.day_name() is typed.
+                df["weekday"] = pd.DatetimeIndex(df["od_date"]).day_name()
                 weekday_counts = df["weekday"].value_counts()
 
                 # Weekend vs Weekday
@@ -730,12 +737,16 @@ def _process_regular_encounters_quarterly(encounters_df: pd.DataFrame) -> pd.Dat
     regular_encounters_df["encounter_date"] = pd.to_datetime(
         regular_encounters_df["encounter_date"], errors="coerce"
     )
+
+    # Use DatetimeIndex for year/quarter extraction to satisfy pandas-stubs typing.
+    date_index = pd.DatetimeIndex(regular_encounters_df["encounter_date"])
     encounters_qdf = pd.DataFrame(
         {
-            "year": regular_encounters_df["encounter_date"].dt.year,
-            "quarter": regular_encounters_df["encounter_date"].dt.quarter,
+            "year": date_index.year,
+            "quarter": date_index.quarter,
         }
     ).dropna()
+
     return (
         encounters_qdf.groupby(["year", "quarter"], dropna=True)
         .size()
@@ -782,6 +793,7 @@ def _merge_quarterly_data(
     return qdf
 
 
+@lru_cache(maxsize=1)
 def _build_encounters_quarterly_quick_stats() -> dict[str, list[dict[str, str]]]:
     """Build quick stat cards for encounters quarterly chart."""
     stats: dict[str, list[dict[str, str]]] = {}
@@ -1691,6 +1703,7 @@ REFERRALS_LABEL_OVERRIDES = {
 }
 
 
+@lru_cache(maxsize=1)
 def _load_referrals_dataframe() -> pd.DataFrame:
     try:
         values = list(Referrals.objects.all().values(*REFERRALS_QUERY_FIELDS))
@@ -1867,6 +1880,7 @@ PATIENTS_STORY_CARDS = [
 ]
 
 
+@lru_cache(maxsize=1)
 def _load_patients_dataframe() -> pd.DataFrame:
     try:
         data = list(Patients.objects.all().values(*PATIENT_BASE_FIELDS))
@@ -2032,9 +2046,12 @@ def _patients_story_response_section(
                 how="inner",
             )
             if not first_df.empty:
-                first_df["days_to_first"] = (
-                    first_df["first_encounter"] - first_df["created_date"]
-                ).dt.days
+                delta = pd.to_timedelta(
+                    first_df["first_encounter"] - first_df["created_date"], errors="coerce"
+                )
+                # Convert timedeltas to whole days using `.dt.days` (better supported by type checkers).
+                days_to_first = delta.dt.days.astype("Int64")
+                first_df["days_to_first"] = days_to_first
                 valid_first = first_df[
                     first_df["days_to_first"].notna() & (first_df["days_to_first"] >= 0)
                 ]
@@ -2107,9 +2124,13 @@ def _patients_story_impact_section(
         df_enc_sorted["prev_encounter"] = df_enc_sorted.groupby("patient_ID")[
             "encounter_date"
         ].shift(1)
+        delta = df_enc_sorted["encounter_date"] - df_enc_sorted["prev_encounter"]
+
+        # Convert timedeltas to whole-day integers via total seconds to keep both pandas and pyright happy.
         df_enc_sorted["days_since_prior"] = (
-            df_enc_sorted["encounter_date"] - df_enc_sorted["prev_encounter"]
-        ).dt.days
+            pd.to_timedelta(delta, errors="coerce").dt.total_seconds() // 86_400
+        ).astype("Int64")
+
         repeat_within_30 = df_enc_sorted[
             df_enc_sorted["days_since_prior"].notna()
             & (df_enc_sorted["days_since_prior"] >= 1)
@@ -2714,9 +2735,13 @@ def _attach_touchpoint_metrics(
             first_encounter = encounters_dates.groupby("referral_ID")["encounter_date"].min()
             enriched["first_encounter_at"] = enriched["ID"].map(first_encounter)
             if "date_received" in enriched.columns:
-                enriched["days_to_first_encounter"] = (
-                    enriched["first_encounter_at"] - enriched["date_received"]
-                ).dt.days
+                delta = pd.to_timedelta(
+                    enriched["first_encounter_at"] - enriched["date_received"], errors="coerce"
+                )
+                # Avoid `.dt.days` (pandas-stubs typing issue); compute whole days via seconds.
+                enriched["days_to_first_encounter"] = (delta.dt.total_seconds() // 86_400).astype(
+                    "Int64"
+                )
     if "days_to_first_encounter" not in enriched.columns:
         enriched["days_to_first_encounter"] = pd.NA
 
@@ -3355,15 +3380,20 @@ def _odreferrals_clean_dates(series: pd.Series | None) -> pd.Series | None:
     dates = pd.to_datetime(series, errors="coerce").dropna()
     if dates.empty:
         return None
+
+    # Use DatetimeIndex for timezone ops to satisfy pandas-stubs/pyright typing.
+    date_index = pd.DatetimeIndex(dates)
     with suppress(TypeError, AttributeError, ValueError):
-        dates = dates.dt.tz_convert(None)
+        date_index = date_index.tz_convert(None)
     with suppress(TypeError, AttributeError, ValueError):
-        dates = dates.dt.tz_localize(None)
-    return dates
+        date_index = date_index.tz_localize(None)
+    return pd.Series(date_index, index=dates.index)
 
 
 def _odreferrals_monthly_insights(dates: pd.Series) -> list[dict[str, object]]:
-    monthly_series = dates.dt.to_period("M").value_counts().sort_index()
+    # pandas-stubs/pyright can fail to type `.dt.to_period(...)`; using DatetimeIndex avoids that.
+    monthly_periods = pd.DatetimeIndex(dates).to_period("M")
+    monthly_series = pd.Series(monthly_periods).value_counts().sort_index()
     if monthly_series.empty:
         return []
     latest_period = monthly_series.index[-1]
@@ -3395,7 +3425,9 @@ def _odreferrals_monthly_insights(dates: pd.Series) -> list[dict[str, object]]:
 
 
 def _odreferrals_weekday_insights(dates: pd.Series) -> list[dict[str, object]]:
-    weekdays = dates.dt.day_name()
+    # pandas-stubs/pyright doesn't always understand `.dt.day_name()`;
+    # DatetimeIndex has a well-typed `.day_name()` method.
+    weekdays = pd.Series(pd.DatetimeIndex(dates).day_name())
     total_records = len(weekdays)
     if total_records == 0:
         return []
@@ -3457,6 +3489,7 @@ def _build_odreferrals_chart_insights(df_all: pd.DataFrame) -> dict[str, list[di
     return insights
 
 
+@lru_cache(maxsize=1)
 def _load_odreferrals_dataframe() -> pd.DataFrame:
     fields = [
         "ID",
@@ -3480,11 +3513,16 @@ def _load_odreferrals_dataframe() -> pd.DataFrame:
         return df
 
     if "od_date" in df.columns:
-        df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
+        od_dates = pd.to_datetime(df["od_date"], errors="coerce")
+
+        # Use DatetimeIndex for timezone ops to satisfy pandas-stubs/pyright typing.
+        date_index = pd.DatetimeIndex(od_dates)
         with suppress(TypeError, AttributeError, ValueError):
-            df["od_date"] = df["od_date"].dt.tz_convert(None)
+            date_index = date_index.tz_convert(None)
         with suppress(TypeError, AttributeError, ValueError):
-            df["od_date"] = df["od_date"].dt.tz_localize(None)
+            date_index = date_index.tz_localize(None)
+
+        df["od_date"] = pd.Series(date_index, index=df.index)
 
     df["narcan_flag"] = 0
     if "narcan_given" in df.columns:
@@ -3533,7 +3571,7 @@ def _compute_odreferrals_metrics(df: pd.DataFrame) -> dict[str, int | float | st
     if "od_date" in df.columns:
         valid_dates = df["od_date"].dropna()
         if not valid_dates.empty:
-            weekdays = valid_dates.dt.day_name()
+            weekdays = pd.Series(pd.DatetimeIndex(valid_dates).day_name())
             weekday_counts = weekdays.value_counts().reindex(
                 OD_REFERRALS_WEEKDAY_ORDER, fill_value=0
             )
@@ -4176,7 +4214,7 @@ def odreferrals(request):
         "theme": theme,
         "story_cards": OD_REFERRALS_STORY_CARDS,
     }
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 1, 30)
     context.update(
         {
             "page_header_updated_at": updated_on,
@@ -5404,11 +5442,9 @@ def _ordered_encounter_fields(df: pd.DataFrame) -> list[str]:
 
 
 def _encounters_monthly_insights(dates: pd.Series) -> list[dict[str, object]]:
-    monthly_counts = (
-        dates.dt.to_period("M").value_counts().sort_index()
-        if not dates.empty
-        else pd.Series(dtype="int64")
-    )
+    # pandas-stubs/pyright can fail to type `.dt.to_period(...)`; DatetimeIndex is well-typed.
+    monthly_periods = pd.DatetimeIndex(dates).to_period("M")
+    monthly_counts = pd.Series(monthly_periods).value_counts().sort_index()
     if monthly_counts.empty:
         return []
     latest_period = monthly_counts.index[-1]
@@ -5440,7 +5476,9 @@ def _encounters_monthly_insights(dates: pd.Series) -> list[dict[str, object]]:
 
 
 def _encounters_weekday_insights(dates: pd.Series) -> list[dict[str, object]]:
-    weekdays = dates.dt.day_name()
+    # pandas-stubs/pyright doesn't always understand `.dt.day_name()`;
+    # DatetimeIndex has a well-typed `.day_name()` method.
+    weekdays = pd.Series(pd.DatetimeIndex(dates).day_name())
     if weekdays.empty:
         return []
     weekday_counts = weekdays.value_counts()
@@ -5518,7 +5556,7 @@ def _build_historical_hargrove_metrics(year_metrics: dict, str_q: str) -> list[d
     """Build metrics from historical JSON data."""
     q_data = year_metrics[str_q]
     metrics = q_data.get("metrics", {})
-    narratives = q_data.get("narratives", [])
+    narratives = _hargrove_normalize_narratives(q_data.get("narratives", []))
 
     # 1. Patient Demographics
     demo_rows = []
@@ -5535,6 +5573,9 @@ def _build_historical_hargrove_metrics(year_metrics: dict, str_q: str) -> list[d
         outcome_rows.extend(metrics["services"])
     if "objectives" in metrics:
         outcome_rows.extend(metrics["objectives"])
+
+    demo_rows = _hargrove_normalize_metric_table_rows(demo_rows)
+    outcome_rows = _hargrove_normalize_metric_table_rows(outcome_rows)
 
     return [
         {
@@ -5579,153 +5620,962 @@ def _build_2025_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
     return _build_dynamic_hargrove_metrics(year, q)
 
 
-def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
-    """Build dynamic quarterly metrics from database."""
+def _hargrove_quarter_date_range(year: int, quarter: int) -> tuple[date, date]:
     from datetime import timedelta
 
-    start_date = date(year, (q - 1) * 3 + 1, 1)
-    end_date = date(year, 12, 31) if q == 4 else date(year, q * 3 + 1, 1) - timedelta(days=1)
-
-    # 1. Patient Demographics
-    served_patient_ids = (
-        Encounters.objects.filter(encounter_date__range=(start_date, end_date))
-        .values_list("patient_ID", flat=True)
-        .distinct()
+    start_date = date(year, (quarter - 1) * 3 + 1, 1)
+    end_date = (
+        date(year, 12, 31) if quarter == 4 else date(year, quarter * 3 + 1, 1) - timedelta(days=1)
     )
-    total_served = len(served_patient_ids)
-    new_enrollments = Patients.objects.filter(created_date__range=(start_date, end_date)).count()
-    served_patients = Patients.objects.filter(id__in=served_patient_ids)
+    return start_date, end_date
 
-    # Insurance
-    insurance_counts = served_patients.values("insurance").annotate(count=Count("id"))
-    insurance_rows = [
-        {
-            "id": "-",
-            "metric": f"Insurance: {item['insurance'] or 'Unknown'}",
-            "value": str(item["count"]),
-            "notes": "",
-        }
-        for item in insurance_counts
+
+def _hargrove_prev_year_quarter(year: int, quarter: int) -> tuple[int, int]:
+    if quarter == 1:
+        return year - 1, 4
+    return year, quarter - 1
+
+
+_HARGROVE_PERIOD_SUFFIX_RE = re.compile(
+    r"\s*\((?:current\s+quarter|quarterly|quarter)\)\s*$", re.IGNORECASE
+)
+_HARGROVE_NUMERIC_RE = re.compile(r"^-?\d+(?:\.\d+)?$")
+
+
+def _hargrove_display_metric(metric: str) -> str:
+    """Normalize metric labels for display.
+
+    We keep explicit yearly markers (YTD), but remove noisy period markers like
+    (Current Quarter) / (Quarter) / (Quarterly).
+    """
+
+    text = (metric or "").strip()
+    if not text:
+        return ""
+    # Preserve YTD suffix (explicit yearly marker).
+    if text.endswith("(YTD)"):
+        return text
+
+    # Remove *trailing* period suffixes; keep other parentheticals (e.g. ZIP code notes).
+    while True:
+        new_text = _HARGROVE_PERIOD_SUFFIX_RE.sub("", text).strip()
+        if new_text == text:
+            return text
+        text = new_text
+
+
+def _hargrove_format_count(value: float) -> str:
+    with suppress(TypeError, ValueError):
+        return f"{int(round(float(value))):,}"
+    return ""
+
+
+def _hargrove_format_pct(value: float) -> str:
+    """Format percentages without pointless trailing decimals.
+
+    Examples:
+    - 63.0 -> "63%"
+    - 63.5 -> "63.5%"
+    """
+
+    with suppress(TypeError, ValueError):
+        rounded = round(float(value), 1)
+        if float(rounded).is_integer():
+            return f"{int(rounded)}%"
+        return f"{rounded:.1f}%"
+    return ""
+
+
+def _hargrove_format_value_for_display(value: object) -> str:
+    if value is None:
+        return ""
+
+    if isinstance(value, bool):
+        return str(value)
+
+    if isinstance(value, int):
+        return f"{value:,}"
+
+    if isinstance(value, float):
+        return _hargrove_format_count(value)
+
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return ""
+        if text.endswith("%"):
+            raw = text[:-1].strip()
+            with suppress(ValueError):
+                return _hargrove_format_pct(float(raw))
+            return text
+        if _HARGROVE_NUMERIC_RE.match(text):
+            with suppress(ValueError):
+                return _hargrove_format_count(float(text))
+        return text
+
+    return str(value)
+
+
+def _hargrove_coerce_metric_rows(value: object) -> list[dict[str, Any]]:
+    """Convert unknown objects into the metric-row shape our table helpers expect.
+
+    Pyright/mypy see `dict.get()` on `dict[str, object]` as returning `object`, so we
+    normalize here and keep the call sites clean.
+    """
+    if not isinstance(value, list):
+        return []
+
+    rows: list[dict[str, Any]] = []
+    for item in value:
+        if isinstance(item, dict):
+            # Force keys to `str` for predictable template rendering + typing.
+            rows.append({str(k): v for k, v in item.items()})
+    return rows
+
+
+def _hargrove_normalize_metric_table_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    for row in rows:
+        metric = row.get("metric")
+        if isinstance(metric, str):
+            row["metric"] = _hargrove_display_metric(metric)
+
+        if "value" in row:
+            row["value"] = _hargrove_format_value_for_display(row.get("value"))
+
+        if row.get("notes") is None:
+            row["notes"] = ""
+
+    return rows
+
+
+def _hargrove_count_filled_referral_slots(referrals: list[dict[str, object]]) -> int:
+    fields = ("referral_1", "referral_2", "referral_3", "referral_4", "referral_5")
+    total = 0
+    for row in referrals:
+        for field in fields:
+            val = row.get(field)
+            if isinstance(val, str) and val.strip():
+                total += 1
+    return total
+
+
+def _hargrove_count_filled_od_referral_slots(od_referrals: list[dict[str, object]]) -> int:
+    fields = ("referral_rediscovery", "referral_reflections", "referral_pbh", "referral_other")
+    total = 0
+    for row in od_referrals:
+        for field in fields:
+            val = row.get(field)
+            if val is None:
+                continue
+            if (isinstance(val, str) and val.strip()) or (
+                isinstance(val, int | float) and float(val) != 0.0
+            ):
+                total += 1
+    return total
+
+
+def _hargrove_normalize_service_label(value: object) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    text = re.sub(r"\s+", " ", text)
+    bad = {
+        "na",
+        "n/a",
+        "n/a.",
+        "none",
+        "null",
+        "unknown",
+        "no data",
+        "nan",
+        "not applicable",
+        "n.a.",
+    }
+    if text.casefold() in bad:
+        return None
+    return text
+
+
+def _hargrove_referral_service_gap_stats(
+    referrals_qs,
+    *,
+    top_n: int = 12,
+) -> dict[str, object]:
+    fields = ("referral_1", "referral_2", "referral_3", "referral_4", "referral_5")
+
+    patient_services: defaultdict[int, set[str]] = defaultdict(set)
+    service_patients: defaultdict[str, set[int]] = defaultdict(set)
+    service_referrals: defaultdict[str, set[int]] = defaultdict(set)
+    service_display: dict[str, str] = {}
+
+    referral_count = 0
+    slot_filled_count = 0
+    referral_unique_service_instances = 0
+
+    for row in referrals_qs.exclude(patient_ID__isnull=True).values("ID", "patient_ID", *fields):
+        referral_count += 1
+        referral_id = row.get("ID")
+        patient_id = row.get("patient_ID")
+        if not isinstance(patient_id, int):
+            continue
+
+        this_ref_services: set[str] = set()
+        for field in fields:
+            normalized = _hargrove_normalize_service_label(row.get(field))
+            if not normalized:
+                continue
+            slot_filled_count += 1
+            key = normalized.casefold()
+            service_display.setdefault(key, normalized)
+            this_ref_services.add(key)
+
+        referral_unique_service_instances += len(this_ref_services)
+
+        for key in this_ref_services:
+            patient_services[patient_id].add(key)
+            service_patients[key].add(patient_id)
+            if isinstance(referral_id, int):
+                service_referrals[key].add(referral_id)
+
+    distinct_service_types = len(service_display)
+    patients_with_any = len(patient_services)
+    total_patient_service_pairs = sum(len(services) for services in patient_services.values())
+    avg_unique_services_per_patient = (
+        (total_patient_service_pairs / patients_with_any) if patients_with_any else 0.0
+    )
+
+    def display_for(key: str) -> str:
+        return service_display.get(key, key)
+
+    top_by_referrals = sorted(service_referrals.items(), key=lambda kv: (-len(kv[1]), kv[0]))
+    top_by_patients = sorted(service_patients.items(), key=lambda kv: (-len(kv[1]), kv[0]))
+
+    top_ref_rows: list[dict[str, str]] = []
+    for idx, (key, referral_ids) in enumerate(top_by_referrals[:top_n], start=1):
+        top_ref_rows.append(
+            {
+                "id": str(idx),
+                "metric": display_for(key),
+                "value": f"{len(referral_ids):,}",
+                "notes": f"{len(service_patients.get(key, set())):,} patients",
+            }
+        )
+
+    top_patient_rows: list[dict[str, str]] = []
+    for idx, (key, patient_ids) in enumerate(top_by_patients[:top_n], start=1):
+        top_patient_rows.append(
+            {
+                "id": str(idx),
+                "metric": display_for(key),
+                "value": f"{len(patient_ids):,}",
+                "notes": f"{len(service_referrals.get(key, set())):,} referrals",
+            }
+        )
+
+    return {
+        "referral_count": referral_count,
+        "distinct_service_types": distinct_service_types,
+        "slot_filled_count": slot_filled_count,
+        "referral_unique_service_instances": referral_unique_service_instances,
+        "patients_with_any": patients_with_any,
+        "total_patient_service_pairs": total_patient_service_pairs,
+        "avg_unique_services_per_patient": avg_unique_services_per_patient,
+        "top_by_referrals_rows": top_ref_rows,
+        "top_by_patients_rows": top_patient_rows,
+    }
+
+
+def _hargrove_narrative_questions() -> list[str]:
+    return [
+        "Reflecting on evaluation results and overall program efforts, describe what has been achieved this Quarter. If objectives went unmet, why? Are there any needed changes in evaluation or scope of work?",
+        "Briefly describe collaborative efforts and outreach activities employing collective impact strategies",
+        "Please describe your sustainability planning — new collaborations, other sources of funding, etc",
+        "Success Stories",
+        "Additional Notes",
     ]
 
-    # Zip Codes
-    zip_counts = served_patients.values("zip_code").annotate(count=Count("id"))
+
+def _hargrove_substitute_placeholders(text: str, context: dict[str, str] | None) -> str:
+    if not context:
+        return text
+    raw = text
+    if not raw:
+        return raw
+
+    def repl(match: re.Match[str]) -> str:
+        key = match.group(1).strip()
+        return context.get(key, match.group(0))
+
+    return re.sub(r"\{\{\s*([a-zA-Z0-9_\-]+)\s*\}\}", repl, raw)
+
+
+def _hargrove_render_narrative_html(text: str, *, context: dict[str, str] | None = None) -> str:
+    raw = _hargrove_substitute_placeholders((text or "").strip(), context)
+    if not raw:
+        return ""
+
+    # Normalize common “pretty” bullets into markdown list bullets.
+    normalized = re.sub(r"(?m)^\s*•\s+", "- ", raw)
+
+    html = render_markdown(normalized, extensions=["extra"], output_format="html")
+
+    # Tailwind preflight tends to remove default margins + list styling.
+    # Add minimal classes so the narrative reads like an actual report.
+    return (
+        html.replace("<p>", '<p class="mb-3">')
+        .replace("<ul>", '<ul class="list-disc pl-6 space-y-1 mb-3">')
+        .replace("<ol>", '<ol class="list-decimal pl-6 space-y-1 mb-3">')
+        .replace("<li>", '<li class="leading-relaxed">')
+    )
+
+
+def _hargrove_normalize_narratives(
+    narratives: object, *, context: dict[str, str] | None = None
+) -> list[dict[str, str]]:
+    if isinstance(narratives, list) and narratives and all(isinstance(x, dict) for x in narratives):
+        items: list[dict[str, str]] = []
+        for row in narratives:
+            question = row.get("question")
+            response = row.get("response")
+            q = question.strip() if isinstance(question, str) else ""
+            r = response if isinstance(response, str) else ""
+            items.append(
+                {
+                    "question": q,
+                    "response": r,
+                    "response_html": _hargrove_render_narrative_html(r, context=context),
+                }
+            )
+        return items
+
+    responses: list[str] = []
+    if isinstance(narratives, list):
+        responses = [x for x in narratives if isinstance(x, str)]
+
+    items: list[dict[str, str]] = []
+    for idx, question in enumerate(_hargrove_narrative_questions()):
+        response = responses[idx] if idx < len(responses) else ""
+        items.append(
+            {
+                "question": question,
+                "response": response,
+                "response_html": _hargrove_render_narrative_html(response, context=context),
+            }
+        )
+    return items
+
+
+def _hargrove_load_narratives(
+    year: int, quarter: int, *, context: dict[str, str] | None = None
+) -> list[dict[str, str]]:
+    try:
+        with HARGROVE_NARRATIVES_PATH.open(encoding="utf-8") as fp:
+            data = json.load(fp)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = {}
+
+    year_data = data.get(str(year), {}) if isinstance(data, dict) else {}
+    responses = year_data.get(str(quarter), []) if isinstance(year_data, dict) else []
+    if not isinstance(responses, list):
+        responses = []
+
+    items: list[dict[str, str]] = []
+    for idx, question in enumerate(_hargrove_narrative_questions()):
+        response = ""
+        if idx < len(responses) and isinstance(responses[idx], str):
+            response = responses[idx]
+        response = _hargrove_substitute_placeholders(response, context)
+        items.append(
+            {
+                "question": question,
+                "response": response,
+                "response_html": _hargrove_render_narrative_html(response, context=context),
+            }
+        )
+    return items
+
+
+def _hargrove_normalize_zip(raw: str) -> str:
+    z = (raw or "").strip()
+    if not z:
+        return ""
+    z = re.sub(r"\s+", "", z)
+    return z
+
+
+def _hargrove_zip_bucket(zip_value: str) -> str:
+    z = _hargrove_normalize_zip(zip_value).upper()
+    if not z or z in {"UNKNOWN", "UNK", "N/A", "NA", "NONE", "NULL"}:
+        return "Unknown"
+    if "NON" in z and "CLALLAM" in z:
+        return "Non-Clallam County ZIP Code"
+    if "JAIL" in z or "CORRECTION" in z:
+        return "Jail"
+    if "HOMELESS" in z or "TRANSIENT" in z:
+        return "Experiencing Homelessness, no current ZIP Code"
+
+    m = re.search(r"(\d{5})", z)
+    if m:
+        zip5 = m.group(1)
+        clallam = {
+            "98382",
+            "98357",
+            "98350",
+            "98324",
+            "98305",
+            "98381",
+            "98362",
+            "98363",
+            "98343",
+            "98331",
+            "98326",
+        }
+        if zip5 in clallam:
+            return zip5
+        return "Experiencing Homelessness, no current ZIP Code"
+    return "Unknown"
+
+
+def _hargrove_patient_zip_map(
+    start_date: date, end_date: date, patient_ids: set[int]
+) -> dict[int, str]:
+    zip_by_patient: dict[int, str] = {}
+
+    # 1) Patients.zip_code
+    for patient in Patients.objects.filter(id__in=patient_ids).values("id", "zip_code"):
+        pid = patient.get("id")
+        z = (patient.get("zip_code") or "").strip()
+        if isinstance(pid, int) and z:
+            zip_by_patient[pid] = z
+
+    missing = patient_ids - set(zip_by_patient)
+    if not missing:
+        return zip_by_patient
+
+    # 2) Referrals.zipcode fallback
+    for row in (
+        Referrals.objects.filter(
+            date_received__range=(start_date, end_date), patient_ID__in=missing
+        )
+        .exclude(zipcode="")
+        .values("patient_ID", "zipcode")
+    ):
+        pid = row.get("patient_ID")
+        z = (row.get("zipcode") or "").strip()
+        if isinstance(pid, int) and z and pid not in zip_by_patient:
+            zip_by_patient[pid] = z
+
+    missing = patient_ids - set(zip_by_patient)
+    if not missing:
+        return zip_by_patient
+
+    # 3) ODReferrals.patient_zipcode fallback
+    for row in (
+        ODReferrals.objects.filter(
+            od_date__date__range=(start_date, end_date), patient_id__in=missing
+        )
+        .exclude(patient_zipcode="")
+        .values("patient_id", "patient_zipcode")
+    ):
+        pid = row.get("patient_id")
+        z = (row.get("patient_zipcode") or "").strip()
+        if isinstance(pid, int) and z and pid not in zip_by_patient:
+            zip_by_patient[pid] = z
+
+    return zip_by_patient
+
+
+def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
+    """Build dynamic quarterly metrics from database.
+
+    For the current year, we emit the 2025 Hargrove Grant metric rows using the
+    IDs/definitions in src/static/data/HARGROVE_GRANT_METRICS_INSIGHTS.md.
+    """
+
+    start_date, end_date = _hargrove_quarter_date_range(year, q)
+    prev_year, prev_q = _hargrove_prev_year_quarter(year, q)
+    prev_start, prev_end = _hargrove_quarter_date_range(prev_year, prev_q)
+
+    # Base quarter querysets
+    encounters_qs = Encounters.objects.filter(encounter_date__range=(start_date, end_date))
+    referrals_qs = Referrals.objects.filter(date_received__range=(start_date, end_date))
+    od_qs = ODReferrals.objects.filter(od_date__date__range=(start_date, end_date))
+
+    # For several metrics we need patient sets across both referral streams.
+    referral_patient_ids = set(
+        referrals_qs.exclude(patient_ID__isnull=True).values_list("patient_ID", flat=True)
+    )
+    od_patient_ids = set(
+        od_qs.exclude(patient_id__isnull=True).values_list("patient_id", flat=True)
+    )
+    patients_served_ids = referral_patient_ids | od_patient_ids
+
+    # -----------------------
+    # Section 1: Services Delivered
+    # -----------------------
+    encounters_count = encounters_qs.count()
+    standard_referrals_received = referrals_qs.count()
+    od_referrals_received = od_qs.count()
+
+    total_contacts = encounters_count + standard_referrals_received + od_referrals_received
+
+    referrals_received = standard_referrals_received + od_referrals_received
+
+    closed_reasons = {"Referred - Successful", "Alt Referral Opened", "CPM Resolved"}
+    referral_slots_initiated = _hargrove_count_filled_referral_slots(
+        list(
+            referrals_qs.filter(referral_closed_reason__in=closed_reasons).values(
+                "referral_1",
+                "referral_2",
+                "referral_3",
+                "referral_4",
+                "referral_5",
+            )
+        )
+    )
+    od_slots_initiated = _hargrove_count_filled_od_referral_slots(
+        list(
+            od_qs.filter(referral_to_sud_agency=True).values(
+                "referral_rediscovery",
+                "referral_reflections",
+                "referral_pbh",
+                "referral_other",
+            )
+        )
+    )
+    referrals_initiated = referral_slots_initiated + od_slots_initiated
+
+    unique_services = _hargrove_count_filled_referral_slots(
+        list(
+            referrals_qs.values(
+                "referral_1",
+                "referral_2",
+                "referral_3",
+                "referral_4",
+                "referral_5",
+            )
+        )
+    ) + _hargrove_count_filled_od_referral_slots(
+        list(
+            od_qs.values(
+                "referral_rediscovery",
+                "referral_reflections",
+                "referral_pbh",
+                "referral_other",
+            )
+        )
+    )
+
+    services_rows = [
+        {
+            "id": "96719",
+            "metric": "Total Contacts (Current Quarter)",
+            "value": _hargrove_format_count(total_contacts),
+            "notes": "Encounters + Referrals + OD Referrals",
+        },
+        {
+            "id": "96720",
+            "metric": "Referrals Initiated (Current Quarter)",
+            "value": _hargrove_format_count(referrals_initiated),
+            "notes": "Filled referral slots from successful closes + OD SUD referrals",
+        },
+        {
+            "id": "96721",
+            "metric": "Referrals Received (Current Quarter)",
+            "value": _hargrove_format_count(referrals_received),
+            "notes": "Referrals + OD Referrals",
+        },
+        {
+            "id": "96722",
+            "metric": "Unique Services (Current Quarter)",
+            "value": _hargrove_format_count(unique_services),
+            "notes": "All filled referral slots (all closures)",
+        },
+    ]
+
+    # -----------------------
+    # Section 2: Individuals Served
+    # -----------------------
+    patients_served = len(patients_served_ids)
+
+    prev_ref_qs = Referrals.objects.filter(date_received__range=(prev_start, prev_end))
+    prev_od_qs = ODReferrals.objects.filter(od_date__date__range=(prev_start, prev_end))
+    prev_patients = set(
+        prev_ref_qs.exclude(patient_ID__isnull=True).values_list("patient_ID", flat=True)
+    ) | set(prev_od_qs.exclude(patient_id__isnull=True).values_list("patient_id", flat=True))
+
+    cross_quarter = patients_served_ids & prev_patients
+
+    # Count combined referrals (both tables) per patient in current quarter.
+    referral_counts = Counter()
+    referral_counts.update(
+        referrals_qs.exclude(patient_ID__isnull=True).values_list("patient_ID", flat=True)
+    )
+    referral_counts.update(
+        od_qs.exclude(patient_id__isnull=True).values_list("patient_id", flat=True)
+    )
+    multiple_refs = {pid for pid, n in referral_counts.items() if n > 1}
+    intensive_case_management = len(cross_quarter | multiple_refs)
+
+    individuals_rows = [
+        {
+            "id": "96723",
+            "metric": "Patients Served (Current Quarter)",
+            "value": _hargrove_format_count(patients_served),
+            "notes": "Unique patients across Referrals + OD Referrals",
+        },
+        {
+            "id": "96724",
+            "metric": "Intensive Case Management (Current Quarter)",
+            "value": _hargrove_format_count(intensive_case_management),
+            "notes": "Cross-quarter continuity OR >1 referral in quarter",
+        },
+    ]
+
+    # -----------------------
+    # Section 3: Progress on Objectives
+    # -----------------------
+    no_action_patients = set(
+        referrals_qs.filter(referral_closed_reason="No Action Taken")
+        .exclude(patient_ID__isnull=True)
+        .values_list("patient_ID", flat=True)
+    )
+    contacted_by_cpm = len(patients_served_ids - no_action_patients)
+
+    od_patient_list = list(
+        od_qs.exclude(patient_id__isnull=True).values_list("patient_id", flat=True)
+    )
+    od_counts = Counter(od_patient_list)
+    unique_od_patients = len(od_counts)
+    repeat_od_patients = sum(1 for n in od_counts.values() if n > 1)
+    repeat_od_pct = (repeat_od_patients / unique_od_patients) * 100.0 if unique_od_patients else 0.0
+
+    # YTD average of quarterly repeat OD percentages.
+    repeat_pct_values: list[float] = []
+    for qq in range(1, q + 1):
+        q_start, q_end = _hargrove_quarter_date_range(year, qq)
+        q_od = ODReferrals.objects.filter(od_date__date__range=(q_start, q_end))
+        q_list = list(q_od.exclude(patient_id__isnull=True).values_list("patient_id", flat=True))
+        q_counts = Counter(q_list)
+        q_unique = len(q_counts)
+        q_repeat = sum(1 for n in q_counts.values() if n > 1)
+        q_pct = (q_repeat / q_unique) * 100.0 if q_unique else 0.0
+        repeat_pct_values.append(q_pct)
+    repeat_od_ytd = sum(repeat_pct_values) / len(repeat_pct_values) if repeat_pct_values else 0.0
+
+    # MAT services: Referrals "Need - SUD Services" + ODReferrals client_agrees_to_mat=1
+    mat_referrals = referrals_qs.filter(referral_agency__icontains="Need - SUD Services").count()
+    mat_od = od_qs.filter(client_agrees_to_mat=1).count()
+    mat_quarter = mat_referrals + mat_od
+
+    mat_ytd = 0
+    for qq in range(1, q + 1):
+        q_start, q_end = _hargrove_quarter_date_range(year, qq)
+        q_refs = Referrals.objects.filter(date_received__range=(q_start, q_end))
+        q_od = ODReferrals.objects.filter(od_date__date__range=(q_start, q_end))
+        mat_ytd += q_refs.filter(referral_agency__icontains="Need - SUD Services").count()
+        mat_ytd += q_od.filter(client_agrees_to_mat=1).count()
+
+    # Trainings: persons_trained + number_of_nonems_onscene (ODReferrals)
+    trainings_quarter = (
+        od_qs.aggregate(Sum("persons_trained")).get("persons_trained__sum") or 0
+    ) + (od_qs.aggregate(Sum("number_of_nonems_onscene")).get("number_of_nonems_onscene__sum") or 0)
+
+    trainings_ytd: float = 0.0
+    for qq in range(1, q + 1):
+        q_start, q_end = _hargrove_quarter_date_range(year, qq)
+        q_od = ODReferrals.objects.filter(od_date__date__range=(q_start, q_end))
+        trainings_ytd += float(
+            q_od.aggregate(Sum("persons_trained")).get("persons_trained__sum") or 0
+        )
+        trainings_ytd += float(
+            q_od.aggregate(Sum("number_of_nonems_onscene")).get("number_of_nonems_onscene__sum")
+            or 0
+        )
+
+    # High utilizer reduction is program-managed / fixed per quarter (see insights doc).
+    fixed_high_utilizer_pct_2025 = {1: 67.0, 2: 59.0, 3: 61.0, 4: 63.0}
+    high_utilizer_q = fixed_high_utilizer_pct_2025.get(q, 0.0) if year == 2025 else 0.0
+    high_utilizer_values = [
+        (fixed_high_utilizer_pct_2025.get(qq, 0.0) if year == 2025 else 0.0)
+        for qq in range(1, q + 1)
+    ]
+    high_utilizer_ytd = (
+        sum(high_utilizer_values) / len(high_utilizer_values) if high_utilizer_values else 0.0
+    )
+
+    objectives_rows = [
+        {
+            "id": "96731",
+            "metric": "# of Unduplicated Individuals Contacted by CPM (Quarter)",
+            "value": _hargrove_format_count(contacted_by_cpm),
+            "notes": "Patients served minus 'No Action Taken'",
+        },
+        {
+            "id": "96733",
+            "metric": "% of Repeat Overdoses (Quarter)",
+            "value": _hargrove_format_pct(repeat_od_pct),
+            "notes": "Patients with >1 OD in quarter / unique OD patients",
+        },
+        {
+            "id": "96733",
+            "metric": "% of Repeat Overdoses (YTD)",
+            "value": _hargrove_format_pct(repeat_od_ytd),
+            "notes": "Average of quarterly % values",
+        },
+        {
+            "id": "96729",
+            "metric": "# of New MAT Services (Quarter)",
+            "value": _hargrove_format_count(mat_quarter),
+            "notes": "Referrals 'Need - SUD Services' + OD agrees to MAT",
+        },
+        {
+            "id": "96729",
+            "metric": "# of New MAT Services (YTD)",
+            "value": _hargrove_format_count(mat_ytd),
+            "notes": "Cumulative sum of quarterly counts",
+        },
+        {
+            "id": "96730",
+            "metric": "# of Trainings Provided (Quarter)",
+            "value": _hargrove_format_count(trainings_quarter),
+            "notes": "persons_trained + number_of_nonems_onscene",
+        },
+        {
+            "id": "96730",
+            "metric": "# of Trainings Provided (YTD)",
+            "value": _hargrove_format_count(trainings_ytd),
+            "notes": "Cumulative sum of quarterly totals",
+        },
+        {
+            "id": "96732",
+            "metric": "% Reduction High Utilizer (Quarter)",
+            "value": _hargrove_format_pct(high_utilizer_q),
+            "notes": "Program-managed value (manual case review)",
+        },
+        {
+            "id": "96732",
+            "metric": "% Reduction High Utilizer (YTD)",
+            "value": _hargrove_format_pct(high_utilizer_ytd),
+            "notes": "Average of quarterly % values",
+        },
+    ]
+
+    # -----------------------
+    # Section 4: ZIP Code Distribution
+    # -----------------------
+    zip_map = _hargrove_patient_zip_map(start_date, end_date, patients_served_ids)
+    buckets = defaultdict(int)
+    for pid in patients_served_ids:
+        bucket = _hargrove_zip_bucket(zip_map.get(pid, ""))
+        buckets[bucket] += 1
+
+    def z(bucket: str) -> int:
+        return int(buckets.get(bucket, 0))
+
     zip_rows = [
         {
-            "id": "-",
-            "metric": f"Zip: {item['zip_code'] or 'Unknown'}",
-            "value": str(item["count"]),
+            "id": "96734",
+            "metric": "98382 (Includes Jamestown S'Klallam Tribal Land) (Current Quarter)",
+            "value": _hargrove_format_count(z("98382")),
             "notes": "",
-        }
-        for item in zip_counts
+        },
+        {
+            "id": "96735",
+            "metric": "98357 (Includes Makah Tribal Land) (Current Quarter)",
+            "value": _hargrove_format_count(z("98357")),
+            "notes": "",
+        },
+        {
+            "id": "96736",
+            "metric": "98350 (Includes Quileute Tribal Land) (Current Quarter)",
+            "value": _hargrove_format_count(z("98350")),
+            "notes": "",
+        },
+        {
+            "id": "96737",
+            "metric": "98324 (Post Office) (Current Quarter)",
+            "value": _hargrove_format_count(z("98324")),
+            "notes": "",
+        },
+        {
+            "id": "96738",
+            "metric": "98305 (Current Quarter)",
+            "value": _hargrove_format_count(z("98305")),
+            "notes": "",
+        },
+        {
+            "id": "96739",
+            "metric": "98381 (Current Quarter)",
+            "value": _hargrove_format_count(z("98381")),
+            "notes": "",
+        },
+        {
+            "id": "96740",
+            "metric": "98362 (Current Quarter)",
+            "value": _hargrove_format_count(z("98362")),
+            "notes": "",
+        },
+        {
+            "id": "96741",
+            "metric": "98363 (Includes Lower Elwha Klallam Tribal Land) (Current Quarter)",
+            "value": _hargrove_format_count(z("98363")),
+            "notes": "",
+        },
+        {
+            "id": "96742",
+            "metric": "98343 (Post Office) (Current Quarter)",
+            "value": _hargrove_format_count(z("98343")),
+            "notes": "",
+        },
+        {
+            "id": "96743",
+            "metric": "98331 (Includes Hoh Indian Tribal Land) (Current Quarter)",
+            "value": _hargrove_format_count(z("98331")),
+            "notes": "",
+        },
+        {
+            "id": "96744",
+            "metric": "98326 (Current Quarter)",
+            "value": _hargrove_format_count(z("98326")),
+            "notes": "",
+        },
+        {
+            "id": "96745",
+            "metric": "Jail (Current Quarter)",
+            "value": _hargrove_format_count(z("Jail")),
+            "notes": "",
+        },
+        {
+            "id": "96746",
+            "metric": "Non-Clallam County ZIP Code (Current Quarter)",
+            "value": _hargrove_format_count(z("Non-Clallam County ZIP Code")),
+            "notes": "",
+        },
+        {
+            "id": "96747",
+            "metric": "Experiencing Homelessness, no current ZIP Code (Current Quarter)",
+            "value": _hargrove_format_count(z("Experiencing Homelessness, no current ZIP Code")),
+            "notes": "",
+        },
+        {
+            "id": "96748",
+            "metric": "Unknown (Current Quarter)",
+            "value": _hargrove_format_count(z("Unknown")),
+            "notes": "",
+        },
     ]
 
-    demo_rows = (
-        [
-            {
-                "id": "-",
-                "metric": "Total Patients Served",
-                "value": str(total_served),
-                "notes": "Patients with encounters in quarter",
-            },
-            {
-                "id": "-",
-                "metric": "New Enrollments",
-                "value": str(new_enrollments),
-                "notes": "Created in quarter",
-            },
-        ]
-        + insurance_rows
-        + zip_rows
+    service_gap = _hargrove_referral_service_gap_stats(referrals_qs)
+    service_gap_rows = [
+        {
+            "id": "—",
+            "metric": "Distinct service types (Referrals)",
+            "value": f"{_to_int(service_gap.get('distinct_service_types')):,}",
+            "notes": "Unique normalized labels across referral_1..referral_5",
+        },
+        {
+            "id": "—",
+            "metric": "Patients with ≥1 service listed (Referrals)",
+            "value": f"{_to_int(service_gap.get('patients_with_any')):,}",
+            "notes": "Unique patients with any non-empty referral_1..5",
+        },
+        {
+            "id": "—",
+            "metric": "Total unique patient-service pairs (Referrals)",
+            "value": f"{_to_int(service_gap.get('total_patient_service_pairs')):,}",
+            "notes": "Sum over patients of distinct services requested",
+        },
+        {
+            "id": "—",
+            "metric": "Avg distinct services per patient (Referrals)",
+            "value": f"{_to_float(service_gap.get('avg_unique_services_per_patient')):.2f}",
+            "notes": "Total patient-service pairs / patients with services",
+        },
+    ]
+
+    narrative_context = {
+        "year": str(year),
+        "quarter": str(q),
+        "quarter_label": f"Q{q} {year}",
+        "encounters": f"{encounters_count:,}",
+        "standard_referrals_received": f"{standard_referrals_received:,}",
+        "od_referrals_received": f"{od_referrals_received:,}",
+        "referrals_received": f"{referrals_received:,}",
+        "total_contacts": f"{total_contacts:,}",
+        "patients_served": f"{patients_served:,}",
+        "intensive_case_management": f"{intensive_case_management:,}",
+        "referrals_initiated": f"{int(referrals_initiated):,}",
+        "repeat_od_patients": f"{repeat_od_patients:,}",
+        "repeat_od_pct": f"{repeat_od_pct:.1f}%",
+        "distinct_referral_service_types": f"{_to_int(service_gap.get('distinct_service_types')):,}",
+        "referral_patients_with_services": f"{_to_int(service_gap.get('patients_with_any')):,}",
+        "referral_patient_service_pairs": f"{_to_int(service_gap.get('total_patient_service_pairs')):,}",
+        "referral_avg_services_per_patient": f"{_to_float(service_gap.get('avg_unique_services_per_patient')):.2f}",
+    }
+
+    services_rows = _hargrove_normalize_metric_table_rows(services_rows)
+    individuals_rows = _hargrove_normalize_metric_table_rows(individuals_rows)
+    objectives_rows = _hargrove_normalize_metric_table_rows(objectives_rows)
+    zip_rows = _hargrove_normalize_metric_table_rows(zip_rows)
+    service_gap_rows = _hargrove_normalize_metric_table_rows(service_gap_rows)
+
+    top_by_referrals_rows = _hargrove_coerce_metric_rows(
+        service_gap.get("top_by_referrals_rows", [])
     )
-
-    # 2. SUD
-    sud_patients = served_patients.filter(sud=True).count()
-    sud_referrals = ODReferrals.objects.filter(
-        od_date__range=(start_date, end_date), referral_to_sud_agency=True
-    ).count()
-    sud_rows = [
-        {
-            "id": "-",
-            "metric": "SUD Flagged Patients",
-            "value": str(sud_patients),
-            "notes": "Subset of served patients",
-        },
-        {
-            "id": "-",
-            "metric": "Referrals to SUD Agency",
-            "value": str(sud_referrals),
-            "notes": "From OD Referrals",
-        },
-    ]
-
-    # 3. Behavioral Health
-    bh_patients = served_patients.filter(behavioral_health=True).count()
-    bh_rows = [
-        {
-            "id": "-",
-            "metric": "Behavioral Health Flagged",
-            "value": str(bh_patients),
-            "notes": "Subset of served patients",
-        },
-    ]
-
-    # 4. Outcomes
-    total_encounters = Encounters.objects.filter(
-        encounter_date__range=(start_date, end_date)
-    ).count()
-    total_referrals = Referrals.objects.filter(date_received__range=(start_date, end_date)).count()
-    total_od_referrals = ODReferrals.objects.filter(od_date__range=(start_date, end_date)).count()
-    total_referrals_all = total_referrals + total_od_referrals
-    outcome_rows = [
-        {
-            "id": "-",
-            "metric": "Total Encounters",
-            "value": str(total_encounters),
-            "notes": "",
-        },
-        {
-            "id": "-",
-            "metric": "Referrals Made",
-            "value": str(total_referrals_all),
-            "notes": "Referrals + OD referrals",
-        },
-    ]
+    top_by_patients_rows = _hargrove_coerce_metric_rows(service_gap.get("top_by_patients_rows", []))
+    _hargrove_normalize_metric_table_rows(top_by_referrals_rows)
+    _hargrove_normalize_metric_table_rows(top_by_patients_rows)
 
     return [
         {
-            "title": "1. Patient Demographics",
+            "title": "1. Services Delivered",
             "type": "table",
             "columns": ["ID", "Metric", "Value", "Notes"],
-            "rows": demo_rows,
+            "rows": services_rows,
         },
         {
-            "title": "2. Substance Use Disorder (SUD)",
+            "title": "2. Individuals Served",
             "type": "table",
             "columns": ["ID", "Metric", "Value", "Notes"],
-            "rows": sud_rows,
+            "rows": individuals_rows,
         },
         {
-            "title": "3. Behavioral Health",
+            "title": "3. Progress on Objectives",
             "type": "table",
             "columns": ["ID", "Metric", "Value", "Notes"],
-            "rows": bh_rows,
+            "rows": objectives_rows,
         },
         {
-            "title": "4. Outcomes",
+            "title": "4. ZIP Code Distribution",
             "type": "table",
             "columns": ["ID", "Metric", "Value", "Notes"],
-            "rows": outcome_rows,
+            "rows": zip_rows,
         },
         {
-            "title": "5. Narrative",
+            "title": "5. Service Gap Analytics (Referrals)",
+            "type": "table",
+            "columns": ["ID", "Metric", "Value", "Notes"],
+            "rows": service_gap_rows,
+        },
+        {
+            "title": "6. Top Services (by Referrals)",
+            "type": "table",
+            "columns": ["ID", "Service", "# Referrals", "Notes"],
+            "rows": top_by_referrals_rows,
+        },
+        {
+            "title": "7. Top Services (by Patients)",
+            "type": "table",
+            "columns": ["ID", "Service", "# Patients", "Notes"],
+            "rows": top_by_patients_rows,
+        },
+        {
+            "title": "8. Narrative",
             "type": "narrative",
-            "questions_responses": [
-                {
-                    "question": "Narrative",
-                    "response": "Data aggregation for the current year is automated. Narrative inputs are not yet available.",
-                }
-            ],
+            "questions_responses": _hargrove_load_narratives(year, q, context=narrative_context),
         },
     ]
 
@@ -5743,7 +6593,8 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
     years_data = []
 
     current_year = timezone.localdate().year
-    min_year = 2019
+    # We don't have reliable source data before 2022.
+    min_year = 2022
 
     historical_years: list[int] = []
     with suppress(ValueError, TypeError):
@@ -5778,7 +6629,9 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
 
             if year_metrics and str_q in year_metrics:
                 sections = _build_historical_hargrove_metrics(year_metrics, str_q)
-            elif year == current_year:
+            elif 2025 <= year <= current_year:
+                # Live metrics are now year-agnostic. We intentionally compute
+                # 2025+ from the database when historical JSON isn't available.
                 sections = _build_dynamic_hargrove_metrics(year, q)
             else:
                 # Placeholder for missing historical years (2019-2021)
