@@ -25,7 +25,7 @@ def healthz(_request: HttpRequest) -> JsonResponse:
 
 
 def overview(request: HttpRequest) -> HttpResponse:
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 2, 19)
     ecosystem_partners = _load_collaborative_ecosystem()
 
     context = {

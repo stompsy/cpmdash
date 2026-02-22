@@ -5,7 +5,7 @@
 
 {% block page_header %}
     {% static 'media/pafd_cpm.jpg' as patients_header_image %}
-    {% with eyebrow="Program overviews" title="Patient profile distributions" description="Quick demographic and attribute summaries for all registered patients. Each chart surfaces one field from the Patients model so you can spot trends at a glance and tailor outreach." image_src=patients_header_image image_alt="Community paramedics preparing to support residents" image_width="960" image_height="640" image_position="center 45%" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso read_time=page_header_read_time %}
+    {% with eyebrow="Program overviews" title="Patient profile distributions" description="Quick demographic and attribute summaries for all registered patients. Each chart surfaces one field from the Patients model so you can spot trends at a glance and tailor outreach." image_src=patients_header_image image_alt="Community paramedics preparing to support residents" image_width="960" image_height="640" image_position="center 45%" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso %}
         {% include "partials/page_header.html" %}
     {% endwith %}
 {% endblock page_header %}
@@ -121,13 +121,13 @@
         class="fixed inset-0 z-[99999] hidden bg-slate-900/80 backdrop-blur-md"
         onclick="if(event.target === this) this.classList.add('hidden')"
     >
-        <div class="flex min-h-screen items-start justify-center overflow-y-auto p-4 pt-8 sm:p-6 sm:pt-12 lg:p-8 lg:pt-16">
+        <div class="flex min-h-full items-start justify-center p-4 sm:items-center sm:p-6 lg:p-8">
             <div
-                class="relative w-full max-w-7xl animate-in fade-in zoom-in-95 duration-300"
+                class="relative flex w-full max-w-7xl flex-col max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] lg:max-h-[calc(100vh-4rem)] animate-in fade-in zoom-in-95 duration-300"
                 onclick="event.stopPropagation()"
             >
                 {# Modal Container with Header Bar #}
-                <div class="overflow-hidden rounded-2xl border-4 border-white/20 bg-white shadow-2xl ring-1 ring-black/5 dark:border-slate-700/50 dark:bg-slate-900 dark:shadow-slate-950/50 dark:ring-white/10">
+                <div class="flex flex-col flex-1 min-h-0 overflow-hidden rounded-2xl border-4 border-white/20 bg-white shadow-2xl ring-1 ring-black/5 dark:border-slate-700/50 dark:bg-slate-900 dark:shadow-slate-950/50 dark:ring-white/10">
 
                     {# Header Bar with Close Button #}
                     <div class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/50 px-6 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800/50">
@@ -149,7 +149,7 @@
                     </div>
 
                     {# Modal Content #}
-                    <div id="top-engaged-modal-content" class="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                    <div id="top-engaged-modal-content" class="flex-1 min-h-0 overflow-y-auto">
                         {# Content will be loaded here via HTMX #}
                     </div>
                 </div>

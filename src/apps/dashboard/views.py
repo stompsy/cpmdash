@@ -1100,6 +1100,7 @@ def _format_bool_label(value: object) -> str:
 def _load_patient_touchpoint_datasets() -> dict[str, pd.DataFrame]:
     patient_fields = [
         "id",
+        "created_date",
         "age",
         "insurance",
         "pcp_agency",
@@ -1124,6 +1125,7 @@ def _enrich_patient_touchpoints(datasets: dict[str, pd.DataFrame]) -> pd.DataFra
         return pd.DataFrame(
             columns=[
                 "patient_id",
+                "created_date",
                 "age",
                 "insurance",
                 "pcp_agency",
@@ -1231,6 +1233,35 @@ def _build_patient_summary_cards(enriched: pd.DataFrame) -> list[dict[str, objec
     ]
 
 
+def _patient_tenure_label(created_value: object) -> str:
+    if created_value is None:
+        return "—"
+    try:
+        # Convert to pandas Timestamp first to safely check for NaT/NaN
+        created_ts = pd.Timestamp(created_value)  # type: ignore[arg-type]
+        if pd.isna(created_ts):
+            return "—"
+    except (TypeError, ValueError):
+        return "—"
+    created_ts = pd.Timestamp(created_value)  # type: ignore[arg-type]
+    created_date = created_ts.date()
+    today = timezone.localdate()
+    months = (today.year - created_date.year) * 12 + (today.month - created_date.month)
+    if today.day < created_date.day:
+        months -= 1
+    if months < 0:
+        months = 0
+    years = months // 12
+    rem_months = months % 12
+    if years and rem_months:
+        return f"{years}y {rem_months}m"
+    if years:
+        return f"{years}y"
+    if rem_months == 0:
+        return "<1m"
+    return f"{rem_months}m"
+
+
 def _build_patient_top_patients(enriched: pd.DataFrame) -> list[dict[str, object]]:
     active_df = enriched[enriched["has_touchpoint"]]
     if active_df.empty:
@@ -1242,6 +1273,7 @@ def _build_patient_top_patients(enriched: pd.DataFrame) -> list[dict[str, object
     ).head(10)
 
     rows: list[dict[str, object]] = []
+
     for _, row in sorted_df.iterrows():
         age_value: object
         age_raw = row.get("age")
@@ -1256,6 +1288,7 @@ def _build_patient_top_patients(enriched: pd.DataFrame) -> list[dict[str, object
         rows.append(
             {
                 "patient_id": int(row["patient_id"]),
+                "tenure": _patient_tenure_label(row.get("created_date")),
                 "total_touchpoints": int(row["total_touchpoints"]),
                 "referrals": int(row["referrals"]),
                 "encounters": int(row["encounters"]),
@@ -2333,12 +2366,11 @@ def patients(request):
         "story_sections": _build_patients_story_sections(),
         "yearly_accordions": _build_yearly_accordions(),
     }
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 2, 19)
     context.update(
         {
             "page_header_updated_at": updated_on,
             "page_header_updated_at_iso": updated_on.isoformat(),
-            "page_header_read_time": "7 min read",
         }
     )
     return render(request, "dashboard/patients.html", context)
@@ -2477,12 +2509,11 @@ def referrals(request):
         "theme": theme,
         "story_cards": REFERRALS_STORY_CARDS,
     }
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 2, 19)
     context.update(
         {
             "page_header_updated_at": updated_on,
             "page_header_updated_at_iso": updated_on.isoformat(),
-            "page_header_read_time": "8 min read",
         }
     )
     return render(request, "dashboard/referrals.html", context)
@@ -2523,12 +2554,11 @@ def odreferrals_shift_coverage(request):
         "proposed_coverage": coverage_stats["proposed"],
         "total_cases": coverage_stats["total"],
     }
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 2, 19)
     context.update(
         {
             "page_header_updated_at": updated_on,
             "page_header_updated_at_iso": updated_on.isoformat(),
-            "page_header_read_time": "9 min read",
         }
     )
     return render(request, "dashboard/odreferrals_shift_coverage.html", context)
@@ -2632,7 +2662,7 @@ def odreferrals_hotspots(request):
         "hotspot_insights": insights,
         "document_metrics": document_metrics,
     }
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 2, 19)
     context.update(
         {
             "page_header_updated_at": updated_on,
@@ -4214,12 +4244,11 @@ def odreferrals(request):
         "theme": theme,
         "story_cards": OD_REFERRALS_STORY_CARDS,
     }
-    updated_on = date(2026, 1, 30)
+    updated_on = date(2026, 2, 19)
     context.update(
         {
             "page_header_updated_at": updated_on,
             "page_header_updated_at_iso": updated_on.isoformat(),
-            "page_header_read_time": "9 min read",
         }
     )
     return render(request, "dashboard/odreferrals.html", context)
@@ -5398,7 +5427,7 @@ def od_transport_detail(request):
 
 def odreferrals_insights(request):
     context = _prepare_odreferrals_insights_context()
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 2, 19)
     context.update(
         {
             "page_header_updated_at": updated_on,
@@ -6660,7 +6689,7 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
 
 def hargrove_grant(request):
     years_data = _build_hargrove_accordions()
-    updated_on = timezone.localdate()
+    updated_on = date(2026, 2, 19)
     context = {
         "years_data": years_data,
         "page_header_updated_at": updated_on,

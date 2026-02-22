@@ -162,7 +162,7 @@ AUTH_USER_MODEL = "accounts.User"
 # --- Authentication UX ---
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/accounts/login/"
+LOGOUT_REDIRECT_URL = "/"
 SESSION_COOKIE_SAMESITE = "Lax"
 
 # django-allauth configuration (email optional, no 2FA)

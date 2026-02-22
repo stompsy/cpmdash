@@ -406,20 +406,49 @@ function timelineEditor() {
 // Adjust vertical line heights to match content card heights
 function adjustTimelineLines() {
     const entries = document.querySelectorAll('.timeline-entry');
-    entries.forEach((entry) => {
-        const contentCard = entry.querySelector('article.group\\/card');
+    entries.forEach((entry, index) => {
+        const dateColumn = entry.querySelector('.timeline-date-column');
+        const dateCard = entry.querySelector('.timeline-date-card');
         const verticalLine = entry.querySelector('.timeline-line');
 
-        if (contentCard && verticalLine) {
-            const cardHeight = contentCard.offsetHeight;
-            // Set line height to match card height minus some padding
-            verticalLine.style.height = `${Math.max(cardHeight - 32, 100)}px`;
+        if (!verticalLine || !dateCard || !dateColumn) {
+            return;
+        }
+
+        const nextEntry = entries[index + 1];
+        const nextDateCard = nextEntry ? nextEntry.querySelector('.timeline-date-card') : null;
+
+        if (!nextDateCard) {
+            verticalLine.style.display = 'none';
+            return;
+        }
+
+        const columnRect = dateColumn.getBoundingClientRect();
+        const currentDateRect = dateCard.getBoundingClientRect();
+        const nextDateRect = nextDateCard.getBoundingClientRect();
+
+        const startY = currentDateRect.bottom + 10;
+        const endY = nextDateRect.top - 10;
+
+        const lineTop = Math.round(startY - columnRect.top);
+        const lineHeight = Math.round(Math.max(endY - startY, 0));
+
+        verticalLine.style.display = 'block';
+        verticalLine.style.top = `${lineTop}px`;
+        verticalLine.style.height = `${lineHeight}px`;
+
+        if (lineHeight <= 0) {
+            verticalLine.style.display = 'none';
         }
     });
 }
 
 // Run on page load and after HTMX updates
-document.addEventListener('DOMContentLoaded', adjustTimelineLines);
+document.addEventListener('DOMContentLoaded', () => {
+    requestAnimationFrame(adjustTimelineLines);
+});
+window.addEventListener('load', adjustTimelineLines);
+window.addEventListener('resize', adjustTimelineLines);
 document.addEventListener('htmx:afterSwap', (event) => {
     if (event.detail.target.id === 'timeline-entries') {
         setTimeout(adjustTimelineLines, 50);

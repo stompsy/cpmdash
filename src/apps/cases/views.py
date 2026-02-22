@@ -14,13 +14,12 @@ from ..charts.overdose.od_shift_scenarios import (
 
 
 def _get_opshielding_context() -> dict[str, object]:
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 2, 19)
     return {
         "title": "PORT Referrals",
         "description": "Case Studies - OP Shielding Hope",
         "page_header_updated_at": updated_on,
         "page_header_updated_at_iso": updated_on.isoformat(),
-        "page_header_read_time": "4 min read",
     }
 
 
@@ -52,7 +51,7 @@ def costsavings(request):
     total_savings = cost_metrics["total_savings"]
     rounded_savings = round(total_savings / 500000) * 500000
 
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 2, 19)
 
     context = {
         "title": title,
@@ -61,7 +60,6 @@ def costsavings(request):
         "rounded_total_savings": rounded_savings,
         "page_header_updated_at": updated_on,
         "page_header_updated_at_iso": updated_on.isoformat(),
-        "page_header_read_time": "7 min read",
     }
     return render(request, "cases/costsavings.html", context)
 
@@ -205,7 +203,7 @@ def timeline(request):
         },
     ]
 
-    updated_on = date(2025, 11, 30)
+    updated_on = date(2026, 2, 19)
 
     context = {
         "title": "PAFD Community Paramedicine Program Timeline",

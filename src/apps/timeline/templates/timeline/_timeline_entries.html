@@ -2,20 +2,20 @@
 
 {% for entry in timeline_entries %}
 <div class="timeline-entry relative pb-12 group" data-entry-id="{{ entry.id }}">
-    <div class="flex gap-8 items-start">
+    <div class="flex gap-3 sm:gap-8 items-start">
         <!-- LEFT SIDE: Date Block + Tagline (like quick stat card) -->
-        <div class="flex-shrink-0 w-44 relative z-10">
+        <div class="timeline-date-column flex-shrink-0 w-28 sm:w-44 relative z-10">
             <!-- Date Block styled like quick stat -->
-            <div class="group/date relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-indigo-50 to-white shadow-sm transition-all duration-300 hover:border-indigo-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-indigo-500/50">
+            <div class="timeline-date-card group/date relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-indigo-50 to-white shadow-sm transition-all duration-300 hover:border-indigo-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-indigo-500/50">
                 <!-- Animated background circle -->
                 <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-indigo-500/5 transition-all duration-300 group-hover/date:scale-150 dark:bg-indigo-400/5"></div>
 
                 <!-- Content -->
-                <div class="relative px-5 py-4">
+                <div class="relative px-3.5 py-3 sm:px-5 sm:py-4">
                     <!-- Month/Year -->
-                    <div class="flex items-center gap-4 mb-3">
+                    <div class="flex items-center gap-2 sm:gap-4 mb-3">
                         <!-- Calendar icon badge -->
-                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-100 to-indigo-50 ring-4 ring-indigo-50 transition-all duration-300 group-hover/date:scale-110 group-hover/date:ring-indigo-100 dark:from-indigo-500/20 dark:to-indigo-600/10 dark:ring-indigo-900/30 dark:group-hover/date:ring-indigo-800/40">
+                        <div class="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-100 to-indigo-50 ring-4 ring-indigo-50 transition-all duration-300 group-hover/date:scale-110 group-hover/date:ring-indigo-100 dark:from-indigo-500/20 dark:to-indigo-600/10 dark:ring-indigo-900/30 dark:group-hover/date:ring-indigo-800/40">
                             <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -25,11 +25,11 @@
                         </div>
                         <div>
                             {% if entry.month %}
-                            <div class="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-indigo-600/70 dark:text-indigo-400/70 leading-none">
+                            <div class="text-[0.58rem] sm:text-[0.65rem] font-bold uppercase tracking-[0.08em] sm:tracking-[0.1em] text-indigo-600/70 dark:text-indigo-400/70 leading-none">
                                 {{ entry.month }}
                             </div>
                             {% endif %}
-                            <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight mt-0.5">
+                            <div class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight mt-0.5">
                                 {{ entry.year }}
                             </div>
                         </div>
@@ -39,7 +39,7 @@
                     <div class="border-t border-slate-200/60 dark:border-slate-700/50 mb-3"></div>
 
                     <!-- Tagline -->
-                    <div class="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-indigo-600 dark:text-indigo-400 leading-tight">
+                    <div class="text-[0.62rem] sm:text-[0.7rem] font-semibold uppercase tracking-[0.06em] sm:tracking-[0.08em] text-indigo-600 dark:text-indigo-400 leading-tight">
                         {{ entry.tagline }}
                     </div>
                 </div>
@@ -47,7 +47,7 @@
 
             <!-- Vertical line - positioned below date block, height dynamically set by JS -->
             {% if not forloop.last %}
-            <div class="timeline-line absolute left-1/2 -translate-x-1/2 top-[calc(100%+0.5rem)] w-0.5 h-[20rem] bg-gradient-to-b from-indigo-300/60 via-indigo-200/40 via-50% to-transparent dark:from-indigo-500/50 dark:via-indigo-600/30 dark:via-50% dark:to-transparent"></div>
+            <div class="timeline-line absolute left-1/2 -translate-x-1/2 w-0.5 bg-indigo-400/75 dark:bg-indigo-500/35"></div>
             {% endif %}
         </div>
 
@@ -121,8 +121,10 @@
                         {% if entry.bullets %}
                         <ul class="space-y-3">
                             {% for item in entry.bullets %}
-                            <li class="flex items-start gap-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                                <span class="mt-1.5 flex-shrink-0 h-1.5 w-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400"></span>
+                            <li class="group/item flex items-start gap-3 rounded-lg border border-slate-200/70 bg-slate-50/70 px-3 py-2.5 text-sm leading-relaxed text-slate-700 transition-colors dark:border-slate-700/60 dark:bg-slate-800/35 dark:text-slate-300">
+                                <span class="mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-300">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                                </span>
                                 <span class="flex-1">{{ item }}</span>
                             </li>
                             {% endfor %}
@@ -139,8 +141,8 @@
                                 </h4>
                                 <ul class="space-y-2">
                                     {% for item in section.items %}
-                                    <li class="flex items-start gap-2.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                                        <span class="mt-1 flex-shrink-0 h-1 w-1 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+                                    <li class="flex items-start gap-2.5 rounded-md border border-slate-200/60 bg-white/70 px-2.5 py-2 text-xs leading-relaxed text-slate-600 dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-400">
+                                        <span class="mt-1.5 inline-flex h-2.5 w-2.5 flex-shrink-0 rounded-full bg-slate-300 dark:bg-slate-500"></span>
                                         <span class="flex-1">{{ item }}</span>
                                     </li>
                                     {% endfor %}

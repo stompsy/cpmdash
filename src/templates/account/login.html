@@ -65,8 +65,14 @@
     </form>
 {% endblock form_body %}
 {% block auth_footer %}
-    <p class="mt-8 text-center text-sm text-slate-200/80 lg:text-right">
-        Don't have an account?
-        <a href="{% url 'account_signup' %}" class="font-semibold text-brand-300 transition hover:text-brand-200">Create one</a>
-    </p>
+    <div class="mt-8 space-y-3 text-center lg:text-right">
+        <p class="text-sm text-slate-200/80">
+            Don't have an account?
+            <a href="{% url 'account_signup' %}" class="font-semibold text-brand-300 transition hover:text-brand-200">Create one</a>
+        </p>
+        <p class="text-sm text-slate-200/80">
+            Want to browse first?
+            <a href="{% url 'home' %}" class="font-semibold text-brand-300 transition hover:text-brand-200">Return to home page</a>
+        </p>
+    </div>
 {% endblock auth_footer %}
