@@ -4,11 +4,12 @@ from __future__ import annotations
 import json
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import AbstractUser
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
@@ -74,7 +75,8 @@ def contact_submit(request: HttpRequest) -> HttpResponse:
 @login_required
 def contact_submissions_list(request: HttpRequest) -> HttpResponse:
     """List all contact submissions (Admin only)."""
-    if not request.user.is_staff:
+    user = cast(AbstractUser, request.user)
+    if not user.is_staff:
         return render(request, "access_denied.html")
 
     submissions = ContactSubmission.objects.all().order_by("-created_at")

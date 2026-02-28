@@ -5,9 +5,9 @@ from .models import ContactSubmission, Encounters, ODReferrals, Patients, Referr
 
 @admin.register(Patients)
 class PatientsAdmin(admin.ModelAdmin):
-    list_display = ("id", "age", "sex", "race", "zip_code", "created_date")
+    list_display = ("id", "age", "sex", "race", "zip_code", "aud", "three_c_client", "created_date")
     search_fields = ("id", "zip_code")
-    list_filter = ("sex", "race", "zip_code")
+    list_filter = ("sex", "race", "zip_code", "aud", "three_c_client")
 
 
 @admin.register(Encounters)

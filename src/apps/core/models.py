@@ -15,6 +15,10 @@ class Patients(models.Model):
     modified_date = models.DateField(max_length=20, null=True, blank=True)
     marital_status = models.CharField(max_length=50, default="", blank=True)
     veteran_status = models.CharField(max_length=50, default="", blank=True)
+    aud = models.BooleanField(null=True, blank=True)
+    three_c_client = models.BooleanField(null=True, blank=True, db_column="3c_client")
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     def __str__(self) -> str:
         return "Patient ID: " + str(self.id)

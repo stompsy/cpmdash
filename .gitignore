@@ -39,6 +39,7 @@ htmlcov/
 
 # Dev
 assets/
+scripts/geocode_call_volume.py
 db.sqlite3
 notes.txt
 docs/*.md

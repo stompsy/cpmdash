@@ -54,6 +54,7 @@ from ..charts.overdose.od_shift_scenarios import (  # noqa: F401 - re-export for
 )
 from ..charts.patients.age_chart_variations import build_all_age_chart_variations
 from ..charts.patients.patient_field_charts import build_patients_field_charts
+from ..charts.referral.patient_map import build_chart_patient_map
 from ..charts.referral.referrals_field_charts import build_referrals_field_charts
 from ..core.models import Encounters, ODReferrals, Patients, Referrals
 
@@ -1570,9 +1571,20 @@ REFERRALS_RATIONALE_HEADINGS: dict[str, str] = {
     "referrals_counts_quarterly": "Demand Heartbeat & Capacity Warning",
     "encounters_counts_quarterly": "Efficiency & Workload Analysis",
     "encounter_type": "Operational Style Profile",
+    "patient_map": "Geographic Reach & Service Footprint",
 }
 
 REFERRALS_RATIONALE_MAP: dict[str, str] = {
+    "patient_map": (
+        "Every referral, encounter, and OD referral record is plotted at the owning patient's home "
+        "address, colour-coded by source type. Toggle layers on and off to isolate patterns. Clusters "
+        "reveal where the program's reach is strongest — and where geographic blind spots may exist. "
+        "Dense urban pockets might indicate walk-in accessibility, while scattered rural markers "
+        "highlight patients who depend on mobile outreach. Comparing layers can expose whether "
+        "referred patients are actually converting to service encounters, or falling off between "
+        "intake and engagement. OD referral hotspots layered against general referral density can "
+        "highlight whether overdose-prone areas are receiving proportional follow-up care."
+    ),
     "age": (
         "This distribution acts as a map of vulnerability rather than just a demographic breakdown. A dominance of the 55-84 age bracket "
         "often signals a system managing frailty, isolation, and chronic disease—patients who may be falling through the cracks of "
@@ -1720,6 +1732,7 @@ REFERRALS_DISPLAY_FIELDS = [
     "referral_closed_reason",
     "referral_agency",
     "encounter_type",  # Special field - uses cat1/2/3 columns
+    "patient_map",  # Leaflet map of patient addresses from Referrals + Encounters + OD Referrals
 ]
 
 REFERRALS_SINGLE_COLUMN_FIELDS = {"sex", "referral_closed_reason"}
@@ -1733,6 +1746,7 @@ REFERRALS_LABEL_OVERRIDES = {
     "encounter_type": "Encounter Type",
     "referrals_counts_quarterly": "Referrals by Quarter",
     "encounters_counts_quarterly": "Encounters by Quarter",
+    "patient_map": "Patient Address Map",
 }
 
 
@@ -1779,6 +1793,14 @@ def _ordered_referral_fields(df: pd.DataFrame) -> list[str]:
             fields.insert(actual_idx, "encounter_type")
         except (ValueError, IndexError):
             fields.append("encounter_type")
+    # Add patient_map virtual field (Leaflet map, not a DataFrame column)
+    if "patient_map" not in fields:
+        try:
+            insert_idx = REFERRALS_DISPLAY_FIELDS.index("patient_map")
+            actual_idx = sum(1 for f in REFERRALS_DISPLAY_FIELDS[:insert_idx] if f in fields)
+            fields.insert(actual_idx, "patient_map")
+        except (ValueError, IndexError):
+            fields.append("patient_map")
     return fields
 
 
@@ -2432,8 +2454,13 @@ def referrals_chart_fragment(request, field: str):
     if field not in valid_fields:
         raise Http404
 
-    charts = build_referrals_field_charts(theme=theme, fields=[field])
-    chart_html = charts.get(field, "")
+    # Patient map is a Leaflet map, not a Plotly chart — build it separately
+    if field == "patient_map":
+        zoom_mode = "full" if request.user.is_authenticated else "restricted"
+        chart_html = _chart_html(build_chart_patient_map(theme=theme, zoom_mode=zoom_mode))
+    else:
+        charts = build_referrals_field_charts(theme=theme, fields=[field])
+        chart_html = charts.get(field, "")
     has_chart = bool(chart_html)
 
     chart_insights = _build_referrals_chart_insights(df_all)
