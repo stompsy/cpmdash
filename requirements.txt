@@ -18,6 +18,8 @@ certifi==2025.10.5
     #   pyproj
 click==8.2.1
     # via uvicorn
+contourpy==1.3.3
+    # via cpmdash (pyproject.toml)
 defusedxml==0.7.1
     # via cpmdash (pyproject.toml)
 dj-database-url==3.0.1
@@ -70,6 +72,7 @@ narwhals==2.3.0
     # via plotly
 numpy==2.3.2
     # via
+    #   contourpy
     #   geopandas
     #   pandas
     #   pyogrio
