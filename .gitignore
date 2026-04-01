@@ -38,7 +38,9 @@ htmlcov/
 *.log
 
 # Dev
-assets/
+assets/*.csv
+assets/*.json
+!assets/css/
 scripts/geocode_call_volume.py
 db.sqlite3
 notes.txt
