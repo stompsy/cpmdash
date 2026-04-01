@@ -122,13 +122,15 @@ dev = [
 [tool.semantic_release]
 version_variables = ["src/config/__init__.py:__version__"]
 version_toml = ["pyproject.toml:project.version"]
-branches = ["main"]
-build_command = "uv build"
+build_command = false
 upload_to_pypi = false
 changelog_file = "CHANGELOG.md"
 tag_format = "v{version}"
 commit_message = "chore(release): {version}"
 major_on_zero = false
+
+[tool.semantic_release.branches.main]
+match = "main"
 
 [tool.semantic_release.commit_parser_options]
 minor_tags = ["feat"]
