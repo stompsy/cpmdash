@@ -38,10 +38,6 @@ COPY Procfile runtime.txt ./
 # Copy built Tailwind CSS from stage 1
 COPY --from=css-builder /build/src/static/css/output.css src/static/css/output.css
 
-# Copy static assets that ship with the repo
-COPY staticfiles/ staticfiles/
-COPY media/ media/
-
 # Collect static files (WhiteNoise serves from STATIC_ROOT)
 RUN SECRET_KEY=build-placeholder \
     DATABASE_URL=sqlite:///tmp/build.db \
