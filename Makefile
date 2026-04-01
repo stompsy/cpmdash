@@ -1,4 +1,4 @@
-.PHONY: setup lint fmt type test run migrate shell analyze-initiated-referrals analyze-initiated-referrals-db
+.PHONY: setup lint fmt type test run migrate shell tailwind loaddata loaddata-dry analyze-initiated-referrals analyze-initiated-referrals-db
 setup:
 	uv sync --dev
 	pre-commit install || uvx pre-commit install
@@ -17,3 +17,12 @@ migrate:
 
 shell:
 	uv run python src/manage.py shell
+
+tailwind:
+	npm run dev
+
+loaddata:
+	uv run python src/manage.py load_csv_data
+
+loaddata-dry:
+	uv run python src/manage.py load_csv_data --dry-run

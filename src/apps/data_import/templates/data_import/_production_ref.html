@@ -1,0 +1,52 @@
+{# Production database reference panel — loaded via HTMX into review.html #}
+<div class="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 to-slate-800/40 p-6">
+    <div class="flex items-center gap-3 mb-5">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500/20">
+            <svg class="h-4 w-4 text-brand-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+            </svg>
+        </div>
+        <div>
+            <h3 class="text-sm font-semibold text-white">Production Database</h3>
+            <p class="text-[11px] text-slate-500">Current production data — new imports start after these IDs</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {% for key, data in ref_data.items %}
+        <div class="rounded-xl border border-white/5 bg-slate-900/60 p-4">
+            <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">{{ key }}</h4>
+
+            <div class="space-y-2">
+                <div class="flex items-baseline justify-between">
+                    <span class="text-[10px] text-slate-500">Total rows</span>
+                    <span class="text-sm font-bold text-white tabular-nums">{{ data.total|default:"0" }}</span>
+                </div>
+
+                <div class="flex items-baseline justify-between">
+                    <span class="text-[10px] text-slate-500">Last ID</span>
+                    {% if data.max_id %}
+                    <span class="text-sm font-mono font-bold text-emerald-400 tabular-nums">#{{ data.max_id }}</span>
+                    {% else %}
+                    <span class="text-sm text-slate-600">—</span>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-baseline justify-between">
+                    <span class="text-[10px] text-slate-500">Latest date</span>
+                    {% if data.latest_date %}
+                    <span class="text-xs font-mono text-slate-300 tabular-nums">{{ data.latest_date|date:"Y-m-d" }}</span>
+                    {% else %}
+                    <span class="text-xs text-slate-600">—</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <p class="mt-4 text-[10px] text-slate-600">
+        Records with IDs ≤ the "Last ID" shown above will be marked as <span class="text-slate-400 font-medium">existing</span> and skipped during commit.
+        Only records with new IDs will be committed.
+    </p>
+</div>

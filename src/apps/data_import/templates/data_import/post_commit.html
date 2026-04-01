@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block pageName %}dataImportPostCommit{% endblock pageName %}
+{% block title %}Import #{{ batch.pk }} Committed{% endblock title %}
+
+{% block content %}
+<div class="col-span-12 mx-auto w-full max-w-3xl">
+    <span data-page-name="dataImportPostCommit" class="hidden" hidden></span>
+    <div class="w-full py-10 space-y-8">
+
+        <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-8 space-y-6 text-center">
+            <div class="flex justify-center">
+                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10">
+                    <svg class="h-8 w-8 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-2xl font-bold text-white">Import Committed!</h2>
+                <p class="mt-2 text-sm text-slate-400">
+                    Batch #{{ batch.pk }} has been committed to production.
+                </p>
+            </div>
+
+            {# Committed counts #}
+            <div class="flex justify-center gap-6">
+                {% if batch.committed_patients %}
+                <div class="text-center">
+                    <p class="text-xl font-bold text-emerald-400">{{ batch.committed_patients }}</p>
+                    <p class="text-xs text-slate-400">patients</p>
+                </div>
+                {% endif %}
+                {% if batch.committed_referrals %}
+                <div class="text-center">
+                    <p class="text-xl font-bold text-emerald-400">{{ batch.committed_referrals }}</p>
+                    <p class="text-xs text-slate-400">referrals</p>
+                </div>
+                {% endif %}
+                {% if batch.committed_odreferrals %}
+                <div class="text-center">
+                    <p class="text-xl font-bold text-emerald-400">{{ batch.committed_odreferrals }}</p>
+                    <p class="text-xs text-slate-400">OD referrals</p>
+                </div>
+                {% endif %}
+                {% if batch.committed_encounters %}
+                <div class="text-center">
+                    <p class="text-xl font-bold text-emerald-400">{{ batch.committed_encounters }}</p>
+                    <p class="text-xs text-slate-400">encounters</p>
+                </div>
+                {% endif %}
+            </div>
+
+            {# Purge staging prompt #}
+            <div class="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+                <p class="text-sm text-amber-300">
+                    Staging data is still in the database. Purge it to free up space?
+                </p>
+                <div class="mt-4 flex justify-center gap-3">
+                    <form method="post" action="{% url 'data_import:purge_staging' batch.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="rounded-xl bg-amber-500/20 px-5 py-2.5 text-sm font-semibold text-amber-300
+                                       hover:bg-amber-500/30 transition">
+                            Purge Staging Data
+                        </button>
+                    </form>
+                    <a href="{% url 'data_import:batch_list' %}"
+                       class="rounded-xl border border-white/10 bg-slate-800/60 px-5 py-2.5 text-sm font-medium text-slate-300
+                              hover:bg-slate-700/60 transition">
+                        Keep &amp; Return to History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

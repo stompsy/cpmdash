@@ -560,6 +560,36 @@
                 </span>
               </a>
             </li>
+            {% if request.user.is_staff %}
+            <li>
+              <a
+                href="{% url 'data_import:batch_list' %}"
+                hx-get="{% url 'data_import:batch_list' %}"
+                hx-target="#dashboard-main"
+                hx-select="#dashboard-main"
+                hx-swap="outerHTML show:top"
+                hx-push-url="true"
+                @click="selected = 'Administration'; page = 'dataImport'; if (window.innerWidth < 1024) sidebarToggle = false"
+                class="menu-item group"
+                :class="page === 'dataImport' ? 'menu-item-active' : 'menu-item-inactive'"
+              >
+                <svg
+                  :class="page === 'dataImport' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                </svg>
+
+                <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">Data Import</span>
+              </a>
+            </li>
+            {% endif %}
           </ul>
         </div>
         <!-- End Menu Group Administration -->

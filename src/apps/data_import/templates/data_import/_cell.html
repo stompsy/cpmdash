@@ -1,0 +1,43 @@
+{# Single cell — click-to-edit via Alpine.js, saves via HTMX on blur/Enter #}
+<td id="cell-{{ row_pk }}-{{ cell.name }}"
+    class="px-3 py-2 whitespace-nowrap relative
+           {% if cell.is_empty %}bg-rose-900/20
+           {% elif cell.is_placeholder %}bg-amber-900/15
+           {% endif %}"
+    x-data="{ editing: false }"
+    @dblclick="editing = true; $nextTick(() => $refs.input.focus())">
+
+    {# Display mode #}
+    <div x-show="!editing" class="cursor-text min-h-[1.1rem] group/cell">
+        {% if cell.is_empty %}
+        <span class="inline-flex items-center gap-0.5 text-[10px] text-rose-500/60 font-medium">
+            <svg class="h-2.5 w-2.5 opacity-50" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+            —
+        </span>
+        {% elif cell.is_placeholder %}
+        <span class="text-[11px] text-amber-400/70 italic">{{ cell.value }}</span>
+        {% else %}
+        <span class="text-[11px] text-slate-300">{{ cell.value }}</span>
+        {% endif %}
+    </div>
+
+    {# Edit mode #}
+    <form x-show="editing" x-cloak
+          hx-post="{% url 'data_import:cell_update' batch_pk dataset row_pk cell.name %}"
+          hx-target="#cell-{{ row_pk }}-{{ cell.name }}"
+          hx-swap="outerHTML"
+          class="flex">
+        {% csrf_token %}
+        <input type="text"
+               name="value"
+               value="{{ cell.value|default_if_none:'' }}"
+               x-ref="input"
+               @keydown.enter.prevent="$el.closest('form').requestSubmit()"
+               @keydown.escape="editing = false"
+               @blur="if(editing) $el.closest('form').requestSubmit()"
+               class="w-full min-w-[60px] rounded border border-brand-500/40 bg-slate-800 px-1.5 py-0.5 text-[11px] text-white
+                      focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400/30">
+    </form>
+</td>

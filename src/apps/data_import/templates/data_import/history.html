@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block pageName %}dataImportHistory{% endblock pageName %}
+{% block title %}Data Import History{% endblock title %}
+
+{% block content %}
+<div class="col-span-12 mx-auto w-full max-w-6xl">
+    <span data-page-name="dataImportHistory" class="hidden" hidden></span>
+    <div class="w-full py-10 space-y-8">
+
+        {# Header #}
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Data Import History</h2>
+                <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">Manage your CSV data imports</p>
+            </div>
+            <div class="flex gap-3">
+                <a
+                    href="{% url 'data_import:log_list' %}"
+                    class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-slate-800/60 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700/60"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                    Processing Logs
+                </a>
+                <a
+                    href="{% url 'data_import:upload' %}"
+                    class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:shadow-xl hover:scale-[1.02]"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                    </svg>
+                    New Import
+                </a>
+            </div>
+        </div>
+
+        {# Batch list #}
+        {% if batches %}
+        <div class="space-y-4">
+            {% for batch in batches %}
+            <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-5 transition hover:border-white/20">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        {# Status badge #}
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                            {% if batch.status == 'committed' %}bg-emerald-400/15 text-emerald-400
+                            {% elif batch.status == 'review' %}bg-amber-400/15 text-amber-400
+                            {% elif batch.status == 'processing' %}bg-blue-400/15 text-blue-400
+                            {% elif batch.status == 'failed' %}bg-rose-400/15 text-rose-400
+                            {% else %}bg-slate-400/15 text-slate-400{% endif %}">
+                            {{ batch.get_status_display }}
+                        </span>
+                        <div>
+                            <h3 class="text-sm font-medium text-white">Import #{{ batch.pk }}</h3>
+                            <p class="text-xs text-slate-400">
+                                {{ batch.created_at|date:"M j, Y g:i A" }}
+                                {% if batch.created_by %} · {{ batch.created_by.username }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3"
+                         x-data="{ confirmDelete: false }">
+                        {% if batch.status == 'review' %}
+                            <a href="{% url 'data_import:review' batch.pk %}"
+                               class="text-sm font-medium text-brand-400 hover:text-brand-300 transition">Review →</a>
+                        {% elif batch.status == 'processing' or batch.status == 'uploading' %}
+                            <a href="{% url 'data_import:process' batch.pk %}"
+                               class="text-sm font-medium text-blue-400 hover:text-blue-300 transition">Continue →</a>
+                        {% elif batch.status == 'committed' %}
+                            <span class="text-xs text-slate-500 font-mono">
+                                {% if batch.committed_patients %}P:{{ batch.committed_patients }}{% endif %}
+                                {% if batch.committed_referrals %} R:{{ batch.committed_referrals }}{% endif %}
+                                {% if batch.committed_odreferrals %} OD:{{ batch.committed_odreferrals }}{% endif %}
+                                {% if batch.committed_encounters %} E:{{ batch.committed_encounters }}{% endif %}
+                            </span>
+                        {% endif %}
+
+                        {# Delete button with inline confirmation #}
+                        <div class="relative">
+                            <button @click="confirmDelete = !confirmDelete"
+                                    x-show="!confirmDelete"
+                                    class="rounded-lg p-1.5 text-slate-600 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                                    title="Delete import">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                </svg>
+                            </button>
+                            <div x-show="confirmDelete" x-cloak x-transition
+                                 class="flex items-center gap-2">
+                                <span class="text-xs text-rose-400">Delete?</span>
+                                <form method="post" action="{% url 'data_import:batch_delete' batch.pk %}"
+                                      hx-post="{% url 'data_import:batch_delete' batch.pk %}"
+                                      hx-target="closest div.rounded-2xl"
+                                      hx-swap="outerHTML">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="rounded-md bg-rose-500/20 px-2 py-1 text-xs font-semibold text-rose-400 hover:bg-rose-500/40 transition">
+                                        Yes
+                                    </button>
+                                </form>
+                                <button @click="confirmDelete = false"
+                                        class="rounded-md bg-slate-700 px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-600 transition">
+                                    No
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if batch.notes %}
+                <p class="mt-2 text-xs text-slate-500">{{ batch.notes|truncatewords:30 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="rounded-2xl border border-dashed border-white/10 p-12 text-center">
+            <p class="text-slate-400">No imports yet. Start by uploading your CSV files.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

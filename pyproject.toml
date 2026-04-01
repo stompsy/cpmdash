@@ -47,7 +47,6 @@ dev = [
     "freezegun",
     "djlint",
     "bandit",
-    "pip-audit",
     "pre-commit",
     "types-Markdown"
 ]
@@ -85,6 +84,8 @@ module = [
     "apps.cases.views",
     "apps.dashboard.views",
     "apps.accounts.models",
+    "apps.data_import.views",
+    "apps.core.management.commands.load_csv_data",
     "apps.*.tests.*"
 ]
 ignore_errors = true
@@ -109,7 +110,6 @@ dev = [
     "django-stubs-ext>=5.1.0",
     "djlint>=1.36.4",
     "mypy>=1.17.1",
-    "pip-audit>=2.9.0",
     "pre-commit>=4.3.0",
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",

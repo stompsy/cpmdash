@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block pageName %}dataImportLogs{% endblock pageName %}
+{% block title %}Processing Logs{% endblock title %}
+
+{% block content %}
+<div class="col-span-12 mx-auto w-full max-w-5xl">
+    <span data-page-name="dataImportLogs" class="hidden" hidden></span>
+    <div class="w-full py-10 space-y-8">
+
+        <div class="flex justify-between items-start">
+            <div>
+                <a href="{% url 'data_import:batch_list' %}" class="text-sm text-slate-400 hover:text-white transition">← Back to Import History</a>
+                <h2 class="mt-3 text-2xl font-bold text-gray-900 dark:text-white">Processing Logs</h2>
+                <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
+                    Persistent log records from all import batches. Delete manually when no longer needed.
+                </p>
+            </div>
+        </div>
+
+        {% if logs %}
+        <div class="space-y-3">
+            {% for log in logs %}
+            <div id="log-{{ log.pk }}" class="rounded-2xl border border-white/10 bg-slate-900/40 overflow-hidden"
+                 x-data="{ expanded: false }">
+                <div class="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-white/5 transition"
+                     @click="expanded = !expanded">
+                    <div class="flex items-center gap-4">
+                        <span class="text-xs font-mono text-slate-500">#{{ log.pk }}</span>
+                        <span class="text-sm text-white font-medium">
+                            Batch #{{ log.batch.pk }}
+                        </span>
+                        <span class="text-xs text-slate-400">
+                            {{ log.created_at|date:"M d, Y H:i" }}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <form hx-post="{% url 'data_import:log_delete' log.pk %}"
+                              hx-target="#log-{{ log.pk }}"
+                              hx-swap="outerHTML"
+                              hx-confirm="Delete this log?"
+                              class="inline">
+                            {% csrf_token %}
+                            <button type="submit" @click.stop
+                                    class="rounded-lg bg-rose-500/10 px-2.5 py-1 text-[10px] font-medium text-rose-400 hover:bg-rose-500/20 transition">
+                                Delete
+                            </button>
+                        </form>
+                        <svg class="h-4 w-4 text-slate-400 transition-transform" :class="expanded && 'rotate-180'"
+                             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </div>
+                </div>
+                <div x-show="expanded" x-cloak x-transition class="border-t border-white/5 px-5 py-4">
+                    <pre class="whitespace-pre-wrap text-xs text-slate-300 font-mono leading-relaxed max-h-96 overflow-y-auto">{{ log.content }}</pre>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-12 text-center">
+            <p class="text-sm text-slate-400">No processing logs yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

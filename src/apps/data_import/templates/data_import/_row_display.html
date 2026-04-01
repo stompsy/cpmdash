@@ -1,0 +1,68 @@
+{# Single row display — used inside the data table and as HTMX swap target #}
+<tr id="row-{{ row.pk }}"
+    class="transition-colors group
+           {% if row.status == 'error' %}bg-rose-500/[0.06] hover:bg-rose-500/[0.12]
+           {% elif row.status == 'warning' %}bg-amber-500/[0.04] hover:bg-amber-500/[0.08]
+           {% elif row.status == 'existing' %}bg-slate-800/10 hover:bg-slate-800/20 opacity-50
+           {% elif row.status == 'new' %}hover:bg-emerald-500/[0.04]
+           {% else %}hover:bg-white/[0.03]{% endif %}">
+
+    {# Status badge — sticky column #}
+    <td class="sticky left-0 z-10 px-3 py-2 bg-slate-900/95">
+        <div class="flex items-center gap-1.5">
+            <span class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none
+                          {% if row.status == 'new' %}text-emerald-400
+                          {% elif row.status == 'existing' %}text-slate-500
+                          {% elif row.status == 'warning' %}text-amber-400
+                          {% elif row.status == 'error' %}text-rose-400
+                          {% else %}text-slate-500{% endif %}">
+                {% if row.status == 'new' %}
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 mr-1"></span>new
+                {% elif row.status == 'warning' %}
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-amber-400 mr-1"></span>warn
+                {% elif row.status == 'error' %}
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-rose-400 mr-1"></span>err
+                {% elif row.status == 'existing' %}
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-slate-500 mr-1"></span>dup
+                {% endif %}
+            </span>
+            {% if row.empty_count %}
+            <span class="text-[8px] text-rose-500/60 font-medium">{{ row.empty_count }}∅</span>
+            {% endif %}
+        </div>
+    </td>
+
+    {# Data cells — each cell is click-to-edit (non-existing rows) #}
+    {% for cell in row.cells %}
+    {% if row.status != 'existing' %}
+    {% include "data_import/_cell.html" with cell=cell batch_pk=batch.pk dataset=dataset row_pk=row.pk %}
+    {% else %}
+    <td class="px-3 py-2 whitespace-nowrap">
+        <span class="text-slate-600 text-[11px]">{{ cell.value|default_if_none:"" }}</span>
+    </td>
+    {% endif %}
+    {% endfor %}
+
+    {# Validation notes #}
+    <td class="px-3 py-2 max-w-[200px]">
+        {% if row.validation_notes %}
+        <span class="text-[10px] leading-snug
+                     {% if row.status == 'error' %}text-rose-400/80{% else %}text-amber-400/70{% endif %}">
+            {{ row.validation_notes|truncatewords:15 }}
+        </span>
+        {% endif %}
+    </td>
+
+    {# Actions #}
+    <td class="px-3 py-2">
+        {% if row.status != 'existing' %}
+        <button hx-get="{% url 'data_import:row_edit' batch.pk dataset row.pk %}"
+                hx-target="#row-{{ row.pk }}"
+                hx-swap="outerHTML"
+                class="rounded-md bg-brand-500/10 px-2 py-0.5 text-[10px] font-semibold text-brand-400
+                       hover:bg-brand-500/20 transition opacity-0 group-hover:opacity-100">
+            Edit
+        </button>
+        {% endif %}
+    </td>
+</tr>
