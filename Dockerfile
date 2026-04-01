@@ -3,7 +3,7 @@ FROM node:22-alpine AS css-builder
 WORKDIR /build
 COPY package.json ./
 RUN npm install
-COPY assets/ assets/
+COPY assets/css/ assets/css/
 COPY src/static/ src/static/
 COPY src/templates/ src/templates/
 COPY src/apps/ src/apps/
@@ -41,7 +41,6 @@ COPY --from=css-builder /build/src/static/css/output.css src/static/css/output.c
 # Copy static assets that ship with the repo
 COPY staticfiles/ staticfiles/
 COPY media/ media/
-COPY assets/ assets/
 
 # Collect static files (WhiteNoise serves from STATIC_ROOT)
 RUN SECRET_KEY=build-placeholder \
