@@ -19,6 +19,7 @@ urlpatterns = [
     path("tasks/", include("apps.tasks.urls")),
     path("timeline/", include("apps.timeline.urls")),
     path("cases/", include("apps.cases.urls")),
+    path("administration/data/", include("apps.data_import.urls")),
     path("privacy/", privacy, name="privacy"),
     path("terms/", terms, name="terms"),
     path("accessibility/", accessibility, name="accessibility"),

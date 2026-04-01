@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "apps.blog",
     "apps.tasks",
     "apps.timeline",
+    "apps.data_import",
     # Third-party
     "rest_framework",
     "django_filters",
