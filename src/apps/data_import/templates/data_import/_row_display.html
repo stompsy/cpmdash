@@ -4,6 +4,7 @@
            {% if row.status == 'error' %}bg-rose-500/[0.06] hover:bg-rose-500/[0.12]
            {% elif row.status == 'warning' %}bg-amber-500/[0.04] hover:bg-amber-500/[0.08]
            {% elif row.status == 'existing' %}bg-slate-800/10 hover:bg-slate-800/20 opacity-50
+           {% elif row.status == 'changed' %}bg-sky-500/[0.04] hover:bg-sky-500/[0.08]
            {% elif row.status == 'new' %}hover:bg-emerald-500/[0.04]
            {% else %}hover:bg-white/[0.03]{% endif %}">
 
@@ -12,12 +13,15 @@
         <div class="flex items-center gap-1.5">
             <span class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none
                           {% if row.status == 'new' %}text-emerald-400
+                          {% elif row.status == 'changed' %}text-sky-400
                           {% elif row.status == 'existing' %}text-slate-500
                           {% elif row.status == 'warning' %}text-amber-400
                           {% elif row.status == 'error' %}text-rose-400
                           {% else %}text-slate-500{% endif %}">
                 {% if row.status == 'new' %}
                     <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 mr-1"></span>new
+                {% elif row.status == 'changed' %}
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-sky-400 mr-1"></span>chg
                 {% elif row.status == 'warning' %}
                     <span class="inline-block h-1.5 w-1.5 rounded-full bg-amber-400 mr-1"></span>warn
                 {% elif row.status == 'error' %}
@@ -47,7 +51,9 @@
     <td class="px-3 py-2 max-w-[200px]">
         {% if row.validation_notes %}
         <span class="text-[10px] leading-snug
-                     {% if row.status == 'error' %}text-rose-400/80{% else %}text-amber-400/70{% endif %}">
+                     {% if row.status == 'error' %}text-rose-400/80
+                     {% elif row.status == 'changed' %}text-sky-400/80
+                     {% else %}text-amber-400/70{% endif %}">
             {{ row.validation_notes|truncatewords:15 }}
         </span>
         {% endif %}

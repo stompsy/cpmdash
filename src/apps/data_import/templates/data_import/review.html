@@ -78,6 +78,7 @@
                     </div>
                     <div class="mt-1.5 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] font-medium">
                         {% if data.new %}<span class="text-emerald-400">{{ data.new }} new</span>{% endif %}
+                        {% if data.changed %}<span class="text-sky-400">{{ data.changed }} changed</span>{% endif %}
                         {% if data.existing %}<span class="text-slate-500">{{ data.existing }} dup</span>{% endif %}
                         {% if data.warning %}<span class="text-amber-400">{{ data.warning }} warn</span>{% endif %}
                         {% if data.error %}<span class="text-rose-400">{{ data.error }} err</span>{% endif %}
