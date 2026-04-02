@@ -18,6 +18,7 @@ from apps.data_import.models import (
 )
 from apps.data_import.views import (
     _build_staging_kwargs,
+    _classify_row,
     _detect_field_changes,
     _do_commit,
     _staging_to_core_kwargs,
@@ -92,6 +93,134 @@ class TestDetectFieldChanges:
         prod_row = {"age": 42, "insurance": "Medicare", "race": "White"}
         diffs = _detect_field_changes(StagingPatient, compare_fields, staging_kwargs, prod_row)
         assert len(diffs) == 2
+
+
+# ======================================================================
+# _classify_row tests
+# ======================================================================
+class TestClassifyRow:
+    """Tests for row classification logic — especially the bug where
+    warnings stole NEW status from genuinely new rows.
+    """
+
+    @staticmethod
+    def _make_result(
+        row_warnings: dict[int, list[str]] | None = None,
+        row_errors: dict[int, list[str]] | None = None,
+    ) -> Any:
+        """Minimal stub mimicking CleaningResult for _classify_row."""
+
+        class _Stub:
+            pass
+
+        stub = _Stub()
+        stub.row_warnings = row_warnings or {}  # type: ignore[attr-defined]
+        stub.row_errors = row_errors or {}  # type: ignore[attr-defined]
+        return stub
+
+    def test_new_row_no_warnings(self, batch: DataImportBatch) -> None:
+        """A row not in existing_pks and without warnings → NEW."""
+        record = {"id": "99", "age": "30", "insurance": "Medicaid"}
+        result = self._make_result()
+        exclude = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
+        compare_fields = [
+            f.name
+            for f in StagingPatient._meta.get_fields()
+            if hasattr(f, "name") and f.name not in exclude
+        ]
+        status, notes = _classify_row(
+            99,
+            0,
+            record,
+            "id",
+            "patients",
+            set(),
+            {},
+            StagingPatient,
+            compare_fields,
+            batch,
+            result,
+        )
+        assert status == RowStatus.NEW
+        assert notes == []
+
+    def test_new_row_with_warnings_stays_new(self, batch: DataImportBatch) -> None:
+        """A genuinely new row that has validation warnings should still
+        be classified as NEW — warnings are metadata, not a blocking status.
+        """
+        record = {"id": "99", "age": "30", "insurance": "Not disclosed"}
+        result = self._make_result(row_warnings={0: ["Insurance not disclosed"]})
+        exclude = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
+        compare_fields = [
+            f.name
+            for f in StagingPatient._meta.get_fields()
+            if hasattr(f, "name") and f.name not in exclude
+        ]
+        status, notes = _classify_row(
+            99,
+            0,
+            record,
+            "id",
+            "patients",
+            set(),
+            {},
+            StagingPatient,
+            compare_fields,
+            batch,
+            result,
+        )
+        assert status == RowStatus.NEW
+        assert "Insurance not disclosed" in notes
+
+    def test_new_row_with_errors_is_error(self, batch: DataImportBatch) -> None:
+        """A new row with hard errors → ERROR (blocks import)."""
+        record = {"id": "99"}
+        result = self._make_result(row_errors={0: ["Corrupt data"]})
+        status, notes = _classify_row(
+            99, 0, record, "id", "patients", set(), {}, StagingPatient, [], batch, result
+        )
+        assert status == RowStatus.ERROR
+        assert "Corrupt data" in notes
+
+    def test_existing_row_unchanged(
+        self, batch: DataImportBatch, existing_patient: Patients
+    ) -> None:
+        """A row whose PK is in existing_pks and fields match → EXISTING."""
+        record = {
+            "id": "1",
+            "age": "42",
+            "insurance": "Medicare",
+            "pcp_agency": "NOHN",
+            "race": "White",
+            "sex": "Male",
+            "zip_code": "98362",
+            "marital_status": "Single",
+            "veteran_status": "No",
+        }
+        result = self._make_result()
+        exclude = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
+        compare_fields = [
+            f.name
+            for f in StagingPatient._meta.get_fields()
+            if hasattr(f, "name") and f.name not in exclude
+        ]
+        existing_rows = {
+            1: {fname: getattr(existing_patient, fname, None) for fname in compare_fields}
+        }
+        status, notes = _classify_row(
+            1,
+            0,
+            record,
+            "id",
+            "patients",
+            {1},
+            existing_rows,
+            StagingPatient,
+            compare_fields,
+            batch,
+            result,
+        )
+        assert status == RowStatus.EXISTING
 
 
 # ======================================================================
