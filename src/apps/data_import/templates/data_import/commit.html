@@ -19,8 +19,9 @@
                 <div>
                     <h2 class="text-xl font-bold text-white">Commit to Production</h2>
                     <p class="mt-1 text-sm text-slate-400">
-                        This will insert <strong class="text-white">new records only</strong> into the production database.
-                        Existing records will not be modified.
+                        This will insert <strong class="text-emerald-400">new records</strong> and
+                        update <strong class="text-sky-400">changed records</strong> in the production database.
+                        Existing unchanged records will not be modified.
                     </p>
                 </div>
             </div>
@@ -28,11 +29,22 @@
             {# Summary of what will be committed #}
             <div class="rounded-xl border border-white/5 bg-slate-800/40 p-4 space-y-2">
                 <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Records to Commit</h4>
-                {% for key, count in commit_summary.items %}
+                {% for key, counts in commit_summary.items %}
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-slate-300">{{ key|title }}</span>
-                    <span class="text-sm font-semibold {% if count > 0 %}text-emerald-400{% else %}text-slate-500{% endif %}">
-                        {{ count }} new record{{ count|pluralize }}
+                    <span class="text-sm font-semibold">
+                        {% if counts.new %}
+                        <span class="text-emerald-400">{{ counts.new }} new</span>
+                        {% endif %}
+                        {% if counts.new and counts.changed %}
+                        <span class="text-slate-600 mx-1">·</span>
+                        {% endif %}
+                        {% if counts.changed %}
+                        <span class="text-sky-400">{{ counts.changed }} updated</span>
+                        {% endif %}
+                        {% if not counts.new and not counts.changed %}
+                        <span class="text-slate-500">0 changes</span>
+                        {% endif %}
                     </span>
                 </div>
                 {% endfor %}

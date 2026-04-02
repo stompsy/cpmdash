@@ -164,22 +164,14 @@ def upload(request: HttpRequest) -> HttpResponse:
                 status=DataImportBatch.Status.UPLOADING,
             )
 
-            file_type_map = {
-                "patients_file": DataImportFile.FileType.PATIENTS,
-                "referrals_file": DataImportFile.FileType.REFERRALS,
-                "odreferrals_file": DataImportFile.FileType.ODREFERRALS,
-                "encounters_file": DataImportFile.FileType.ENCOUNTERS,
-            }
-
-            for field_name, file_type in file_type_map.items():
-                uploaded = request.FILES.get(field_name)
-                if uploaded:
-                    DataImportFile.objects.create(
-                        batch=batch,
-                        file_type=file_type,
-                        file=uploaded,
-                        original_filename=uploaded.name or "unknown",
-                    )
+            uploaded = form.cleaned_data["file"]
+            file_type = form.cleaned_data["file_type"]
+            DataImportFile.objects.create(
+                batch=batch,
+                file_type=file_type,
+                file=uploaded,
+                original_filename=uploaded.name or "unknown",
+            )
 
             return redirect("data_import:process", batch_id=batch.pk)
     else:
@@ -238,8 +230,24 @@ def _process_single_file(
     staging_model = STAGING_MODELS[file_type_key]
     staging_model.objects.filter(batch=batch).delete()
 
+    # Pre-fetch existing production rows for field-level change detection.
+    # We load them into a dict keyed by PK so we can compare field-by-field.
+    exclude_staging = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
+    compare_fields = [
+        f.name
+        for f in staging_model._meta.get_fields()
+        if hasattr(f, "name") and f.name not in exclude_staging
+    ]
+    existing_rows: dict[int, dict[str, Any]] = {}
+    if existing_pks:
+        core_qs = core_model.objects.filter(**{f"{pk_field}__in": existing_pks})
+        for obj in core_qs.iterator():
+            pk_val = getattr(obj, pk_field)
+            existing_rows[pk_val] = {fname: getattr(obj, fname, None) for fname in compare_fields}
+
     new_count = 0
     existing_count = 0
+    changed_count = 0
     warning_count = 0
     raw_records: list[dict[str, Any]] = [
         {str(k): v for k, v in row.items()} for row in result.df.to_dict("records")
@@ -248,25 +256,29 @@ def _process_single_file(
     staging_instances = []
     for i, record in enumerate(raw_records):
         source_id = int(record[id_col])
-        is_existing = source_id in existing_pks
 
-        if is_existing:
-            row_status = RowStatus.EXISTING
-            existing_count += 1
-        elif i in result.row_warnings:
-            row_status = RowStatus.WARNING
-            warning_count += 1
-        elif i in result.row_errors:
-            row_status = RowStatus.ERROR
-        else:
-            row_status = RowStatus.NEW
+        row_status, notes_parts = _classify_row(
+            source_id,
+            i,
+            record,
+            id_col,
+            file_type_key,
+            existing_pks,
+            existing_rows,
+            staging_model,
+            compare_fields,
+            batch,
+            result,
+        )
+
+        if row_status == RowStatus.NEW:
             new_count += 1
-
-        notes_parts: list[str] = []
-        if i in result.row_warnings:
-            notes_parts.extend(result.row_warnings[i])
-        if i in result.row_errors:
-            notes_parts.extend(result.row_errors[i])
+        elif row_status == RowStatus.CHANGED:
+            changed_count += 1
+        elif row_status == RowStatus.EXISTING:
+            existing_count += 1
+        elif row_status == RowStatus.WARNING:
+            warning_count += 1
 
         staging_kwargs = _build_staging_kwargs(
             file_type_key, record, id_col, batch, row_status, notes_parts
@@ -276,7 +288,7 @@ def _process_single_file(
     staging_model.objects.bulk_create(staging_instances, batch_size=500)
 
     summary = (
-        f"  ✓ {new_count} new, {existing_count} existing, "
+        f"  ✓ {new_count} new, {changed_count} changed, {existing_count} unchanged, "
         f"{warning_count} warnings — staged for review"
     )
     yield ("log", summary)
@@ -342,6 +354,7 @@ def review(request: HttpRequest, batch_id: int) -> HttpResponse:
                 "total": total,
                 "new": qs.filter(row_status=RowStatus.NEW).count(),
                 "existing": qs.filter(row_status=RowStatus.EXISTING).count(),
+                "changed": qs.filter(row_status=RowStatus.CHANGED).count(),
                 "warning": qs.filter(row_status=RowStatus.WARNING).count(),
                 "error": qs.filter(row_status=RowStatus.ERROR).count(),
                 "schema": SCHEMA_INFO.get(key, {}),
@@ -728,8 +741,8 @@ def commit_view(request: HttpRequest, batch_id: int) -> HttpResponse:
         messages.error(request, "This batch is not ready for commit.")
         return redirect("data_import:review", batch_id=batch_id)
 
-    # Collect new-only counts
-    commit_summary: dict[str, int] = {}
+    # Collect new + changed counts
+    commit_summary: dict[str, dict[str, int]] = {}
     has_errors = False
     for key, model in STAGING_MODELS.items():
         qs = model.objects.filter(batch=batch)
@@ -737,7 +750,10 @@ def commit_view(request: HttpRequest, batch_id: int) -> HttpResponse:
             error_count = qs.filter(row_status=RowStatus.ERROR).count()
             if error_count > 0:
                 has_errors = True
-            commit_summary[key] = qs.filter(row_status=RowStatus.NEW).count()
+            commit_summary[key] = {
+                "new": qs.filter(row_status=RowStatus.NEW).count(),
+                "changed": qs.filter(row_status=RowStatus.CHANGED).count(),
+            }
 
     if request.method == "POST":
         if has_errors:
@@ -913,6 +929,79 @@ def _build_page_numbers(current: int, total: int) -> list[int | str]:
     return pages
 
 
+def _detect_field_changes(
+    staging_model: type[dm.Model],
+    compare_fields: list[str],
+    staging_kwargs: dict[str, Any],
+    prod_row: dict[str, Any],
+) -> list[str]:
+    """Compare incoming staged values against production row, return human-readable diffs.
+
+    Only fields that differ produce an entry like ``"age: 64 → 65"``.  Fields
+    that are identical or where both sides are empty are skipped.
+    """
+    diffs: list[str] = []
+    for fname in compare_fields:
+        new_val = staging_kwargs.get(fname)
+        old_val = prod_row.get(fname)
+
+        # Normalize for comparison: treat None and "" as equivalent for strings
+        field_obj = staging_model._meta.get_field(fname)
+        if isinstance(field_obj, dm.CharField | dm.TextField):
+            new_cmp = str(new_val).strip() if new_val is not None else ""
+            old_cmp = str(old_val).strip() if old_val is not None else ""
+        else:
+            new_cmp = new_val
+            old_cmp = old_val
+
+        if new_cmp != old_cmp:
+            diffs.append(f"{fname}: {old_val} → {new_val}")
+    return diffs
+
+
+def _classify_row(
+    source_id: int,
+    row_index: int,
+    record: dict[str, Any],
+    id_col: str,
+    file_type: str,
+    existing_pks: set[Any],
+    existing_rows: dict[int, dict[str, Any]],
+    staging_model: type[dm.Model],
+    compare_fields: list[str],
+    batch: DataImportBatch,
+    result: Any,
+) -> tuple[str, list[str]]:
+    """Determine row status and build validation notes for a single record."""
+    notes_parts: list[str] = []
+    diffs: list[str] = []
+
+    if source_id in existing_pks:
+        staging_kwargs_preview = _build_staging_kwargs(
+            file_type, record, id_col, batch, RowStatus.EXISTING, []
+        )
+        prod_row = existing_rows.get(source_id, {})
+        diffs = _detect_field_changes(
+            staging_model, compare_fields, staging_kwargs_preview, prod_row
+        )
+        row_status = RowStatus.CHANGED if diffs else RowStatus.EXISTING
+    elif row_index in result.row_errors:
+        row_status = RowStatus.ERROR
+    elif row_index in result.row_warnings:
+        row_status = RowStatus.WARNING
+    else:
+        row_status = RowStatus.NEW
+
+    if diffs:
+        notes_parts.append("Changed: " + "; ".join(diffs))
+    if row_index in result.row_warnings:
+        notes_parts.extend(result.row_warnings[row_index])
+    if row_index in result.row_errors:
+        notes_parts.extend(result.row_errors[row_index])
+
+    return row_status, notes_parts
+
+
 def _build_staging_kwargs(
     file_type: str,
     record: dict[str, Any],
@@ -988,55 +1077,91 @@ def _coerce_non_empty(field: Any, value: Any) -> Any:
 
 
 @transaction.atomic
-def _do_commit(batch: DataImportBatch, commit_summary: dict[str, int]) -> None:
-    """Commit new staging rows to production tables inside a transaction."""
+def _do_commit(batch: DataImportBatch, commit_summary: dict[str, dict[str, int]]) -> None:
+    """Commit new and changed staging rows to production tables inside a transaction."""
     log_lines = [f"Commit started at {timezone.now():%Y-%m-%d %H:%M:%S}"]
 
-    for file_type, new_count in commit_summary.items():
-        if new_count == 0:
-            log_lines.append(f"  {file_type}: 0 new rows, skipping")
+    total_new = 0
+    total_updated = 0
+
+    for file_type, counts in commit_summary.items():
+        new_count = counts.get("new", 0)
+        changed_count = counts.get("changed", 0)
+
+        if new_count == 0 and changed_count == 0:
+            log_lines.append(f"  {file_type}: 0 new, 0 changed — skipping")
             continue
 
         staging_model = STAGING_MODELS[file_type]
         core_model = CORE_MODELS[file_type]
+        pk_field = CORE_PK_FIELDS[file_type]
 
-        new_rows = staging_model.objects.filter(batch=batch, row_status=RowStatus.NEW)
-
-        # Build core model instances from staging rows
         exclude_fields = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
         core_field_names = {f.name for f in core_model._meta.get_fields() if hasattr(f, "name")}
 
-        instances = []
-        pk_field = CORE_PK_FIELDS[file_type]
+        # --- Insert NEW rows ---
+        if new_count > 0:
+            new_rows = staging_model.objects.filter(batch=batch, row_status=RowStatus.NEW)
+            instances = []
+            for staging_row in new_rows:
+                kwargs = _staging_to_core_kwargs(
+                    staging_model, staging_row, pk_field, exclude_fields, core_field_names
+                )
+                instances.append(core_model(**kwargs))
+            core_model.objects.bulk_create(instances, batch_size=500)
+            total_new += len(instances)
+            log_lines.append(f"  {file_type}: inserted {len(instances)} new rows")
 
-        for staging_row in new_rows:
-            kwargs: dict[str, Any] = {}
-            # Set the PK
-            kwargs[pk_field] = staging_row.source_id
-
-            # Copy fields
-            staging_field_names = [
-                f.name
-                for f in staging_model._meta.get_fields()
-                if hasattr(f, "name") and f.name not in exclude_fields
-            ]
-            for fname in staging_field_names:
-                if fname in core_field_names:
-                    kwargs[fname] = getattr(staging_row, fname)
-
-            instances.append(core_model(**kwargs))
-
-        core_model.objects.bulk_create(instances, batch_size=500)
-        log_lines.append(f"  {file_type}: inserted {len(instances)} new rows")
+        # --- Update CHANGED rows ---
+        if changed_count > 0:
+            changed_rows = staging_model.objects.filter(batch=batch, row_status=RowStatus.CHANGED)
+            updated = 0
+            for staging_row in changed_rows:
+                kwargs = _staging_to_core_kwargs(
+                    staging_model, staging_row, pk_field, exclude_fields, core_field_names
+                )
+                pk_val = kwargs.pop(pk_field)
+                core_model.objects.filter(**{pk_field: pk_val}).update(**kwargs)
+                updated += 1
+            total_updated += updated
+            log_lines.append(f"  {file_type}: updated {updated} changed rows")
 
     # Update batch metadata
     batch.status = DataImportBatch.Status.COMMITTED
     batch.committed_at = timezone.now()
-    batch.committed_patients = commit_summary.get("patients", 0)
-    batch.committed_referrals = commit_summary.get("referrals", 0)
-    batch.committed_odreferrals = commit_summary.get("odreferrals", 0)
-    batch.committed_encounters = commit_summary.get("encounters", 0)
+    batch.committed_patients = commit_summary.get("patients", {}).get(
+        "new", 0
+    ) + commit_summary.get("patients", {}).get("changed", 0)
+    batch.committed_referrals = commit_summary.get("referrals", {}).get(
+        "new", 0
+    ) + commit_summary.get("referrals", {}).get("changed", 0)
+    batch.committed_odreferrals = commit_summary.get("odreferrals", {}).get(
+        "new", 0
+    ) + commit_summary.get("odreferrals", {}).get("changed", 0)
+    batch.committed_encounters = commit_summary.get("encounters", {}).get(
+        "new", 0
+    ) + commit_summary.get("encounters", {}).get("changed", 0)
     batch.save()
 
-    # Save commit log
+    log_lines.append(f"  Total: {total_new} inserted, {total_updated} updated")
     ProcessingLog.objects.create(batch=batch, content="\n".join(log_lines))
+
+
+def _staging_to_core_kwargs(
+    staging_model: type[dm.Model],
+    staging_row: Any,
+    pk_field: str,
+    exclude_fields: set[str],
+    core_field_names: set[str],
+) -> dict[str, Any]:
+    """Build a dict of kwargs for creating/updating a core model instance from a staging row."""
+    kwargs: dict[str, Any] = {pk_field: staging_row.source_id}
+    staging_field_names = [
+        f.name
+        for f in staging_model._meta.get_fields()
+        if hasattr(f, "name") and f.name not in exclude_fields
+    ]
+    for fname in staging_field_names:
+        if fname in core_field_names:
+            kwargs[fname] = getattr(staging_row, fname)
+    return kwargs

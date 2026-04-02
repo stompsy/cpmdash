@@ -84,6 +84,7 @@ class ProcessingLog(models.Model):
 class RowStatus(models.TextChoices):
     NEW = "new", "New"
     EXISTING = "existing", "Existing"
+    CHANGED = "changed", "Changed"
     WARNING = "warning", "Warning"
     ERROR = "error", "Error"
 

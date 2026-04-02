@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Any
-
 from django import forms
 
-from .models import DataImportBatch
+from .models import DataImportBatch, DataImportFile
 
 FIELD_CLASS = (
     "block w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm "
@@ -19,28 +17,24 @@ FILE_CLASS = (
     "hover:file:bg-brand-400 cursor-pointer"
 )
 
+SELECT_CLASS = (
+    "block w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm "
+    "text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-400/60 "
+    "focus:border-transparent appearance-none"
+)
+
 
 class DataUploadForm(forms.Form):
-    """Multi-file upload form for the 4 CSV types."""
+    """Single-file upload form — user picks a dataset type and uploads one CSV."""
 
-    patients_file = forms.FileField(
-        required=False,
-        label="Patients CSV",
-        widget=forms.ClearableFileInput(attrs={"class": FILE_CLASS, "accept": ".csv"}),
+    file_type = forms.ChoiceField(
+        choices=DataImportFile.FileType.choices,
+        label="Dataset",
+        widget=forms.Select(attrs={"class": SELECT_CLASS}),
+        help_text="Select the type of data you are importing.",
     )
-    referrals_file = forms.FileField(
-        required=False,
-        label="Referrals CSV",
-        widget=forms.ClearableFileInput(attrs={"class": FILE_CLASS, "accept": ".csv"}),
-    )
-    odreferrals_file = forms.FileField(
-        required=False,
-        label="OD Referrals CSV",
-        widget=forms.ClearableFileInput(attrs={"class": FILE_CLASS, "accept": ".csv"}),
-    )
-    encounters_file = forms.FileField(
-        required=False,
-        label="Encounters CSV",
+    file = forms.FileField(
+        label="CSV File",
         widget=forms.ClearableFileInput(attrs={"class": FILE_CLASS, "accept": ".csv"}),
     )
     notes = forms.CharField(
@@ -53,21 +47,6 @@ class DataUploadForm(forms.Form):
             }
         ),
     )
-
-    def clean(self) -> dict[str, Any]:
-        cleaned = super().clean()
-        if cleaned is None:
-            cleaned = {}
-        # At least one file must be uploaded
-        files = [
-            cleaned.get("patients_file"),
-            cleaned.get("referrals_file"),
-            cleaned.get("odreferrals_file"),
-            cleaned.get("encounters_file"),
-        ]
-        if not any(files):
-            raise forms.ValidationError("Upload at least one CSV file.")
-        return cleaned
 
 
 class BatchEditForm(forms.ModelForm):
