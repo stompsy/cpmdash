@@ -277,7 +277,8 @@ def _process_single_file(
             changed_count += 1
         elif row_status == RowStatus.EXISTING:
             existing_count += 1
-        elif row_status == RowStatus.WARNING:
+
+        if i in result.row_warnings:
             warning_count += 1
 
         staging_kwargs = _build_staging_kwargs(
@@ -355,7 +356,9 @@ def review(request: HttpRequest, batch_id: int) -> HttpResponse:
                 "new": qs.filter(row_status=RowStatus.NEW).count(),
                 "existing": qs.filter(row_status=RowStatus.EXISTING).count(),
                 "changed": qs.filter(row_status=RowStatus.CHANGED).count(),
-                "warning": qs.filter(row_status=RowStatus.WARNING).count(),
+                "warning": qs.exclude(validation_notes="")
+                .exclude(row_status=RowStatus.ERROR)
+                .count(),
                 "error": qs.filter(row_status=RowStatus.ERROR).count(),
                 "schema": SCHEMA_INFO.get(key, {}),
             }
@@ -390,7 +393,10 @@ def review_table(request: HttpRequest, batch_id: int, dataset: str) -> HttpRespo
     qs = staging_model.objects.filter(batch=batch)
 
     if status_filter and not filter_empty:
-        qs = qs.filter(row_status=status_filter)
+        if status_filter == "warning":
+            qs = qs.exclude(validation_notes="").exclude(row_status=RowStatus.ERROR)
+        else:
+            qs = qs.filter(row_status=status_filter)
 
     # Get field names for the table header (exclude batch, row_status, etc.)
     exclude_fields = {"id", "batch", "batch_id", "row_status", "validation_notes"}
@@ -987,8 +993,6 @@ def _classify_row(
         row_status = RowStatus.CHANGED if diffs else RowStatus.EXISTING
     elif row_index in result.row_errors:
         row_status = RowStatus.ERROR
-    elif row_index in result.row_warnings:
-        row_status = RowStatus.WARNING
     else:
         row_status = RowStatus.NEW
 
