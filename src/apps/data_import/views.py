@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import io
 import json
+import queue
+import threading
+import time
 import traceback
 from collections.abc import Iterator
 from typing import Any, cast
@@ -18,8 +22,8 @@ from django.views.decorators.http import require_POST
 
 from apps.core.models import Encounters, ODReferrals, Patients, Referrals
 
-from .etl_service import DataCleaningService
-from .forms import DataUploadForm
+from .etl_service import CleaningResult, DataCleaningService
+from .forms import DataUploadForm, DataUploadToBatchForm
 from .models import (
     DataImportBatch,
     DataImportFile,
@@ -47,12 +51,15 @@ SCHEMA_INFO = {
             ("sud", "SUD", "Boolean", "Substance use disorder"),
             ("behavioral_health", "Behavioral Health", "Boolean", ""),
             ("zip_code", "Zip Code", "Text (50)", ""),
+            ("address", "Address", "Text (255)", "Street address for geocoding"),
             ("created_date", "Created Date", "Date", "Record creation date"),
             ("modified_date", "Modified Date", "Date", "Last modification"),
             ("marital_status", "Marital Status", "Text (50)", ""),
             ("veteran_status", "Veteran Status", "Text (50)", ""),
             ("aud", "AUD", "Boolean", "Alcohol use disorder"),
             ("three_c_client", "3C Client", "Boolean", ""),
+            ("latitude", "Latitude", "Float", "Geocoded latitude"),
+            ("longitude", "Longitude", "Float", "Geocoded longitude"),
         ],
     },
     "referrals": {
@@ -140,6 +147,46 @@ ID_COLUMN = {
     "encounters": "ID",
 }
 
+# Fields to skip during change detection — these exist in the staging model
+# but the CSV never supplies them, so comparing against production values
+# would flag every existing row as "changed" (e.g. lat/long are populated
+# in prod via geocoding but the raw CSV doesn't contain them).
+CHANGE_DETECT_SKIP: dict[str, set[str]] = {
+    "patients": {"latitude", "longitude", "address"},
+    "referrals": set(),
+    "odreferrals": {"lat", "long"},
+    "encounters": set(),
+}
+
+
+# Clallam County zip-code centroids (approximate) for geocoding patients
+# that have a zip_code but no lat/long.  Avoids external API calls —
+# centroid-level precision is sufficient for mapping and analytics.
+#
+# "Homeless/Transient" and similar non-zip values map to the Serenity House
+# location at 2321 W 18th St, Port Angeles — the CPM program's home base.
+_SERENITY_HOUSE = (48.1224, -123.4912)
+
+ZIP_CENTROIDS: dict[str, tuple[float, float]] = {
+    "98305": (47.9073, -124.6353),  # La Push
+    "98324": (48.0734, -123.1168),  # Gardiner
+    "98326": (48.1572, -123.8481),  # Joyce
+    "98331": (47.9498, -124.3505),  # Forks
+    "98343": (48.1889, -124.2467),  # Pysht
+    "98357": (48.3651, -124.6248),  # Neah Bay
+    "98362": (48.1181, -123.4307),  # Port Angeles
+    "98363": (48.0976, -123.7403),  # Port Angeles (rural)
+    "98381": (48.2653, -124.3923),  # Sekiu / Clallam Bay
+    "98382": (48.0795, -123.1018),  # Sequim
+    "98386": (47.8225, -122.8268),  # Quilcene (Jefferson Co. — USGS GNIS ref)
+    "98339": (48.0311, -122.8103),  # Port Hadlock (Jefferson Co.)
+    "98368": (48.1170, -122.7604),  # Port Townsend (Jefferson Co.)
+    "Homeless": _SERENITY_HOUSE,
+    "Homeless/Transient": _SERENITY_HOUSE,
+    "Transient": _SERENITY_HOUSE,
+    "Not disclosed": _SERENITY_HOUSE,
+}
+
 
 # ======================================================================
 # History view
@@ -151,7 +198,7 @@ def batch_list(request: HttpRequest) -> HttpResponse:
 
 
 # ======================================================================
-# Upload view
+# Upload view — new batch (patients first, always)
 # ======================================================================
 @staff_member_required
 def upload(request: HttpRequest) -> HttpResponse:
@@ -165,10 +212,9 @@ def upload(request: HttpRequest) -> HttpResponse:
             )
 
             uploaded = form.cleaned_data["file"]
-            file_type = form.cleaned_data["file_type"]
             DataImportFile.objects.create(
                 batch=batch,
-                file_type=file_type,
+                file_type=DataImportFile.FileType.PATIENTS,
                 file=uploaded,
                 original_filename=uploaded.name or "unknown",
             )
@@ -181,6 +227,55 @@ def upload(request: HttpRequest) -> HttpResponse:
 
 
 # ======================================================================
+# Upload view — add dataset to existing batch
+# ======================================================================
+@staff_member_required
+def upload_to_batch(request: HttpRequest, batch_id: int) -> HttpResponse:
+    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+
+    # Which file types are already uploaded for this batch?
+    existing_types = set(
+        DataImportFile.objects.filter(batch=batch).values_list("file_type", flat=True)
+    )
+    # Remaining choices (exclude already-uploaded types)
+    remaining_choices = [
+        (val, label) for val, label in DataImportFile.FileType.choices if val not in existing_types
+    ]
+
+    if not remaining_choices:
+        messages.info(request, "All dataset types have already been uploaded for this batch.")
+        return redirect("data_import:review", batch_id=batch.pk)
+
+    if request.method == "POST":
+        form = DataUploadToBatchForm(
+            request.POST, request.FILES, file_type_choices=remaining_choices
+        )
+        if form.is_valid():
+            uploaded = form.cleaned_data["file"]
+            file_type = form.cleaned_data["file_type"]
+            DataImportFile.objects.create(
+                batch=batch,
+                file_type=file_type,
+                file=uploaded,
+                original_filename=uploaded.name or "unknown",
+            )
+
+            return redirect("data_import:process", batch_id=batch.pk)
+    else:
+        form = DataUploadToBatchForm(file_type_choices=remaining_choices)
+
+    return render(
+        request,
+        "data_import/upload.html",
+        {
+            "form": form,
+            "batch": batch,
+            "existing_types": existing_types,
+        },
+    )
+
+
+# ======================================================================
 # Processing view + SSE stream
 # ======================================================================
 @staff_member_required
@@ -189,10 +284,29 @@ def process_view(request: HttpRequest, batch_id: int) -> HttpResponse:
     return render(request, "data_import/process.html", {"batch": batch})
 
 
+class _StreamingLog(list):
+    """A list subclass that pushes each appended item to a ``queue.Queue``.
+
+    Pass an instance of this as the ``log`` parameter to any ``clean_*()``
+    method.  While the clean function runs in a background thread, the SSE
+    generator on the main thread drains the queue and yields messages to the
+    browser in real-time — no more frozen console during geocoding.
+    """
+
+    def __init__(self, q: queue.Queue[str | None]) -> None:
+        super().__init__()
+        self._queue = q
+
+    def append(self, item: str) -> None:  # type: ignore[override]
+        super().append(item)
+        self._queue.put(item)
+
+
 def _process_single_file(
     import_file: DataImportFile,
     batch: DataImportBatch,
     service: DataCleaningService,
+    patients_df: pd.DataFrame | None = None,
 ) -> Iterator[tuple[str, str]]:
     """Process a single uploaded file: clean, delta-detect, stage. Yields (event, data) tuples."""
     file_type_key: str = {
@@ -211,17 +325,89 @@ def _process_single_file(
 
     yield ("log", f"\n▶ Processing {import_file.original_filename}...")
 
+    # Read file into memory for thread safety — Django FieldFile
+    # objects aren't safe to share across threads.
     import_file.file.seek(0)
-    result = clean_fn(import_file.file)
+    file_bytes = import_file.file.read()
+    buf = io.BytesIO(file_bytes)
 
-    for line in result.log:
-        yield ("log", f"  {line}")
+    # --------------- threaded clean with real-time log streaming -------
+    # StreamingLog is a list subclass that pushes each append() to a
+    # queue, allowing the main SSE generator thread to yield messages
+    # to the browser while the clean function is still running.
+    q: queue.Queue[str | None] = queue.Queue()
+    streaming_log = _StreamingLog(q)
+    result_holder: list[CleaningResult | None] = [None]
+    error_holder: list[BaseException | None] = [None]
 
+    def _run_clean() -> None:
+        try:
+            if file_type_key in ("referrals", "odreferrals", "encounters"):
+                result_holder[0] = clean_fn(buf, patients_df=patients_df, log=streaming_log)
+            else:
+                result_holder[0] = clean_fn(buf, log=streaming_log)
+        except Exception as exc:
+            error_holder[0] = exc
+        finally:
+            q.put(None)  # sentinel — tells the reader the thread is done
+
+    t_start = time.monotonic()
+    thread = threading.Thread(target=_run_clean, daemon=True)
+    thread.start()
+
+    # Drain the queue in real-time, yielding SSE messages as they arrive.
+    while True:
+        msg = q.get()  # blocks until a message or sentinel
+        if msg is None:
+            break
+        yield ("log", f"  {msg}")
+
+    thread.join()
+
+    if error_holder[0]:
+        raise error_holder[0]  # propagate to process_stream's try/except
+
+    result = result_holder[0]
+    assert result is not None  # noqa: S101
+
+    elapsed_clean = time.monotonic() - t_start
+    yield ("log", f"  Cleaning finished ({elapsed_clean:.1f}s)")
+
+    # --------------- delta-detection & staging -------------------------
     import_file.row_count = len(result.df)
     import_file.save(update_fields=["row_count"])
 
-    yield ("log", f"  Comparing against production {file_type_key}...")
+    yield ("log", f"  ⏳ Comparing against production {file_type_key}...")
 
+    yield from _stage_records(file_type_key, result, batch)
+
+
+def _save_file_log(
+    batch: DataImportBatch,
+    import_file: DataImportFile,
+    log_lines: list[str],
+) -> None:
+    """Extract summary and persist a per-file processing log."""
+    summary = ""
+    for line in reversed(log_lines):
+        if "✓" in line and ("new" in line or "staged" in line):
+            summary = line.strip()
+            break
+    ProcessingLog.objects.create(
+        batch=batch,
+        file_type=import_file.file_type,
+        original_filename=import_file.original_filename,
+        content="\n".join(log_lines),
+        summary=summary,
+    )
+
+
+def _stage_records(
+    file_type_key: str,
+    result: CleaningResult,
+    batch: DataImportBatch,
+) -> Iterator[tuple[str, str]]:
+    """Delta-detect against production and create staging rows. Yields progress."""
     core_model = CORE_MODELS[file_type_key]
     pk_field = CORE_PK_FIELDS[file_type_key]
     existing_pks = set(core_model.objects.values_list(pk_field, flat=True))
@@ -231,19 +417,20 @@ def _process_single_file(
     staging_model.objects.filter(batch=batch).delete()
 
     # Pre-fetch existing production rows for field-level change detection.
-    # We load them into a dict keyed by PK so we can compare field-by-field.
     exclude_staging = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
+    skip_fields = CHANGE_DETECT_SKIP.get(file_type_key, set())
     compare_fields = [
         f.name
         for f in staging_model._meta.get_fields()
-        if hasattr(f, "name") and f.name not in exclude_staging
+        if hasattr(f, "name") and f.name not in exclude_staging and f.name not in skip_fields
     ]
+    fetch_fields = compare_fields + [f for f in skip_fields]
     existing_rows: dict[int, dict[str, Any]] = {}
     if existing_pks:
         core_qs = core_model.objects.filter(**{f"{pk_field}__in": existing_pks})
         for obj in core_qs.iterator():
             pk_val = getattr(obj, pk_field)
-            existing_rows[pk_val] = {fname: getattr(obj, fname, None) for fname in compare_fields}
+            existing_rows[pk_val] = {fname: getattr(obj, fname, None) for fname in fetch_fields}
 
     new_count = 0
     existing_count = 0
@@ -254,6 +441,7 @@ def _process_single_file(
     ]
 
     staging_instances = []
+    total_records = len(raw_records)
     for i, record in enumerate(raw_records):
         source_id = int(record[id_col])
 
@@ -284,9 +472,21 @@ def _process_single_file(
         staging_kwargs = _build_staging_kwargs(
             file_type_key, record, id_col, batch, row_status, notes_parts
         )
+        _backfill_skip_fields(staging_kwargs, source_id, existing_rows, skip_fields)
         staging_instances.append(staging_model(**staging_kwargs))
 
+        # Yield progress every 100 rows for larger datasets
+        if total_records > 100 and (i + 1) % 100 == 0:
+            yield ("log", f"  ⏳ Staging: {i + 1}/{total_records} records...")
+
     staging_model.objects.bulk_create(staging_instances, batch_size=500)
+
+    # For patients, immediately backfill missing coords from zip-code centroids.
+    # This runs against ALL rows in the batch — not just whatever page the user
+    # happens to view in the review UI — so no records slip through un-geocoded.
+    if file_type_key == "patients":
+        all_patient_rows = list(staging_model.objects.filter(batch=batch))
+        _geocode_patient_rows(all_patient_rows)
 
     summary = (
         f"  ✓ {new_count} new, {changed_count} changed, {existing_count} unchanged, "
@@ -303,26 +503,77 @@ def process_stream(request: HttpRequest, batch_id: int) -> StreamingHttpResponse
     def event_stream() -> Iterator[str]:
         try:
             yield _sse("status", "Processing started...")
+            t_total = time.monotonic()
             batch.status = DataImportBatch.Status.PROCESSING
             batch.save(update_fields=["status"])
 
             service = DataCleaningService()
-            log_lines: list[str] = []
 
-            for import_file in DataImportFile.objects.filter(batch=batch):
-                for event, data in _process_single_file(import_file, batch, service):
-                    yield _sse(event, data)
-                    log_lines.append(data)
+            unprocessed = DataImportFile.objects.filter(batch=batch, processed=False)
+            if not unprocessed.exists():
+                yield _sse("log", "⚠ No new files to process.")
+            else:
+                # Sort so patients are processed first — other datasets depend on them
+                # for age lookups, pcp_agency fallback, etc.
+                _FILE_TYPE_ORDER = {
+                    DataImportFile.FileType.PATIENTS: 0,
+                    DataImportFile.FileType.REFERRALS: 1,
+                    DataImportFile.FileType.ODREFERRALS: 2,
+                    DataImportFile.FileType.ENCOUNTERS: 3,
+                }
+                sorted_files = sorted(
+                    unprocessed, key=lambda f: _FILE_TYPE_ORDER.get(f.file_type, 99)
+                )
 
-            # Save processing log
-            ProcessingLog.objects.create(
-                batch=batch,
-                content="\n".join(log_lines),
-            )
+                # Build patients_df from production data (will be replaced
+                # if a patients file is in this batch)
+                patients_df: pd.DataFrame | None = None
+                if Patients.objects.exists():
+                    patients_df = pd.DataFrame.from_records(
+                        Patients.objects.values("id", "age", "insurance", "pcp_agency")
+                    )
+                else:
+                    # Check if any non-patients files are in the batch without patients
+                    has_patients_file = any(
+                        f.file_type == DataImportFile.FileType.PATIENTS for f in sorted_files
+                    )
+                    non_patient_files = [
+                        f for f in sorted_files if f.file_type != DataImportFile.FileType.PATIENTS
+                    ]
+                    if non_patient_files and not has_patients_file:
+                        yield _sse(
+                            "log",
+                            "⚠ No patients data in production or batch — "
+                            "age/pcp lookups will be unavailable",
+                        )
+
+                for import_file in sorted_files:
+                    file_log_lines: list[str] = []
+                    for event, data in _process_single_file(
+                        import_file, batch, service, patients_df=patients_df
+                    ):
+                        yield _sse(event, data)
+                        file_log_lines.append(data)
+
+                    _save_file_log(batch, import_file, file_log_lines)
+
+                    # If we just processed patients, capture the cleaned DataFrame
+                    # for use by subsequent files in this batch
+                    if import_file.file_type == DataImportFile.FileType.PATIENTS:
+                        staging_qs = StagingPatient.objects.filter(batch=batch).values(
+                            "source_id", "age", "insurance", "pcp_agency"
+                        )
+                        if staging_qs.exists():
+                            patients_df = pd.DataFrame.from_records(staging_qs)
+                            patients_df = patients_df.rename(columns={"source_id": "id"})
+
+                    import_file.processed = True
+                    import_file.save(update_fields=["processed"])
 
             batch.status = DataImportBatch.Status.REVIEW
             batch.save(update_fields=["status"])
-            yield _sse("log", "\n✓ Processing complete. Ready for review.")
+            elapsed = time.monotonic() - t_total
+            yield _sse("log", f"\n✓ Processing complete. Ready for review. ({elapsed:.1f}s)")
             yield _sse("done", "complete")
 
         except Exception as e:
@@ -366,6 +617,13 @@ def review(request: HttpRequest, batch_id: int) -> HttpResponse:
     # Has errors that block commit?
     has_errors = any(d["error"] > 0 for d in datasets.values())
 
+    # What file types still have room to add?
+    existing_file_types = set(
+        DataImportFile.objects.filter(batch=batch).values_list("file_type", flat=True)
+    )
+    all_file_types = {val for val, _ in DataImportFile.FileType.choices}
+    can_add_datasets = bool(all_file_types - existing_file_types)
+
     return render(
         request,
         "data_import/review.html",
@@ -374,8 +632,37 @@ def review(request: HttpRequest, batch_id: int) -> HttpResponse:
             "datasets": datasets,
             "active_tab": active_tab,
             "has_errors": has_errors,
+            "can_add_datasets": can_add_datasets,
         },
     )
+
+
+def _narrow_changed_fields(
+    field_names: list[str],
+    row_data: list[dict[str, Any]],
+    status_filter: str,
+) -> list[str]:
+    """When viewing changed rows, narrow to only fields with actual changes."""
+    if status_filter != "changed" or not row_data:
+        return list(field_names)
+    visible = {"source_id"}
+    for rd in row_data:
+        visible.update(rd.get("changed_fields", set()))
+    return [f for f in field_names if f in visible]
+
+
+def _apply_empty_filter(qs: Any, staging_model: type[dm.Model], field_names: list[str]) -> Any:
+    """Filter queryset to rows that have at least one empty/null field."""
+    from django.db.models import Q
+
+    empty_q = Q()
+    for fname in field_names:
+        field_obj = staging_model._meta.get_field(fname)
+        if isinstance(field_obj, dm.CharField | dm.TextField):
+            empty_q |= Q(**{fname: ""})
+        if field_obj.null:
+            empty_q |= Q(**{f"{fname}__isnull": True})
+    return qs.filter(empty_q)
 
 
 @staff_member_required
@@ -406,18 +693,9 @@ def review_table(request: HttpRequest, batch_id: int, dataset: str) -> HttpRespo
         if hasattr(f, "name") and f.name not in exclude_fields
     ]
 
-    # For "has empty fields" filter, build Q objects for string/nullable fields
+    # For "has empty fields" filter
     if filter_empty:
-        from django.db.models import Q
-
-        empty_q = Q()
-        for fname in field_names:
-            field_obj = staging_model._meta.get_field(fname)
-            if isinstance(field_obj, dm.CharField | dm.TextField):
-                empty_q |= Q(**{fname: ""})
-            if field_obj.null:
-                empty_q |= Q(**{f"{fname}__isnull": True})
-        qs = qs.filter(empty_q)
+        qs = _apply_empty_filter(qs, staging_model, field_names)
 
     # Sorting
     sort_by = request.GET.get("sort", "")
@@ -441,10 +719,23 @@ def review_table(request: HttpRequest, batch_id: int, dataset: str) -> HttpRespo
     # Build page number list with ellipsis gaps
     page_numbers = _build_page_numbers(page, total_pages)
 
-    # Build row data with per-cell metadata
+    # Geocode patients with missing lat/lng from zip code centroids
+    if dataset == "patients":
+        _geocode_patient_rows(rows)
+
+    # Fetch production data for the current page so we can show old→new diffs
+    source_ids = [row.source_id for row in rows]
+    prod_map = _fetch_prod_rows(dataset, source_ids)
+
+    # Build row data with per-cell metadata (including production comparison)
     row_data = []
     for row in rows:
-        row_data.append(_build_row_context(row, field_names))
+        prod_row = prod_map.get(row.source_id)
+        row_data.append(_build_row_context(row, field_names, prod_row))
+
+    # When viewing "changed" rows, narrow columns to only fields with changes
+    # plus source_id for identity. This declutters the table dramatically.
+    display_fields = _narrow_changed_fields(field_names, row_data, status_filter)
 
     schema = SCHEMA_INFO.get(dataset, {})
 
@@ -454,7 +745,8 @@ def review_table(request: HttpRequest, batch_id: int, dataset: str) -> HttpRespo
         {
             "batch": batch,
             "dataset": dataset,
-            "field_names": field_names,
+            "field_names": display_fields,
+            "all_field_names": field_names,
             "rows": row_data,
             "page": page,
             "total_pages": total_pages,
@@ -542,13 +834,14 @@ def row_update(request: HttpRequest, batch_id: int, dataset: str, row_pk: int) -
 
     row.save()
 
+    prod_row = _get_single_prod_row(dataset, row.source_id)
     return render(
         request,
         "data_import/_row_display.html",
         {
             "batch": {"pk": batch_id},
             "dataset": dataset,
-            "row": _build_row_context(row, field_names),
+            "row": _build_row_context(row, field_names, prod_row or None),
             "field_names": field_names,
         },
     )
@@ -570,13 +863,14 @@ def row_cancel(request: HttpRequest, batch_id: int, dataset: str, row_pk: int) -
         if hasattr(f, "name") and f.name not in exclude_fields
     ]
 
+    prod_row = _get_single_prod_row(dataset, row.source_id)
     return render(
         request,
         "data_import/_row_display.html",
         {
             "batch": {"pk": batch_id},
             "dataset": dataset,
-            "row": _build_row_context(row, field_names),
+            "row": _build_row_context(row, field_names, prod_row or None),
             "field_names": field_names,
         },
     )
@@ -852,7 +1146,19 @@ def batch_delete(request: HttpRequest, batch_id: int) -> HttpResponse:
 @staff_member_required
 def log_list(request: HttpRequest) -> HttpResponse:
     logs = ProcessingLog.objects.select_related("batch").all()
-    return render(request, "data_import/logs.html", {"logs": logs})
+    # Group logs by batch for accordion display
+    batches_seen: dict[int | None, dict[str, Any]] = {}
+    for log in logs:
+        batch_pk = log.batch_id
+        if batch_pk not in batches_seen:
+            batches_seen[batch_pk] = {
+                "batch": log.batch,
+                "logs": [],
+                "created_at": log.created_at,
+            }
+        batches_seen[batch_pk]["logs"].append(log)
+    batch_groups = sorted(batches_seen.values(), key=lambda g: g["created_at"], reverse=True)
+    return render(request, "data_import/logs.html", {"batch_groups": batch_groups})
 
 
 @require_POST
@@ -874,34 +1180,138 @@ def log_delete(request: HttpRequest, log_id: int) -> HttpResponse:
 PLACEHOLDER_VALUES = {"Not disclosed", "Unknown", "None", "N/A", "n/a", "Select Race"}
 
 
-def _build_row_context(row: Any, field_names: list[str]) -> dict[str, Any]:
-    """Build a unified row context dict with per-cell metadata for templates."""
+def _geocode_patient_rows(rows: list[Any]) -> None:
+    """Backfill lat/lng on StagingPatient rows that have a zip_code but no coords.
+
+    Uses the static ZIP_CENTROIDS lookup so there are zero network calls.
+    Rows that gain coordinates are bulk-updated in a single query.
+    Appends a 'Geocoded:' note to validation_notes so the UI can highlight
+    the affected cells.
+    """
+    # Zip values that should be reclassified to "Homeless/Transient" when
+    # they get the Serenity House fallback — these indicate the patient has
+    # no known address and is effectively homeless for mapping purposes.
+    _reclassify_to_homeless = {"Not disclosed", "No data", "Unknown", "None", "N/A"}
+
+    to_update: list[Any] = []
+    for row in rows:
+        if row.latitude is not None or row.longitude is not None:
+            continue
+        zc = str(getattr(row, "zip_code", "") or "").strip()
+        if zc in ZIP_CENTROIDS:
+            lat, lng = ZIP_CENTROIDS[zc]
+            row.latitude = lat
+            row.longitude = lng
+            geo_note = f"Geocoded: latitude: → {lat}; longitude: → {lng}"
+            # Reclassify ambiguous zip values to Homeless/Transient
+            if zc in _reclassify_to_homeless:
+                row.zip_code = "Homeless/Transient"
+                geo_note += f"; zip_code: {zc} → Homeless/Transient"
+            existing = (row.validation_notes or "").strip()
+            row.validation_notes = f"{existing}; {geo_note}" if existing else geo_note
+            to_update.append(row)
+    if to_update:
+        StagingPatient.objects.bulk_update(
+            to_update, ["latitude", "longitude", "zip_code", "validation_notes"]
+        )
+
+
+PLACEHOLDER_VALUES = {"Not disclosed", "Unknown", "None", "N/A", "n/a", "Select Race"}
+
+
+def _build_row_context(
+    row: Any, field_names: list[str], prod_values: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    """Build a unified row context dict with per-cell metadata for templates.
+
+    ``prod_values`` is an optional dict of the *production* row's field values
+    (keyed by staging field names, i.e. core PK is mapped to ``source_id``).
+    When present, each cell gets an ``old_value`` entry so the template can
+    render an old → new diff for changed fields.
+    """
+    # Parse changed field names from validation_notes.
+    # Supported prefixes: "Changed: field: old → new; ..." and
+    # "Geocoded: field: → val; ...".  Both use semicolon-delimited
+    # entries where the field name precedes the first colon.
+    changed_fields: set[str] = set()
+    notes = getattr(row, "validation_notes", "") or ""
+    for prefix in ("Changed: ", "Geocoded: "):
+        if prefix not in notes:
+            continue
+        segment = notes.split(prefix, 1)[1]
+        # Stop at the next prefix or end-of-string
+        for other in ("Changed: ", "Geocoded: "):
+            if other != prefix and other in segment:
+                segment = segment.split(other, 1)[0]
+        for chunk in segment.split(";"):
+            chunk = chunk.strip()
+            if ": " in chunk:
+                changed_fields.add(chunk.split(": ", 1)[0].strip())
+
     cells_list: list[dict[str, Any]] = []
     cells_dict: dict[str, Any] = {}
+    cells_by_name: dict[str, dict[str, Any]] = {}
     empty_count = 0
     for fname in field_names:
         val = getattr(row, fname, "")
         cells_dict[fname] = val
         is_empty = val is None or str(val).strip() == ""
         is_placeholder = str(val).strip() in PLACEHOLDER_VALUES
+        is_changed = fname in changed_fields
+
+        # Grab old production value when available
+        old_value = prod_values.get(fname) if prod_values else None
+
         if is_empty:
             empty_count += 1
-        cells_list.append(
-            {
-                "name": fname,
-                "value": val,
-                "is_empty": is_empty,
-                "is_placeholder": is_placeholder,
-            }
-        )
+        cell_info = {
+            "name": fname,
+            "value": val,
+            "old_value": old_value,
+            "is_empty": is_empty,
+            "is_placeholder": is_placeholder,
+            "is_changed": is_changed,
+        }
+        cells_list.append(cell_info)
+        cells_by_name[fname] = cell_info
     return {
         "pk": row.pk,
         "status": row.row_status,
         "validation_notes": row.validation_notes,
         "cells": cells_list,
         "cells_dict": cells_dict,
+        "cells_by_name": cells_by_name,
         "empty_count": empty_count,
+        "changed_fields": changed_fields,
     }
+
+
+def _fetch_prod_rows(dataset: str, source_ids: list[int]) -> dict[int, dict[str, Any]]:
+    """Fetch production rows for a list of source_ids and return them keyed by source_id.
+
+    The returned dicts use *staging* field names (i.e. the core PK field is
+    mapped to ``source_id``), so callers can pass them straight into
+    ``_build_row_context`` without any key translation.
+    """
+    core_model = CORE_MODELS.get(dataset)
+    pk_field = CORE_PK_FIELDS.get(dataset, "id")
+    if not core_model or not source_ids:
+        return {}
+
+    prod_qs = core_model.objects.filter(**{f"{pk_field}__in": source_ids}).values()
+    prod_map: dict[int, dict[str, Any]] = {}
+    for row in prod_qs:
+        sid = row.pop(pk_field, None)
+        if sid is not None:
+            row["source_id"] = sid
+            prod_map[sid] = row
+    return prod_map
+
+
+def _get_single_prod_row(dataset: str, source_id: int) -> dict[str, Any]:
+    """Fetch a single production row for a given source_id, mapped to staging field names."""
+    rows = _fetch_prod_rows(dataset, [source_id])
+    return rows.get(source_id, {})
 
 
 def _sse(event: str, data: str) -> str:
@@ -933,6 +1343,26 @@ def _build_page_numbers(current: int, total: int) -> list[int | str]:
         prev = p
 
     return pages
+
+
+def _backfill_skip_fields(
+    staging_kwargs: dict[str, Any],
+    source_id: int,
+    existing_rows: dict[int, dict[str, Any]],
+    skip_fields: set[str],
+) -> None:
+    """Copy skip_fields (e.g. lat/long) from production into staging kwargs.
+
+    The CSV doesn't supply these fields, but production has them (from
+    geocoding etc.).  Back-filling lets users see existing values in the
+    review table without triggering false change-detection.
+    """
+    if not skip_fields or source_id not in existing_rows:
+        return
+    prod_row = existing_rows[source_id]
+    for sf in skip_fields:
+        if sf in prod_row and prod_row[sf] is not None and not staging_kwargs.get(sf):
+            staging_kwargs[sf] = prod_row[sf]
 
 
 def _detect_field_changes(
@@ -1084,6 +1514,14 @@ def _coerce_non_empty(field: Any, value: Any) -> Any:
 def _do_commit(batch: DataImportBatch, commit_summary: dict[str, dict[str, int]]) -> None:
     """Commit new and changed staging rows to production tables inside a transaction."""
     log_lines = [f"Commit started at {timezone.now():%Y-%m-%d %H:%M:%S}"]
+
+    # Final safety net: backfill any staging patients still missing coords.
+    # This catches edge cases where staging data was manually edited after
+    # the initial staging backfill, or rows from older import batches.
+    if "patients" in commit_summary:
+        patient_staging = STAGING_MODELS["patients"]
+        all_pts = list(patient_staging.objects.filter(batch=batch))
+        _geocode_patient_rows(all_pts)
 
     total_new = 0
     total_updated = 0

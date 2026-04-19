@@ -89,6 +89,28 @@ def build_chart_od_hist_monthly(theme):
         bargap=0.1,
     )
 
+    # Add a total-count line trace overlaying the stacked bars.
+    # This makes the overall trend visible even when the fatal/non-fatal
+    # split makes it hard to read.
+    monthly_totals = df.groupby(df["od_date"].dt.to_period("M")).size()
+    monthly_totals.index = monthly_totals.index.to_timestamp()
+    monthly_totals = monthly_totals.sort_index()
+    fig.add_trace(
+        go.Scatter(
+            x=monthly_totals.index,
+            y=monthly_totals.values,
+            mode="lines",
+            name="Total",
+            line=dict(
+                color=TAILWIND_COLORS["amber-400"],
+                width=2.5,
+                shape="spline",
+                smoothing=0.8,
+            ),
+            hovertemplate="Month: %{x|%b %Y}<br>Total: %{y}<extra></extra>",
+        )
+    )
+
     # Apply theme styling
     fig = style_plotly_layout(
         fig,
@@ -101,12 +123,9 @@ def build_chart_od_hist_monthly(theme):
         hovermode_unified=False,
     )
 
-    # Calculate date range for trailing 12 months (one year ago to today)
-    now = datetime.now()
-    one_year_ago = (now - pd.DateOffset(months=12)).strftime("%Y-%m-%d")
-    today = now.strftime("%Y-%m-%d")
-
     # style x-axis & rangeselector (AFTER style_plotly_layout to override grid settings)
+    # Default to full date range ("All") so users see the complete picture.
+    # They can narrow with 1y/6m/1m buttons or the range slider.
     fig.update_xaxes(
         showgrid=False,  # Remove vertical grid lines
         ticklabelmode="period",
@@ -114,13 +133,12 @@ def build_chart_od_hist_monthly(theme):
         tickformat="%b\n%Y",
         rangemode="tozero",  # Start range at 0
         rangeslider_visible=True,
-        range=[one_year_ago, today],  # Default view: trailing 12 months
         rangeselector=dict(
             buttons=[
-                dict(count=1, label="1m", step="month", stepmode="backward"),
-                dict(count=6, label="6m", step="month", stepmode="backward"),
-                dict(count=1, label="1y", step="year", stepmode="backward"),
                 dict(label="All", step="all"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="1m", step="month", stepmode="backward"),
             ],
             bgcolor=TAILWIND_COLORS["slate-800"],  # dark background
             activecolor=TAILWIND_COLORS["slate-600"],  # slightly lighter when active
@@ -272,18 +290,32 @@ def build_chart_top5_drugs_monthly(theme):
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=300,
+        height=500,
         scroll_zoom=False,
         x_title=None,
         y_title="Overdose Count",
-        margin=dict(t=20, l=50, r=0, b=40),  # Match margins with OD referrals by month chart
+        margin=dict(t=50, l=50, r=0, b=40),  # Extra top margin for range selector buttons
         hovermode_unified=False,
     )
 
-    # Style axes
+    # Style axes — default to "All" with range selector buttons for narrowing.
     fig.update_xaxes(
         showgrid=False,
         tickformat="%b\n%Y",
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=[
+                dict(label="All", step="all"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+            ],
+            bgcolor=TAILWIND_COLORS["slate-800"],
+            activecolor=TAILWIND_COLORS["slate-600"],
+            font=dict(color=TAILWIND_COLORS["slate-100"]),
+            y=1.15,
+            yanchor="bottom",
+        ),
     )
 
     fig.update_yaxes(

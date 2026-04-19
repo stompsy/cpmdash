@@ -53,6 +53,7 @@ class DataImportFile(models.Model):
     file = models.FileField(upload_to="uploads/data_import/")
     original_filename = models.CharField(max_length=255)
     row_count = models.IntegerField(null=True, blank=True)
+    processed = models.BooleanField(default=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
@@ -65,7 +66,12 @@ class ProcessingLog(models.Model):
     batch = models.ForeignKey(
         DataImportBatch, on_delete=models.SET_NULL, null=True, related_name="logs"
     )
+    file_type = models.CharField(
+        max_length=20, choices=DataImportFile.FileType.choices, blank=True, default=""
+    )
+    original_filename = models.CharField(max_length=255, blank=True, default="")
     content = models.TextField()
+    summary = models.CharField(max_length=255, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -106,6 +112,7 @@ class StagingPatient(models.Model):
     sud = models.BooleanField(null=True, blank=True)
     behavioral_health = models.BooleanField(null=True, blank=True)
     zip_code = models.CharField(max_length=50, default="", blank=True)
+    address = models.CharField(max_length=255, default="", blank=True)
     created_date = models.DateField(null=True, blank=True)
     modified_date = models.DateField(null=True, blank=True)
     marital_status = models.CharField(max_length=50, default="", blank=True)
@@ -114,6 +121,13 @@ class StagingPatient(models.Model):
     three_c_client = models.BooleanField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
+    case_management = models.BooleanField(null=True, blank=True)
+    flyer = models.BooleanField(null=True, blank=True)
+    safety_plan = models.BooleanField(null=True, blank=True)
+    is_high_utilizer = models.BooleanField(null=True, blank=True)
+    bh_sus = models.BooleanField(null=True, blank=True)
+    sud_sus = models.BooleanField(null=True, blank=True)
+    aud_sus = models.BooleanField(null=True, blank=True)
 
     class Meta:
         ordering = ["source_id"]
@@ -147,6 +161,12 @@ class StagingReferral(models.Model):
     referral_3 = models.CharField(max_length=50, default="", blank=True)
     referral_4 = models.CharField(max_length=50, default="", blank=True)
     referral_5 = models.CharField(max_length=50, default="", blank=True)
+    diversion_type_cat1 = models.CharField(max_length=50, default="", blank=True)
+    diversion_type_cat2 = models.CharField(max_length=50, default="", blank=True)
+    med_manage = models.BooleanField(null=True, blank=True)
+    med_script = models.BooleanField(null=True, blank=True)
+    pcp_connect = models.BooleanField(null=True, blank=True)
+    survey_willing = models.BooleanField(null=True, blank=True)
 
     class Meta:
         ordering = ["source_id"]
@@ -221,6 +241,16 @@ class StagingODReferral(models.Model):
     jail_end_1 = models.DateField(null=True, blank=True)
     jail_start_2 = models.DateField(null=True, blank=True)
     jail_end_2 = models.DateField(null=True, blank=True)
+    diversion_type_cat1 = models.CharField(max_length=50, default="", blank=True)
+    diversion_type_cat2 = models.CharField(max_length=50, default="", blank=True)
+    od_district = models.CharField(max_length=50, default="", blank=True)
+    encounter_type_cat1 = models.CharField(max_length=50, default="", blank=True)
+    encounter_type_cat2 = models.CharField(max_length=50, default="", blank=True)
+    encounter_type_cat3 = models.CharField(max_length=50, default="", blank=True)
+    med_manage = models.BooleanField(null=True, blank=True)
+    med_script = models.BooleanField(null=True, blank=True)
+    pcp_connect = models.BooleanField(null=True, blank=True)
+    survey_willing = models.BooleanField(null=True, blank=True)
 
     class Meta:
         ordering = ["source_id"]
@@ -246,6 +276,12 @@ class StagingEncounter(models.Model):
     encounter_type_cat1 = models.CharField(max_length=50, default="", blank=True)
     encounter_type_cat2 = models.CharField(max_length=50, default="", blank=True)
     encounter_type_cat3 = models.CharField(max_length=50, default="", blank=True)
+    diversion_type_cat1 = models.CharField(max_length=50, default="", blank=True)
+    diversion_type_cat2 = models.CharField(max_length=50, default="", blank=True)
+    med_manage = models.BooleanField(null=True, blank=True)
+    med_script = models.BooleanField(null=True, blank=True)
+    pcp_connect = models.BooleanField(null=True, blank=True)
+    survey_willing = models.BooleanField(null=True, blank=True)
 
     class Meta:
         ordering = ["source_id"]

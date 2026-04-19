@@ -3,6 +3,7 @@
     class="px-3 py-2 whitespace-nowrap relative
            {% if cell.is_empty %}bg-rose-900/20
            {% elif cell.is_placeholder %}bg-amber-900/15
+           {% elif cell.is_changed %}bg-sky-500/10
            {% endif %}"
     x-data="{ editing: false }"
     @dblclick="editing = true; $nextTick(() => $refs.input.focus())">
@@ -18,6 +19,11 @@
         </span>
         {% elif cell.is_placeholder %}
         <span class="text-[11px] text-amber-400/70 italic">{{ cell.value }}</span>
+        {% elif cell.is_changed %}
+        {% if cell.old_value is not None %}
+        <div class="text-[9px] text-slate-500/70 line-through leading-tight mb-0.5">{{ cell.old_value }}</div>
+        {% endif %}
+        <span class="text-[11px] text-sky-300 font-medium">{{ cell.value }}</span>
         {% else %}
         <span class="text-[11px] text-slate-300">{{ cell.value }}</span>
         {% endif %}

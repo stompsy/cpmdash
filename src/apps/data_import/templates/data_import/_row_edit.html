@@ -1,5 +1,6 @@
 {# Inline edit form for a single staging row — replaces _row_display.html via HTMX #}
 {% load data_import_tags %}
+{# djlint:off H025 #}
 <tr id="row-{{ row.pk }}" class="bg-brand-500/8 ring-1 ring-inset ring-brand-500/20">
     {# Status #}
     <td class="sticky left-0 z-10 bg-slate-900/95 px-3 py-2.5">
@@ -8,48 +9,40 @@
         </span>
     </td>
 
-    {# Editable cells — wrapped in a form #}
-    <form hx-post="{% url 'data_import:row_update' batch.pk dataset row.pk %}"
-          hx-target="#row-{{ row.pk }}"
-          hx-swap="outerHTML"
-          class="contents">
-        {% csrf_token %}
-        {% for fname in field_names %}
-        <td class="px-1 py-1.5">
-            <input type="text"
-                   name="{{ fname }}"
-                   value="{{ row.cells_dict|lookup:fname }}"
-                   class="w-full min-w-[80px] rounded-lg border border-brand-500/20 bg-slate-800/80 px-2 py-1.5 text-xs text-white
-                          placeholder-slate-600 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400/30
-                          transition"
-                   placeholder="{{ fname }}">
-        </td>
-        {% endfor %}
+    {# Editable cells — no <form> wrapper (invalid inside <tr>) #}
+    {% for fname in field_names %}
+    <td class="px-1 py-1.5">
+        <input type="text"
+               name="{{ fname }}"
+               value="{{ row.cells_dict|lookup:fname }}"
+               class="w-full min-w-[80px] rounded-lg border border-brand-500/20 bg-slate-800/80 px-2 py-1.5 text-xs text-white
+                      placeholder-slate-600 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400/30
+                      transition"
+               placeholder="{{ fname }}">
+    </td>
+    {% endfor %}
 
-        {# Notes (read-only) #}
-        <td class="px-3 py-2.5">
-            {% if row.validation_notes %}
-            <span class="text-amber-400 text-[10px]">{{ row.validation_notes|truncatewords:10 }}</span>
-            {% endif %}
-        </td>
-
-        {# Action buttons #}
-        <td class="px-3 py-2.5">
-            <div class="flex gap-1">
-                <button type="submit"
-                        class="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-[10px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30
-                               hover:bg-emerald-500/30 transition">
-                    Save
-                </button>
-                <button type="button"
-                        hx-get="{% url 'data_import:row_cancel' batch.pk dataset row.pk %}"
-                        hx-target="#row-{{ row.pk }}"
-                        hx-swap="outerHTML"
-                        class="rounded-lg bg-slate-700/60 px-3 py-1.5 text-[10px] font-semibold text-slate-400 ring-1 ring-white/5
-                               hover:bg-slate-600/60 transition">
-                    Cancel
-                </button>
-            </div>
-        </td>
-    </form>
+    {# Action buttons — sticky right, Save uses hx-include to gather inputs from this row #}
+    <td class="sticky right-0 z-10 bg-slate-900/95 px-3 py-2.5">
+        <div class="flex gap-1">
+            <button type="button"
+                    hx-post="{% url 'data_import:row_update' batch.pk dataset row.pk %}"
+                    hx-target="#row-{{ row.pk }}"
+                    hx-swap="outerHTML"
+                    hx-include="closest tr"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    class="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-[10px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30
+                           hover:bg-emerald-500/30 transition">
+                Save
+            </button>
+            <button type="button"
+                    hx-get="{% url 'data_import:row_cancel' batch.pk dataset row.pk %}"
+                    hx-target="#row-{{ row.pk }}"
+                    hx-swap="outerHTML"
+                    class="rounded-lg bg-slate-700/60 px-3 py-1.5 text-[10px] font-semibold text-slate-400 ring-1 ring-white/5
+                           hover:bg-slate-600/60 transition">
+                Cancel
+            </button>
+        </div>
+    </td>
 </tr>
