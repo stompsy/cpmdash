@@ -356,8 +356,19 @@ def _process_single_file(
     thread.start()
 
     # Drain the queue in real-time, yielding SSE messages as they arrive.
+    # Use a short timeout so we can emit keepalive comments between
+    # messages — Gunicorn sync workers can't send heartbeats while
+    # blocked on a lock, so an indefinite q.get() causes WORKER TIMEOUT
+    # kills during slow geocoding (Nominatim: 1 req/sec × 200+ addrs).
     while True:
-        msg = q.get()  # blocks until a message or sentinel
+        try:
+            msg = q.get(timeout=5)
+        except queue.Empty:
+            # Yield an SSE comment to keep the connection alive.
+            # Comments (lines starting with ':') are ignored by the
+            # browser's EventSource but reset Gunicorn's idle timer.
+            yield ("keepalive", "")
+            continue
         if msg is None:
             break
         yield ("log", f"  {msg}")
@@ -495,6 +506,23 @@ def _stage_records(
     yield ("log", summary)
 
 
+def _stream_file_events(
+    import_file: DataImportFile,
+    batch: DataImportBatch,
+    service: DataCleaningService,
+    patients_df: pd.DataFrame | None,
+) -> Iterator[str]:
+    """Process one file and yield SSE strings, including keepalive comments."""
+    log_lines: list[str] = []
+    for event, data in _process_single_file(import_file, batch, service, patients_df=patients_df):
+        if event == "keepalive":
+            yield ": keepalive\n\n"
+            continue
+        yield _sse(event, data)
+        log_lines.append(data)
+    _save_file_log(batch, import_file, log_lines)
+
+
 @staff_member_required
 def process_stream(request: HttpRequest, batch_id: int) -> StreamingHttpResponse:
     """SSE endpoint that runs ETL processing and streams log output."""
@@ -548,14 +576,7 @@ def process_stream(request: HttpRequest, batch_id: int) -> StreamingHttpResponse
                         )
 
                 for import_file in sorted_files:
-                    file_log_lines: list[str] = []
-                    for event, data in _process_single_file(
-                        import_file, batch, service, patients_df=patients_df
-                    ):
-                        yield _sse(event, data)
-                        file_log_lines.append(data)
-
-                    _save_file_log(batch, import_file, file_log_lines)
+                    yield from _stream_file_events(import_file, batch, service, patients_df)
 
                     # If we just processed patients, capture the cleaned DataFrame
                     # for use by subsequent files in this batch
