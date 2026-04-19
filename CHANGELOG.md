@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.3 (2026-04-19)
+
+### Bug Fixes
+
+- Strip timezone before to_period() in OD monthly histogram
+  ([`1bc4dbc`](https://github.com/stompsy/cpmdash/commit/1bc4dbc38f534f45ce4825316732e4b3f4208f2e))
+
+
 ## v1.0.2 (2026-04-19)
 
 ### Bug Fixes
