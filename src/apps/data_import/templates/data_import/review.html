@@ -5,34 +5,60 @@
 {% block content %}
 <div class="col-span-12 mx-auto w-full max-w-7xl">
     <span data-page-name="dataImportReview" class="hidden" hidden></span>
-    <div class="w-full py-10 space-y-6" x-data="{ activeTab: '{{ active_tab }}', showSchema: false }">
+    <div class="w-full py-10 space-y-8"
+         x-data="{
+            activeTab: '{{ active_tab }}',
+            showSchema: false,
+            expanded: false,
+            fullscreen: false,
+         }"
+         @keydown.escape.window="fullscreen = false">
 
-        {# Header #}
+        {# ── Header ─────────────────────────────────────────────── #}
         <div class="flex justify-between items-start">
             <div>
-                <a href="{% url 'data_import:batch_list' %}" class="text-xs text-slate-500 hover:text-slate-300 transition">← Import History</a>
-                <h2 class="mt-2 text-xl font-bold text-white tracking-tight">Review Import #{{ batch.pk }}</h2>
+                <a href="{% url 'data_import:batch_list' %}"
+                   class="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                    Import History
+                </a>
+                <h2 class="mt-2 text-xl font-bold text-white tracking-tight">
+                    Review Import <span class="text-brand-400">#{{ batch.pk }}</span>
+                </h2>
                 <p class="mt-0.5 text-sm text-slate-400">
-                    Review staged data, correct issues, commit new records.
+                    Review staged data, correct issues, then commit to production.
                 </p>
             </div>
             <div class="flex gap-3" x-data="{ confirmDelete: false }">
                 <button @click="showSchema = !showSchema"
-                        class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-slate-800/60 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700/60">
+                        class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-slate-800/60 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700/60 hover:border-white/20">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
                     </svg>
                     Schema
                 </button>
 
+                {# Add Dataset #}
+                {% if can_add_datasets %}
+                <a href="{% url 'data_import:upload_to_batch' batch.pk %}"
+                   class="inline-flex items-center gap-2 rounded-xl border border-brand-500/20 bg-brand-500/5 px-4 py-2.5 text-sm font-medium text-brand-400 transition hover:bg-brand-500/15 hover:border-brand-500/40">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add Dataset
+                </a>
+                {% endif %}
+
                 {# Delete draft #}
-                <div class="relative" x-show="!confirmDelete">
+                <div x-show="!confirmDelete">
                     <button @click="confirmDelete = true"
                             class="inline-flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/5 px-4 py-2.5 text-sm font-medium text-rose-400 transition hover:bg-rose-500/15 hover:border-rose-500/40">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                         </svg>
-                        Delete Draft
+                        Delete
                     </button>
                 </div>
                 <div x-show="confirmDelete" x-cloak x-transition
@@ -54,41 +80,122 @@
                 {% if not has_errors %}
                 <a href="{% url 'data_import:commit' batch.pk %}"
                    class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:shadow-xl hover:scale-[1.02]">
-                    Commit to Production →
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Commit to Production
                 </a>
                 {% else %}
                 <span class="inline-flex items-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/30 px-5 py-2.5 text-sm font-medium text-rose-400 cursor-not-allowed">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
                     Fix errors before commit
                 </span>
                 {% endif %}
             </div>
         </div>
 
-        {# Summary cards #}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {# ── Summary cards ───────────────────────────────────────── #}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             {% for key, data in datasets.items %}
-            <div class="rounded-xl border cursor-pointer transition
-                        {% if key == active_tab %}border-brand-500/30 bg-brand-500/5{% else %}border-white/10 bg-slate-900/40 hover:border-white/20{% endif %}"
-                 :class="activeTab === '{{ key }}' ? 'border-brand-500/30 bg-brand-500/5' : 'border-white/10 bg-slate-900/40 hover:border-white/20'"
-                 @click="activeTab = '{{ key }}'">
-                <div class="px-4 py-3">
-                    <div class="flex items-baseline justify-between">
-                        <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ key }}</h4>
-                        <span class="text-lg font-bold text-white tabular-nums">{{ data.total }}</span>
-                    </div>
-                    <div class="mt-1.5 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] font-medium">
-                        {% if data.new %}<span class="text-emerald-400">{{ data.new }} new</span>{% endif %}
-                        {% if data.changed %}<span class="text-sky-400">{{ data.changed }} changed</span>{% endif %}
-                        {% if data.existing %}<span class="text-slate-500">{{ data.existing }} dup</span>{% endif %}
-                        {% if data.warning %}<span class="text-amber-400">{{ data.warning }} warn</span>{% endif %}
-                        {% if data.error %}<span class="text-rose-400">{{ data.error }} err</span>{% endif %}
-                    </div>
+            <button
+                @click="activeTab = '{{ key }}'"
+                :class="activeTab === '{{ key }}'
+                    ? 'border-brand-500/40 bg-gradient-to-br from-brand-500/10 to-brand-500/5 shadow-lg shadow-brand-500/10'
+                    : 'border-white/10 bg-slate-900/40 hover:border-white/20 hover:bg-slate-800/50'"
+                class="rounded-2xl border p-5 text-left transition-all duration-200 group">
+                <div class="flex items-baseline justify-between mb-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider"
+                        :class="activeTab === '{{ key }}' ? 'text-brand-400' : 'text-slate-400'">{{ key }}</h4>
+                    <span class="text-2xl font-bold text-white tabular-nums">{{ data.total }}</span>
                 </div>
-            </div>
+                <div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-semibold">
+                    {% if data.new %}
+                    <span class="inline-flex items-center gap-1">
+                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                        <span class="text-emerald-400">{{ data.new }} new</span>
+                    </span>
+                    {% endif %}
+                    {% if data.changed %}
+                    <span class="inline-flex items-center gap-1">
+                        <span class="h-2 w-2 rounded-full bg-sky-400"></span>
+                        <span class="text-sky-400">{{ data.changed }} changed</span>
+                    </span>
+                    {% endif %}
+                    {% if data.existing %}
+                    <span class="inline-flex items-center gap-1">
+                        <span class="h-2 w-2 rounded-full bg-slate-500"></span>
+                        <span class="text-slate-500">{{ data.existing }} existing</span>
+                    </span>
+                    {% endif %}
+                    {% if data.warning %}
+                    <span class="inline-flex items-center gap-1">
+                        <span class="h-2 w-2 rounded-full bg-amber-400"></span>
+                        <span class="text-amber-400">{{ data.warning }} warn</span>
+                    </span>
+                    {% endif %}
+                    {% if data.error %}
+                    <span class="inline-flex items-center gap-1">
+                        <span class="h-2 w-2 rounded-full bg-rose-400"></span>
+                        <span class="text-rose-400">{{ data.error }} err</span>
+                    </span>
+                    {% endif %}
+                </div>
+            </button>
             {% endfor %}
         </div>
 
-        {# Production database reference — loaded via HTMX #}
+        {# ── Action items callout ────────────────────────────────── #}
+        {% for key, data in datasets.items %}
+        {% if data.error or data.warning or data.changed %}
+        <div x-show="activeTab === '{{ key }}'" x-cloak
+             class="rounded-2xl border border-white/10 bg-slate-900/60 overflow-hidden">
+            <div class="px-5 py-3 border-b border-white/5 bg-slate-800/50">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Action items · {{ key|title }}
+                </h3>
+            </div>
+            <div class="px-5 py-4 space-y-3">
+                {% if data.error %}
+                <div class="flex items-start gap-3 rounded-xl bg-rose-500/10 border border-rose-500/20 px-4 py-3">
+                    <svg class="h-5 w-5 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-rose-300">{{ data.error }} rows have errors</p>
+                        <p class="text-xs text-rose-400/70 mt-0.5">These must be fixed before you can commit.</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% if data.changed %}
+                <div class="flex items-start gap-3 rounded-xl bg-sky-500/10 border border-sky-500/20 px-4 py-3">
+                    <svg class="h-5 w-5 text-sky-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-sky-300">{{ data.changed }} rows have updated fields</p>
+                        <p class="text-xs text-sky-400/70 mt-0.5">These records exist in production with updated values. Use the Changed filter to see only the affected columns.</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% if data.warning %}
+                <div class="flex items-start gap-3 rounded-xl bg-amber-500/10 border border-amber-500/20 px-4 py-3">
+                    <svg class="h-5 w-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-amber-300">{{ data.warning }} rows have warnings</p>
+                        <p class="text-xs text-amber-400/70 mt-0.5">Non-blocking — these will still import. Review for data quality.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        {# ── Production database reference ───────────────────────── #}
         <div hx-get="{% url 'data_import:production_ref' batch.pk %}"
              hx-trigger="load"
              hx-swap="innerHTML">
@@ -98,16 +205,22 @@
             </div>
         </div>
 
-        {# Editing hint — compact bar #}
-        <div class="rounded-lg border border-white/5 bg-slate-800/40 px-3 py-2 flex items-center gap-2 text-[11px] text-slate-500">
+        {# ── Quick help bar ──────────────────────────────────────── #}
+        <div class="rounded-xl border border-white/5 bg-slate-800/40 px-4 py-2.5 flex items-center gap-3 text-[11px] text-slate-500">
             <svg class="h-3.5 w-3.5 text-brand-400/60 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
             </svg>
-            <span class="font-medium text-slate-400">Double-click cells</span> to edit in-place · Enter saves · Esc cancels
+            <span><span class="font-semibold text-slate-400">Double-click</span> any cell to edit</span>
+            <span class="h-3 w-px bg-white/10"></span>
+            <span><kbd class="rounded bg-slate-700/80 px-1 py-0.5 font-mono text-[9px] text-slate-400">Enter</kbd> saves</span>
+            <span class="h-3 w-px bg-white/10"></span>
+            <span><kbd class="rounded bg-slate-700/80 px-1 py-0.5 font-mono text-[9px] text-slate-400">Esc</kbd> cancels</span>
+            <span class="h-3 w-px bg-white/10"></span>
+            <span>Click <span class="font-semibold text-brand-400">⤢</span> to expand table fullscreen</span>
         </div>
 
-        {# Schema panel (collapsible) #}
-        <div x-show="showSchema" x-cloak x-transition class="rounded-xl border border-white/10 bg-slate-900/40 p-5">
+        {# ── Schema panel (collapsible) ──────────────────────────── #}
+        <div x-show="showSchema" x-cloak x-transition class="rounded-2xl border border-white/10 bg-slate-900/40 p-5">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Schema Reference</h3>
             {% for key, data in datasets.items %}
             <div x-show="activeTab === '{{ key }}'" class="overflow-x-auto">
@@ -136,29 +249,30 @@
             {% endfor %}
         </div>
 
-        {# Dataset tabs #}
+        {# ── Dataset tab bar ─────────────────────────────────────── #}
         <div class="flex gap-1 border-b border-white/10">
             {% for key, data in datasets.items %}
             <button
                 @click="activeTab = '{{ key }}'"
-                :class="activeTab === '{{ key }}' ? 'border-brand-400 text-white' : 'border-transparent text-slate-400 hover:text-slate-300'"
-                class="px-4 py-2.5 text-sm font-medium border-b-2 transition">
+                :class="activeTab === '{{ key }}'
+                    ? 'border-brand-400 text-white bg-brand-500/5'
+                    : 'border-transparent text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'"
+                class="px-5 py-3 text-sm font-medium border-b-2 transition rounded-t-lg">
                 {{ key|title }}
-                <span class="ml-1 text-xs opacity-60">({{ data.total }})</span>
+                <span class="ml-1.5 rounded-full bg-white/10 px-2 py-0.5 text-[10px] tabular-nums"
+                      :class="activeTab === '{{ key }}' ? 'text-brand-300' : 'text-slate-500'">{{ data.total }}</span>
             </button>
             {% endfor %}
         </div>
 
-        {# Data table (loaded via HTMX) #}
+        {# ── Data tables (HTMX lazy-loaded) ──────────────────────── #}
         {% for key, data in datasets.items %}
         <div x-show="activeTab === '{{ key }}'" x-cloak>
-            <div
-                hx-get="{% url 'data_import:review_table' batch.pk key %}"
-                hx-trigger="intersect once"
-                hx-swap="innerHTML"
-                class="min-h-[200px]"
-            >
-                <div class="flex items-center justify-center py-12">
+            <div hx-get="{% url 'data_import:review_table' batch.pk key %}"
+                 hx-trigger="intersect once"
+                 hx-swap="innerHTML"
+                 class="min-h-[200px]">
+                <div class="flex items-center justify-center py-16">
                     <div class="h-6 w-6 animate-spin rounded-full border-2 border-brand-400 border-t-transparent"></div>
                     <span class="ml-3 text-sm text-slate-400">Loading {{ key }}...</span>
                 </div>

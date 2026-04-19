@@ -36,10 +36,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # project root
 CACHE_PATH = BASE_DIR / "assets" / "geocode_cache.json"
 
 # ---------------------------------------------------------------------------
-# Clallam County bounding box — sanity filter for wrong results
+# Olympic Peninsula bounding box — sanity filter for wrong geocoding results.
+# Covers Clallam + NE Jefferson County (Port Townsend, Quilcene, etc.)
+# because referrals sometimes come from neighbouring counties.
 # ---------------------------------------------------------------------------
-_LAT_MIN, _LAT_MAX = 47.85, 48.40
-_LON_MIN, _LON_MAX = -124.80, -123.40
+_LAT_MIN, _LAT_MAX = 47.75, 48.40
+_LON_MIN, _LON_MAX = -124.80, -122.65
 
 # Zip codes that aren't geocodable
 _SKIP_ZIPS = {"Homeless", "Homeless/Transient", "Not disclosed", "No data", ""}
@@ -58,7 +60,8 @@ _NON_ADDRESS_PATTERNS = [
     "no data",
 ]
 
-# Cities in Clallam County for sweep fallback
+# Cities in the service area for sweep fallback
+# (Clallam County + neighbouring Jefferson County communities)
 _CLALLAM_CITIES = [
     "Port Angeles",
     "Sequim",
@@ -69,36 +72,44 @@ _CLALLAM_CITIES = [
     "La Push",
     "Gardiner",
     "Clallam Bay",
+    "Port Townsend",
+    "Port Hadlock",
+    "Quilcene",
 ]
 
-# Zip-to-city mapping
+# Zip-to-city mapping (Clallam + Jefferson County)
 _ZIP_TO_CITY: dict[str, str] = {
     "98305": "La Push",
     "98324": "Gardiner",
     "98326": "Joyce",
     "98331": "Forks",
+    "98339": "Port Hadlock",
     "98343": "Pysht",
     "98357": "Neah Bay",
     "98362": "Port Angeles",
     "98363": "Port Angeles",
+    "98368": "Port Townsend",
     "98381": "Sekiu",
     "98382": "Sequim",
     "98386": "Quilcene",
 }
 
-# Approximate centroids — last-resort fallback
+# Approximate centroids — last-resort fallback.
+# Aligned with ZIP_CENTROIDS in data_import/views.py — keep them in sync!
 _ZIP_CENTROIDS: dict[str, tuple[float, float]] = {
-    "98305": (48.0534, -124.3548),
-    "98324": (48.1000, -123.6000),
-    "98326": (48.1750, -124.2500),
-    "98331": (48.1000, -124.4200),
-    "98343": (48.1900, -123.6300),
-    "98357": (48.3200, -124.6100),
-    "98362": (48.1149, -123.4307),
-    "98363": (48.0590, -123.5860),
-    "98381": (48.0800, -124.4000),
-    "98382": (48.0340, -123.0400),
-    "98386": (48.0700, -122.8800),
+    "98305": (47.9073, -124.6353),  # La Push
+    "98324": (48.0734, -123.1168),  # Gardiner
+    "98326": (48.1572, -123.8481),  # Joyce
+    "98331": (47.9498, -124.3505),  # Forks
+    "98343": (48.1889, -124.2467),  # Pysht
+    "98357": (48.3651, -124.6248),  # Neah Bay
+    "98362": (48.1181, -123.4307),  # Port Angeles
+    "98363": (48.0976, -123.7403),  # Port Angeles (rural)
+    "98381": (48.2653, -124.3923),  # Sekiu / Clallam Bay
+    "98382": (48.0795, -123.1018),  # Sequim
+    "98386": (47.8225, -122.8268),  # Quilcene (Jefferson Co. — USGS GNIS ref)
+    "98339": (48.0311, -122.8103),  # Port Hadlock (Jefferson Co.)
+    "98368": (48.1170, -122.7604),  # Port Townsend (Jefferson Co.)
 }
 
 _DEFAULT_STATE = "WA"
@@ -188,7 +199,11 @@ def _build_full_address(address: str, zipcode: str) -> str:
         return norm
     parts = [norm]
     if zipcode not in _SKIP_ZIPS:
-        parts.append(f"{_DEFAULT_STATE} {zipcode}")
+        city = _ZIP_TO_CITY.get(zipcode, "")
+        if city:
+            parts.append(f"{city}, {_DEFAULT_STATE} {zipcode}")
+        else:
+            parts.append(f"{_DEFAULT_STATE} {zipcode}")
     else:
         parts.append(f"{_DEFAULT_CITY}, {_DEFAULT_STATE} {_DEFAULT_OD_ZIP}")
     return ", ".join(parts)
@@ -213,6 +228,8 @@ def _geocode_census_batch(
         if city_match and _has_location_context(norm):
             norm = city_match.group(1).strip()
             city = city_match.group(2).strip()
+        elif zc in _ZIP_TO_CITY:
+            city = _ZIP_TO_CITY[zc]
         writer.writerow([uid, norm, city, _DEFAULT_STATE, zc])
 
     csv_data = buf.getvalue().encode()
@@ -354,10 +371,25 @@ def _phase_cache_lookup(
         ck = _cache_key(addr, zc)
         if ck in cache:
             entry = cache[ck]
-            if entry.get("lat") is not None and entry.get("lon") is not None:
+            # Treat zip_centroid entries as retryable — these are real
+            # street addresses that previously fell through to centroid
+            # fallback.  Re-attempt Census/Nominatim on each import so
+            # we can upgrade them to precise coordinates.
+            if entry.get("method") == "zip_centroid":
+                if ck not in todo:
+                    todo[ck] = (addr, zc, [])
+                todo[ck][2].append(idx)
+                # Use centroid coords as interim value in case retry
+                # still fails — _phase_zip_centroid will overwrite.
+                if entry.get("lat") is not None and entry.get("lon") is not None:
+                    lats[idx] = entry["lat"]
+                    lons[idx] = entry["lon"]
+            elif entry.get("lat") is not None and entry.get("lon") is not None:
                 lats[idx] = entry["lat"]
                 lons[idx] = entry["lon"]
-            cached_count += 1
+                cached_count += 1
+            else:
+                cached_count += 1
         else:
             if ck not in todo:
                 todo[ck] = (addr, zc, [])
@@ -394,15 +426,21 @@ def _phase_nominatim(
     cache: _CacheDict,
     lats: pd.Series,
     lons: pd.Series,
+    log: list[str] | None = None,
 ) -> int:
     """Phase 3: Nominatim direct + city sweep. Returns number of hits."""
     hits = 0
-    for ck in list(todo.keys()):
+    total = len(todo)
+    for i, ck in enumerate(list(todo.keys())):
         addr, zc, indices = todo[ck]
+        if log is not None:
+            log.append(f"  ⏳ Nominatim {i + 1}/{total}: {addr[:50]}...")
         full = _build_full_address(addr, zc)
         result = _nominatim_query(full)
 
         if result is None and zc in _SKIP_ZIPS:
+            if log is not None:
+                log.append(f"  ⏳ Nominatim {i + 1}/{total}: {addr[:50]}... city sweep")
             sweep = _geocode_with_city_sweep(addr)
             if sweep:
                 result = (sweep[0], sweep[1])
@@ -479,12 +517,16 @@ def geocode_od_addresses(
     if not todo:
         return lats, lons
 
+    log.append("  ⏳ Running Census batch geocoder...")
+    t0 = time.time()
     census_hits = _phase_census(todo, cache, lats, lons)
-    log.append(f"  Census geocoder: {census_hits} hits")
+    log.append(f"  Census geocoder: {census_hits} hits ({time.time() - t0:.1f}s)")
 
     if todo:
-        nom_hits = _phase_nominatim(todo, cache, lats, lons)
-        log.append(f"  Nominatim: {nom_hits} hits")
+        log.append(f"  ⏳ Starting Nominatim lookups ({len(todo)} addresses)...")
+        t0 = time.time()
+        nom_hits = _phase_nominatim(todo, cache, lats, lons, log=log)
+        log.append(f"  Nominatim: {nom_hits} hits ({time.time() - t0:.1f}s)")
 
     if todo:
         centroid_hits = _phase_zip_centroid(todo, cache, lats, lons)

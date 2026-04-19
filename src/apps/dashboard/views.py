@@ -4236,7 +4236,18 @@ def odreferrals(request):
     fig_repeat_interval_hist = _chart_html(build_chart_repeat_interval_hist(theme=theme))
     fig_repeat_seasonality = _chart_html(build_chart_repeat_seasonality(theme=theme))
     repeat_overdose_stats = build_repeat_overdose_quick_stats()
-    repeat_overdose_quarterly_rates = _build_repeat_overdose_quarterly_rates([2024, 2025])
+    # Build a dynamic year range that always includes the current year so new
+    # quarters appear automatically as time passes.
+    today = date.today()
+    repeat_od_years = list(range(2024, today.year + 1))
+    repeat_overdose_quarterly_rates = _build_repeat_overdose_quarterly_rates(repeat_od_years)
+    # Drop the current (partial) quarter — only show fully completed quarters.
+    current_q = (today.month - 1) // 3 + 1
+    repeat_overdose_quarterly_rates = [
+        r
+        for r in repeat_overdose_quarterly_rates
+        if not (r["year"] == today.year and r["quarter"] >= current_q)
+    ]
     fig_repeat_overdose_quarterly_trend = _chart_html(
         build_chart_repeat_overdose_quarterly_trend(
             theme=theme,

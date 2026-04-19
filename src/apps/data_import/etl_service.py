@@ -173,6 +173,13 @@ OD_AGENCY_CLEANUP: dict[str, str] = {
 # Sentinel date for missing jail dates in OD referrals
 _JAIL_SENTINEL = "2000-01-01"
 
+# Narcan edge-case text → numeric mapping (for narcan_doses_* columns)
+NARCAN_TEXT_MAP: dict[str, int] = {
+    "none given": 0,
+    "> 6": 7,
+    "unknown": 0,
+}
+
 
 # ---------------------------------------------------------------------------
 # Result dataclass
@@ -200,8 +207,13 @@ class DataCleaningService:
     # ------------------------------------------------------------------
     # Public cleaning methods
     # ------------------------------------------------------------------
-    def clean_patients(self, source: Path | IO[bytes] | IO[str]) -> CleaningResult:
-        log: list[str] = []
+    def clean_patients(
+        self,
+        source: Path | IO[bytes] | IO[str],
+        log: list[str] | None = None,
+    ) -> CleaningResult:
+        if log is None:
+            log = []
         row_warnings: dict[int, list[str]] = {}
         row_errors: dict[int, list[str]] = {}
 
@@ -246,10 +258,26 @@ class DataCleaningService:
         df["bh_clean"] = df["behavioral_health"].apply(_bool_to_int)
         df["aud_clean"] = df["aud"].apply(_bool_to_int)
         df["3c_clean"] = df["3C Client"].apply(_bool_to_int)
+        df["case_mgmt_clean"] = df["Case Management"].apply(_bool_to_int)
+        df["flyer_clean"] = df["flyer"].apply(_bool_to_int)
+        df["safety_plan_clean"] = df["safety_plan"].apply(_bool_to_int)
+        df["high_util_clean"] = df["High_Utilizer"].apply(_bool_to_int)
+        df["bh_sus_clean"] = df["bh_sus"].apply(_bool_to_int)
+        df["sud_sus_clean"] = df["sud_sus"].apply(_bool_to_int)
+        df["aud_sus_clean"] = df["aud_sus"].apply(_bool_to_int)
 
         # --- Dates → YYYY-MM-DD ----------------------------------------
         df["created_clean"] = df["Created"].apply(_parse_date)
         df["modified_clean"] = df["Modified"].apply(_parse_date)
+
+        # --- Geocode from Address column --------------------------------
+        # Only geocode rows where there's an address to work with.
+        # The lat/long will be blank for rows with no Address value.
+        from apps.data_import.geocode_service import geocode_od_addresses
+
+        df["lat_clean"], df["long_clean"] = geocode_od_addresses(
+            df, address_col="Address", zip_col="zip_clean", log=log
+        )
 
         # Build output frame
         out = pd.DataFrame(
@@ -262,6 +290,7 @@ class DataCleaningService:
                 "sex": df["sex_clean"],
                 "sud": df["sud_clean"],
                 "zip_code": df["zip_clean"],
+                "address": df["Address"].fillna("").str.strip(),
                 "created_date": df["created_clean"],
                 "modified_date": df["modified_clean"],
                 "marital_status": df["marital_status"].replace(
@@ -270,9 +299,16 @@ class DataCleaningService:
                 "veteran_status": df["veteran_status"].replace("", "Not disclosed"),
                 "behavioral_health": df["bh_clean"],
                 "aud": df["aud_clean"],
-                "latitude": "",
-                "longitude": "",
+                "latitude": df["lat_clean"],
+                "longitude": df["long_clean"],
                 "three_c_client": df["3c_clean"],
+                "case_management": df["case_mgmt_clean"],
+                "flyer": df["flyer_clean"],
+                "safety_plan": df["safety_plan_clean"],
+                "is_high_utilizer": df["high_util_clean"],
+                "bh_sus": df["bh_sus_clean"],
+                "sud_sus": df["sud_sus_clean"],
+                "aud_sus": df["aud_sus_clean"],
             }
         )
 
@@ -301,8 +337,10 @@ class DataCleaningService:
         self,
         source: Path | IO[bytes] | IO[str],
         patients_df: pd.DataFrame | None = None,
+        log: list[str] | None = None,
     ) -> CleaningResult:
-        log: list[str] = []
+        if log is None:
+            log = []
         row_warnings: dict[int, list[str]] = {}
         row_errors: dict[int, list[str]] = {}
 
@@ -349,10 +387,29 @@ class DataCleaningService:
         df["zip_clean"] = df["PatientZipcode"].map(ZIP_CLEANUP).fillna(df["PatientZipcode"])
         df["zip_clean"] = df["zip_clean"].replace("", "No data")
 
-        # Age: look up from cleaned patients (single source of truth)
-        df["age_clean"] = _resolve_age_from_patients(
-            df, "patient_ID", "PatientAge", patients_df, log, "referral"
+        # Age: compute from RefBirthdate → date_received, fall back to PatientAge, then patients
+        df["age_clean"] = _resolve_age_at_event(
+            df,
+            "RefBirthdate",
+            "date_received",
+            "PatientAge",
+            "patient_ID",
+            patients_df,
+            log,
+            "referral",
         )
+
+        # --- New fields: diversion + boolean (strip ref_ prefix from CSV names) ---
+        for col in ["diversion_type_cat1", "diversion_type_cat2"]:
+            df[col] = df[col].replace("", "No data")
+
+        for csv_col, model_col in [
+            ("ref_med_manage", "med_manage_int"),
+            ("ref_med_script", "med_script_int"),
+            ("ref_pcp_connect", "pcp_connect_int"),
+            ("ref_survey_willing", "survey_willing_int"),
+        ]:
+            df[model_col] = df[csv_col].apply(_bool_to_int)
 
         out = pd.DataFrame(
             {
@@ -373,6 +430,12 @@ class DataCleaningService:
                 "referral_3": ref_df["referral_3"],
                 "referral_4": ref_df["referral_4"],
                 "referral_5": ref_df["referral_5"],
+                "diversion_type_cat1": df["diversion_type_cat1"],
+                "diversion_type_cat2": df["diversion_type_cat2"],
+                "med_manage": df["med_manage_int"],
+                "med_script": df["med_script_int"],
+                "pcp_connect": df["pcp_connect_int"],
+                "survey_willing": df["survey_willing_int"],
             }
         )
 
@@ -396,8 +459,10 @@ class DataCleaningService:
         self,
         source: Path | IO[bytes] | IO[str],
         patients_df: pd.DataFrame | None = None,
+        log: list[str] | None = None,
     ) -> CleaningResult:
-        log: list[str] = []
+        if log is None:
+            log = []
         row_warnings: dict[int, list[str]] = {}
         row_errors: dict[int, list[str]] = {}
 
@@ -419,54 +484,64 @@ class DataCleaningService:
         df["ins_clean"] = _resolve_od_insurance(df, patients_df, self._normalize_insurance)
 
         # Boolean fields → int
-        bool_fields = [
-            "referral_to_sud_agency",
-            "referral_rediscovery",
-            "referral_reflections",
-            "referral_pbh",
-            "referral_other",
-            "accepted_rediscovery",
-            "accepted_reflections",
-            "accepted_pbh",
-            "accepted_other",
-            "is_bup_indicated",
-            "bup_admin",
-            "client_agrees_to_mat",
-        ]
-        for col in bool_fields:
-            df[f"{col}_int"] = df[col].apply(_bool_to_int)
+        _apply_bool_to_int(
+            df,
+            [
+                "referral_to_sud_agency",
+                "referral_rediscovery",
+                "referral_reflections",
+                "referral_pbh",
+                "referral_other",
+                "accepted_rediscovery",
+                "accepted_reflections",
+                "accepted_pbh",
+                "accepted_other",
+                "is_bup_indicated",
+                "bup_admin",
+                "client_agrees_to_mat",
+            ],
+        )
 
         df["narcan_int"] = df["narcan_given"].apply(_bool_to_int)
 
-        # Numeric fields
-        int_fields = [
-            "number_of_nonems_onscene",
-            "number_of_ems_onscene",
-            "number_of_peers_onscene",
-            "number_of_police_onscene",
-            "narcan_doses_prior_to_ems",
-            "narcan_doses_by_ems",
-            "leave_behind_narcan_amount",
-        ]
-        for col in int_fields:
-            df[f"{col}_num"] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
+        # Numeric fields — use _narcan_to_int for narcan/onscene fields
+        # to handle text edge cases ("None Given" → 0, "> 6" → 7, "Unknown" → 0)
+        _apply_narcan_to_int(
+            df,
+            [
+                "number_of_nonems_onscene",
+                "number_of_ems_onscene",
+                "number_of_peers_onscene",
+                "number_of_police_onscene",
+                "narcan_doses_prior_to_ems",
+                "narcan_doses_by_ems",
+                "leave_behind_narcan_amount",
+            ],
+        )
 
-        float_fields = ["narcan_prior_to_ems_dosage", "narcan_by_ems_dosage", "persons_trained"]
-        for col in float_fields:
-            df[f"{col}_num"] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+        _apply_float_coerce(
+            df,
+            [
+                "narcan_prior_to_ems_dosage",
+                "narcan_by_ems_dosage",
+                "persons_trained",
+            ],
+        )
 
-        # Age: look up from cleaned patients (single source of truth)
-        df["age_clean"] = _resolve_age_from_patients(
-            df, "patient_id", "patient_age", patients_df, log, "OD referral"
+        # Age: compute from birthdate → od_date, fall back to patient_age, then patient lookup
+        df["age_clean"] = _resolve_age_at_event(
+            df,
+            "birthdate",
+            "od_date",
+            "patient_age",
+            "patient_id",
+            patients_df,
+            log,
+            "OD referral",
         )
 
         # Race: look up from cleaned patients. "No data" when not found or empty.
-        if patients_df is not None:
-            race_lookup = patients_df.set_index("id")["race"]
-            df["race_clean"] = df["patient_id"].astype(int).map(race_lookup).fillna("No data")
-            df["race_clean"] = df["race_clean"].replace("", "No data")
-        else:
-            df["race_clean"] = "No data"
+        df["race_clean"] = _resolve_race_from_patients(df, "patient_id", patients_df)
 
         # Referral agency: expand abbreviations, empties → "No data"
         df["agency_clean"] = (
@@ -476,33 +551,54 @@ class DataCleaningService:
 
         # --- Blanket empty → "No data" for text fields ---
         # Fields with special defaults handled separately above/below.
-        blanket_no_data_fields = [
-            "cpm_disposition",
-            "referral_source",
-            "engagement_location",
-            "cpr_administered",
-            "police_ita",
-            "disposition",
-            "transport_to_location",
-            "transported_by",
-            "bup_not_indicated_reason",
-            "bup_already_prescribed",
-            "contact_level_rediscovery",
-            "contact_level_reflections",
-            "contact_level_pbh",
-            "contact_level_other",
-        ]
-        for col in blanket_no_data_fields:
-            df[col] = df[col].replace("", "No data")
+        _replace_empty_with_no_data(
+            df,
+            [
+                "cpm_disposition",
+                "referral_source",
+                "engagement_location",
+                "cpr_administered",
+                "police_ita",
+                "disposition",
+                "transport_to_location",
+                "transported_by",
+                "bup_not_indicated_reason",
+                "bup_already_prescribed",
+                "contact_level_rediscovery",
+                "contact_level_reflections",
+                "contact_level_pbh",
+                "contact_level_other",
+            ],
+        )
 
         # delay_in_referral: empties → "24-72hrs" (most likely timeframe)
         df["delay_in_referral"] = df["delay_in_referral"].replace("", "24-72hrs")
 
-        # Geocode OD addresses (cache + Census + Nominatim + zip centroid)
-        from apps.data_import.geocode_service import geocode_od_addresses
+        # Geocode OD addresses — prefer lat/long from CSV, only geocode empty rows
+        df["lat_clean"], df["long_clean"] = _geocode_od_with_csv_fallback(df, log)
 
-        df["lat_clean"], df["long_clean"] = geocode_od_addresses(
-            df, address_col="od_address", zip_col="zip_clean", log=log
+        # --- New boolean fields (strip ref_port_ prefix from CSV names) ---
+        _apply_bool_to_int_mapped(
+            df,
+            [
+                ("ref_port_med_manage", "med_manage_int"),
+                ("ref_port_med_script", "med_script_int"),
+                ("ref_port_pcp_connect", "pcp_connect_int"),
+                ("ref_port_survey_willing", "survey_willing_int"),
+            ],
+        )
+
+        # --- New text/categorical fields --------------------------------
+        _replace_empty_with_no_data(
+            df,
+            [
+                "diversion_type_cat1",
+                "diversion_type_cat2",
+                "od_district",
+                "encounter_type_cat1",
+                "encounter_type_cat2",
+                "encounter_type_cat3",
+            ],
         )
 
         out = pd.DataFrame(
@@ -565,6 +661,16 @@ class DataCleaningService:
                 "bup_admin": df["bup_admin_int"],
                 "client_agrees_to_mat": df["client_agrees_to_mat_int"],
                 "overdose_recent": df["overdose_recent"].replace("", "No data"),
+                "diversion_type_cat1": df["diversion_type_cat1"],
+                "diversion_type_cat2": df["diversion_type_cat2"],
+                "od_district": df["od_district"],
+                "encounter_type_cat1": df["encounter_type_cat1"],
+                "encounter_type_cat2": df["encounter_type_cat2"],
+                "encounter_type_cat3": df["encounter_type_cat3"],
+                "med_manage": df["med_manage_int"],
+                "med_script": df["med_script_int"],
+                "pcp_connect": df["pcp_connect_int"],
+                "survey_willing": df["survey_willing_int"],
                 "jail_start_1": _JAIL_SENTINEL,
                 "jail_end_1": _JAIL_SENTINEL,
                 "jail_start_2": _JAIL_SENTINEL,
@@ -588,8 +694,13 @@ class DataCleaningService:
         )
         return CleaningResult(df=out, log=log, row_warnings=row_warnings, row_errors=row_errors)
 
-    def clean_encounters(self, source: Path | IO[bytes] | IO[str]) -> CleaningResult:
-        log: list[str] = []
+    def clean_encounters(
+        self,
+        source: Path | IO[bytes] | IO[str],
+        patients_df: pd.DataFrame | None = None,
+        log: list[str] | None = None,
+    ) -> CleaningResult:
+        log = log or []
         row_warnings: dict[int, list[str]] = {}
         row_errors: dict[int, list[str]] = {}
 
@@ -644,6 +755,17 @@ class DataCleaningService:
         for col in cat_cols:
             df[col] = df[col].replace("", "No data")
 
+        # pcp_agency fallback: when CSV value is empty/No data, look up from patients table
+        _fill_pcp_from_patients(df, patients_df, log)
+
+        # --- New fields: diversion types --------------------------------
+        for col in ["diversion_type_cat1", "diversion_type_cat2"]:
+            df[col] = df[col].str.strip().replace("", "No data")
+
+        # --- New boolean fields → 1/0 ----------------------------------
+        for col in ["med_manage", "med_script", "pcp_connect", "survey_willing"]:
+            df[f"{col}_int"] = df[col].apply(_bool_to_int)
+
         # port_referral_ID: empty → 0
         df["port_ref_clean"] = (
             pd.to_numeric(df["port_referral_ID"], errors="coerce").fillna(0).astype(int)
@@ -662,6 +784,12 @@ class DataCleaningService:
                 "encounter_type_cat1": df["encounter_type_cat1"],
                 "encounter_type_cat2": df["encounter_type_cat2"],
                 "encounter_type_cat3": df["encounter_type_cat3"],
+                "diversion_type_cat1": df["diversion_type_cat1"],
+                "diversion_type_cat2": df["diversion_type_cat2"],
+                "med_manage": df["med_manage_int"],
+                "med_script": df["med_script_int"],
+                "pcp_connect": df["pcp_connect_int"],
+                "survey_willing": df["survey_willing_int"],
             }
         )
 
@@ -929,6 +1057,154 @@ def _resolve_age_from_patients(
     return pd.to_numeric(df[raw_age_col], errors="coerce")
 
 
+def _compute_age_at_event(
+    row: pd.Series,
+    birthdate_col: str,
+    event_date_col: str,
+    fallback_age_col: str,
+) -> float | None:
+    """Compute age at the time of an event (OD or referral) from birthdate.
+
+    Returns floor((event_date - birthdate) / 365.25).
+    Falls back to the raw age column if birthdate or event date is missing.
+    Returns None if nothing works (caller can fill from patients table).
+    """
+    raw_bd = str(row.get(birthdate_col, "")).strip()
+    raw_event = str(row.get(event_date_col, "")).strip()
+
+    # Try birthdate → event date calculation
+    if raw_bd and raw_bd != "nan" and raw_event and raw_event != "nan":
+        bd = _parse_date_obj(raw_bd)
+        evt = _parse_date_obj(raw_event)
+        if bd is not None and evt is not None:
+            age = int((evt - bd).days / 365.25)
+            if _AGE_MIN_VALID <= age <= _AGE_MAX_VALID:
+                return float(age)
+
+    # Fall back to raw age column
+    raw_age = str(row.get(fallback_age_col, "")).strip()
+    if raw_age and raw_age != "nan":
+        with contextlib.suppress(ValueError, TypeError):
+            age = int(float(raw_age))
+            if _AGE_MIN_VALID <= age <= _AGE_MAX_VALID:
+                return float(age)
+
+    return None
+
+
+def _parse_date_obj(raw: str) -> date | None:
+    """Parse a date string into a date object, returning None on failure."""
+    raw = str(raw).strip()
+    if not raw or raw == "nan":
+        return None
+    for fmt in ("%m/%d/%Y %H:%M", "%m/%d/%Y", "%Y-%m-%d", "%Y-%m-%d %H:%M:%S"):
+        try:
+            return datetime.strptime(raw.split("+")[0].strip(), fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def _resolve_age_at_event(
+    df: pd.DataFrame,
+    birthdate_col: str,
+    event_date_col: str,
+    fallback_age_col: str,
+    patient_id_col: str,
+    patients_df: pd.DataFrame | None,
+    log: list[str],
+    label: str = "referral",
+) -> pd.Series:
+    """Compute age at event from birthdate, fill gaps from patients table.
+
+    1. birthdate → event date → floor((event - bd) / 365.25)
+    2. Fall back to raw age column
+    3. Fill remaining NaN from patients_df lookup
+    """
+    ages = df.apply(
+        lambda r: _compute_age_at_event(r, birthdate_col, event_date_col, fallback_age_col),
+        axis=1,
+    )
+    if patients_df is not None:
+        age_lookup = patients_df.set_index("id")["age"]
+        still_missing = ages.isna()
+        if still_missing.any():
+            looked_up = df.loc[still_missing, patient_id_col].astype(int).map(age_lookup)
+            ages.loc[still_missing] = looked_up
+            unmatched = int(looked_up.isna().sum())
+            if unmatched:
+                log.append(f"  ⚠ {unmatched} {label}(s) have no matching patient for age")
+    else:
+        still_missing = ages.isna()
+        if still_missing.any():
+            ages.loc[still_missing] = pd.to_numeric(
+                df.loc[still_missing, fallback_age_col], errors="coerce"
+            )
+    return ages
+
+
+def _fill_pcp_from_patients(
+    df: pd.DataFrame,
+    patients_df: pd.DataFrame | None,
+    log: list[str],
+) -> None:
+    """Fill empty pcp_agency values from patients table (in-place)."""
+    if patients_df is None:
+        return
+    pcp_lookup = patients_df.set_index("id")["pcp_agency"]
+    empty_pcp = df["pcp_agency"].isin({"", "No data", "Not disclosed"})
+    if not empty_pcp.any():
+        return
+    looked_up = (
+        pd.to_numeric(df.loc[empty_pcp, "patient_ID"], errors="coerce")
+        .dropna()
+        .astype(int)
+        .map(pcp_lookup)
+        .fillna("No data")
+    )
+    df.loc[looked_up.index, "pcp_agency"] = looked_up
+    filled = int((looked_up != "No data").sum())
+    if filled:
+        log.append(f"  → Filled {filled} pcp_agency values from patients table")
+
+
+def _geocode_od_with_csv_fallback(
+    df: pd.DataFrame,
+    log: list[str],
+) -> tuple[pd.Series, pd.Series]:
+    """Use CSV lat/long when present, geocode only empty rows."""
+    from apps.data_import.geocode_service import geocode_od_addresses
+
+    lat_clean = pd.to_numeric(df["lat"], errors="coerce")
+    long_clean = pd.to_numeric(df["long"], errors="coerce")
+
+    needs_geocoding = lat_clean.isna() | long_clean.isna()
+    if needs_geocoding.any():
+        geo_df = df.loc[needs_geocoding].copy()
+        geo_lats, geo_lons = geocode_od_addresses(
+            geo_df, address_col="od_address", zip_col="zip_clean", log=log
+        )
+        lat_clean.loc[needs_geocoding] = geo_lats
+        long_clean.loc[needs_geocoding] = geo_lons
+    else:
+        log.append("  Geocoding: all rows have CSV lat/long, skipping geocoder")
+
+    return lat_clean, long_clean
+
+
+def _resolve_race_from_patients(
+    df: pd.DataFrame,
+    patient_id_col: str,
+    patients_df: pd.DataFrame | None,
+) -> pd.Series:
+    """Look up race from cleaned patients. Returns 'No data' when not found."""
+    if patients_df is not None and "race" in patients_df.columns:
+        race_lookup = patients_df.set_index("id")["race"]
+        result = df[patient_id_col].astype(int).map(race_lookup).fillna("No data")
+        return result.replace("", "No data")
+    return pd.Series("No data", index=df.index)
+
+
 def _parse_date(raw: str) -> str:
     """Parse various date formats into YYYY-MM-DD or empty string."""
     raw = str(raw).strip()
@@ -953,6 +1229,54 @@ def _parse_bool_or_none(raw: str) -> str:
 
 def _bool_to_int(raw: str) -> int:
     return 1 if str(raw).strip().lower() in ("true", "1", "yes") else 0
+
+
+def _apply_bool_to_int(df: pd.DataFrame, cols: list[str]) -> None:
+    """Apply _bool_to_int to each column, storing result as {col}_int."""
+    for col in cols:
+        df[f"{col}_int"] = df[col].apply(_bool_to_int)
+
+
+def _apply_bool_to_int_mapped(df: pd.DataFrame, mappings: list[tuple[str, str]]) -> None:
+    """Apply _bool_to_int from csv_col → model_col name."""
+    for csv_col, model_col in mappings:
+        df[model_col] = df[csv_col].apply(_bool_to_int)
+
+
+def _apply_narcan_to_int(df: pd.DataFrame, cols: list[str]) -> None:
+    """Apply _narcan_to_int to each column, storing result as {col}_num."""
+    for col in cols:
+        df[f"{col}_num"] = df[col].apply(_narcan_to_int)
+
+
+def _apply_float_coerce(df: pd.DataFrame, cols: list[str]) -> None:
+    """Coerce columns to float, filling NaN with 0, storing as {col}_num."""
+    for col in cols:
+        df[f"{col}_num"] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
+
+def _replace_empty_with_no_data(df: pd.DataFrame, cols: list[str]) -> None:
+    """Replace empty strings with 'No data' for each column in-place."""
+    for col in cols:
+        df[col] = df[col].replace("", "No data")
+
+
+def _narcan_to_int(raw: str) -> int:
+    """Convert narcan/onscene text values to integers.
+
+    Handles edge cases from SharePoint data entry:
+    - "None Given" → 0, "> 6" → 7, "Unknown" → 0
+    - Normal numeric strings pass through as-is
+    - Anything else (empty, NaN) → 0
+    """
+    val = str(raw).strip()
+    mapped = NARCAN_TEXT_MAP.get(val.lower())
+    if mapped is not None:
+        return mapped
+    try:
+        return int(float(val))
+    except (ValueError, TypeError):
+        return 0
 
 
 def _split_referral_type(raw: str) -> list[str]:

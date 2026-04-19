@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block pageName %}dataImportUpload{% endblock pageName %}
-{% block title %}Upload Data{% endblock title %}
+{% block title %}{% if batch %}Add Dataset · Import #{{ batch.pk }}{% else %}Upload Data{% endif %}{% endblock title %}
 
 {% block content %}
 <div class="col-span-12 mx-auto w-full max-w-3xl">
@@ -9,12 +9,116 @@
 
         {# Header #}
         <div>
-            <a href="{% url 'data_import:batch_list' %}" class="text-sm text-slate-400 hover:text-white transition">← Back to Import History</a>
-            <h2 class="mt-3 text-2xl font-bold text-gray-900 dark:text-white">Upload CSV File</h2>
+            {% if batch %}
+            <a href="{% url 'data_import:review' batch.pk %}" class="text-sm text-slate-400 hover:text-white transition">← Back to Review</a>
+            <h2 class="mt-3 text-2xl font-bold text-gray-900 dark:text-white">Add Dataset to Import <span class="text-brand-400">#{{ batch.pk }}</span></h2>
             <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
-                Upload a raw CSV export from PowerApps/SharePoint.
-                Select the dataset type, then choose the file. It will be cleaned and staged for review before committing to production.
+                Upload an additional CSV to this import batch. It will be cleaned and staged alongside your existing data.
             </p>
+            {% else %}
+            <a href="{% url 'data_import:batch_list' %}" class="text-sm text-slate-400 hover:text-white transition">← Back to Import History</a>
+            <h2 class="mt-3 text-2xl font-bold text-gray-900 dark:text-white">New Data Import</h2>
+            <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
+                Start by uploading <span class="text-brand-400 font-semibold">patients.csv</span> — the foundation dataset.
+                You can add referrals, OD referrals, and encounters after reviewing patients.
+            </p>
+            {% endif %}
+        </div>
+
+        {# Workflow steps indicator #}
+        <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Import Workflow</h3>
+            <div class="flex items-start gap-3">
+                {# Step 1: Patients — always required #}
+                {% if batch and "patients" in existing_types %}
+                <div class="flex flex-col items-center text-center flex-1">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 ring-1 ring-emerald-500/40">
+                        <svg class="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                    </div>
+                    <span class="mt-1.5 text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Patients</span>
+                    <span class="text-[10px] text-slate-500">Done</span>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center text-center flex-1">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full {% if not batch %}bg-brand-500/20 ring-2 ring-brand-400{% else %}bg-slate-800 ring-1 ring-white/10{% endif %}">
+                        <span class="text-xs font-bold {% if not batch %}text-brand-400{% else %}text-slate-500{% endif %}">1</span>
+                    </div>
+                    <span class="mt-1.5 text-[10px] font-semibold {% if not batch %}text-brand-400{% else %}text-slate-500{% endif %} uppercase tracking-wider">Patients</span>
+                    {% if not batch %}<span class="text-[10px] text-brand-400/70">Current</span>{% endif %}
+                </div>
+                {% endif %}
+
+                <div class="h-px flex-1 bg-white/10 mt-4"></div>
+
+                {# Step 2: Referrals (optional) #}
+                {% if batch and "referrals" in existing_types %}
+                <div class="flex flex-col items-center text-center flex-1">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 ring-1 ring-emerald-500/40">
+                        <svg class="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                    </div>
+                    <span class="mt-1.5 text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Referrals</span>
+                    <span class="text-[10px] text-slate-500">Done</span>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center text-center flex-1">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 ring-1 ring-white/10">
+                        <span class="text-xs font-bold text-slate-500">2</span>
+                    </div>
+                    <span class="mt-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Referrals</span>
+                    <span class="text-[10px] text-slate-600">Optional</span>
+                </div>
+                {% endif %}
+
+                <div class="h-px flex-1 bg-white/10 mt-4"></div>
+
+                {# Step 3: OD Referrals (optional) #}
+                {% if batch and "odreferrals" in existing_types %}
+                <div class="flex flex-col items-center text-center flex-1">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 ring-1 ring-emerald-500/40">
+                        <svg class="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                    </div>
+                    <span class="mt-1.5 text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">OD Referrals</span>
+                    <span class="text-[10px] text-slate-500">Done</span>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center text-center flex-1">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 ring-1 ring-white/10">
+                        <span class="text-xs font-bold text-slate-500">3</span>
+                    </div>
+                    <span class="mt-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">OD Referrals</span>
+                    <span class="text-[10px] text-slate-600">Optional</span>
+                </div>
+                {% endif %}
+
+                <div class="h-px flex-1 bg-white/10 mt-4"></div>
+
+                {# Step 4: Encounters (optional) #}
+                {% if batch and "encounters" in existing_types %}
+                <div class="flex flex-col items-center text-center flex-1">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 ring-1 ring-emerald-500/40">
+                        <svg class="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                    </div>
+                    <span class="mt-1.5 text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Encounters</span>
+                    <span class="text-[10px] text-slate-500">Done</span>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center text-center flex-1">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 ring-1 ring-white/10">
+                        <span class="text-xs font-bold text-slate-500">4</span>
+                    </div>
+                    <span class="mt-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Encounters</span>
+                    <span class="text-[10px] text-slate-600">Optional</span>
+                </div>
+                {% endif %}
+            </div>
         </div>
 
         {# Upload form #}
@@ -24,9 +128,11 @@
             {# Dataset + File inputs #}
             <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-6 space-y-5">
                 <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Import Data</h3>
+
+                {% if batch %}
+                {# Adding to existing batch — show dataset selector with remaining types #}
                 <p class="text-xs text-slate-500">Select the dataset type and upload the corresponding CSV file.</p>
 
-                {# Dataset selector #}
                 <div>
                     <label for="{{ form.file_type.id_for_label }}" class="block text-sm font-medium text-slate-300 mb-1.5">
                         {{ form.file_type.label }}
@@ -40,21 +146,33 @@
                     {% endif %}
                 </div>
 
-                {# Expected filename hint #}
-                <div x-data="{ fileType: '{{ form.file_type.value|default:'patients' }}' }" class="text-xs text-slate-500 mt-1">
+                {# Expected filename hint — reactive via Alpine x-effect #}
+                <div x-data="{ fileType: document.getElementById('id_file_type')?.value || '' }"
+                     x-init="$el.closest('.space-y-5').querySelector('#id_file_type')
+                         ?.addEventListener('change', (e) => fileType = e.target.value)"
+                     class="text-xs text-slate-500 mt-1">
                     <p>
                         Expected file:
-                        <span x-show="fileType === 'patients'" class="text-brand-400 font-mono">patients.csv</span>
-                        <span x-show="fileType === 'referrals'" class="text-brand-400 font-mono">referrals.csv</span>
-                        <span x-show="fileType === 'odreferrals'" class="text-brand-400 font-mono">referrals_port.csv</span>
-                        <span x-show="fileType === 'encounters'" class="text-brand-400 font-mono">encounters.csv</span>
+                        <span x-show="fileType === 'patients'" x-cloak class="text-brand-400 font-mono">patients.csv</span>
+                        <span x-show="fileType === 'referrals'" x-cloak class="text-brand-400 font-mono">referrals.csv</span>
+                        <span x-show="fileType === 'odreferrals'" x-cloak class="text-brand-400 font-mono">referrals_port.csv</span>
+                        <span x-show="fileType === 'encounters'" x-cloak class="text-brand-400 font-mono">encounters.csv</span>
                     </p>
-                    <script>
-                        document.getElementById('{{ form.file_type.id_for_label }}')?.addEventListener('change', function(e) {
-                            document.querySelector('[x-data]').__x.$data.fileType = e.target.value;
-                        });
-                    </script>
                 </div>
+
+                {% else %}
+                {# New batch — locked to patients #}
+                <p class="text-xs text-slate-500">
+                    Upload <span class="text-brand-400 font-mono">patients.csv</span> to start.
+                    Referrals, OD referrals, and encounters can be added after you review patient data.
+                </p>
+
+                <div class="text-xs text-slate-500 mt-1">
+                    <p>
+                        Expected file: <span class="text-brand-400 font-mono">patients.csv</span>
+                    </p>
+                </div>
+                {% endif %}
 
                 {# File input #}
                 <div>
@@ -85,9 +203,15 @@
 
             {# Submit #}
             <div class="flex justify-end gap-3">
+                {% if batch %}
+                <a href="{% url 'data_import:review' batch.pk %}" class="rounded-xl border border-white/10 bg-slate-800/60 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700/60">
+                    Cancel
+                </a>
+                {% else %}
                 <a href="{% url 'data_import:batch_list' %}" class="rounded-xl border border-white/10 bg-slate-800/60 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700/60">
                     Cancel
                 </a>
+                {% endif %}
                 <button type="submit" class="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:shadow-xl hover:scale-[1.02]">
                     Upload & Process
                 </button>

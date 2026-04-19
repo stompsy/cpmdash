@@ -163,6 +163,28 @@ def _build_donut_chart(
     )
 
 
+def _apply_patient_field_transforms(
+    s: pd.Series,
+    field: str,
+    include_missing: bool,  # type: ignore[type-arg]
+) -> tuple:
+    """Apply per-field data transforms before charting, returning (series, include_missing)."""
+    if field == "marital_status":
+        # Consolidate to two categories: Married vs Not Married/Widowed.
+        # Drop unknown/missing — they dominate the chart and add no insight.
+        s = s[s != MISSING_LABEL]
+        s = s.where(s == "Married", "Not Married/Widowed")
+        include_missing = False
+
+    if field == "insurance":
+        # Show known insurance types only — "Not disclosed" dominates
+        # and isn't actionable.
+        s = s[s != MISSING_LABEL]
+        include_missing = False
+
+    return s, include_missing
+
+
 def _build_chart_for_field(
     df: pd.DataFrame,
     field: str,
@@ -355,6 +377,9 @@ def _build_chart_for_field(
                 if include_missing
                 else s_clean[~missing_mask]
             )
+
+        # ------- field-specific transforms before charting -------
+        s_clean, include_missing = _apply_patient_field_transforms(s_clean, field, include_missing)
 
         vc = _top_n_counts_with_other_and_missing(
             s_clean,
@@ -814,8 +839,13 @@ def _render_categorical_override(
 
         # Some datasets appear to contain a stray "single" value; keep the existing behavior.
         s = s[~s.str.lower().isin({"single"})]
+        # Default: show only known geographic ZIP codes (numeric values).
+        # Homeless/Transient and similar non-ZIP values aren't actionable
+        # for geographic distribution analysis.
+        _non_geographic = {"homeless", "homeless/transient", "transient"}
         if not zip_include_missing:
             s = s[s != missing_label]
+            s = s[~s.str.lower().isin(_non_geographic)]
         vc = _top_n_counts_with_other_and_missing(
             s,
             field,

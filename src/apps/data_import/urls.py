@@ -9,6 +9,7 @@ urlpatterns = [
     path("", views.batch_list, name="batch_list"),
     # Upload
     path("upload/", views.upload, name="upload"),
+    path("<int:batch_id>/upload/", views.upload_to_batch, name="upload_to_batch"),
     # Processing
     path("<int:batch_id>/process/", views.process_view, name="process"),
     path("<int:batch_id>/stream/", views.process_stream, name="process_stream"),

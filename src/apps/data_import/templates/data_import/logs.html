@@ -17,42 +17,81 @@
             </div>
         </div>
 
-        {% if logs %}
-        <div class="space-y-3">
-            {% for log in logs %}
-            <div id="log-{{ log.pk }}" class="rounded-2xl border border-white/10 bg-slate-900/40 overflow-hidden"
-                 x-data="{ expanded: false }">
-                <div class="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-white/5 transition"
-                     @click="expanded = !expanded">
+        {% if batch_groups %}
+        <div class="space-y-5">
+            {% for group in batch_groups %}
+            <div class="rounded-2xl border border-white/10 bg-slate-900/40 overflow-hidden">
+                {# Batch header #}
+                <div class="flex items-center justify-between px-5 py-4 border-b border-white/5">
                     <div class="flex items-center gap-4">
-                        <span class="text-xs font-mono text-slate-500">#{{ log.pk }}</span>
-                        <span class="text-sm text-white font-medium">
-                            Batch #{{ log.batch.pk }}
+                        {% if group.batch %}
+                        <span class="text-sm font-semibold text-white">Batch #{{ group.batch.pk }}</span>
+                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium
+                            {% if group.batch.status == 'committed' %}bg-emerald-400/15 text-emerald-400
+                            {% elif group.batch.status == 'review' %}bg-amber-400/15 text-amber-400
+                            {% elif group.batch.status == 'failed' %}bg-rose-400/15 text-rose-400
+                            {% else %}bg-slate-400/15 text-slate-400{% endif %}">
+                            {{ group.batch.get_status_display }}
                         </span>
-                        <span class="text-xs text-slate-400">
-                            {{ log.created_at|date:"M d, Y H:i" }}
+                        {% else %}
+                        <span class="text-sm font-semibold text-slate-400">Batch deleted</span>
+                        {% endif %}
+                        <span class="text-xs text-slate-500">
+                            {{ group.created_at|date:"M j, Y g:i A" }}
                         </span>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <form hx-post="{% url 'data_import:log_delete' log.pk %}"
-                              hx-target="#log-{{ log.pk }}"
-                              hx-swap="outerHTML"
-                              hx-confirm="Delete this log?"
-                              class="inline">
-                            {% csrf_token %}
-                            <button type="submit" @click.stop
-                                    class="rounded-lg bg-rose-500/10 px-2.5 py-1 text-[10px] font-medium text-rose-400 hover:bg-rose-500/20 transition">
-                                Delete
-                            </button>
-                        </form>
-                        <svg class="h-4 w-4 text-slate-400 transition-transform" :class="expanded && 'rotate-180'"
-                             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                        </svg>
-                    </div>
+                    <span class="text-[10px] font-medium text-slate-500">
+                        {{ group.logs|length }} file{{ group.logs|length|pluralize }}
+                    </span>
                 </div>
-                <div x-show="expanded" x-cloak x-transition class="border-t border-white/5 px-5 py-4">
-                    <pre class="whitespace-pre-wrap text-xs text-slate-300 font-mono leading-relaxed max-h-96 overflow-y-auto">{{ log.content }}</pre>
+
+                {# Per-file accordion logs #}
+                <div class="divide-y divide-white/[0.04]">
+                    {% for log in group.logs %}
+                    <div id="log-{{ log.pk }}" x-data="{ open: false }">
+                        <div class="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-white/[0.03] transition"
+                             @click="open = !open">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="h-3.5 w-3.5 text-slate-500 transition-transform shrink-0" :class="open && 'rotate-90'"
+                                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                                {# File type badge #}
+                                {% if log.file_type %}
+                                <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider
+                                    {% if log.file_type == 'patients' %}bg-brand-500/15 text-brand-400
+                                    {% elif log.file_type == 'referrals' %}bg-sky-500/15 text-sky-400
+                                    {% elif log.file_type == 'odreferrals' %}bg-amber-500/15 text-amber-400
+                                    {% elif log.file_type == 'encounters' %}bg-emerald-500/15 text-emerald-400
+                                    {% else %}bg-slate-500/15 text-slate-400{% endif %}">
+                                    {{ log.get_file_type_display }}
+                                </span>
+                                {% endif %}
+                                <span class="text-xs text-slate-300 font-mono truncate">{{ log.original_filename|default:"(all files)" }}</span>
+                                {% if log.summary %}
+                                <span class="text-[10px] text-slate-500 truncate hidden sm:inline">{{ log.summary }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0 ml-3">
+                                <span class="text-[10px] text-slate-600">{{ log.created_at|date:"H:i" }}</span>
+                                <form hx-post="{% url 'data_import:log_delete' log.pk %}"
+                                      hx-target="#log-{{ log.pk }}"
+                                      hx-swap="outerHTML"
+                                      hx-confirm="Delete this log?"
+                                      class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" @click.stop
+                                            class="rounded-md bg-rose-500/10 px-2 py-0.5 text-[9px] font-medium text-rose-400 hover:bg-rose-500/20 transition">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div x-show="open" x-cloak x-transition class="border-t border-white/[0.04] bg-black/20 px-5 py-4">
+                            <pre class="whitespace-pre-wrap text-xs text-slate-300 font-mono leading-relaxed max-h-80 overflow-y-auto">{{ log.content }}</pre>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
             {% endfor %}

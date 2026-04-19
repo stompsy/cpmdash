@@ -810,9 +810,12 @@ def _apply_field_specific_transforms(s: pd.Series, field: str) -> pd.Series:
 
     # Filter out unwanted values based on field type
     # For all fields including insurance, filter out "not disclosed" and "single"
-    s_clean = s[~s.str.lower().isin({"not disclosed", "single"})]
+    # Also filter out "no data" — these are genuinely missing values that
+    # distort the chart (e.g. 44% of referral_agency is "No data").
+    s_clean = s[~s.str.lower().isin({"not disclosed", "single", "no data", "no-data", "no_data"})]
 
     # For encounter type categories, drop explicit 'No data' buckets
+    # (already covered by the filter above, but kept for clarity)
     if field.startswith("encounter_type_cat"):
         s_clean = s_clean[~s_clean.str.strip().str.lower().isin({"no data", "no-data", "no_data"})]
 

@@ -1,4 +1,5 @@
 {# Single row display — used inside the data table and as HTMX swap target #}
+{% load data_import_tags %}
 <tr id="row-{{ row.pk }}"
     class="transition-colors group
            {% if row.status == 'error' %}bg-rose-500/[0.06] hover:bg-rose-500/[0.12]
@@ -19,15 +20,15 @@
                           {% elif row.status == 'error' %}text-rose-400
                           {% else %}text-slate-500{% endif %}">
                 {% if row.status == 'new' %}
-                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 mr-1"></span>new
+                    new
                 {% elif row.status == 'changed' %}
-                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-sky-400 mr-1"></span>chg
+                    chg
                 {% elif row.status == 'warning' %}
-                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-amber-400 mr-1"></span>warn
+                    warn
                 {% elif row.status == 'error' %}
-                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-rose-400 mr-1"></span>err
+                    err
                 {% elif row.status == 'existing' %}
-                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-slate-500 mr-1"></span>dup
+                    dup
                 {% endif %}
             </span>
             {% if row.empty_count %}
@@ -36,8 +37,9 @@
         </div>
     </td>
 
-    {# Data cells — each cell is click-to-edit (non-existing rows) #}
-    {% for cell in row.cells %}
+    {# Data cells — iterate field_names to respect narrowed column display #}
+    {% for fname in field_names %}
+    {% with cell=row.cells_by_name|lookup:fname %}
     {% if row.status != 'existing' %}
     {% include "data_import/_cell.html" with cell=cell batch_pk=batch.pk dataset=dataset row_pk=row.pk %}
     {% else %}
@@ -45,30 +47,79 @@
         <span class="text-slate-600 text-[11px]">{{ cell.value|default_if_none:"" }}</span>
     </td>
     {% endif %}
+    {% endwith %}
     {% endfor %}
 
-    {# Validation notes #}
-    <td class="px-3 py-2 max-w-[200px]">
-        {% if row.validation_notes %}
-        <span class="text-[10px] leading-snug
-                     {% if row.status == 'error' %}text-rose-400/80
-                     {% elif row.status == 'changed' %}text-sky-400/80
-                     {% else %}text-amber-400/70{% endif %}">
-            {{ row.validation_notes|truncatewords:15 }}
-        </span>
-        {% endif %}
-    </td>
+    {# Actions + Notes tooltip — sticky right column #}
+    <td class="sticky right-0 z-10 px-3 py-2 bg-slate-900/95">
+        <div class="flex items-center gap-1.5">
+            {% if row.status != 'existing' %}
+            <button hx-get="{% url 'data_import:row_edit' batch.pk dataset row.pk %}"
+                    hx-target="#row-{{ row.pk }}"
+                    hx-swap="outerHTML"
+                    class="rounded-md bg-brand-500/10 px-2 py-0.5 text-[10px] font-semibold text-brand-400
+                           hover:bg-brand-500/20 transition opacity-0 group-hover:opacity-100">
+                Edit
+            </button>
+            {% endif %}
+            {% if row.validation_notes %}
+            <div class="relative" x-data="{ showTip: false }">
+                <button @mouseenter="showTip = true" @mouseleave="showTip = false"
+                        @click="showTip = !showTip"
+                        class="rounded-full p-0.5 transition
+                               {% if row.status == 'error' %}text-rose-400 hover:bg-rose-500/20
+                               {% elif row.status == 'changed' %}text-sky-400 hover:bg-sky-500/20
+                               {% else %}text-amber-400 hover:bg-amber-500/20{% endif %}">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                    </svg>
+                </button>
+                <div x-show="showTip" x-cloak x-transition
+                     class="absolute top-full right-0 mt-2 w-80 rounded-xl border border-white/10 bg-slate-800 shadow-xl p-3 text-[10px] leading-relaxed z-50">
+                    {# Arrow caret pointing up #}
+                    <div class="absolute top-0 right-4 -translate-y-full">
+                        <div class="border-x-[6px] border-x-transparent border-b-[6px] border-b-white/10"></div>
+                    </div>
 
-    {# Actions #}
-    <td class="px-3 py-2">
-        {% if row.status != 'existing' %}
-        <button hx-get="{% url 'data_import:row_edit' batch.pk dataset row.pk %}"
-                hx-target="#row-{{ row.pk }}"
-                hx-swap="outerHTML"
-                class="rounded-md bg-brand-500/10 px-2 py-0.5 text-[10px] font-semibold text-brand-400
-                       hover:bg-brand-500/20 transition opacity-0 group-hover:opacity-100">
-            Edit
-        </button>
-        {% endif %}
+                    {% for group in row.validation_notes|grouped_notes %}
+                    {% if not forloop.first %}
+                    <div class="my-2 border-t border-white/10"></div>
+                    {% endif %}
+                    <div class="font-bold uppercase tracking-wider text-[9px] mb-1
+                                {% if group.color == 'sky' %}text-sky-400
+                                {% elif group.color == 'emerald' %}text-emerald-400
+                                {% elif group.color == 'rose' %}text-rose-400
+                                {% else %}text-amber-400{% endif %}">
+                        {{ group.label }}
+                    </div>
+                    <ul class="space-y-0.5 list-none">
+                        {% for item in group.items %}
+                        <li class="flex items-start gap-1">
+                            <span class="mt-px shrink-0
+                                         {% if group.color == 'sky' %}text-sky-500/60
+                                         {% elif group.color == 'emerald' %}text-emerald-500/60
+                                         {% elif group.color == 'rose' %}text-rose-500/60
+                                         {% else %}text-amber-500/60{% endif %}">→</span>
+                            <span class="{% if group.color == 'sky' %}text-sky-300
+                                         {% elif group.color == 'emerald' %}text-emerald-300
+                                         {% elif group.color == 'rose' %}text-rose-300
+                                         {% else %}text-amber-300{% endif %}">{{ item }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endfor %}
+
+                    {# Cell color legend #}
+                    {% if row.empty_count %}
+                    <div class="my-2 border-t border-white/10"></div>
+                    <div class="flex items-center gap-2 text-[9px] text-slate-500">
+                        <span class="inline-block h-2 w-2 rounded-sm bg-rose-900/40 ring-1 ring-rose-500/20 shrink-0"></span>
+                        {{ row.empty_count }} empty field{{ row.empty_count|pluralize }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </td>
 </tr>

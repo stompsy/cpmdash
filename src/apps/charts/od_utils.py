@@ -49,19 +49,42 @@ def get_od_metrics(year: int, population: int = 20_000) -> dict:
     }
 
 
+def _empty_cost_savings_result() -> dict:
+    """Return a zero-filled cost savings dict when no patient data is available."""
+    return {
+        "calls_prevented": 0,
+        "transports_averted": 0,
+        "ed_visits_avoided": 0,
+        "total_savings": 0,
+        "savings_breakdown": {"transports": 0, "911_non_transport": 0, "ed_visits": 0},
+        "total_patients": 0,
+        "years_calculated": 0,
+        "yearly_breakdown": [],
+        "transport_savings_per_patient": 0,
+        "prevention_success_rate": 0,
+    }
+
+
 def get_cost_savings_metrics() -> dict:
     """
     Calculate aggregated cost savings metrics from all years of data using patient-based methodology.
     Returns metrics for 911 calls prevented, transports averted, ED visits avoided, and total savings.
+
+    Patient counts are derived dynamically from get_quarterly_patient_counts() so new
+    quarters/years appear automatically without code changes.
     """
-    # STATIC authoritative patient counts provided (do not trust historical created_date)
-    static_patient_counts = {2021: 419, 2022: 748, 2023: 396, 2024: 411, 2025: 298}
+    # Pull annual patient totals from the quarterly counts (which already handle
+    # static fallbacks + dynamic DB queries for new quarters).
+    quarterly_data = get_quarterly_patient_counts()
+    df_q = quarterly_data.get("df")
+    if df_q is None or df_q.empty:
+        return _empty_cost_savings_result()
 
-    # Derive ordered years present in static mapping (filter to those <= current year if needed)
-    years = sorted(static_patient_counts.keys())
+    annual_counts = df_q.groupby("year")["count"].sum().to_dict()
+    years = sorted(int(y) for y in annual_counts)
 
-    # Build a lightweight iterable mimicking the old structure
-    patients_by_year = [{"year": y, "total_patients": static_patient_counts[y]} for y in years]
+    # Build a lightweight iterable from the dynamic annual totals
+    patients_by_year = [{"year": y, "total_patients": int(annual_counts[y])} for y in years]
 
     total_calls_prevented = 0
     total_transports_averted = 0
