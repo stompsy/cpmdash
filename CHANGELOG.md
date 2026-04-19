@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.2 (2026-04-19)
+
+### Bug Fixes
+
+- Pin non-geocodable addresses to Serenity House and skip API calls
+  ([`592898b`](https://github.com/stompsy/cpmdash/commit/592898bd6a302381c8a9e4f243182146e3c70079))
+
+
 ## v1.0.1 (2026-04-19)
 
 ### Bug Fixes
