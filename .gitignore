@@ -51,3 +51,4 @@ copilot-instructions.md
 compress_images.py
 src/static/data/hargrove_grant/202*.csv
 src/static/data/*.csv
+*.bak
