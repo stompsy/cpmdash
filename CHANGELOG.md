@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.1 (2026-04-19)
+
+### Bug Fixes
+
+- Switch to gthread workers to fix SSE heartbeat during geocoding
+  ([`416cbd5`](https://github.com/stompsy/cpmdash/commit/416cbd531d62a746b4e149e72257da4b7f013426))
+
+
 ## v1.0.0 (2026-04-19)
 
 ### Bug Fixes
