@@ -92,7 +92,7 @@ def build_chart_od_hist_monthly(theme):
     # Add a total-count line trace overlaying the stacked bars.
     # This makes the overall trend visible even when the fatal/non-fatal
     # split makes it hard to read.
-    monthly_totals = df.groupby(df["od_date"].dt.to_period("M")).size()
+    monthly_totals = df.groupby(df["od_date"].dt.tz_localize(None).dt.to_period("M")).size()
     monthly_totals.index = monthly_totals.index.to_timestamp()
     monthly_totals = monthly_totals.sort_index()
     fig.add_trace(
