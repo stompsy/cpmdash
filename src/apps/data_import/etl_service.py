@@ -273,11 +273,22 @@ class DataCleaningService:
         # --- Geocode from Address column --------------------------------
         # Only geocode rows where there's an address to work with.
         # The lat/long will be blank for rows with no Address value.
-        from apps.data_import.geocode_service import geocode_od_addresses
+        from apps.data_import.geocode_service import (
+            SERENITY_HOUSE_ADDRESS,
+            geocode_od_addresses,
+            is_non_geocodable,
+        )
 
         df["lat_clean"], df["long_clean"] = geocode_od_addresses(
             df, address_col="Address", zip_col="zip_clean", log=log
         )
+
+        # Override address + zip for non-geocodable rows — empty, unknown,
+        # and descriptive locations (vehicles, shelters, etc.) all become
+        # Serenity House.  These are homeless/transient patients.
+        _non_geo_mask = df["Address"].fillna("").apply(is_non_geocodable)
+        df.loc[_non_geo_mask, "zip_clean"] = "Homeless/Transient"
+        df.loc[_non_geo_mask, "Address"] = SERENITY_HOUSE_ADDRESS
 
         # Build output frame
         out = pd.DataFrame(

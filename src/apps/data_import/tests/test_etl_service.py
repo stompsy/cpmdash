@@ -251,7 +251,7 @@ class TestCleanPatients:
             "3C Client": "true",
             "Zip Code": "98362",
             "zipcode": "",
-            "Address": "",
+            "Address": "123 E 1st St",
             "Created": "01/15/2024",
             "Modified": "02/20/2024",
             "marital_status": "Single",
@@ -291,9 +291,27 @@ class TestCleanPatients:
         result = svc.clean_patients(csv)
         assert result.df.iloc[0]["zip_code"] == "Homeless/Transient"
 
+    def test_empty_address_becomes_serenity_house(self) -> None:
+        """Empty/non-geocodable addresses → Serenity House + Homeless/Transient zip."""
+        svc = DataCleaningService()
+        csv = self._make_patient_csv({"Address": "", "Zip Code": "98362"})
+        result = svc.clean_patients(csv)
+        row = result.df.iloc[0]
+        assert row["address"] == "2321 W 18th St, Port Angeles, WA 98363"
+        assert row["zip_code"] == "Homeless/Transient"
+
+    def test_junk_address_becomes_serenity_house(self) -> None:
+        """Descriptive location text → Serenity House + Homeless/Transient zip."""
+        svc = DataCleaningService()
+        csv = self._make_patient_csv({"Address": "Kia Rio at Tree Park", "Zip Code": "98362"})
+        result = svc.clean_patients(csv)
+        row = result.df.iloc[0]
+        assert row["address"] == "2321 W 18th St, Port Angeles, WA 98363"
+        assert row["zip_code"] == "Homeless/Transient"
+
     def test_bracket_zip_normalized(self) -> None:
         svc = DataCleaningService()
-        csv = self._make_patient_csv({"Zip Code": "[]"})
+        csv = self._make_patient_csv({"Zip Code": "[]", "Address": "456 Main St"})
         result = svc.clean_patients(csv)
         assert result.df.iloc[0]["zip_code"] == "Not disclosed"
 

@@ -54,10 +54,35 @@ _NON_ADDRESS_PATTERNS = [
     "general delivery",
     "unhoused",
     "unknown",
+    "unkn",
+    "uknown",
     "n/a",
     "none",
     "shelter",
     "no data",
+    "no permanent",
+    "serenity house",
+    "lives in",
+    "living in",
+    "likely transient",
+    "likely unhoused",
+    "houseless",
+    "unsheltered",
+    "winnebago",
+    "vehicle",
+    "van at",
+    "green van",
+    "white van",
+    "rv at",
+    "currently",
+    "hotels",
+    "motel",
+    "not local",
+    "out of area",
+    "po box",
+    "p.o. box",
+    "po bo ",
+    "airbnb",
 ]
 
 # Cities in the service area for sweep fallback
@@ -112,6 +137,12 @@ _ZIP_CENTROIDS: dict[str, tuple[float, float]] = {
     "98368": (48.1170, -122.7604),  # Port Townsend (Jefferson Co.)
 }
 
+# Default coordinates for non-geocodable addresses (Serenity House / CPM office).
+# Homeless patients with descriptive locations like "Kia Rio at Tree Park" get
+# pinned here so they appear on maps near the agency that serves them.
+_SERENITY_HOUSE_COORDS: tuple[float, float] = (48.1224, -123.4912)
+SERENITY_HOUSE_ADDRESS = "2321 W 18th St, Port Angeles, WA 98363"
+
 _DEFAULT_STATE = "WA"
 _DEFAULT_COUNTY = "Clallam County"
 _DEFAULT_CITY = "Port Angeles"
@@ -162,7 +193,43 @@ def _normalize_address(address: str) -> str:
 
 def _is_non_address(address: str) -> bool:
     lower = address.strip().lower()
-    return any(p in lower for p in _NON_ADDRESS_PATTERNS)
+    if any(p in lower for p in _NON_ADDRESS_PATTERNS):
+        return True
+    # Short PO box variants: "PO 114", "po 232"
+    if re.match(r"^po\s+\d", lower):
+        return True
+    # Very short abbreviations that are clearly not addresses
+    return lower in ("unk", "sh", "rv", "na", "tbd")
+
+
+def _looks_like_street_address(address: str) -> bool:
+    """Return True if the address plausibly contains a street number.
+
+    Real street addresses almost always start with a digit ("123 Main St").
+    Addresses like "Serenity House", "UNKN", or "Kia Rio" waste 12+ Nominatim
+    calls each during city sweep with zero chance of resolving.
+    """
+    norm = address.strip()
+    if not norm:
+        return False
+    # Starts with a digit → likely a street address
+    if re.match(r"^\d", norm):
+        return True
+    # Contains a directional + street type pattern ("E 1st St", "W Washington St")
+    return bool(re.match(r"^[NSEW]\s+\d", norm, re.IGNORECASE))
+
+
+def is_non_geocodable(address: str) -> bool:
+    """Return True if the address is empty, unknown, or a location description.
+
+    Public API for use by the ETL layer to identify patients without a real
+    street address.  Covers empty/blank values, keyword matches like 'shelter'
+    or 'vehicle', and non-numeric descriptions like 'Kia Rio at Tree Park'.
+    All of these get pinned to the Serenity House / CPM office address.
+    """
+    if not address or not address.strip():
+        return True
+    return _is_non_address(address) or not _looks_like_street_address(address)
 
 
 def _has_location_context(address: str) -> bool:
@@ -329,6 +396,9 @@ def _geocode_with_city_sweep(address: str) -> tuple[float, float, str] | None:
     if not clean:
         return None
 
+    if not _looks_like_street_address(clean):
+        return None
+
     for city in _CLALLAM_CITIES:
         query = f"{clean}, {city}, WA"
         result = _nominatim_query(query)
@@ -345,6 +415,26 @@ def _geocode_with_city_sweep(address: str) -> tuple[float, float, str] | None:
 # ---------------------------------------------------------------------------
 _CacheDict = dict[str, dict[str, float | str | None]]
 _TodoMap = dict[str, tuple[str, str, list[int]]]  # cache_key → (addr, zip, row_indices)
+
+
+def _assign_non_address_default(
+    addr: str,
+    zc: str,
+    idx: int,
+    cache: _CacheDict,
+    lats: pd.Series,
+    lons: pd.Series,
+) -> None:
+    """Pin a non-geocodable address to Serenity House coords and cache it."""
+    lats[idx] = _SERENITY_HOUSE_COORDS[0]
+    lons[idx] = _SERENITY_HOUSE_COORDS[1]
+    ck = _cache_key(addr, zc)
+    if ck not in cache:
+        cache[ck] = {
+            "lat": _SERENITY_HOUSE_COORDS[0],
+            "lon": _SERENITY_HOUSE_COORDS[1],
+            "method": "non_address_default",
+        }
 
 
 def _phase_cache_lookup(
@@ -364,7 +454,11 @@ def _phase_cache_lookup(
         addr = str(row[address_col]).strip()
         zc = str(row[zip_col]).strip()
 
-        if not addr or _is_non_address(addr):
+        if not addr or _is_non_address(addr) or not _looks_like_street_address(addr):
+            # Location description, not a real street address — pin to
+            # Serenity House so these patients/ODs appear on maps near
+            # the agency that serves them.  Zero API calls.
+            _assign_non_address_default(addr, zc, idx, cache, lats, lons)
             skip_count += 1
             continue
 
@@ -502,7 +596,9 @@ def geocode_od_addresses(
       4. Zip-code centroid fallback
 
     Updates the shared ``assets/geocode_cache.json`` with any new results.
-    Non-geocodable addresses (empty, homeless, etc.) get NaN.
+    Non-geocodable location descriptions (homeless shelters, vehicle
+    descriptions, etc.) are pinned to the Serenity House / CPM office
+    coordinates.  Truly empty addresses get NaN.
     """
     if log is None:
         log = []
