@@ -7,7 +7,7 @@ from plotly.offline import plot
 
 from utils.chart_colors import CHART_COLORS_VIBRANT
 from utils.chart_normalization import add_share_columns, count_share_text
-from utils.plotly import style_plotly_layout
+from utils.plotly import get_theme_colors, style_plotly_layout
 from utils.tailwind_colors import TAILWIND_COLORS
 
 from ...core.models import ODReferrals
@@ -76,6 +76,20 @@ def _build_donut_chart(vc_df: pd.DataFrame, label_col: str, value_col: str, them
         margin={"t": 30, "l": 24, "r": 24, "b": 10},
     )
     fig.update_layout(showlegend=False)
+
+    # Center annotation: total count inside the donut hole
+    tc = get_theme_colors(theme)
+    total_n = int(vc_df[value_col].sum())
+    fig.add_annotation(
+        text=f"<b>{total_n:,}</b><br>Total",
+        showarrow=False,
+        font=dict(size=22, color=tc["font_color"]),
+        x=0.5,
+        y=0.5,
+        xref="paper",
+        yref="paper",
+    )
+
     return plot(
         fig,
         output_type="div",

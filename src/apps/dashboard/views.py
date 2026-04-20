@@ -4612,7 +4612,7 @@ def od_sud_referral_detail(request):
     from plotly.offline import plot
 
     from utils.chart_colors import CHART_COLORS_VIBRANT
-    from utils.plotly import style_plotly_layout
+    from utils.plotly import get_theme_colors, style_plotly_layout
 
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
@@ -4739,6 +4739,19 @@ def od_sud_referral_detail(request):
                 fig.update_layout(legend_title_text="")
 
                 fig.update_traces(textposition="inside", textinfo="percent")
+
+                # Center annotation: total count inside the donut hole
+                tc = get_theme_colors(theme)
+                total_n = int(reasons_df["Count"].sum())
+                fig.add_annotation(
+                    text=f"<b>{total_n:,}</b><br>Total",
+                    showarrow=False,
+                    font=dict(size=22, color=tc["font_color"]),
+                    x=0.5,
+                    y=0.5,
+                    xref="paper",
+                    yref="paper",
+                )
 
                 non_referral_chart = plot(
                     fig,
@@ -6723,6 +6736,67 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
         years_data.append({"year": year, "is_current": year == current_year, "quarters": quarters})
 
     return years_data
+
+
+def cooccurring_deep_dive(request):
+    """Standalone deep-dive page for co-occurring behavioral health, substance
+    use, and alcohol use disorder analysis across the OUD/SUD cohorts."""
+    from ..charts.cooccurring.charts import (
+        build_age_bh_boxplot,
+        build_aud_by_age_sex,
+        build_aud_cooccurrence_donut,
+        build_bh_by_age_bracket,
+        build_bh_by_sex,
+        build_bh_cooccurrence_heatmap,
+        build_bh_prevalence_bar,
+        build_chronic_illness_treemap,
+        build_complexity_funnel,
+        build_deep_dive_hero_stats,
+        build_intentional_od_profile,
+        build_multi_bh_histogram,
+        build_odreferrals_cooccurring_stats,
+        build_patients_cooccurring_stats,
+        build_referrals_cooccurring_stats,
+        build_repeat_od_bh_comparison,
+        build_sud_bh_by_substance,
+        build_sud_substance_breakdown,
+    )
+
+    theme = get_theme_from_request(request)
+    updated_on = date(2026, 4, 19)
+
+    context = {
+        "theme": theme,
+        # Hero stats
+        "hero_stats": build_deep_dive_hero_stats(),
+        # Section 1: Behavioral Health Prevalence
+        "bh_prevalence_bar": build_bh_prevalence_bar(theme=theme),
+        "bh_by_age_bracket": build_bh_by_age_bracket(theme=theme),
+        "bh_by_sex": build_bh_by_sex(theme=theme),
+        "bh_cooccurrence_heatmap": build_bh_cooccurrence_heatmap(theme=theme),
+        "age_bh_boxplot": build_age_bh_boxplot(theme=theme),
+        "multi_bh_histogram": build_multi_bh_histogram(theme=theme),
+        # Section 2: Chronic Illness
+        "chronic_treemap": build_chronic_illness_treemap(theme=theme),
+        "complexity_funnel": build_complexity_funnel(theme=theme),
+        # Section 3: Overdose Risk
+        "repeat_od_bh": build_repeat_od_bh_comparison(theme=theme),
+        "intentional_od_profile": build_intentional_od_profile(theme=theme),
+        # Section 4: Substance Co-Occurrence
+        "aud_donut": build_aud_cooccurrence_donut(theme=theme),
+        "aud_by_age_sex": build_aud_by_age_sex(theme=theme),
+        "sud_breakdown": build_sud_substance_breakdown(theme=theme),
+        "sud_bh_by_substance": build_sud_bh_by_substance(theme=theme),
+        # Stats groups
+        "patients_stats": build_patients_cooccurring_stats(),
+        "odreferrals_stats": build_odreferrals_cooccurring_stats(),
+        "referrals_stats": build_referrals_cooccurring_stats(),
+        # Page metadata
+        "page_header_updated_at": updated_on,
+        "page_header_updated_at_iso": updated_on.isoformat(),
+        "page_header_read_time": "12 min read",
+    }
+    return render(request, "dashboard/cooccurring.html", context)
 
 
 def hargrove_grant(request):
