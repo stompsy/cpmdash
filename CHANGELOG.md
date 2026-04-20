@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.1.0 (2026-04-20)
+
+### Features
+
+- Add co-occurring disorders deep-dive page with donut center annotations
+  ([#7](https://github.com/stompsy/cpmdash/pull/7),
+  [`06fc05f`](https://github.com/stompsy/cpmdash/commit/06fc05faf258f847c2d66fb4bb6f1b12a3d211b3))
+
+
 ## v1.0.3 (2026-04-19)
 
 ### Bug Fixes
