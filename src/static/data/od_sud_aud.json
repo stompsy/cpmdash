@@ -1,0 +1,2938 @@
+{
+  "metadata": {
+    "source": "od-sud-aud.xlsx",
+    "date_range": "03/2024-03/2025",
+    "title": "Overdoses by Opioids and Substance Use Disorders",
+    "deidentified": true,
+    "note": "Names and patient IDs removed for privacy"
+  },
+  "opioid_od_patients": [
+    {
+      "age": 61,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, depression",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Sleep apnea",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Sleep Apnea"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 72,
+      "sex": "Female",
+      "behavioral_health": "Bipolar",
+      "oud": "Yes",
+      "aud": null,
+      "intentional_od": "Yes",
+      "repeat_od_count": 0,
+      "chronic_illness": "ESRD",
+      "bh_conditions": [
+        "Bipolar"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "End-Stage Renal Disease"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 41,
+      "sex": "Female",
+      "behavioral_health": "PPD",
+      "oud": "Yes",
+      "aud": null,
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Chronic back pain",
+      "bh_conditions": [
+        "PPD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Back Pain"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 32,
+      "sex": "Male",
+      "behavioral_health": "ADHD, sexual assault victim,",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "HIV",
+      "bh_conditions": [
+        "ADHD",
+        "Suicide Attempt"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "HIV"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 22,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 23,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 40,
+      "sex": "Male",
+      "behavioral_health": "Depression",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 34,
+      "sex": "Male",
+      "behavioral_health": "Anxiety",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Hep C",
+      "bh_conditions": [
+        "Anxiety"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 22,
+      "sex": "Male",
+      "behavioral_health": "ADHD, oppositional defiant behavior",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "ADHD",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 25,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 19,
+      "sex": "Male",
+      "behavioral_health": "Depression, SI",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Depression",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 39,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 49,
+      "sex": "Male",
+      "behavioral_health": "Psychosis, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "HIV, CAD, DM2, Hep B",
+      "bh_conditions": [
+        "PTSD",
+        "Psychosis"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Coronary Artery Disease",
+        "Diabetes (Type 2)",
+        "HIV",
+        "Hepatitis B"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 32,
+      "sex": "Male",
+      "behavioral_health": "Anxiety",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Anxiety"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 36,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, depression, ADHD",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "ADHD",
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 68,
+      "sex": "Male",
+      "behavioral_health": "Schizophrenia, bipolar",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "Yes",
+      "repeat_od_count": 0,
+      "chronic_illness": "COPD, Hep C, spinal stenosis, TBI",
+      "bh_conditions": [
+        "Bipolar",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "COPD",
+        "Hepatitis C",
+        "Spinal Stenosis",
+        "Traumatic Brain Injury"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 48,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 58,
+      "sex": "Male",
+      "behavioral_health": "Anxiety, depression",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 51,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 3,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 34,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 35,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 65,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 29,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Degeneration of vertebral disc",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Rheumatoid Arthritis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 44,
+      "sex": "Female",
+      "behavioral_health": "Deprssion, anxiety, bipolar",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": "Chronic back and shoulder pain",
+      "bh_conditions": [
+        "Anxiety",
+        "Bipolar",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Back And Shoulder Pain"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 93,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 70,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": "Back pain, Hep C",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Back Pain",
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 26,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 32,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Knee pain",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Knee Pain"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 53,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 33,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Hep C",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 33,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 88,
+      "sex": "Female",
+      "behavioral_health": "Depression, SI",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "Yes",
+      "repeat_od_count": 0,
+      "chronic_illness": "Arthritis, osteoperosis",
+      "bh_conditions": [
+        "Depression",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Arthritis",
+        "Osteoperosis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 80,
+      "sex": "Female",
+      "behavioral_health": "Depression, anxiety, SI",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "Yes",
+      "repeat_od_count": 0,
+      "chronic_illness": "CHF, HTN, cancer",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Cancer",
+        "Heart Failure",
+        "Hypertension"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 42,
+      "sex": "Male",
+      "behavioral_health": "PTSD, anxiety, depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "RA, HTN",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hypertension",
+        "Rheumatoid Arthritis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 30,
+      "sex": "Male",
+      "behavioral_health": "SI, dperssion, schizoaffective, ADHD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "Yes",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "ADHD",
+        "Depression",
+        "Schizoaffective",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 54,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 78,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 2,
+      "chronic_illness": "CHF, HTN, DM2, AAA, CAD",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Aaa",
+        "Coronary Artery Disease",
+        "Diabetes (Type 2)",
+        "Heart Failure",
+        "Hypertension"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 62,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Colon cancer, stroke, DM2, arthritis, chronic px",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Arthritis",
+        "Chronic Px",
+        "Colon Cancer",
+        "Diabetes (Type 2)",
+        "Stroke"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 62,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, depression, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Breast cancer, Hep C",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Breast Cancer",
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 60,
+      "sex": "Male",
+      "behavioral_health": "PTSD, Depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": "Spondylosis",
+      "bh_conditions": [
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Spondylosis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 34,
+      "sex": "Male",
+      "behavioral_health": "SI, schizophrenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "Yes",
+      "repeat_od_count": 0,
+      "chronic_illness": "Hep C",
+      "bh_conditions": [
+        "Schizophrenia",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 47,
+      "sex": "Male",
+      "behavioral_health": "Depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 49,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 35,
+      "sex": "Male",
+      "behavioral_health": "ADHD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Seizures",
+      "bh_conditions": [
+        "ADHD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Seizures"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 32,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Back strain",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Rheumatoid Arthritis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 23,
+      "sex": "Male",
+      "behavioral_health": "ADHD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "ADHD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 43,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 34,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 30,
+      "sex": "Female",
+      "behavioral_health": "PTSD, ADHD, PPD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Migraines",
+      "bh_conditions": [
+        "ADHD",
+        "PPD",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Migraines"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 32,
+      "sex": "Female",
+      "behavioral_health": "Depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 3,
+      "chronic_illness": "Hep C",
+      "bh_conditions": [
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 69,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "Unk",
+      "repeat_od_count": 0,
+      "chronic_illness": "Chronic back pain, DM2",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Chronic Back Pain",
+        "Diabetes (Type 2)"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": null,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "Unk",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 19,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 34,
+      "sex": "Male",
+      "behavioral_health": "Anxiety, dperession",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Migraines",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Migraines"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 21,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 47,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, SI, schizophrenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Bipolar",
+        "Schizophrenia",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 23,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 35,
+      "sex": "Female",
+      "behavioral_health": "Depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": "Seizures, chronic back pain",
+      "bh_conditions": [
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Back Pain",
+        "Seizures"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 32,
+      "sex": "Male",
+      "behavioral_health": "Schizoprhenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 30,
+      "sex": "Female",
+      "behavioral_health": "Seasonal affective disorder",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Seasonal Affective Disorder"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 57,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "COPD, tendinopathy, synovitis",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "COPD",
+        "Synovitis",
+        "Tendinopathy"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 35,
+      "sex": "Female",
+      "behavioral_health": "Schizophrenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 39,
+      "sex": "Male",
+      "behavioral_health": "PTSD, depression",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 29,
+      "sex": "Male",
+      "behavioral_health": "Schizophrenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 3,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 36,
+      "sex": "Female",
+      "behavioral_health": "PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": null,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "Unk",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 43,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Chronic pain, arthritis",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Arthritis",
+        "Chronic Pain"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 20,
+      "sex": "Male",
+      "behavioral_health": "ADHD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 3,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "ADHD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 34,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, SI, schizophrenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Kyphosis",
+      "bh_conditions": [
+        "Bipolar",
+        "Schizophrenia",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Kyphosis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 55,
+      "sex": "Female",
+      "behavioral_health": "ADD, dperession, anxiety",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "HIV, back pain, spondylosis",
+      "bh_conditions": [
+        "ADHD",
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Back Pain",
+        "HIV",
+        "Spondylosis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 32,
+      "sex": "Female",
+      "behavioral_health": "PPD, depression, anxiety, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "PPD",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 31,
+      "sex": "Female",
+      "behavioral_health": "Depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 38,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 50,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, depression, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 2,
+      "chronic_illness": "Fibromyalgia",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Fibromyalgia"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 43,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, SI, schizophrenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": "Nerve palsy, spina bifida",
+      "bh_conditions": [
+        "Bipolar",
+        "Schizophrenia",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Nerve Palsy",
+        "Spina Bifida"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 52,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 30,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, depression, PTSD",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Hep C",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 47,
+      "sex": "Male",
+      "behavioral_health": "REM Behavioral Disorder",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "Unk",
+      "repeat_od_count": 0,
+      "chronic_illness": "Guillian barre syndrome, chronic knee px",
+      "bh_conditions": [
+        "REM Behavioral Disorder"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Knee Px",
+        "Guillian Barre Syndrome"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 35,
+      "sex": "Female",
+      "behavioral_health": "Depression, anxiety, SI, ADHD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Liver disease",
+      "bh_conditions": [
+        "ADHD",
+        "Anxiety",
+        "Depression",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Liver Disease"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 20,
+      "sex": "Female",
+      "behavioral_health": "Depression, paranoia, anxiety, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "PTSD",
+        "Paranoia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 27,
+      "sex": "Male",
+      "behavioral_health": "Schizophrenia, psychosis, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 5,
+      "chronic_illness": "Knee injury",
+      "bh_conditions": [
+        "PTSD",
+        "Psychosis",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Knee Injury"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 64,
+      "sex": "Female",
+      "behavioral_health": "Depression, anxiety, schizotypal",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "Unk",
+      "repeat_od_count": 0,
+      "chronic_illness": "CKD, HTN, adrenal insufficiency",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "Schizotypal"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Adrenal Insufficiency",
+        "Chronic Kidney Disease",
+        "Hypertension"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 54,
+      "sex": "Male",
+      "behavioral_health": "Depression, anxiety",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "Unk",
+      "repeat_od_count": 0,
+      "chronic_illness": "Hep C, arthritis",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Arthritis",
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 43,
+      "sex": "Male",
+      "behavioral_health": "Depression, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Epilepsy, chronic pain",
+      "bh_conditions": [
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Pain",
+        "Epilepsy"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 39,
+      "sex": "Male",
+      "behavioral_health": "ADHD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "COPD",
+      "bh_conditions": [
+        "ADHD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "COPD"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 43,
+      "sex": "Male",
+      "behavioral_health": "Schizophrenia, psychosis, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 3,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "PTSD",
+        "Psychosis",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 39,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Chron's",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Chron'S"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 23,
+      "sex": "Male",
+      "behavioral_health": "ADHD, psychosis, schizophrenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Heart failure",
+      "bh_conditions": [
+        "ADHD",
+        "Psychosis",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Heart Failure"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 42,
+      "sex": "Male",
+      "behavioral_health": "Schizophrenia, anxiety, psychosis",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "RA",
+      "bh_conditions": [
+        "Anxiety",
+        "Psychosis",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Rheumatoid Arthritis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 38,
+      "sex": "Male",
+      "behavioral_health": "Anxiety, ADHD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "ADHD",
+        "Anxiety"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 29,
+      "sex": "Male",
+      "behavioral_health": "Psychosis, schizophrenia, SI",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Chronic pain post MVC",
+      "bh_conditions": [
+        "Psychosis",
+        "Schizophrenia",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Pain Post Mvc"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 68,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "DM2",
+      "bh_conditions": [
+        "Bipolar",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Diabetes (Type 2)"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 54,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 42,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Brain bleed",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Rheumatoid Arthritis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 32,
+      "sex": "Male",
+      "behavioral_health": "Schizophrenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 32,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 48,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, depression, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Hep C, DM2",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Diabetes (Type 2)",
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 32,
+      "sex": "Male",
+      "behavioral_health": "Depression",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "Rx yes/ Opioids no",
+      "repeat_od_count": 0,
+      "chronic_illness": "Skull injury",
+      "bh_conditions": [
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Skull Injury"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 50,
+      "sex": "Male",
+      "behavioral_health": "Anxiety, depression",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 3,
+      "chronic_illness": "Hep C, nerve pain",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hepatitis C",
+        "Nerve Pain"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 40,
+      "sex": "Male",
+      "behavioral_health": "Schozoaffective disorder, depression, anxiety",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Hep C",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "Schizoaffective"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 46,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 35,
+      "sex": "Male",
+      "behavioral_health": "Depression, PTSD",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 25,
+      "sex": "Male",
+      "behavioral_health": "ADHD, bipolar",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "CPOD, HTN, MI",
+      "bh_conditions": [
+        "ADHD",
+        "Bipolar"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "COPD",
+        "Hypertension"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 50,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": null,
+      "aud": null,
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 29,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 37,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 3,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Bipolar",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 71,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": "PAD, afib",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Atrial Fibrillation",
+        "Peripheral Artery Disease"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 24,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 30,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 37,
+      "sex": "Male",
+      "behavioral_health": "Anxiety",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": "Chronic back pain",
+      "bh_conditions": [
+        "Anxiety"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Back Pain"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 30,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 27,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, psychosis, mood disorder",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Injuries post car v pedestrian",
+      "bh_conditions": [
+        "Bipolar",
+        "Mood Disorder",
+        "Psychosis"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Injuries Post Car V Pedestrian"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 63,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Brain aneurysm, seizure disorer",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Rheumatoid Arthritis",
+        "Seizures"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 63,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Lung cancer",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Lung Cancer"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": null,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 38,
+      "sex": "Male",
+      "behavioral_health": "Anxiety, depression, PTSD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "PTSD"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 65,
+      "sex": "Male",
+      "behavioral_health": "Anxiety",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Afib, Parkinson's, Hep C, joint pain",
+      "bh_conditions": [
+        "Anxiety"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Atrial Fibrillation",
+        "Hepatitis C",
+        "Joint Pain",
+        "Parkinson'S"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 70,
+      "sex": "Male",
+      "behavioral_health": "Depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": "COPD, heart failure, Hep C, lumbar fracture",
+      "bh_conditions": [
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "COPD",
+        "Heart Failure",
+        "Hepatitis C",
+        "Rheumatoid Arthritis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 66,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 3,
+      "chronic_illness": "Seizures, Hep C",
+      "bh_conditions": [
+        "Bipolar",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hepatitis C",
+        "Seizures"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 57,
+      "sex": "Male",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 25,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, mood disorder, pyschotic disorder, ADHD, autism",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "ADHD",
+        "Autism",
+        "Bipolar",
+        "Mood Disorder",
+        "Psychosis"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 24,
+      "sex": "Male",
+      "behavioral_health": "Shizophrenia, ADHD",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Hep C",
+      "bh_conditions": [
+        "ADHD",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 31,
+      "sex": "Male",
+      "behavioral_health": "SI, schizophrenia",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 7,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Schizophrenia",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 38,
+      "sex": "Male",
+      "behavioral_health": "Delusional disorder, depression, anxiety",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Seizures",
+      "bh_conditions": [
+        "Anxiety",
+        "Delusional Disorder",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Seizures"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 27,
+      "sex": "Male",
+      "behavioral_health": "Psychosis, schizophrenia, SI, autism",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Autism",
+        "Psychosis",
+        "Schizophrenia",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 62,
+      "sex": "Male",
+      "behavioral_health": "Anxiety, schizophrenia, depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "PAD, thrombosis",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Peripheral Artery Disease",
+        "Thrombosis"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 56,
+      "sex": "Female",
+      "behavioral_health": null,
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": null,
+      "repeat_od_count": 0,
+      "chronic_illness": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 50,
+      "sex": "Male",
+      "behavioral_health": "Schizophrenia, bipolar",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 0,
+      "chronic_illness": "Chronic back pain",
+      "bh_conditions": [
+        "Bipolar",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Back Pain"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 53,
+      "sex": "Female",
+      "behavioral_health": "Drug Psychosis",
+      "oud": "Yes",
+      "aud": "Yes",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": null,
+      "bh_conditions": [
+        "Psychosis"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 44,
+      "sex": "Male",
+      "behavioral_health": "Shizophrenia, depression",
+      "oud": "Yes",
+      "aud": "No",
+      "intentional_od": "No",
+      "repeat_od_count": 2,
+      "chronic_illness": "Chronic pain",
+      "bh_conditions": [
+        "Depression",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Pain"
+      ],
+      "has_chronic": true
+    }
+  ],
+  "sud_patients": [
+    {
+      "age": null,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": null,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": null,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": null,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": null,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": null,
+      "sex": "Female",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": null,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": null,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": null,
+      "sex": "Female",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 16,
+      "sex": "Female",
+      "behavioral_health": "ADHD, anxiety, depression, SI, SA, x2",
+      "sud": "No",
+      "aud": "Yes",
+      "substance": "Poly rx, cannabis",
+      "repeat_911": "Yes",
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "ADHD",
+        "Anxiety",
+        "Depression",
+        "Suicidal Ideation",
+        "Suicide Attempt"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 33,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, Depression",
+      "sud": "Yes",
+      "aud": null,
+      "substance": "Meth",
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "LE",
+      "bh_conditions": [
+        "Bipolar",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 53,
+      "sex": "Male",
+      "behavioral_health": "Schizophrenia, psychosis",
+      "sud": "Yes",
+      "aud": null,
+      "substance": "Meth, Cannabis",
+      "repeat_911": "Yes",
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [
+        "Psychosis",
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 41,
+      "sex": "Female",
+      "behavioral_health": "SI, schizoaffective",
+      "sud": "Yes",
+      "aud": "No",
+      "substance": "Meth",
+      "repeat_911": "Yes",
+      "chronic_illness": "COPD",
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Schizoaffective",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "COPD"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 58,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": "Meth",
+      "repeat_911": null,
+      "chronic_illness": "Seizures",
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Seizures"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 36,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": "Yes",
+      "aud": null,
+      "substance": "Meth",
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": null,
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 64,
+      "sex": "Female",
+      "behavioral_health": "Anxiety",
+      "sud": "Yes",
+      "aud": null,
+      "substance": "Benzo, opioid, cannabis",
+      "repeat_911": null,
+      "chronic_illness": "Kyphosis, chronic low back px, sciatica",
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Anxiety"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Low Back Px",
+        "Kyphosis",
+        "Sciatica"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 52,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, PTSD, SI, SA, Depression",
+      "sud": "Yes",
+      "aud": "Yes",
+      "substance": "Prazosin",
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "PTSD",
+        "Suicidal Ideation",
+        "Suicide Attempt"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 28,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": "Yes",
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "No",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 18,
+      "sex": "Female",
+      "behavioral_health": "SI, SA x2",
+      "sud": null,
+      "aud": null,
+      "substance": "Poly rx",
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Suicidal Ideation",
+        "Suicide Attempt"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 38,
+      "sex": "Male",
+      "behavioral_health": "Anxiety",
+      "sud": "Yes",
+      "aud": null,
+      "substance": "Meth",
+      "repeat_911": null,
+      "chronic_illness": "Hep C",
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Anxiety"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Hepatitis C"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 51,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": "Yes",
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "No",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 51,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "LE",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 24,
+      "sex": "Female",
+      "behavioral_health": "Depression, SI",
+      "sud": "Yes",
+      "aud": null,
+      "substance": "Meth, Cannabis",
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Depression",
+        "Suicidal Ideation"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 69,
+      "sex": "Female",
+      "behavioral_health": "Anxiety, Depression, mood disorder",
+      "sud": null,
+      "aud": "Yes",
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": "CKD, CVA, dementia",
+      "withdrawals": "Yes",
+      "transport": "Yes",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "Mood Disorder"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Chronic Kidney Disease",
+        "Cva",
+        "Dementia"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 56,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": "Yes",
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 40,
+      "sex": "Female",
+      "behavioral_health": null,
+      "sud": "Yes",
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": "Yes",
+      "transport": "No",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 39,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": "Yes",
+      "aud": null,
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 57,
+      "sex": "Male",
+      "behavioral_health": "Psychosis",
+      "sud": "Yes",
+      "aud": null,
+      "substance": "Meth, Cannabis",
+      "repeat_911": null,
+      "chronic_illness": "DM",
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Psychosis"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Diabetes"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 55,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": "Cannabis",
+      "repeat_911": null,
+      "chronic_illness": "DM",
+      "withdrawals": null,
+      "transport": "No",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [
+        "Diabetes"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 54,
+      "sex": "Female",
+      "behavioral_health": "Schizophrenia",
+      "sud": "Yes",
+      "aud": null,
+      "substance": "Unkn",
+      "repeat_911": "Yes",
+      "chronic_illness": "COPD, DM",
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Schizophrenia"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "COPD",
+        "Diabetes"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 23,
+      "sex": "Male",
+      "behavioral_health": "Anxiety, ADHD, Depression",
+      "sud": null,
+      "aud": null,
+      "substance": "Cannabis",
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "No",
+      "bh_conditions": [
+        "ADHD",
+        "Anxiety",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 45,
+      "sex": "Male",
+      "behavioral_health": "Bipolar, Depression",
+      "sud": "Yes",
+      "aud": null,
+      "substance": "Meth",
+      "repeat_911": null,
+      "chronic_illness": "Seizures",
+      "withdrawals": null,
+      "transport": "No",
+      "bh_conditions": [
+        "Bipolar",
+        "Depression"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "Seizures"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 33,
+      "sex": "Male",
+      "behavioral_health": null,
+      "sud": null,
+      "aud": null,
+      "substance": "Cannabis?",
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [],
+      "has_bh": false,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 16,
+      "sex": "Female",
+      "behavioral_health": "SI, SA, Anxiety, Depression",
+      "sud": "No",
+      "aud": "No",
+      "substance": "Prozac, Mealtonin",
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Anxiety",
+        "Depression",
+        "Suicidal Ideation",
+        "Suicide Attempt"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    },
+    {
+      "age": 48,
+      "sex": "Male",
+      "behavioral_health": "Bipolar",
+      "sud": null,
+      "aud": null,
+      "substance": "Cannabis",
+      "repeat_911": null,
+      "chronic_illness": "CHF, COPD",
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Bipolar"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [
+        "COPD",
+        "Heart Failure"
+      ],
+      "has_chronic": true
+    },
+    {
+      "age": 15,
+      "sex": "Female",
+      "behavioral_health": "SI, SA",
+      "sud": "No",
+      "aud": "No",
+      "substance": null,
+      "repeat_911": null,
+      "chronic_illness": null,
+      "withdrawals": null,
+      "transport": "Yes",
+      "bh_conditions": [
+        "Suicidal Ideation",
+        "Suicide Attempt"
+      ],
+      "has_bh": true,
+      "chronic_conditions": [],
+      "has_chronic": false
+    }
+  ],
+  "summary_stats": {
+    "total_opioid_patients": 130,
+    "bh_with_sud": "80/115 (69.56%)",
+    "aud_with_sud": "28/115 (24.35%)",
+    "chronic_with_sud": "63/115 (54.78%)",
+    "repeat_overdoses": "21/115 (18.26%)",
+    "repeat_od_deaths": "3/24 (12.5%)",
+    "pa_patients": "93/115 (80.9%)",
+    "d2_sequim_patients": "22/115 (19.13%)"
+  }
+}

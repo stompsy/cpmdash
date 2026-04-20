@@ -52,3 +52,5 @@ compress_images.py
 src/static/data/hargrove_grant/202*.csv
 src/static/data/*.csv
 *.bak
+assets/OD.SUD.AUD.xlsx:Zone.Identifier
+assets/od-sud-aud.xlsx
