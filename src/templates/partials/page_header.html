@@ -21,6 +21,7 @@ Expected context variables:
     updated_at: Optional datetime or formatted string for "Last updated"
     updated_at_iso: Optional ISO-8601 string for the datetime attribute
     read_time: Optional preformatted read-time label (e.g., "6 min read")
+    print_url: Optional URL for a "Print" button rendered alongside the meta row (opens in new tab)
     show_stats: Optional boolean to display cost savings stats (requires cost_metrics context)
     image_position: Optional background-position for the header image (defaults to "center center")
 {% endcomment %}
@@ -97,7 +98,7 @@ Expected context variables:
                 </p>
             {% endif %}
 
-            {% if updated_at or read_time %}
+            {% if updated_at or read_time or print_url %}
                 <div class="flex flex-wrap items-center gap-4 text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
                     {% if updated_at %}
                         <span class="inline-flex items-center gap-2">
@@ -117,6 +118,25 @@ Expected context variables:
                             <svg class="h-4 w-4 text-brand-200/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M12 4h9"/><rect width="4" height="16" x="3" y="4" rx="1"/></svg>
                             {{ read_time }}
                         </span>
+                    {% endif %}
+                    {% if print_url %}
+                        {% if updated_at or read_time %}
+                            <span aria-hidden="true">•</span>
+                        {% endif %}
+                        <a
+                            href="{{ print_url }}"
+                            target="_blank"
+                            rel="noopener"
+                            class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-100 transition hover:border-brand-400/60 hover:bg-brand-500/15 hover:text-white"
+                            title="Open a printer-friendly version (use your browser's Print dialog to save as PDF)"
+                        >
+                            <svg class="h-4 w-4 text-brand-200/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 6 2 18 2 18 9"/>
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                                <rect x="6" y="14" width="12" height="8" rx="1"/>
+                            </svg>
+                            Print
+                        </a>
                     {% endif %}
                 </div>
             {% endif %}

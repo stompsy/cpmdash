@@ -4,6 +4,7 @@ from .views import (
     age_chart_variations_demo,
     authentication,
     cooccurring_deep_dive,
+    cooccurring_deep_dive_print,
     hargrove_grant,
     od_cpm_notification_detail,
     od_cpr_administered_detail,
@@ -126,6 +127,7 @@ urlpatterns = [
     path("profile/", user_profile, name="user_profile"),
     path("hargrove-grant/", hargrove_grant, name="hargrove_grant"),
     path("cooccurring/", cooccurring_deep_dive, name="cooccurring"),
+    path("cooccurring/print/", cooccurring_deep_dive_print, name="cooccurring_print"),
     path("authentication/", authentication, name="authentication"),
     path("demo/age-chart-variations/", age_chart_variations_demo, name="age_chart_variations_demo"),
 ]

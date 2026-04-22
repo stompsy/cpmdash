@@ -10,10 +10,12 @@ from __future__ import annotations
 
 from collections import Counter
 
+import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import plot
 
-from utils.chart_colors import CHART_COLORS_VIBRANT, CHART_COLORS_WARM
+from utils.chart_colors import CHART_COLORS_VIBRANT
 from utils.plotly import get_theme_colors, style_plotly_layout
 from utils.tailwind_colors import TAILWIND_COLORS
 
@@ -23,12 +25,48 @@ from .data_loader import get_opioid_patients
 # Helpers
 # ---------------------------------------------------------------------------
 
+# Shared palette ordering matches the patients page (`PATIENT_CHART_COLORS`)
+# so categorical charts across the site use the same hues in the same order.
+COOCCURRING_CHART_COLORS = [
+    CHART_COLORS_VIBRANT[0],  # violet
+    CHART_COLORS_VIBRANT[1],  # cyan
+    CHART_COLORS_VIBRANT[3],  # emerald
+    CHART_COLORS_VIBRANT[4],  # amber
+    CHART_COLORS_VIBRANT[5],  # blue
+    CHART_COLORS_VIBRANT[2],  # rose
+    CHART_COLORS_VIBRANT[7],  # teal
+    CHART_COLORS_VIBRANT[6],  # pink
+    CHART_COLORS_VIBRANT[9],  # indigo
+    CHART_COLORS_VIBRANT[10],  # lime
+    CHART_COLORS_VIBRANT[8],  # orange
+    CHART_COLORS_VIBRANT[11],  # fuchsia
+]
+
+# Standard interactive config — same set used by the patients page.
+_PLOT_CONFIG = {
+    "responsive": True,
+    "displaylogo": False,
+    "displayModeBar": "hover",
+    "modeBarButtonsToRemove": [
+        "zoom2d",
+        "pan2d",
+        "select2d",
+        "lasso2d",
+        "zoomIn2d",
+        "zoomOut2d",
+        "autoScale2d",
+        "hoverClosestCartesian",
+        "hoverCompareCartesian",
+        "toggleSpikelines",
+    ],
+}
+
 
 def _plot_html(fig: go.Figure) -> str:
     return plot(
         fig,
         output_type="div",
-        config={"displayModeBar": False},
+        config=_PLOT_CONFIG,
     )
 
 
@@ -56,11 +94,11 @@ _BH_CATEGORY = {
 }
 
 _CATEGORY_COLORS = {
-    "Mood": TAILWIND_COLORS["violet-500"],
-    "Anxiety": TAILWIND_COLORS["amber-500"],
-    "Psychotic": TAILWIND_COLORS["rose-500"],
-    "Crisis": TAILWIND_COLORS["red-600"],
-    "Neurodevelopmental": TAILWIND_COLORS["cyan-500"],
+    "Mood": TAILWIND_COLORS["indigo-500"],
+    "Anxiety": TAILWIND_COLORS["sky-500"],
+    "Psychotic": TAILWIND_COLORS["violet-600"],
+    "Crisis": TAILWIND_COLORS["amber-600"],
+    "Neurodevelopmental": TAILWIND_COLORS["slate-500"],
     "Other": TAILWIND_COLORS["slate-400"],
 }
 
@@ -111,10 +149,11 @@ def build_bh_prevalence_bar(theme: str = "dark") -> str:
             y=conditions,
             x=counts,
             orientation="h",
-            marker_color=colors,
+            marker=dict(color=colors, line=dict(color="white", width=1)),
             text=[f"{n}  ({p}%)" for n, p in zip(counts, pcts, strict=False)],
             textposition="outside",
-            textfont=dict(size=13),
+            cliponaxis=False,
+            textfont=dict(size=13, family="Arial, sans-serif"),
             hovertemplate=(
                 "<b>%{y}</b><br>"
                 "Patients: %{x}<br>"
@@ -134,7 +173,7 @@ def build_bh_prevalence_bar(theme: str = "dark") -> str:
     fig.update_layout(
         yaxis=dict(autorange="reversed", categoryorder="total ascending"),
         xaxis=dict(title=None, showticklabels=False, showgrid=False),
-        bargap=0.35,
+        bargap=0.15,
     )
     return _plot_html(fig)
 
@@ -197,65 +236,77 @@ def build_chronic_illness_treemap(theme: str = "dark") -> str:
     if not items:
         return ""
 
-    labels = []
-    parents = []
-    values = []
-    colors_list = []
+    # Build a tidy DataFrame: one row per condition with its parent system
+    rows = [
+        {
+            "category": _SYSTEM_MAP.get(cond, "Other"),
+            "value": cond,
+            "count": cnt,
+        }
+        for cond, cnt in items
+    ]
+    treemap_df = pd.DataFrame(rows)
 
-    system_color_map = {
-        "Hepatic/Infectious": TAILWIND_COLORS["amber-500"],
-        "Cardiovascular": TAILWIND_COLORS["rose-500"],
-        "Pain/Musculoskeletal": TAILWIND_COLORS["violet-500"],
-        "Neurological": TAILWIND_COLORS["cyan-500"],
-        "Respiratory": TAILWIND_COLORS["teal-500"],
-        "Metabolic": TAILWIND_COLORS["emerald-500"],
-        "Renal": TAILWIND_COLORS["blue-500"],
-        "Other": TAILWIND_COLORS["slate-500"],
+    # Percentage within each parent system (for hover)
+    treemap_df["percentage"] = treemap_df.groupby("category")["count"].transform(
+        lambda x: (x / x.sum() * 100)
+    )
+
+    text_color = "#0f172a" if theme == "light" else "#f8fafc"
+    parent_color = "#f1f5f9" if theme == "light" else "#334155"  # slate-100 / slate-700
+
+    fig = px.treemap(
+        treemap_df,
+        path=["category", "value"],
+        values="count",
+        color="value",
+        color_discrete_sequence=CHART_COLORS_VIBRANT,
+        custom_data=["percentage"],
+    )
+
+    # Map each child label to a vibrant color from the sequence
+    unique_values = treemap_df["value"].unique()
+    value_color_map = {
+        val: CHART_COLORS_VIBRANT[i % len(CHART_COLORS_VIBRANT)]
+        for i, val in enumerate(unique_values)
     }
+    parent_labels = set(treemap_df["category"].unique())
+    pct_by_value: dict[str, float] = dict(
+        zip(treemap_df["value"], treemap_df["percentage"], strict=True)
+    )
 
-    # Collect system totals
-    system_totals: Counter[str] = Counter()
-    for cond, cnt in items:
-        system = _SYSTEM_MAP.get(cond, "Other")
-        system_totals[system] += cnt
+    trace_data = fig.data[0]
+    color_list: list[str] = []
+    hover_list: list[str] = []
+    for label, parent in zip(trace_data.labels, trace_data.parents, strict=True):  # type: ignore[attr-defined]
+        if label in parent_labels or parent == "":
+            color_list.append(parent_color)
+            hover_list.append("<extra></extra>")
+        else:
+            color_list.append(value_color_map.get(label, CHART_COLORS_VIBRANT[0]))
+            pct = pct_by_value.get(label, 0.0)
+            hover_list.append(f"<b>{label}</b><br>{pct:.1f}%<extra></extra>")
 
-    # Add system-level parents
-    for system, total in system_totals.most_common():
-        labels.append(system)
-        parents.append("")
-        values.append(total)
-        colors_list.append(system_color_map.get(system, TAILWIND_COLORS["slate-500"]))
-
-    # Add individual conditions as children
-    for cond, cnt in items:
-        system = _SYSTEM_MAP.get(cond, "Other")
-        labels.append(cond)
-        parents.append(system)
-        values.append(cnt)
-        base_color = system_color_map.get(system, TAILWIND_COLORS["slate-500"])
-        colors_list.append(base_color)
-
-    tc = get_theme_colors(theme)
-
-    fig = go.Figure(
-        go.Treemap(
-            labels=labels,
-            parents=parents,
-            values=values,
-            marker=dict(colors=colors_list),
-            textfont=dict(size=14, color=tc["font_color"]),
-            textinfo="label+value",
-            hovertemplate="<b>%{label}</b><br>Patients: %{value}<extra></extra>",
-            branchvalues="total",
-        )
+    fig.update_traces(
+        textposition="top left",
+        textfont=dict(size=14, family="Roboto, sans-serif", color=text_color),
+        hovertemplate=hover_list,
+        marker=dict(
+            line=dict(width=1),
+            colors=color_list,
+        ),
+        root_color="rgba(0,0,0,0)",
     )
 
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=400,
-        margin=dict(t=20, l=10, r=10, b=10),
+        height=500,
+        x_title=None,
+        y_title=None,
+        margin={"t": 0, "l": 0, "r": 0, "b": 0},
     )
+    fig.update_layout(showlegend=False)
     return _plot_html(fig)
 
 
@@ -299,10 +350,14 @@ def build_repeat_od_bh_comparison(theme: str = "dark") -> str:
             x=categories,
             y=[repeat_pct, single_pct],
             name="With BH Disorder",
-            marker_color=TAILWIND_COLORS["violet-500"],
+            marker=dict(
+                color=COOCCURRING_CHART_COLORS[0],
+                line=dict(color="white", width=1),
+            ),
             text=[f"{repeat_pct}%", f"{single_pct}%"],
             textposition="outside",
-            textfont=dict(size=16, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=16, color=tc["font_color"], family="Arial, sans-serif"),
             hovertemplate=("<b>%{x}</b><br>With BH disorder: %{y}%<br><extra></extra>"),
         )
     )
@@ -315,10 +370,14 @@ def build_repeat_od_bh_comparison(theme: str = "dark") -> str:
             x=categories,
             y=[repeat_no_pct, single_no_pct],
             name="No BH Disorder",
-            marker_color=TAILWIND_COLORS["slate-400"],
+            marker=dict(
+                color=TAILWIND_COLORS["slate-400"],
+                line=dict(color="white", width=1),
+            ),
             text=[f"{repeat_no_pct}%", f"{single_no_pct}%"],
             textposition="outside",
-            textfont=dict(size=16, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=16, color=tc["font_color"], family="Arial, sans-serif"),
             hovertemplate=("<b>%{x}</b><br>No BH disorder: %{y}%<br><extra></extra>"),
         )
     )
@@ -333,8 +392,8 @@ def build_repeat_od_bh_comparison(theme: str = "dark") -> str:
     )
     fig.update_layout(
         barmode="group",
-        bargap=0.3,
-        bargroupgap=0.15,
+        bargap=0.15,
+        bargroupgap=0.1,
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -383,10 +442,13 @@ def build_bh_by_sex(theme: str = "dark") -> str:
             x=categories,
             y=[m_bh, f_bh],
             name="With BH Disorder",
-            marker_color=TAILWIND_COLORS["violet-500"],
+            marker=dict(
+                color=COOCCURRING_CHART_COLORS[0],
+                line=dict(color="white", width=1),
+            ),
             text=[f"{m_pct}%", f"{f_pct}%"],
             textposition="inside",
-            textfont=dict(size=15, color="white"),
+            textfont=dict(size=15, color="white", family="Arial, sans-serif"),
         )
     )
     fig.add_trace(
@@ -394,10 +456,13 @@ def build_bh_by_sex(theme: str = "dark") -> str:
             x=categories,
             y=[m_no, f_no],
             name="No BH Disorder",
-            marker_color=TAILWIND_COLORS["slate-500"],
+            marker=dict(
+                color=TAILWIND_COLORS["slate-500"],
+                line=dict(color="white", width=1),
+            ),
             text=[f"{100 - m_pct}%", f"{100 - f_pct}%"],
             textposition="inside",
-            textfont=dict(size=15, color="white"),
+            textfont=dict(size=15, color="white", family="Arial, sans-serif"),
         )
     )
 
@@ -411,7 +476,7 @@ def build_bh_by_sex(theme: str = "dark") -> str:
     )
     fig.update_layout(
         barmode="stack",
-        bargap=0.4,
+        bargap=0.15,
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -548,7 +613,7 @@ def build_age_bh_boxplot(theme: str = "dark") -> str:
         go.Box(
             y=with_bh,
             name="With BH Disorder",
-            marker_color=TAILWIND_COLORS["violet-500"],
+            marker_color=COOCCURRING_CHART_COLORS[0],
             boxmean=True,
             line=dict(width=2),
         )
@@ -601,15 +666,17 @@ def build_aud_cooccurrence_donut(theme: str = "dark") -> str:
         go.Pie(
             labels=["AUD Co-Occurring", "OUD Only"],
             values=[aud_yes, aud_no],
-            hole=0.55,
+            hole=0.5,
             marker=dict(
                 colors=[
-                    TAILWIND_COLORS["amber-500"],
+                    COOCCURRING_CHART_COLORS[3],  # amber
                     TAILWIND_COLORS["slate-500"],
-                ]
+                ],
+                line=dict(color="white", width=1),
             ),
             textinfo="percent+label",
-            textfont=dict(size=14, color=tc["font_color"]),
+            textposition="inside",
+            textfont=dict(size=14, color="#1e293b", family="Arial, sans-serif"),
             hovertemplate=(
                 "<b>%{label}</b><br>Patients: %{value}<br>Share: %{percent}<extra></extra>"
             ),
@@ -630,8 +697,19 @@ def build_aud_cooccurrence_donut(theme: str = "dark") -> str:
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=340,
-        margin=dict(t=20, l=20, r=20, b=20),
+        height=380,
+        show_legend=True,
+        margin=dict(t=20, l=20, r=20, b=80),
+    )
+    fig.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.05,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=13, color=tc["font_color"]),
+        ),
     )
     return _plot_html(fig)
 
@@ -679,10 +757,14 @@ def build_sud_substance_breakdown(theme: str = "dark") -> str:
         go.Bar(
             x=substances,
             y=counts,
-            marker_color=CHART_COLORS_WARM[: len(substances)],
+            marker=dict(
+                color=COOCCURRING_CHART_COLORS[: len(substances)],
+                line=dict(color="white", width=1),
+            ),
             text=counts,
             textposition="outside",
-            textfont=dict(size=14),
+            cliponaxis=False,
+            textfont=dict(size=14, family="Arial, sans-serif"),
             hovertemplate="<b>%{x}</b><br>Patients: %{y}<extra></extra>",
         )
     )
@@ -690,13 +772,13 @@ def build_sud_substance_breakdown(theme: str = "dark") -> str:
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=340,
-        margin=dict(t=30, l=50, r=30, b=60),
+        height=400,
+        margin=dict(t=40, l=70, r=20, b=90),
         y_title="Patients",
     )
     fig.update_layout(
         xaxis=dict(showgrid=False),
-        bargap=0.35,
+        bargap=0.15,
     )
     return _plot_html(fig)
 
@@ -749,10 +831,14 @@ def build_bh_by_age_bracket(theme: str = "dark") -> str:
             x=labels,
             y=bh_pcts,
             name="With BH Disorder",
-            marker_color=TAILWIND_COLORS["violet-500"],
+            marker=dict(
+                color=COOCCURRING_CHART_COLORS[0],
+                line=dict(color="white", width=1),
+            ),
             text=[f"{p}%" for p in bh_pcts],
             textposition="outside",
-            textfont=dict(size=13, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=13, color=tc["font_color"], family="Arial, sans-serif"),
             customdata=hover_texts,
             hovertemplate="<b>Age %{x}</b><br>BH prevalence: %{y}%<br>%{customdata}<extra></extra>",
         )
@@ -762,10 +848,14 @@ def build_bh_by_age_bracket(theme: str = "dark") -> str:
             x=labels,
             y=no_bh_pcts,
             name="No BH Disorder",
-            marker_color=TAILWIND_COLORS["slate-400"],
+            marker=dict(
+                color=TAILWIND_COLORS["slate-400"],
+                line=dict(color="white", width=1),
+            ),
             text=[f"{p}%" for p in no_bh_pcts],
             textposition="outside",
-            textfont=dict(size=13, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=13, color=tc["font_color"], family="Arial, sans-serif"),
             hovertemplate="<b>Age %{x}</b><br>No BH: %{y}%<extra></extra>",
         )
     )
@@ -781,7 +871,7 @@ def build_bh_by_age_bracket(theme: str = "dark") -> str:
     )
     fig.update_layout(
         barmode="group",
-        bargap=0.25,
+        bargap=0.15,
         bargroupgap=0.1,
         yaxis=dict(range=[0, 100], dtick=20, ticksuffix="%"),
         legend=dict(
@@ -843,10 +933,14 @@ def build_aud_by_age_sex(theme: str = "dark") -> str:
             x=labels,
             y=male_pcts,
             name="Male",
-            marker_color=TAILWIND_COLORS["blue-500"],
+            marker=dict(
+                color=COOCCURRING_CHART_COLORS[4],  # blue
+                line=dict(color="white", width=1),
+            ),
             text=[f"{p}%" for p in male_pcts],
             textposition="outside",
-            textfont=dict(size=12, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=12, color=tc["font_color"], family="Arial, sans-serif"),
             hovertemplate="<b>Age %{x} — Male</b><br>AUD: %{y}%<extra></extra>",
         )
     )
@@ -855,10 +949,14 @@ def build_aud_by_age_sex(theme: str = "dark") -> str:
             x=labels,
             y=female_pcts,
             name="Female",
-            marker_color=TAILWIND_COLORS["rose-400"],
+            marker=dict(
+                color=COOCCURRING_CHART_COLORS[5],  # rose
+                line=dict(color="white", width=1),
+            ),
             text=[f"{p}%" for p in female_pcts],
             textposition="outside",
-            textfont=dict(size=12, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=12, color=tc["font_color"], family="Arial, sans-serif"),
             hovertemplate="<b>Age %{x} — Female</b><br>AUD: %{y}%<extra></extra>",
         )
     )
@@ -874,7 +972,7 @@ def build_aud_by_age_sex(theme: str = "dark") -> str:
     )
     fig.update_layout(
         barmode="group",
-        bargap=0.25,
+        bargap=0.15,
         bargroupgap=0.1,
         yaxis=dict(range=[0, 60], dtick=10, ticksuffix="%"),
         legend=dict(
@@ -964,10 +1062,11 @@ def build_complexity_funnel(theme: str = "dark") -> str:
             y=labels,
             x=values,
             orientation="h",
-            marker_color=colors,
+            marker=dict(color=colors, line=dict(color="white", width=1)),
             text=[f"{v} ({p}%)" for v, p in zip(values, pcts, strict=False)],
             textposition="outside",
-            textfont=dict(size=14, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=14, color=tc["font_color"], family="Arial, sans-serif"),
             hovertemplate="<b>%{y}</b><br>Patients: %{x}<br>Share: %{customdata}%<extra></extra>",
             customdata=pcts,
         )
@@ -982,7 +1081,7 @@ def build_complexity_funnel(theme: str = "dark") -> str:
     fig.update_layout(
         yaxis=dict(showgrid=False),
         xaxis=dict(title=None, showticklabels=False, showgrid=False),
-        bargap=0.3,
+        bargap=0.15,
     )
     return _plot_html(fig)
 
@@ -1019,10 +1118,14 @@ def build_multi_bh_histogram(theme: str = "dark") -> str:
         go.Bar(
             x=[str(x) for x in x_vals],
             y=y_vals,
-            marker_color=CHART_COLORS_VIBRANT[: len(x_vals)],
+            marker=dict(
+                color=COOCCURRING_CHART_COLORS[: len(x_vals)],
+                line=dict(color="white", width=1),
+            ),
             text=y_vals,
             textposition="outside",
-            textfont=dict(size=14, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=14, color=tc["font_color"], family="Arial, sans-serif"),
             hovertemplate=("<b>%{x} condition(s)</b><br>Patients: %{y}<br><extra></extra>"),
         )
     )
@@ -1030,12 +1133,12 @@ def build_multi_bh_histogram(theme: str = "dark") -> str:
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=340,
-        margin=dict(t=30, l=50, r=30, b=50),
+        height=400,
+        margin=dict(t=40, l=70, r=20, b=90),
         y_title="Patients",
         x_title="Number of BH Conditions",
     )
-    fig.update_layout(bargap=0.3)
+    fig.update_layout(bargap=0.15)
     return _plot_html(fig)
 
 
@@ -1087,10 +1190,14 @@ def build_sud_bh_by_substance(theme: str = "dark") -> str:
         go.Bar(
             x=substances,
             y=pcts,
-            marker_color=CHART_COLORS_WARM[: len(substances)],
+            marker=dict(
+                color=COOCCURRING_CHART_COLORS[: len(substances)],
+                line=dict(color="white", width=1),
+            ),
             text=[f"{p}%" for p in pcts],
             textposition="outside",
-            textfont=dict(size=14, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=14, color=tc["font_color"], family="Arial, sans-serif"),
             customdata=totals,
             hovertemplate=(
                 "<b>%{x}</b><br>"
@@ -1104,14 +1211,14 @@ def build_sud_bh_by_substance(theme: str = "dark") -> str:
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=340,
-        margin=dict(t=30, l=50, r=30, b=60),
+        height=400,
+        margin=dict(t=40, l=70, r=20, b=90),
         y_title="BH Prevalence (%)",
     )
     fig.update_layout(
         yaxis=dict(range=[0, 110], dtick=25, ticksuffix="%"),
         xaxis=dict(showgrid=False),
-        bargap=0.35,
+        bargap=0.15,
     )
     return _plot_html(fig)
 
@@ -1154,11 +1261,11 @@ def build_intentional_od_profile(theme: str = "dark") -> str:
     values = [has_bh, has_si, has_chronic, has_aud, female]
     pcts = [round(100 * v / total) for v in values]
     colors = [
-        TAILWIND_COLORS["violet-500"],
-        TAILWIND_COLORS["red-500"],
-        TAILWIND_COLORS["amber-500"],
-        TAILWIND_COLORS["amber-600"],
-        TAILWIND_COLORS["rose-400"],
+        TAILWIND_COLORS["indigo-500"],  # BH disorder
+        TAILWIND_COLORS["amber-600"],  # Suicidal Ideation — single warm alert
+        TAILWIND_COLORS["slate-500"],  # Chronic illness
+        TAILWIND_COLORS["sky-500"],  # AUD
+        TAILWIND_COLORS["violet-500"],  # Female
     ]
 
     tc = get_theme_colors(theme)
@@ -1169,10 +1276,11 @@ def build_intentional_od_profile(theme: str = "dark") -> str:
             y=labels,
             x=values,
             orientation="h",
-            marker_color=colors,
+            marker=dict(color=colors, line=dict(color="white", width=1)),
             text=[f"{v}/{total} ({p}%)" for v, p in zip(values, pcts, strict=False)],
             textposition="outside",
-            textfont=dict(size=13, color=tc["font_color"]),
+            cliponaxis=False,
+            textfont=dict(size=13, color=tc["font_color"], family="Arial, sans-serif"),
             hovertemplate="<b>%{y}</b><br>%{x} of %{customdata} patients<extra></extra>",
             customdata=[total] * len(values),
         )
@@ -1192,7 +1300,7 @@ def build_intentional_od_profile(theme: str = "dark") -> str:
             showgrid=False,
             range=[0, total + 1],
         ),
-        bargap=0.35,
+        bargap=0.15,
     )
     return _plot_html(fig)
 
@@ -1234,15 +1342,10 @@ def build_odreferrals_cooccurring_stats() -> list[dict[str, str]]:
     single_bh_pct = (
         round(100 * sum(1 for p in single if p["has_bh"]) / len(single)) if single else 0
     )
-    intentional = sum(1 for p in patients if p.get("intentional_od") == "Yes")
-    aud_count = sum(1 for p in patients if p.get("aud") == "Yes")
 
     return [
         {"label": "Repeat OD + BH", "value": f"{repeat_bh_pct}%"},
         {"label": "Single OD + BH", "value": f"{single_bh_pct}%"},
-        {"label": "BH Gap", "value": f"+{repeat_bh_pct - single_bh_pct}pts"},
-        {"label": "Intentional OD", "value": str(intentional)},
-        {"label": "OUD + AUD", "value": str(aud_count)},
     ]
 
 
@@ -1285,7 +1388,7 @@ def build_deep_dive_hero_stats() -> list[dict[str, str]]:
         {"label": "Combined Cohort", "value": str(total_combined)},
         {"label": "Overall BH Rate", "value": f"{bh_pct}%"},
         {
-            "label": "Chronic Illness (OUD)",
+            "label": "Chronic Illness + OUD",
             "value": f"{round(100 * chronic_count / len(patients))}%",
         },
         {"label": "Triple Burden", "value": str(triple)},

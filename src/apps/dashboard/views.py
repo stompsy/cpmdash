@@ -5,7 +5,7 @@ from contextlib import suppress
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any, TypedDict, cast
 
 import pandas as pd
 from django.conf import settings
@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.http import Http404
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_GET
 from markdown import markdown as render_markdown
@@ -4246,7 +4247,7 @@ def odreferrals(request):
     repeat_overdose_quarterly_rates = [
         r
         for r in repeat_overdose_quarterly_rates
-        if not (r["year"] == today.year and r["quarter"] >= current_q)
+        if not (r["year"] == today.year and cast(int, r["quarter"]) >= current_q)
     ]
     fig_repeat_overdose_quarterly_trend = _chart_html(
         build_chart_repeat_overdose_quarterly_trend(
@@ -6741,6 +6742,31 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
 def cooccurring_deep_dive(request):
     """Standalone deep-dive page for co-occurring behavioral health, substance
     use, and alcohol use disorder analysis across the OUD/SUD cohorts."""
+    theme = get_theme_from_request(request)
+    context = _build_cooccurring_context(theme=theme)
+    # Surface a link to the printable variant in the page header.
+    context["page_header_print_url"] = reverse("dashboard:cooccurring_print") + "?auto=1"
+    return render(request, "dashboard/cooccurring.html", context)
+
+
+def cooccurring_deep_dive_print(request):
+    """Printer/PDF-friendly variant of the co-occurring deep-dive page.
+
+    Renders the same content sections without the dashboard chrome (sidebar,
+    nav, footer) and forces the chart theme to ``light`` so the resulting
+    PDF is legible on white paper.
+    """
+    context = _build_cooccurring_context(theme="light")
+    return render(request, "dashboard/cooccurring_print.html", context)
+
+
+def _build_cooccurring_context(theme: str) -> dict:
+    """Build the shared template context for the co-occurring deep-dive page.
+
+    Extracted so that both the standard dashboard view and the print-friendly
+    view render identical data without duplicating the (long) list of chart
+    builders.
+    """
     from ..charts.cooccurring.charts import (
         build_age_bh_boxplot,
         build_aud_by_age_sex,
@@ -6762,10 +6788,10 @@ def cooccurring_deep_dive(request):
         build_sud_substance_breakdown,
     )
 
-    theme = get_theme_from_request(request)
     updated_on = date(2026, 4, 19)
+    current_period_label = timezone.now().strftime("%B %Y")
 
-    context = {
+    return {
         "theme": theme,
         # Hero stats
         "hero_stats": build_deep_dive_hero_stats(),
@@ -6795,8 +6821,8 @@ def cooccurring_deep_dive(request):
         "page_header_updated_at": updated_on,
         "page_header_updated_at_iso": updated_on.isoformat(),
         "page_header_read_time": "12 min read",
+        "current_period_label": current_period_label,
     }
-    return render(request, "dashboard/cooccurring.html", context)
 
 
 def hargrove_grant(request):

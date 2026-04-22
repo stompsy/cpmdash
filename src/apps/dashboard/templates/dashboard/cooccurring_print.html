@@ -1,0 +1,317 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="robots" content="noindex" />
+        <meta name="description" content="Printable research briefing on co-occurring behavioral health, substance use, and alcohol use disorders in the CPM patient cohort." />
+        <meta name="keywords" content="community paramedicine, behavioral health, substance use disorder, alcohol use disorder, opioid overdose" />
+        <title>Behavioral Health, SUD &amp; AUD: A Deep Dive — Print View</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'media/favicon.ico' %}" />
+        <link rel="stylesheet" href="{% static 'css/output.css' %}" />
+        <style>
+            /* Print-friendly base. We force a light, white-paper look so the
+               PDF/printed output is legible without burning a toner cartridge
+               on the dashboard's dark theme. */
+            html, body {
+                background: #ffffff !important;
+                color: #0f172a;
+            }
+
+            /* Top toolbar with print button — only visible on screen. */
+            .print-toolbar {
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                display: flex;
+                justify-content: flex-end;
+                gap: 0.5rem;
+                padding: 0.75rem 1.5rem;
+                background: rgba(248, 250, 252, 0.96);
+                border-bottom: 1px solid #e2e8f0;
+                backdrop-filter: blur(6px);
+            }
+
+            .print-toolbar button,
+            .print-toolbar a {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                padding: 0.5rem 1rem;
+                border-radius: 9999px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                cursor: pointer;
+                border: 1px solid #cbd5e1;
+                background: #ffffff;
+                color: #0f172a;
+                text-decoration: none;
+                transition: background 0.15s ease, border-color 0.15s ease;
+            }
+
+            .print-toolbar button.primary {
+                background: #0f172a;
+                border-color: #0f172a;
+                color: #ffffff;
+            }
+
+            .print-toolbar button:hover,
+            .print-toolbar a:hover {
+                background: #f1f5f9;
+            }
+
+            .print-toolbar button.primary:hover {
+                background: #1e293b;
+            }
+
+            /* Header band for the printable doc — keep it tasteful, not the
+               full splash hero from the live page. */
+            .print-header {
+                padding: 2rem 2.5rem 1.25rem;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .print-header .eyebrow {
+                font-size: 0.7rem;
+                font-weight: 700;
+                letter-spacing: 0.3em;
+                text-transform: uppercase;
+                color: #64748b;
+            }
+
+            .print-header h1 {
+                margin-top: 0.5rem;
+                font-size: 2rem;
+                line-height: 1.15;
+                font-weight: 700;
+                color: #0f172a;
+            }
+
+            .print-header p.lede {
+                margin-top: 0.75rem;
+                max-width: 60rem;
+                font-size: 0.95rem;
+                line-height: 1.55;
+                color: #334155;
+            }
+
+            .print-header .meta {
+                margin-top: 0.85rem;
+                font-size: 0.7rem;
+                font-weight: 600;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: #64748b;
+            }
+
+            .print-header .meta span + span::before {
+                content: "•";
+                margin: 0 0.6rem;
+                color: #cbd5e1;
+            }
+
+            /* Body container. */
+            .print-body {
+                padding: 1.5rem 2rem 3rem;
+            }
+
+            .print-body > .stack {
+                display: flex;
+                flex-direction: column;
+                gap: 3rem;
+            }
+
+            /* @media print: hide controls, keep colors, prevent ugly breaks
+               inside chart cards. */
+            @media print {
+                .print-toolbar {
+                    display: none !important;
+                }
+
+                .print-header {
+                    padding: 0.5in 0.5in 0.25in;
+                    border-bottom: 1px solid #cbd5e1;
+                }
+
+                .print-body {
+                    padding: 0.25in 0.5in 0.5in;
+                }
+
+                /* Force browsers to actually print backgrounds/colors so the
+                   chart cards and section accents survive the trip to paper. */
+                * {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+
+                /* Tighten the section-to-section spacing so the document reads
+                   as one continuous report — but leave enough room that the
+                   eye can still parse where one section ends and the next
+                   begins. */
+                .print-body > .stack {
+                    gap: 2rem;
+                }
+
+                /* Allow sections to split across pages so we don't waste
+                   half a sheet just because one section won't fit on the
+                   remainder of the current page. Only protect the actual
+                   chart cards and rendered Plotly figures from being cut. */
+                section {
+                    break-inside: auto;
+                    page-break-inside: auto;
+                }
+
+                .print-chart,
+                .js-plotly-plot {
+                    break-inside: avoid;
+                    page-break-inside: avoid;
+                }
+
+                /* Named pages: portrait for narrative & quick-stat cards,
+                   landscape for chart cards. Each .print-chart gets its own
+                   landscape sheet via forced page breaks before & after. */
+                @page portrait {
+                    size: Letter portrait;
+                    margin: 0.4in;
+                }
+
+                @page landscape {
+                    size: Letter landscape;
+                    margin: 0.4in;
+                }
+
+                html,
+                body,
+                .print-body,
+                section {
+                    page: portrait;
+                }
+
+                .print-chart {
+                    page: landscape;
+                    break-before: page;
+                    break-after: page;
+                    page-break-before: always;
+                    page-break-after: always;
+                }
+
+                /* A `.print-pair` wraps two .print-chart cards that should
+                   share a single landscape sheet, side by side. We force a
+                   page break around the pair, render its children as a
+                   2-column grid, and explicitly cancel the per-chart page
+                   breaks set above so the children stay together. */
+                .print-pair {
+                    page: landscape;
+                    break-before: page;
+                    break-after: page;
+                    page-break-before: always;
+                    page-break-after: always;
+                    display: grid !important;
+                    grid-template-columns: 1fr 1fr !important;
+                    gap: 0.3in !important;
+                    align-items: start;
+                }
+
+                .print-pair > .print-chart {
+                    break-before: auto !important;
+                    break-after: auto !important;
+                    page-break-before: auto !important;
+                    page-break-after: auto !important;
+                }
+
+                /* Constrain chart WIDTH only so nothing overflows the right
+                   margin of the page. We deliberately do NOT force height
+                   here: Plotly positions its SVG and overlay layers using
+                   absolute positioning inside `.js-plotly-plot`, which
+                   relies on the inline pixel height to reserve vertical
+                   space. Forcing `height: auto` collapses the container to
+                   zero, which is why charts were rendering on top of the
+                   narrative in print preview. */
+                .plotly-chart-wrapper {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    position: relative !important;
+                    overflow: visible !important;
+                }
+
+                .js-plotly-plot,
+                .js-plotly-plot .plot-container,
+                .js-plotly-plot .svg-container {
+                    max-width: 100% !important;
+                }
+
+                .js-plotly-plot svg.main-svg {
+                    max-width: 100% !important;
+                    overflow: visible !important;
+                }
+
+                /* Plotly modebar is hidden via config but belt-and-suspenders. */
+                .modebar-container,
+                .modebar {
+                    display: none !important;
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-white text-slate-900">
+        <!-- Screen-only toolbar. Hidden during printing. -->
+        <div class="print-toolbar">
+            <a href="{% url 'dashboard:cooccurring' %}" rel="noopener">← Back to dashboard</a>
+            <button type="button" class="primary" onclick="window.print();">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8" rx="1"></rect>
+                </svg>
+                Print / Save as PDF
+            </button>
+        </div>
+
+        <header class="print-header">
+            <p class="eyebrow">Research Briefing</p>
+            <h1>Behavioral Health, SUD &amp; AUD: A Deep Dive</h1>
+            <p class="lede">
+                A comprehensive analysis of co-occurring behavioral health disorders, substance use patterns,
+                and alcohol use disorder across 166 patients in the opioid overdose and general SUD cohorts.
+                Data covers March 2024 through {{ current_period_label }}.
+            </p>
+            <div class="meta">
+                {% if page_header_updated_at %}
+                    <span>
+                        {% if page_header_updated_at_iso %}
+                            <time datetime="{{ page_header_updated_at_iso }}">{{ page_header_updated_at|date:"F j, Y" }}</time>
+                        {% else %}
+                            {{ page_header_updated_at|date:"F j, Y" }}
+                        {% endif %}
+                    </span>
+                {% endif %}
+                {% if page_header_read_time %}
+                    <span>{{ page_header_read_time }}</span>
+                {% endif %}
+                <span>Printable Edition</span>
+            </div>
+        </header>
+
+        <main class="print-body">
+            <div class="stack">
+                {% include "dashboard/partials/cooccurring_body.html" %}
+            </div>
+        </main>
+
+        <script>
+            // Optional auto-print: append ?auto=1 to the URL to immediately
+            // pop the print dialog (handy when wiring the button to a single
+            // click flow). We delay briefly to let Plotly finish rendering;
+            // otherwise the first chart can come through blank in print preview.
+            (function () {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get("auto") === "1") {
+                    window.addEventListener("load", function () {
+                        setTimeout(function () { window.print(); }, 800);
+                    });
+                }
+            })();
+        </script>
+    </body>
+</html>

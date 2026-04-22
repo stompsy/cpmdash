@@ -720,7 +720,7 @@ def _build_hierarchical_encounter_treemap(df: pd.DataFrame, theme: str) -> str |
     fig = style_plotly_layout(
         fig,
         theme=theme,
-        height=500,  # Taller for better visibility
+        height=500,
         x_title=None,
         y_title=None,
         margin={"t": 0, "l": 0, "r": 0, "b": 0},
