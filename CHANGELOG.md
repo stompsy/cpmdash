@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.1.1 (2026-04-22)
+
+### Bug Fixes
+
+- **dashboard**: Polish co-occurring deep-dive layout and printable view
+  ([#8](https://github.com/stompsy/cpmdash/pull/8),
+  [`00649c3`](https://github.com/stompsy/cpmdash/commit/00649c3ced0388536e27ea19d12af2c20145d6fc))
+
+
 ## v1.1.0 (2026-04-20)
 
 ### Features
