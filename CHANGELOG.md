@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.2.0 (2026-04-30)
+
+### Features
+
+- **dashboard**: Expand Hargrove reporting and overdose analytics
+  ([`916e17b`](https://github.com/stompsy/cpmdash/commit/916e17b5738911d9d024964dd897d0764bbb3c4f))
+
+
 ## v1.1.1 (2026-04-22)
 
 ### Bug Fixes
