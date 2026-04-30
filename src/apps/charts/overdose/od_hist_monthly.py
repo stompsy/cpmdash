@@ -1,4 +1,4 @@
-from datetime import datetime
+from typing import Any
 
 import pandas as pd
 import plotly.express as px
@@ -22,6 +22,12 @@ def build_chart_od_hist_monthly(theme):
 
     # Exclude Feb 2024 (no data available until March)
     df = df[~((df["od_date"].dt.year == 2024) & (df["od_date"].dt.month == 2))]
+
+    # Exclude the December 2023 aberrant OD event from this chart only.
+    # The underlying record is intentionally left in the database so it still
+    # contributes to totals/insights elsewhere; it just visually distorts the
+    # monthly trend here, so we drop it from the plotted dataset.
+    df = df[~((df["od_date"].dt.year == 2023) & (df["od_date"].dt.month == 12))]
 
     df["overdose_outcome"] = df["disposition"].apply(
         lambda x: "Fatal" if x in ["CPR attempted", "DOA"] else "Non-Fatal"
@@ -89,27 +95,56 @@ def build_chart_od_hist_monthly(theme):
         bargap=0.1,
     )
 
-    # Add a total-count line trace overlaying the stacked bars.
-    # This makes the overall trend visible even when the fatal/non-fatal
-    # split makes it hard to read.
+    # 12-month trailing sum (TTM) overlay.
+    #
+    # Why TTM instead of a straight regression line:
+    #   - Naturally absorbs seasonality (always sums a full year of months).
+    #   - A single noisy month moves the line by 1/12, not 1/N.
+    #   - Reads as "annualized rate as of this month" -- the same shape public
+    #     health agencies (CDC, state ME's) use for OD trends.
+    #   - Honest about coverage: months without 12 prior months of data simply
+    #     don't get a value (min_periods=12), so we don't fake a TTM number
+    #     during the program's first year.
+    #
+    # The TTM line is plotted on a secondary y-axis (yaxis2) so its magnitude
+    # (~tens or hundreds annually) doesn't crush the monthly bar scale.
     monthly_totals = df.groupby(df["od_date"].dt.tz_localize(None).dt.to_period("M")).size()
-    monthly_totals.index = monthly_totals.index.to_timestamp()
     monthly_totals = monthly_totals.sort_index()
-    fig.add_trace(
-        go.Scatter(
-            x=monthly_totals.index,
-            y=monthly_totals.values,
-            mode="lines",
-            name="Total",
-            line=dict(
-                color=TAILWIND_COLORS["amber-400"],
-                width=2.5,
-                shape="spline",
-                smoothing=0.8,
-            ),
-            hovertemplate="Month: %{x|%b %Y}<br>Total: %{y}<extra></extra>",
+    period_index = pd.PeriodIndex(monthly_totals.index)
+    starts = period_index.to_timestamp(how="start")
+    ends = period_index.to_timestamp(how="end")
+    mid_month = starts + (ends - starts) / 2
+
+    ttm = monthly_totals.rolling(window=12, min_periods=12).sum().dropna()
+    if not ttm.empty:
+        # Map each TTM month back to its mid-month timestamp via the dict
+        # we already built (period -> mid-month).
+        mid_lookup = dict(zip(monthly_totals.index, mid_month, strict=True))
+        ttm_x = [mid_lookup[p] for p in ttm.index]
+        ttm_y = [int(v) for v in ttm.values]
+        fig.add_trace(
+            go.Scatter(
+                x=ttm_x,
+                y=ttm_y,
+                mode="lines+markers",
+                name="12-month trailing total",
+                yaxis="y2",
+                line=dict(
+                    color=TAILWIND_COLORS["amber-400"],
+                    width=3,
+                    shape="spline",
+                    smoothing=0.6,
+                ),
+                marker=dict(
+                    size=6,
+                    color=TAILWIND_COLORS["amber-400"],
+                    line=dict(width=1, color=TAILWIND_COLORS["slate-800"]),
+                ),
+                hovertemplate=(
+                    "Month: %{x|%b %Y}<br>Last 12 months: <b>%{y}</b> overdoses<extra></extra>"
+                ),
+            )
         )
-    )
 
     # Apply theme styling
     fig = style_plotly_layout(
@@ -166,6 +201,21 @@ def build_chart_od_hist_monthly(theme):
         hovermode="closest",
         plot_bgcolor="rgba(0,0,0,0)",  # Transparent background
         paper_bgcolor="rgba(0,0,0,0)",  # Transparent background
+        # Secondary axis for the TTM line so it doesn't crush the bar scale.
+        # Anchored to the right side; tick color matches the line so viewers
+        # know which axis goes with which trace.
+        yaxis2=dict(
+            overlaying="y",
+            side="right",
+            title=dict(
+                text="12-month trailing total",
+                font=dict(color=TAILWIND_COLORS["amber-400"]),
+            ),
+            tickfont=dict(color=TAILWIND_COLORS["amber-400"]),
+            showgrid=False,
+            rangemode="tozero",
+            zeroline=False,
+        ),
         modebar=dict(
             orientation="h",  # Horizontal orientation
             # Note: Plotly doesn't support x/y positioning for modebar - it's hardcoded to top-right
@@ -226,10 +276,8 @@ def build_chart_top5_drugs_monthly(theme):
         return "<p>No data available</p>"
 
     # Create monthly aggregations
-    # Cast to Series[datetime] to satisfy mypy, which gets confused otherwise
-    od_date_series: pd.Series[datetime] = df["od_date"]
-    # Mypy gets confused by the chained .dt accessors. Chaining them directly
-    # seems to resolve the false positive.
+    # Cast to Series[Any] to avoid Pylance overload conflicts on chained .dt accessors.
+    od_date_series: pd.Series[Any] = df["od_date"]
     df["month"] = od_date_series.dt.tz_localize(None).dt.to_period("M")
 
     # Find top 5 drugs overall

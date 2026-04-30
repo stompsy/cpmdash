@@ -54,3 +54,8 @@ src/static/data/*.csv
 *.bak
 assets/OD.SUD.AUD.xlsx:Zone.Identifier
 assets/od-sud-aud.xlsx
+assets/FDA_Common_Meds_Home_EMS_ED.xlsx
+assets/FDA_RxNorm_1000_Unique_Ingredients.xlsx
+assets/med_clean.py
+assets/med_filter.py
+assets/products.txt

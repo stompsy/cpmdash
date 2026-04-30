@@ -2,21 +2,24 @@ import json
 import re
 from collections import Counter, defaultdict
 from contextlib import suppress
-from datetime import date
+from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, TypedDict, cast
+from typing import TYPE_CHECKING, Any, TypedDict, cast
+
+if TYPE_CHECKING:
+    from shapely.geometry.base import BaseGeometry
 
 import pandas as pd
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
-from django.http import Http404
+from django.db.models import Q
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from markdown import markdown as render_markdown
 
 from apps.accounts.forms import ProfileForm
@@ -29,7 +32,11 @@ from ..charts.odreferrals.narcan_charts import (
     build_narcan_stats,
 )
 from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
-from ..charts.odreferrals.repeat_overdose_charts import build_chart_repeat_overdose_quarterly_trend
+from ..charts.odreferrals.repeat_overdose_charts import (
+    build_chart_repeat_overdose_km,
+    build_chart_repeat_overdose_km_by_cohort,
+    build_chart_repeat_overdose_quarterly_trend,
+)
 from ..charts.overdose.od_all_cases_scatter import (
     build_chart_all_cases_scatter,  # noqa: F401 - re-export for tests monkeypatch
 )
@@ -3893,14 +3900,14 @@ OD_REFERRALS_LABEL_MAP: dict[str, str] = {
 
 OD_REFERRALS_RATIONALE_MAP: dict[str, str] = {
     "odreferrals_counts_monthly": (
-        "Read these two charts together:\n\n"
-        "• The monthly bars show when total overdose referrals rise/fall and whether the fatal vs. non-fatal mix is shifting. "
-        "A sustained climb across multiple months is a real trend; a single tall month can be a short-lived event. "
-        "The day-level markers help you spot whether a month is inflated by a handful of extreme days versus a steady drumbeat.\n\n"
-        "• The ‘Top 5 suspected drugs by month’ area chart below explains what’s driving the volume. "
-        "If a monthly spike lines up with one drug’s band expanding, you likely have a specific supply/contamination problem. "
-        "If total volume rises while the mix stays roughly the same, you’re looking at broad increased exposure/risk rather than one new culprit.\n\n"
-        "Use the combination to plan staffing and outreach for rising months, and to tune naloxone/supplies, messaging, and treatment partner capacity toward the substances growing fastest."
+        "Every bar is a neighbor — someone who survived or died from an overdose that month. "
+        "Read the bars first; the amber line is just a longer-range view.\n\n"
+        "The amber line is a 12-month trailing sum: at every month, it shows the total number of "
+        "overdoses in the prior 12 months. It absorbs seasonality, smooths out single-month noise, "
+        "and reads as “annualized rate as of this month.” It only appears once we have a full year "
+        "of prior data, so we’re not faking a number during the program’s first year. The "
+        "December 2023 outlier is hidden from this chart so it doesn’t distort the visual; it "
+        "still counts toward totals elsewhere."
     ),
     "odreferrals_counts_weekday": (
         "Day-of-week patterns highlight when overdose referrals peak, informing shift coverage and outreach campaigns."
@@ -4256,6 +4263,73 @@ def odreferrals(request):
         )
     )
 
+    # Kaplan-Meier cumulative incidence of repeat overdose. Input is built
+    # from the same per-patient date map the quarterly chart uses, so the two
+    # charts can never disagree about who exists in the cohort. We use *all*
+    # observed years here, not just the year-restricted view, so the curve
+    # captures every patient we've ever seen.
+    km_patient_dates, km_max_date = _load_od_patient_dates({y for y in range(2000, today.year + 1)})
+    km_durations: list[int] = []
+    km_events: list[int] = []
+    if km_max_date is not None:
+        for dates_for_pid in km_patient_dates.values():
+            if not dates_for_pid:
+                continue
+            index_day = dates_for_pid[0]
+            if len(dates_for_pid) >= 2:
+                # Patient had a repeat OD: time-to-event is days to second OD.
+                km_durations.append((dates_for_pid[1] - index_day).days)
+                km_events.append(1)
+            else:
+                # No repeat observed: censored at the data cutoff. Patients
+                # whose index OD is the same day as the cutoff contribute 0
+                # follow-up time and just don't move the curve.
+                km_durations.append((km_max_date - index_day).days)
+                km_events.append(0)
+    fig_repeat_overdose_km = _chart_html(
+        build_chart_repeat_overdose_km(
+            theme=theme,
+            durations=km_durations,
+            events=km_events,
+        )
+    )
+
+    # Cohort-stratified KM: same cohort, sliced by the calendar year of each
+    # patient's first observed OD. The promise of this chart is "look at
+    # patients we picked up in 2024 vs 2025 -- are the newer ones repeating
+    # less?" Patients indexing in the current year are still included so we
+    # can see the program's freshest cohort, even though their curve will
+    # only extend as far as the data cutoff allows.
+    cohort_buckets: dict[int, tuple[list[int], list[int]]] = {}
+    if km_max_date is not None:
+        for dates_for_pid in km_patient_dates.values():
+            if not dates_for_pid:
+                continue
+            index_day = dates_for_pid[0]
+            year = index_day.year
+            durs, evts = cohort_buckets.setdefault(year, ([], []))
+            if len(dates_for_pid) >= 2:
+                durs.append((dates_for_pid[1] - index_day).days)
+                evts.append(1)
+            else:
+                durs.append((km_max_date - index_day).days)
+                evts.append(0)
+    # Drop cohorts with too few patients to read meaningfully -- a curve
+    # built on 3 patients is mostly noise. Threshold is intentionally low so
+    # the most recent cohort still shows up early in the year.
+    MIN_COHORT_SIZE = 10
+    cohort_input: list[tuple[str, list[int], list[int]]] = [
+        (str(year), durs, evts)
+        for year, (durs, evts) in sorted(cohort_buckets.items())
+        if len(durs) >= MIN_COHORT_SIZE
+    ]
+    fig_repeat_overdose_km_by_cohort = _chart_html(
+        build_chart_repeat_overdose_km_by_cohort(
+            theme=theme,
+            cohorts=cohort_input,
+        )
+    )
+
     # Add hotspot map and statistics
     zoom_mode = "full" if request.user.is_authenticated else "restricted"
     fig_od_map = _chart_html(build_chart_od_map(theme=theme, zoom_mode=zoom_mode))
@@ -4275,6 +4349,8 @@ def odreferrals(request):
         "repeat_overdose_stats": repeat_overdose_stats,
         "repeat_overdose_quarterly_rates": repeat_overdose_quarterly_rates,
         "fig_repeat_overdose_quarterly_trend": fig_repeat_overdose_quarterly_trend,
+        "fig_repeat_overdose_km": fig_repeat_overdose_km,
+        "fig_repeat_overdose_km_by_cohort": fig_repeat_overdose_km_by_cohort,
         "fig_od_map": fig_od_map,
         "hotspot_stats": hotspot_stats,
         "narcan_grid_chart": narcan_grid_chart,
@@ -5767,6 +5843,13 @@ def _hargrove_format_pct(value: float) -> str:
     return ""
 
 
+def _hargrove_format_currency(value: float) -> str:
+    """Whole-dollar currency formatter for grant report cells."""
+    with suppress(TypeError, ValueError):
+        return f"${int(round(float(value))):,}"
+    return ""
+
+
 def _hargrove_format_value_for_display(value: object) -> str:
     if value is None:
         return ""
@@ -6168,6 +6251,373 @@ def _hargrove_patient_zip_map(
     return zip_by_patient
 
 
+# Cached CPM service-area geometries keyed by whether expanded areas are included.
+# "expanded" = PA city + FD2 + FD4 + Lower Elwha (from 2026 Q2 onward).
+# "pa_only"  = City of Port Angeles boundary only (used for 2026 Q1 and earlier,
+#              before referrals from the new partner districts had started arriving).
+_HARGROVE_CPM_JURISDICTION: dict[str, "BaseGeometry"] = {}
+
+# First (year, quarter) in which the expanded service area (FD2, FD4, Lower Elwha)
+# was active for referral purposes.  Prior quarters use the PA-only boundary.
+_CPM_EXPANSION_START: tuple[int, int] = (2026, 2)
+
+
+def _hargrove_load_cpm_jurisdiction(*, expanded: bool) -> "BaseGeometry":
+    """Return a cached shapely geometry for the requested CPM service area.
+
+    ``expanded=False``  →  City of Port Angeles boundary only.
+    ``expanded=True``   →  PA + Fire Districts 2 & 4 + Lower Elwha Reservation.
+    """
+    cache_key = "expanded" if expanded else "pa_only"
+    if cache_key in _HARGROVE_CPM_JURISDICTION:
+        return _HARGROVE_CPM_JURISDICTION[cache_key]
+
+    import json as _json
+    from pathlib import Path
+
+    from shapely.geometry import shape
+    from shapely.ops import unary_union
+
+    base = Path(__file__).parent.parent.parent / "static" / "data"
+    polygons = []
+
+    # City of Port Angeles outer boundary — always included
+    with (base / "port_angeles_outer_boundary.geojson").open() as fh:
+        pa = _json.load(fh)
+    for feat in pa.get("features", [pa]):
+        polygons.append(shape(feat["geometry"]))
+
+    if expanded:
+        # Fire Districts 2 & 4
+        with (base / "fire_districts.geojson").open() as fh:
+            fds = _json.load(fh)
+        for feat in fds.get("features", []):
+            if feat.get("properties", {}).get("FIRE") in ("FD2", "FD4"):
+                polygons.append(shape(feat["geometry"]))
+
+        # Lower Elwha Reservation + Off-Reservation Trust Land
+        with (base / "lower_elwha_reservation.geojson").open() as fh:
+            le = _json.load(fh)
+        for feat in le.get("features", [le]):
+            polygons.append(shape(feat["geometry"]))
+
+    _HARGROVE_CPM_JURISDICTION[cache_key] = unary_union(polygons)
+    return _HARGROVE_CPM_JURISDICTION[cache_key]
+
+
+def _hargrove_filter_od_to_jurisdiction(od_qs, *, year: int, q: int) -> object:
+    """Return ``od_qs`` filtered to events within the active CPM service area.
+
+    Before ``_CPM_EXPANSION_START`` (currently 2026 Q2) only the City of Port
+    Angeles boundary is used because FD2, FD4, and Lower Elwha had not yet
+    started sending referrals.  From that point forward the full expanded
+    service area is applied.
+
+    Records with no usable lat/lon are *included* (benefit of the doubt —
+    they are CPM-dispatched events with missing geocoordinates).
+    """
+    from shapely.geometry import Point
+
+    use_expanded = (year, q) >= _CPM_EXPANSION_START
+    jurisdiction = _hargrove_load_cpm_jurisdiction(expanded=use_expanded)
+
+    no_geo_ids: list[int] = []
+    in_ids: list[int] = []
+    for row in od_qs.values("ID", "lat", "long"):
+        lat, lon = row["lat"], row["long"]
+        if not lat or not lon:
+            no_geo_ids.append(row["ID"])
+        elif jurisdiction.contains(Point(lon, lat)):
+            in_ids.append(row["ID"])
+
+    return od_qs.filter(ID__in=in_ids + no_geo_ids)
+
+
+def _build_hargrove_2026_rows(
+    *,
+    year: int,
+    q: int,
+    od_qs,
+    patients_served: int,
+) -> list[dict[str, object]]:
+    """Build the rows for the 2026 Hargrove enhancements section.
+
+    Adds four new requirement groups for the 2026 grant year:
+
+    1. % of overdose survivors contacted who received supportive services /
+       warm handoff (current quarter + YTD average).
+    2. Cumulative fatal overdoses through the current quarter, with the
+       prior-year same-period comparison and a 20%-reduction goal check.
+    3. Cumulative repeat overdoses (patients with >1 OD in the YTD window)
+       through the current quarter, with the prior-year comparison and the
+       20%-reduction goal check.
+    4. Cost-avoidance estimates: transports prevented, 911 calls prevented,
+       ED visits prevented, and the dollar value of each.
+
+    The cost-avoidance coefficients mirror the methodology in
+    ``src/apps/charts/od_utils.py`` (42% / 71% / 56% / 51% / 69% with
+    $3,800 / $1,900 / $1,146 unit values) so the grant report and the
+    public Cost Savings page never disagree on the math.
+    """
+    fatal_dispositions = ["CPR attempted", "DOA"]
+
+    # ---- #1 Overdose survivors receiving supportive services -------------
+    def _supportive_services_pct(qs) -> tuple[int, int, float]:
+        """Return (numerator, denominator, pct) for an OD queryset.
+
+        Denominator: OD events whose disposition is not in the fatal set
+        (the patient survived, so a warm handoff is even possible).
+        Numerator: those events where the patient was referred to another
+        agency -- either flagged via ``referral_to_sud_agency`` or via any
+        of the OD-specific referral slots.
+        """
+        survivors = qs.exclude(disposition__in=fatal_dispositions)
+        denom = survivors.count()
+        if denom == 0:
+            return 0, 0, 0.0
+        num = (
+            survivors.filter(
+                Q(referral_to_sud_agency=True)
+                | Q(referral_rediscovery=True)
+                | Q(referral_reflections=True)
+                | Q(referral_pbh=True)
+                | Q(referral_other=True)
+            )
+            .distinct()
+            .count()
+        )
+        return num, denom, (num / denom) * 100.0
+
+    qtr_num, qtr_denom, qtr_pct = _supportive_services_pct(
+        _hargrove_filter_od_to_jurisdiction(od_qs, year=year, q=q)
+    )
+
+    # YTD percentages: average the per-quarter rates so a quarter with very
+    # few OD events doesn't drown out one with many. (If we instead summed
+    # numerators and denominators, a single high-volume quarter could mask
+    # poor follow-up in the others.)
+    ytd_pcts: list[float] = []
+    ytd_num_total = 0
+    ytd_denom_total = 0
+    for qq in range(1, q + 1):
+        q_start, q_end = _hargrove_quarter_date_range(year, qq)
+        q_od = _hargrove_filter_od_to_jurisdiction(
+            ODReferrals.objects.filter(od_date__date__range=(q_start, q_end)),
+            year=year,
+            q=qq,
+        )
+        n, d, p = _supportive_services_pct(q_od)
+        if d > 0:
+            ytd_pcts.append(p)
+            ytd_num_total += n
+            ytd_denom_total += d
+    ytd_avg_pct = sum(ytd_pcts) / len(ytd_pcts) if ytd_pcts else 0.0
+
+    # ---- #2 Cumulative fatal overdoses through Q (YoY 20% reduction) ----
+    def _fatal_count_ytd(yr: int, through_q: int) -> int:
+        if through_q < 1:
+            return 0
+        start, _ = _hargrove_quarter_date_range(yr, 1)
+        _, end = _hargrove_quarter_date_range(yr, through_q)
+        return ODReferrals.objects.filter(
+            od_date__date__range=(start, end),
+            disposition__in=fatal_dispositions,
+        ).count()
+
+    fatal_ytd = _fatal_count_ytd(year, q)
+    fatal_prev_ytd = _fatal_count_ytd(year - 1, q)
+    fatal_target = fatal_prev_ytd * 0.80  # 20% reduction goal
+    fatal_status = _hargrove_reduction_status(fatal_ytd, fatal_prev_ytd, target_reduction=0.20)
+
+    # ---- #3 Cumulative repeat overdoses through Q (YoY 20% reduction) ---
+    def _repeat_count_ytd(yr: int, through_q: int) -> int:
+        """Patients with >1 OD event between Jan 1 and end of through_q."""
+        if through_q < 1:
+            return 0
+        start, _ = _hargrove_quarter_date_range(yr, 1)
+        _, end = _hargrove_quarter_date_range(yr, through_q)
+        pids = list(
+            ODReferrals.objects.filter(od_date__date__range=(start, end))
+            .exclude(patient_id__isnull=True)
+            .values_list("patient_id", flat=True)
+        )
+        counts = Counter(pids)
+        return sum(1 for n in counts.values() if n > 1)
+
+    repeat_ytd = _repeat_count_ytd(year, q)
+    repeat_prev_ytd = _repeat_count_ytd(year - 1, q)
+    repeat_status = _hargrove_reduction_status(repeat_ytd, repeat_prev_ytd, target_reduction=0.20)
+
+    # ---- #4 Cost avoidance ---------------------------------------------
+    # Patient-based methodology (same coefficients as
+    # apps.charts.od_utils.get_cost_savings_metrics).
+    served = max(int(patients_served), 0)
+    patients_used_911 = int(served * 0.42)
+    calls_prevented = int(patients_used_911 * 0.71)
+    transports_prevented = int(calls_prevented * 0.56)
+    non_transport_calls = max(calls_prevented - transports_prevented, 0)
+    patients_used_ed = int(served * 0.51)
+    ed_visits_prevented = int(patients_used_ed * 0.69)
+
+    savings_transports = transports_prevented * 3800
+    # "Dollars saved per 911 call prevented" uses the non-transport unit
+    # value ($1,900). Transport savings are a separate line so we don't
+    # double-count the cases that ended in transport.
+    savings_911 = non_transport_calls * 1900
+    savings_ed = ed_visits_prevented * 1146
+
+    rows: list[dict[str, object]] = [
+        # ---- #1 ----
+        {
+            "id": "2026-01a",
+            "metric": "% Overdose Survivors Receiving Supportive Services (Quarter)",
+            "value": (
+                f"{_hargrove_format_pct(qtr_pct)} ({qtr_num} of {qtr_denom})"
+                if qtr_denom
+                else _hargrove_format_pct(qtr_pct)
+            ),
+            "notes": (
+                "Non-fatal OD events referred to another agency"
+                if qtr_denom
+                else "No non-fatal OD events recorded this quarter"
+            ),
+        },
+        {
+            "id": "2026-01b",
+            "metric": "% Overdose Survivors Receiving Supportive Services (YTD avg)",
+            "value": (
+                f"{_hargrove_format_pct(ytd_avg_pct)} ({ytd_num_total} of {ytd_denom_total})"
+                if ytd_pcts
+                else _hargrove_format_pct(ytd_avg_pct)
+            ),
+            "notes": (
+                f"Average of {len(ytd_pcts)} quarter(s)"
+                if ytd_pcts
+                else "No qualifying quarters yet"
+            ),
+        },
+        # ---- #2 ----
+        {
+            "id": "2026-02a",
+            "metric": f"Fatal Overdoses (YTD through Q{q})",
+            "value": _hargrove_format_count(fatal_ytd),
+            "notes": "Disposition in {CPR attempted, DOA}",
+        },
+        {
+            "id": "2026-02b",
+            "metric": f"Fatal Overdoses ({year - 1} same-period comparison)",
+            "value": _hargrove_format_count(fatal_prev_ytd),
+            "notes": (
+                f"Goal: ≤ {fatal_target:.1f} (20% reduction from {fatal_prev_ytd})"
+                if fatal_prev_ytd
+                else "No prior-year baseline"
+            ),
+        },
+        {
+            "id": "2026-02c",
+            "metric": "Fatal Overdose Reduction Goal Status",
+            "value": fatal_status,
+            "notes": "20% reduction year-over-year through current quarter",
+        },
+        # ---- #3 ----
+        {
+            "id": "2026-03a",
+            "metric": f"Repeat Overdose Patients (YTD through Q{q})",
+            "value": _hargrove_format_count(repeat_ytd),
+            "notes": "Patients with >1 OD event Jan 1 – end of current quarter",
+        },
+        {
+            "id": "2026-03b",
+            "metric": f"Repeat Overdose Patients ({year - 1} same-period comparison)",
+            "value": _hargrove_format_count(repeat_prev_ytd),
+            "notes": (
+                f"Goal: ≤ {repeat_prev_ytd * 0.80:.1f} (20% reduction from {repeat_prev_ytd})"
+                if repeat_prev_ytd
+                else "No prior-year baseline"
+            ),
+        },
+        {
+            "id": "2026-03c",
+            "metric": "Repeat Overdose Reduction Goal Status",
+            "value": repeat_status,
+            "notes": "20% reduction year-over-year through current quarter",
+        },
+        # ---- #4 ----
+        {
+            "id": "2026-04a",
+            "metric": "Transports Prevented (Quarter)",
+            "value": _hargrove_format_count(transports_prevented),
+            "notes": (
+                f"Estimated from {served} patients served × 42% × 71% × 56% "
+                "(prior 911 use × reduction × transport rate)"
+            ),
+        },
+        {
+            "id": "2026-04b",
+            "metric": "Transports Prevented — Dollars Saved (Quarter)",
+            "value": _hargrove_format_currency(savings_transports),
+            "notes": "$3,800 per ambulance transport averted",
+        },
+        {
+            "id": "2026-04c",
+            "metric": "911 Calls Prevented (Quarter)",
+            "value": _hargrove_format_count(calls_prevented),
+            "notes": "Estimated from patients served × 42% × 71%",
+        },
+        {
+            "id": "2026-04d",
+            "metric": "911 Calls Prevented — Dollars Saved (Quarter)",
+            "value": _hargrove_format_currency(savings_911),
+            "notes": "$1,900 per 911 call without transport (transport calls counted separately)",
+        },
+        {
+            "id": "2026-04e",
+            "metric": "ED Visits Prevented (Quarter)",
+            "value": _hargrove_format_count(ed_visits_prevented),
+            "notes": "Estimated from patients served × 51% × 69%",
+        },
+        {
+            "id": "2026-04f",
+            "metric": "ED Visits Prevented — Dollars Saved (Quarter)",
+            "value": _hargrove_format_currency(savings_ed),
+            "notes": "$1,146 per ED visit avoided",
+        },
+    ]
+
+    return rows
+
+
+def _hargrove_reduction_status(
+    current: float,
+    baseline: float,
+    *,
+    target_reduction: float,
+) -> str:
+    """Return a human-readable status for a reduction-target metric.
+
+    target_reduction is the desired fractional reduction, e.g. 0.20 for 20%.
+    """
+    if not baseline:
+        return "No baseline"
+    target = baseline * (1.0 - target_reduction)
+    actual_reduction = (baseline - current) / baseline
+    if current <= target:
+        return f"Goal met (−{actual_reduction * 100:.1f}%)"
+    if current < baseline:
+        return f"Improving but short of goal (−{actual_reduction * 100:.1f}%)"
+    if current == baseline:
+        return "Flat vs prior year"
+    return f"Worsened (+{(-actual_reduction) * 100:.1f}%)"
+
+
+# Number of Tuesday HRHC afternoon sessions (60 contacts each) missed per quarter.
+# These are subtracted from the 90×Tuesdays undocumented outreach estimate.
+# Add an entry here each quarter when HRHC outreach couldn't be staffed.
+_HRHC_MISSED_SESSIONS: dict[tuple[int, int], int] = {
+    (2026, 1): 7,  # 7 Tuesdays in Q1 2026 HRHC outreach was not provided
+}
+
+
 def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]]:
     """Build dynamic quarterly metrics from database.
 
@@ -6204,30 +6654,6 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
 
     referrals_received = standard_referrals_received + od_referrals_received
 
-    closed_reasons = {"Referred - Successful", "Alt Referral Opened", "CPM Resolved"}
-    referral_slots_initiated = _hargrove_count_filled_referral_slots(
-        list(
-            referrals_qs.filter(referral_closed_reason__in=closed_reasons).values(
-                "referral_1",
-                "referral_2",
-                "referral_3",
-                "referral_4",
-                "referral_5",
-            )
-        )
-    )
-    od_slots_initiated = _hargrove_count_filled_od_referral_slots(
-        list(
-            od_qs.filter(referral_to_sud_agency=True).values(
-                "referral_rediscovery",
-                "referral_reflections",
-                "referral_pbh",
-                "referral_other",
-            )
-        )
-    )
-    referrals_initiated = referral_slots_initiated + od_slots_initiated
-
     unique_services = _hargrove_count_filled_referral_slots(
         list(
             referrals_qs.values(
@@ -6255,12 +6681,6 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
             "metric": "Total Contacts (Current Quarter)",
             "value": _hargrove_format_count(total_contacts),
             "notes": "Encounters + Referrals + OD Referrals",
-        },
-        {
-            "id": "96720",
-            "metric": "Referrals Initiated (Current Quarter)",
-            "value": _hargrove_format_count(referrals_initiated),
-            "notes": "Filled referral slots from successful closes + OD SUD referrals",
         },
         {
             "id": "96721",
@@ -6335,6 +6755,8 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
 
     # YTD average of quarterly repeat OD percentages.
     repeat_pct_values: list[float] = []
+    repeat_raw_ytd_n = 0
+    repeat_raw_ytd_d = 0
     for qq in range(1, q + 1):
         q_start, q_end = _hargrove_quarter_date_range(year, qq)
         q_od = ODReferrals.objects.filter(od_date__date__range=(q_start, q_end))
@@ -6344,47 +6766,30 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
         q_repeat = sum(1 for n in q_counts.values() if n > 1)
         q_pct = (q_repeat / q_unique) * 100.0 if q_unique else 0.0
         repeat_pct_values.append(q_pct)
+        repeat_raw_ytd_n += q_repeat
+        repeat_raw_ytd_d += q_unique
     repeat_od_ytd = sum(repeat_pct_values) / len(repeat_pct_values) if repeat_pct_values else 0.0
 
-    # MAT services: Referrals "Need - SUD Services" + ODReferrals client_agrees_to_mat=1
-    mat_referrals = referrals_qs.filter(referral_agency__icontains="Need - SUD Services").count()
-    mat_od = od_qs.filter(client_agrees_to_mat=1).count()
-    mat_quarter = mat_referrals + mat_od
-
-    mat_ytd = 0
-    for qq in range(1, q + 1):
-        q_start, q_end = _hargrove_quarter_date_range(year, qq)
-        q_refs = Referrals.objects.filter(date_received__range=(q_start, q_end))
-        q_od = ODReferrals.objects.filter(od_date__date__range=(q_start, q_end))
-        mat_ytd += q_refs.filter(referral_agency__icontains="Need - SUD Services").count()
-        mat_ytd += q_od.filter(client_agrees_to_mat=1).count()
-
-    # Trainings: persons_trained + number_of_nonems_onscene (ODReferrals)
-    trainings_quarter = (
-        od_qs.aggregate(Sum("persons_trained")).get("persons_trained__sum") or 0
-    ) + (od_qs.aggregate(Sum("number_of_nonems_onscene")).get("number_of_nonems_onscene__sum") or 0)
-
-    trainings_ytd: float = 0.0
-    for qq in range(1, q + 1):
-        q_start, q_end = _hargrove_quarter_date_range(year, qq)
-        q_od = ODReferrals.objects.filter(od_date__date__range=(q_start, q_end))
-        trainings_ytd += float(
-            q_od.aggregate(Sum("persons_trained")).get("persons_trained__sum") or 0
-        )
-        trainings_ytd += float(
-            q_od.aggregate(Sum("number_of_nonems_onscene")).get("number_of_nonems_onscene__sum")
-            or 0
-        )
-
-    # High utilizer reduction is program-managed / fixed per quarter (see insights doc).
-    fixed_high_utilizer_pct_2025 = {1: 67.0, 2: 59.0, 3: 61.0, 4: 63.0}
-    high_utilizer_q = fixed_high_utilizer_pct_2025.get(q, 0.0) if year == 2025 else 0.0
-    high_utilizer_values = [
-        (fixed_high_utilizer_pct_2025.get(qq, 0.0) if year == 2025 else 0.0)
-        for qq in range(1, q + 1)
-    ]
-    high_utilizer_ytd = (
-        sum(high_utilizer_values) / len(high_utilizer_values) if high_utilizer_values else 0.0
+    # Outreach: referrals via outreach agencies + encounters for those patients
+    # + undocumented Tuesday field sessions (60 afternoon + 30 morning = 90/week),
+    # minus 60 for each Tuesday HRHC session that was missed (see _HRHC_MISSED_SESSIONS).
+    # OD referrals are excluded; no outreach-agency values exist in that table.
+    outreach_referrals_qs = referrals_qs.filter(referral_agency__icontains="outreach")
+    outreach_ref_count = outreach_referrals_qs.count()
+    outreach_pids = set(
+        outreach_referrals_qs.exclude(patient_ID__isnull=True).values_list("patient_ID", flat=True)
+    )
+    outreach_enc_count = (
+        encounters_qs.filter(patient_ID__in=outreach_pids).count() if outreach_pids else 0
+    )
+    # Count Tuesdays in the quarter for the two undocumented OPCC/REdisCOVERY sessions
+    first_tuesday = start_date + timedelta(days=(1 - start_date.weekday()) % 7)
+    tuesdays_in_quarter = (
+        max(0, (end_date - first_tuesday).days // 7 + 1) if first_tuesday <= end_date else 0
+    )
+    hrhc_missed = _HRHC_MISSED_SESSIONS.get((year, q), 0)
+    outreach_encounters = (
+        outreach_ref_count + outreach_enc_count + tuesdays_in_quarter * 90 - hrhc_missed * 60
     )
 
     objectives_rows = [
@@ -6397,50 +6802,28 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
         {
             "id": "96733",
             "metric": "% of Repeat Overdoses (Quarter)",
-            "value": _hargrove_format_pct(repeat_od_pct),
+            "value": (
+                f"{_hargrove_format_pct(repeat_od_pct)} ({repeat_od_patients} of {unique_od_patients})"
+                if unique_od_patients
+                else _hargrove_format_pct(repeat_od_pct)
+            ),
             "notes": "Patients with >1 OD in quarter / unique OD patients",
         },
         {
             "id": "96733",
             "metric": "% of Repeat Overdoses (YTD)",
-            "value": _hargrove_format_pct(repeat_od_ytd),
-            "notes": "Average of quarterly % values",
+            "value": (
+                f"{_hargrove_format_pct(repeat_od_ytd)} ({repeat_raw_ytd_n} of {repeat_raw_ytd_d})"
+                if repeat_raw_ytd_d
+                else _hargrove_format_pct(repeat_od_ytd)
+            ),
+            "notes": "Average of quarterly % values; raw = sum of quarterly repeat / total OD patients",
         },
         {
             "id": "96729",
-            "metric": "# of New MAT Services (Quarter)",
-            "value": _hargrove_format_count(mat_quarter),
-            "notes": "Referrals 'Need - SUD Services' + OD agrees to MAT",
-        },
-        {
-            "id": "96729",
-            "metric": "# of New MAT Services (YTD)",
-            "value": _hargrove_format_count(mat_ytd),
-            "notes": "Cumulative sum of quarterly counts",
-        },
-        {
-            "id": "96730",
-            "metric": "# of Trainings Provided (Quarter)",
-            "value": _hargrove_format_count(trainings_quarter),
-            "notes": "persons_trained + number_of_nonems_onscene",
-        },
-        {
-            "id": "96730",
-            "metric": "# of Trainings Provided (YTD)",
-            "value": _hargrove_format_count(trainings_ytd),
-            "notes": "Cumulative sum of quarterly totals",
-        },
-        {
-            "id": "96732",
-            "metric": "% Reduction High Utilizer (Quarter)",
-            "value": _hargrove_format_pct(high_utilizer_q),
-            "notes": "Program-managed value (manual case review)",
-        },
-        {
-            "id": "96732",
-            "metric": "% Reduction High Utilizer (YTD)",
-            "value": _hargrove_format_pct(high_utilizer_ytd),
-            "notes": "Average of quarterly % values",
+            "metric": "# Individuals Encountered Through Outreach",
+            "value": _hargrove_format_count(outreach_encounters),
+            "notes": "Outreach referrals (agency contains 'Outreach') + encounters for those patients + 90×Tuesdays (60 afternoon + 30 morning OPCC/REdisCOVERY, undocumented)",
         },
     ]
 
@@ -6547,6 +6930,12 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
             "value": _hargrove_format_count(z("Unknown")),
             "notes": "",
         },
+        {
+            "id": "—",
+            "metric": "Total (Current Quarter)",
+            "value": _hargrove_format_count(patients_served),
+            "notes": "Sum of all ZIP buckets above",
+        },
     ]
 
     service_gap = _hargrove_referral_service_gap_stats(referrals_qs)
@@ -6588,7 +6977,6 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
         "total_contacts": f"{total_contacts:,}",
         "patients_served": f"{patients_served:,}",
         "intensive_case_management": f"{intensive_case_management:,}",
-        "referrals_initiated": f"{int(referrals_initiated):,}",
         "repeat_od_patients": f"{repeat_od_patients:,}",
         "repeat_od_pct": f"{repeat_od_pct:.1f}%",
         "distinct_referral_service_types": f"{_to_int(service_gap.get('distinct_service_types')):,}",
@@ -6603,6 +6991,21 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
     zip_rows = _hargrove_normalize_metric_table_rows(zip_rows)
     service_gap_rows = _hargrove_normalize_metric_table_rows(service_gap_rows)
 
+    # -----------------------
+    # Section: 2026 Hargrove enhancements
+    # -----------------------
+    # New reporting requirements added for the 2026 grant year. Computed for
+    # every year so the helpers are exercised in tests, but only surfaced as
+    # a report section when year >= 2026 (older years never had these
+    # targets, so showing them retroactively would be misleading).
+    hargrove2026_rows = _build_hargrove_2026_rows(
+        year=year,
+        q=q,
+        od_qs=od_qs,
+        patients_served=patients_served,
+    )
+    hargrove2026_rows = _hargrove_normalize_metric_table_rows(hargrove2026_rows)
+
     top_by_referrals_rows = _hargrove_coerce_metric_rows(
         service_gap.get("top_by_referrals_rows", [])
     )
@@ -6610,7 +7013,7 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
     _hargrove_normalize_metric_table_rows(top_by_referrals_rows)
     _hargrove_normalize_metric_table_rows(top_by_patients_rows)
 
-    return [
+    sections: list[dict[str, object]] = [
         {
             "title": "1. Services Delivered",
             "type": "table",
@@ -6629,36 +7032,112 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
             "columns": ["ID", "Metric", "Value", "Notes"],
             "rows": objectives_rows,
         },
+        *(
+            [
+                {
+                    "title": "4. 2026 Hargrove Targets & Cost Avoidance",
+                    "type": "table",
+                    "columns": ["ID", "Metric", "Value", "Notes"],
+                    "rows": hargrove2026_rows,
+                }
+            ]
+            if year >= 2026
+            else []
+        ),
         {
-            "title": "4. ZIP Code Distribution",
+            "title": "4. ZIP Code Distribution" if year < 2026 else "5. ZIP Code Distribution",
             "type": "table",
+            "section_variant": "zip",
             "columns": ["ID", "Metric", "Value", "Notes"],
             "rows": zip_rows,
         },
         {
-            "title": "5. Service Gap Analytics (Referrals)",
+            "title": (
+                "5. Service Gap Analytics (Referrals)"
+                if year < 2026
+                else "6. Service Gap Analytics (Referrals)"
+            ),
             "type": "table",
             "columns": ["ID", "Metric", "Value", "Notes"],
             "rows": service_gap_rows,
         },
         {
-            "title": "6. Top Services (by Referrals)",
+            "title": (
+                "6. Top Services (by Referrals)"
+                if year < 2026
+                else "7. Top Services (by Referrals)"
+            ),
             "type": "table",
             "columns": ["ID", "Service", "# Referrals", "Notes"],
             "rows": top_by_referrals_rows,
         },
         {
-            "title": "7. Top Services (by Patients)",
-            "type": "table",
-            "columns": ["ID", "Service", "# Patients", "Notes"],
-            "rows": top_by_patients_rows,
-        },
-        {
-            "title": "8. Narrative",
+            "title": "7. Narrative" if year < 2026 else "8. Narrative",
             "type": "narrative",
             "questions_responses": _hargrove_load_narratives(year, q, context=narrative_context),
         },
     ]
+    return _hargrove_apply_overrides(sections, year, q)
+
+
+def _hargrove_apply_overrides(
+    sections: list[dict[str, Any]], year: int, q: int
+) -> list[dict[str, Any]]:
+    """Mark rows editable and apply any saved DB overrides for year >= 2026."""
+    if year < 2026:
+        return sections
+    from .models import HargroveMetricOverride
+
+    overrides = {
+        obj.metric_key: obj for obj in HargroveMetricOverride.objects.filter(year=year, quarter=q)
+    }
+    for section in sections:
+        if section.get("type") == "table":
+            _hargrove_apply_table_overrides(
+                cast(list[dict[str, Any]], section.get("rows") or []),
+                overrides,
+                is_zip=section.get("section_variant") == "zip",
+            )
+        elif section.get("type") == "narrative":
+            _hargrove_apply_narrative_overrides(
+                cast(list[dict[str, Any]], section.get("questions_responses") or []),
+                overrides,
+            )
+    return sections
+
+
+def _hargrove_apply_table_overrides(
+    rows: list[dict[str, Any]], overrides: dict[str, Any], *, is_zip: bool
+) -> None:
+    for row in rows:
+        if is_zip and row.get("metric") == "Total (Current Quarter)":
+            row["is_zip_total"] = True
+            continue
+        row["editable"] = True
+        key = str(row.get("metric", ""))
+        obj = overrides.get(key)
+        if obj is None:
+            continue
+        # Use truthiness: blank override is a no-op so computed values always
+        # win over accidental empty saves.
+        if obj.value:
+            row["value"] = obj.value
+        if obj.notes is not None:
+            row["notes"] = obj.notes
+
+
+def _hargrove_apply_narrative_overrides(
+    items: list[dict[str, Any]], overrides: dict[str, Any]
+) -> None:
+    for item in items:
+        item["editable"] = True
+        key = ("narrative::" + str(item.get("question", "")))[:490]
+        item["narrative_key"] = key
+        obj = overrides.get(key)
+        if obj is None or obj.value is None:
+            continue
+        item["response"] = obj.value
+        item["response_html"] = render_markdown(obj.value)
 
 
 def _build_hargrove_accordions() -> list[dict[str, object]]:
@@ -6732,7 +7211,9 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
                     }
                 ]
 
-            quarters.append({"label": label, "date_range": date_range, "sections": sections})
+            quarters.append(
+                {"label": label, "date_range": date_range, "q": q, "sections": sections}
+            )
 
         years_data.append({"year": year, "is_current": year == current_year, "quarters": quarters})
 
@@ -6835,6 +7316,151 @@ def hargrove_grant(request):
         "page_header_read_time": "5 min read",
     }
     return render(request, "dashboard/hargrove_grant.html", context)
+
+
+def _docx_render_table_section(doc: Any, rows: list[dict[str, Any]]) -> None:
+    """Append a table section to a python-docx Document."""
+    if not rows:
+        doc.add_paragraph("No data recorded for this section.")
+        return
+    tbl = doc.add_table(rows=1, cols=4)
+    tbl.style = "Table Grid"
+    hdr_cells = tbl.rows[0].cells
+    for idx, col_name in enumerate(["ID", "Metric", "Value", "Notes"]):
+        hdr_cells[idx].text = col_name
+        hdr_cells[idx].paragraphs[0].runs[0].bold = True
+    for row_dict in rows:
+        cells = tbl.add_row().cells
+        cells[0].text = str(row_dict.get("id") or "")
+        cells[1].text = str(row_dict.get("metric") or "")
+        cells[2].text = str(row_dict.get("value") or "")
+        cells[3].text = str(row_dict.get("notes") or "")
+
+
+def _docx_render_narrative_section(doc: Any, items: list[dict[str, Any]]) -> None:
+    """Append Q&A narrative blocks to a python-docx Document."""
+    for num, qa in enumerate(items, 1):
+        q_para = doc.add_paragraph()
+        q_run = q_para.add_run(f"{num}. {qa.get('question', '')}")
+        q_run.bold = True
+        response_text = str(qa.get("response") or "")
+        doc.add_paragraph(response_text if response_text else "[Response to be completed]")
+        doc.add_paragraph()  # blank line between Q&A pairs
+
+
+@login_required
+def hargrove_grant_export(request: HttpRequest, year: int, q: int) -> HttpResponse:
+    """Generate a downloadable Word document for a Hargrove Grant quarterly report.
+
+    Reuses the same data-building pipeline as the main page so the exported
+    document always matches exactly what the UI shows.  The file is returned as
+    a streaming attachment – no temp files, no disk I/O outside the request
+    cycle.
+    """
+    from io import BytesIO
+
+    import docx  # python-docx
+    from docx.enum.text import WD_ALIGN_PARAGRAPH  # type: ignore[attr-defined]
+    from docx.shared import Pt  # type: ignore[attr-defined]
+
+    # ------------------------------------------------------------------ data
+    historical_data: dict[str, Any] = {}
+    try:
+        with HARGROVE_METRICS_PATH.open(encoding="utf-8") as fp:
+            historical_data = json.load(fp)
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+
+    current_year = timezone.localdate().year
+    year_metrics = historical_data.get(str(year))
+    sections: list[dict[str, Any]] = []
+    if year_metrics and str(q) in year_metrics:
+        sections = _build_historical_hargrove_metrics(year_metrics, str(q))
+    elif 2025 <= year <= current_year:
+        sections = _build_dynamic_hargrove_metrics(year, q)
+
+    date_labels = {
+        1: f"January \u2013 March {year}",
+        2: f"April \u2013 June {year}",
+        3: f"July \u2013 September {year}",
+        4: f"October \u2013 December {year}",
+    }
+    date_range = date_labels.get(q, "")
+
+    # --------------------------------------------------------------- document
+    doc = docx.Document()
+
+    # Make the page margins a touch narrower so tables have more room.
+    for section_obj in doc.sections:
+        section_obj.top_margin = Pt(54)  # 0.75 in
+        section_obj.bottom_margin = Pt(54)
+        section_obj.left_margin = Pt(72)  # 1 in
+        section_obj.right_margin = Pt(72)
+
+    # Cover heading
+    title_para = doc.add_heading("Hargrove Grant Quarterly Report", level=0)
+    title_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    sub_para = doc.add_heading(f"Q{q} {year}  \u2013  {date_range}", level=2)
+    sub_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    doc.add_paragraph()  # breathing room
+
+    # ---------------------------------------------------------- render sections
+    for section_data in sections:
+        section_title = str(section_data.get("title", ""))
+        section_type = str(section_data.get("type", ""))
+        doc.add_heading(section_title, level=2)
+        if section_type == "table":
+            _docx_render_table_section(
+                doc, cast(list[dict[str, Any]], section_data.get("rows") or [])
+            )
+        elif section_type == "narrative":
+            _docx_render_narrative_section(
+                doc, cast(list[dict[str, Any]], section_data.get("questions_responses") or [])
+            )
+        doc.add_paragraph()  # blank line between sections
+
+    # --------------------------------------------------------- stream response
+    buf = BytesIO()
+    doc.save(buf)
+    buf.seek(0)
+
+    http_response = HttpResponse(
+        buf.read(),
+        content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
+    http_response["Content-Disposition"] = f'attachment; filename="hargrove_grant_{year}_Q{q}.docx"'
+    return http_response
+
+
+@login_required
+@require_POST
+def hargrove_metric_save(request: HttpRequest) -> HttpResponse:
+    """Upsert a HargroveMetricOverride for an editable metric row (year >= 2026)."""
+    from .models import HargroveMetricOverride
+
+    try:
+        year = int(request.POST["year"])
+        quarter = int(request.POST["quarter"])
+        metric_key = request.POST["metric_key"].strip()
+        field = request.POST["field"]
+        content = request.POST.get("content", "").strip()
+    except (KeyError, ValueError):
+        return HttpResponse("Invalid request", status=400)
+    if year < 2026:
+        return HttpResponse("Edits only allowed for 2026+", status=403)
+    if field not in ("value", "notes"):
+        return HttpResponse("Invalid field", status=400)
+    if not metric_key:
+        return HttpResponse("metric_key required", status=400)
+    metric_id = request.POST.get("metric_id", "")
+    HargroveMetricOverride.objects.update_or_create(
+        year=year,
+        quarter=quarter,
+        metric_key=metric_key,
+        defaults={field: content, "metric_id": metric_id, "updated_by": request.user},
+    )
+    return HttpResponse("", status=204)
 
 
 @login_required
