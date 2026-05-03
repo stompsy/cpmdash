@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.3.0 (2026-05-03)
+
+### Features
+
+- **dashboard**: UI polish — overview icons/styles, dynamic footer version, repeat OD chart
+  simplification
+  ([`8f210bf`](https://github.com/stompsy/cpmdash/commit/8f210bf0dddb3d4ae7f47769be41c1164b577ece))
+
+
 ## v1.2.0 (2026-04-30)
 
 ### Features
