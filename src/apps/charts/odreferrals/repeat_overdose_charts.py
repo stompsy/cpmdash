@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any
+from typing import Any, cast
 
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -46,6 +46,298 @@ def _first_censored_index(rows: list[dict[str, Any]], censor_key: str) -> int | 
         if bool(row.get(censor_key)):
             return i
     return None
+
+
+def _rolling_mean(values: list[float | None], window: int) -> list[float | None]:
+    """Return trailing rolling mean with None for incomplete/invalid windows."""
+    if window <= 1:
+        return values[:]
+
+    out: list[float | None] = []
+    for idx in range(len(values)):
+        start = idx - window + 1
+        if start < 0:
+            out.append(None)
+            continue
+        span = values[start : idx + 1]
+        if any(v is None for v in span):
+            out.append(None)
+            continue
+        numeric = [cast(float, v) for v in span]
+        out.append(sum(numeric) / window)
+    return out
+
+
+def _post_baseline_fit_points(
+    rows: list[dict[str, Any]],
+    y_values: list[float | None],
+    *,
+    trend_start_year: int,
+) -> list[tuple[int, float]]:
+    """Collect (index, value) points eligible for post-baseline trend fitting."""
+    fit_pts: list[tuple[int, float]] = []
+    for i, (row, value) in enumerate(zip(rows, y_values, strict=False)):
+        if value is None:
+            continue
+        try:
+            year = int(cast(object, row.get("year")))
+        except (TypeError, ValueError):
+            continue
+        if year < trend_start_year:
+            continue
+        fit_pts.append((i, value))
+    return fit_pts
+
+
+def _linear_fit(points: list[tuple[int, float]]) -> tuple[float, float] | None:
+    """Return (slope, intercept) for an OLS fit, or None if not solvable."""
+    if len(points) < 3:
+        return None
+
+    n = len(points)
+    sx = sum(i for i, _ in points)
+    sy = sum(v for _, v in points)
+    sxx = sum(i * i for i, _ in points)
+    sxy = sum(i * v for i, v in points)
+    denom = n * sxx - sx * sx
+    if denom == 0:
+        return None
+
+    slope = (n * sxy - sx * sy) / denom
+    intercept = (sy - slope * sx) / n
+    return slope, intercept
+
+
+def _overall_change_label(
+    *,
+    start_label: str,
+    first_value: float,
+    last_value: float,
+) -> tuple[str, str]:
+    """Build annotation text/color for start-to-latest change."""
+    delta = last_value - first_value
+    if delta < 0:
+        return f"Overall since {start_label}: {delta:.1f} pp", TAILWIND_COLORS["emerald-500"]
+    if delta > 0:
+        return f"Overall since {start_label}: +{delta:.1f} pp", TAILWIND_COLORS["rose-500"]
+    return f"Overall since {start_label}: 0.0 pp", TAILWIND_COLORS["amber-500"]
+
+
+def _yearly_weighted_repeat_rates(
+    rows: list[dict[str, Any]],
+) -> dict[int, tuple[str, float]]:
+    """Return weighted yearly same-quarter repeat rates keyed by year.
+
+    Rate is computed as (sum repeat_patients / sum unique_patients) * 100,
+    which avoids bias from averaging quarter percentages with different
+    denominators.
+    """
+    by_year: dict[int, dict[str, float | str]] = {}
+    for row in rows:
+        try:
+            year = int(cast(object, row.get("year")))
+            quarter = int(cast(object, row.get("quarter")))
+        except (TypeError, ValueError):
+            continue
+
+        unique_raw = row.get("unique_patients", 0)
+        repeat_raw = row.get("repeat_patients", 0)
+        try:
+            unique = int(cast(object, unique_raw))
+            repeat = int(cast(object, repeat_raw))
+        except (TypeError, ValueError):
+            continue
+
+        acc = by_year.setdefault(
+            year,
+            {
+                "repeat_sum": 0.0,
+                "unique_sum": 0.0,
+                "last_quarter": 0.0,
+                "anchor_label": "",
+            },
+        )
+        acc["repeat_sum"] = cast(float, acc["repeat_sum"]) + repeat
+        acc["unique_sum"] = cast(float, acc["unique_sum"]) + unique
+        if quarter >= cast(float, acc["last_quarter"]):
+            acc["last_quarter"] = float(quarter)
+            acc["anchor_label"] = str(row.get("label", ""))
+
+    out: dict[int, tuple[str, float]] = {}
+    for year, acc in by_year.items():
+        unique_sum = cast(float, acc["unique_sum"])
+        if unique_sum <= 0:
+            continue
+        repeat_sum = cast(float, acc["repeat_sum"])
+        anchor_label = str(acc["anchor_label"])
+        out[year] = (anchor_label, (repeat_sum / unique_sum) * 100.0)
+    return out
+
+
+def _first_last_observed(
+    labels: list[str],
+    values: list[float | None],
+) -> tuple[tuple[str, float], tuple[str, float]] | None:
+    """Return first and last non-null points from a labeled series."""
+    points = [
+        (label, value) for label, value in zip(labels, values, strict=False) if value is not None
+    ]
+    if len(points) < 2:
+        return None
+    first_label, first_value = points[0]
+    last_label, last_value = points[-1]
+    return (first_label, cast(float, first_value)), (last_label, cast(float, last_value))
+
+
+def _filtered_rows_from_quarter(
+    rows: list[dict[str, Any]],
+    *,
+    start_year: int,
+    start_quarter: int,
+) -> list[dict[str, Any]]:
+    """Return rows from the requested quarter onward."""
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        try:
+            year = int(cast(object, row.get("year")))
+            quarter = int(cast(object, row.get("quarter")))
+        except (TypeError, ValueError):
+            continue
+        if (year, quarter) >= (start_year, start_quarter):
+            out.append(row)
+    return out
+
+
+def _trend_line_from_points(
+    labels: list[str],
+    values: list[float | None],
+) -> tuple[list[float | None], str] | None:
+    """Return linear trend line values and direction for a labeled series."""
+    fit_pts = [(i, value) for i, value in enumerate(values) if value is not None]
+    fit_model = _linear_fit(cast(list[tuple[int, float]], fit_pts))
+    if fit_model is None:
+        return None
+
+    slope, intercept = fit_model
+    trend_y: list[float | None] = [None] * len(labels)
+    first_idx = fit_pts[0][0]
+    for i in range(first_idx, len(labels)):
+        trend_y[i] = intercept + slope * i
+    direction = "down" if slope < 0 else ("up" if slope > 0 else "flat")
+    return trend_y, direction
+
+
+def _add_overall_trend_anchor(
+    fig: go.Figure,
+    labels: list[str],
+    y_values: list[float | None],
+) -> None:
+    """Overlay first-to-latest anchor line for the same-quarter series."""
+    overall_points = _first_last_observed(labels, y_values)
+    if overall_points is None:
+        return
+
+    (start_label, start_rate), (end_label, end_rate) = overall_points
+    overall_delta = end_rate - start_rate
+    if overall_delta < 0:
+        overall_color = TAILWIND_COLORS["emerald-500"]
+        overall_text = f"Overall incl. ramp-up ({start_label}→{end_label}): {overall_delta:.1f} pp"
+    elif overall_delta > 0:
+        overall_color = TAILWIND_COLORS["rose-500"]
+        overall_text = f"Overall incl. ramp-up ({start_label}→{end_label}): +{overall_delta:.1f} pp"
+    else:
+        overall_color = TAILWIND_COLORS["amber-500"]
+        overall_text = f"Overall incl. ramp-up ({start_label}→{end_label}): 0.0 pp"
+
+    fig.add_trace(
+        go.Scatter(
+            x=[start_label, end_label],
+            y=[start_rate, end_rate],
+            mode="lines+markers",
+            name="Overall trend (same quarter, includes 2024 ramp-up)",
+            line=dict(color=overall_color, width=3, dash="dot"),
+            marker=dict(color=overall_color, size=9, symbol="circle-open"),
+            hovertemplate="<b>%{x}</b><br>Overall trend anchor: %{y:.1f}%<extra></extra>",
+        )
+    )
+    fig.add_annotation(
+        x=end_label,
+        y=end_rate,
+        text=overall_text,
+        showarrow=True,
+        arrowhead=2,
+        arrowsize=1,
+        arrowwidth=1.5,
+        arrowcolor=overall_color,
+        ax=24,
+        ay=-20,
+        font=dict(size=11, color=overall_color),
+        bgcolor=TAILWIND_COLORS["slate-900"],
+        bordercolor=overall_color,
+        borderwidth=1,
+        borderpad=4,
+    )
+
+
+def _add_yearly_weighted_baseline(
+    fig: go.Figure,
+    rows: list[dict[str, Any]],
+) -> None:
+    """Overlay weighted 2024-to-latest-year baseline comparison."""
+    yearly_rates = _yearly_weighted_repeat_rates(rows)
+    if 2024 not in yearly_rates:
+        return
+
+    later_years = [year for year in yearly_rates if year > 2024]
+    if not later_years:
+        return
+
+    compare_year = max(later_years)
+    base_label, base_rate = yearly_rates[2024]
+    compare_label, compare_rate = yearly_rates[compare_year]
+    yoy_delta = compare_rate - base_rate
+    yoy_direction = "down" if yoy_delta < 0 else ("up" if yoy_delta > 0 else "flat")
+    yoy_color = (
+        TAILWIND_COLORS["emerald-500"]
+        if yoy_delta < 0
+        else (TAILWIND_COLORS["rose-500"] if yoy_delta > 0 else TAILWIND_COLORS["amber-500"])
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=[base_label, compare_label],
+            y=[base_rate, compare_rate],
+            mode="lines+markers",
+            name=f"Yearly weighted baseline (2024→{compare_year}, {yoy_direction})",
+            line=dict(color=yoy_color, width=4),
+            marker=dict(color=yoy_color, size=10, symbol="diamond"),
+            hovertemplate="<b>%{x}</b><br>Yearly weighted same-quarter rate: %{y:.1f}%<extra></extra>",
+        )
+    )
+
+    if yoy_delta < 0:
+        delta_text = f"2024→{compare_year}: {yoy_delta:.1f} pp"
+    elif yoy_delta > 0:
+        delta_text = f"2024→{compare_year}: +{yoy_delta:.1f} pp"
+    else:
+        delta_text = f"2024→{compare_year}: 0.0 pp"
+
+    fig.add_annotation(
+        x=compare_label,
+        y=compare_rate,
+        text=delta_text,
+        showarrow=True,
+        arrowhead=2,
+        arrowsize=1,
+        arrowwidth=1.5,
+        arrowcolor=yoy_color,
+        ax=20,
+        ay=32,
+        font=dict(size=11, color=yoy_color),
+        bgcolor=TAILWIND_COLORS["slate-900"],
+        bordercolor=yoy_color,
+        borderwidth=1,
+        borderpad=4,
+    )
 
 
 def build_chart_repeat_overdose_quarterly_trend(
@@ -101,39 +393,18 @@ def build_chart_repeat_overdose_quarterly_trend(
         )
     )
 
-    # Linear trend overlay -- fit on the within-quarter series only. That
-    # series is the only one with no right-censoring (each quarter's own
-    # window closes when the quarter ends), so an OLS line here isn't
-    # tainted by quarters with immature follow-up. We fit only on quarters
-    # with a real numeric value, then draw the line across the full x range
-    # so the trend reads visually even if a stray quarter is missing.
-    fit_pts = [(i, v) for i, v in enumerate(y_within) if v is not None]
-    if len(fit_pts) >= 3:
-        n = len(fit_pts)
-        sx = sum(i for i, _ in fit_pts)
-        sy = sum(v for _, v in fit_pts)
-        sxx = sum(i * i for i, _ in fit_pts)
-        sxy = sum(i * v for i, v in fit_pts)
-        denom = n * sxx - sx * sx
-        if denom != 0:
-            slope = (n * sxy - sx * sy) / denom
-            intercept = (sy - slope * sx) / n
-            trend_y = [intercept + slope * i for i in range(len(x))]
-            direction = "down" if slope < 0 else ("up" if slope > 0 else "flat")
-            fig.add_trace(
-                go.Scatter(
-                    x=x,
-                    y=trend_y,
-                    mode="lines",
-                    name=f"Trend (same quarter, {direction})",
-                    line=dict(
-                        color=TAILWIND_COLORS["slate-400"],
-                        width=2,
-                        dash="dash",
-                    ),
-                    hovertemplate=("<b>%{x}</b><br>Trend (same-quarter): %{y:.1f}%<extra></extra>"),
-                )
-            )
+    y_within_roll4 = _rolling_mean(y_within, window=3)
+    fig.add_trace(
+        go.Scatter(
+            x=x,
+            y=y_within_roll4,
+            mode="lines",
+            name="Trend (3-quarter avg, same quarter)",
+            line=dict(color=TAILWIND_COLORS["slate-300"], width=4),
+            connectgaps=False,
+            hovertemplate="<b>%{x}</b><br>Trend (3-quarter avg): %{y:.1f}%<extra></extra>",
+        )
+    )
 
     fig.add_trace(
         go.Scatter(
@@ -209,6 +480,94 @@ def build_chart_repeat_overdose_quarterly_trend(
     )
 
     # Use `to_html` so Plotly.js is emitted *before* the init script.
+    return pio.to_html(
+        fig,
+        include_plotlyjs=True,
+        full_html=False,
+        config={
+            "displayModeBar": False,
+            "responsive": True,
+        },
+    )
+
+
+def build_chart_repeat_overdose_quarterly_post_ramp_trend(
+    *,
+    theme: str,
+    quarterly_rows: list[dict[str, Any]],
+) -> str:
+    """Build a focused same-quarter chart from 2024 Q4 onward with trend line."""
+    filtered_rows = _filtered_rows_from_quarter(
+        quarterly_rows,
+        start_year=2024,
+        start_quarter=4,
+    )
+    if not filtered_rows:
+        return ""
+
+    x = [str(r.get("label", "")) for r in filtered_rows]
+    y_within = [_to_rate(r.get("repeat_pct_value")) for r in filtered_rows]
+    y_smoothed = _rolling_mean(y_within, window=2)
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=x,
+            y=y_within,
+            mode="lines+markers",
+            name="Repeat (same quarter)",
+            line=dict(color=CHART_COLORS_VIBRANT[0], width=3),
+            marker=dict(color=CHART_COLORS_VIBRANT[0], size=8),
+            hovertemplate="<b>%{x}</b><br>Repeat (same quarter): %{y:.1f}%<extra></extra>",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=x,
+            y=y_smoothed,
+            mode="lines",
+            name="Trend (2-quarter avg)",
+            line=dict(color=TAILWIND_COLORS["slate-200"], width=4),
+            connectgaps=False,
+            hovertemplate="<b>%{x}</b><br>Trend (2-quarter avg): %{y:.1f}%<extra></extra>",
+        )
+    )
+
+    trend = _trend_line_from_points(x, y_within)
+    if trend is not None:
+        trend_y, direction = trend
+        fig.add_trace(
+            go.Scatter(
+                x=x,
+                y=trend_y,
+                mode="lines",
+                name=f"Trend line (2024 Q4+, {direction})",
+                line=dict(color=TAILWIND_COLORS["slate-500"], width=2, dash="dash"),
+                connectgaps=False,
+                hovertemplate="<b>%{x}</b><br>Trend line: %{y:.1f}%<extra></extra>",
+            )
+        )
+
+    fig = style_plotly_layout(
+        fig,
+        theme=theme,
+        height=320,
+        x_title="Quarter",
+        y_title="Repeat rate (%)",
+        show_legend=True,
+    )
+    fig.update_yaxes(range=[0, 100])
+    fig.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0,
+        ),
+        margin=dict(t=70),
+    )
+
     return pio.to_html(
         fig,
         include_plotlyjs=True,

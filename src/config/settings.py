@@ -112,6 +112,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.tasks.context_processors.tasks_badge",
+                "utils.context_processors.app_context",
             ],
         },
     },

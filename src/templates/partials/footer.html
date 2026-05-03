@@ -168,12 +168,10 @@
         {# Bottom Bar #}
         <div class="mt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p class="text-xs text-slate-500">
-                © 2025 D. Brian Gerdes. All rights reserved.
+                © {{ current_year }} D. Brian Gerdes. All rights reserved.
             </p>
             <div class="flex items-center gap-6 text-xs text-slate-500">
-                <span>Built by <span class="text-brand-400">Brian Gerdes</span> & <span class="text-brand-400">Tatiana Hyldahl</span></span>
-                <span class="hidden sm:inline">•</span>
-                <span>v1.0</span>
+                <span>{{ app_version }}</span>
             </div>
         </div>
     </div>

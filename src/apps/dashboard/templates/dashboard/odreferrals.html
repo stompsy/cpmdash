@@ -285,7 +285,7 @@
                             <div class="flex items-start justify-between gap-3">
                                 <div>
                                     <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Repeat Overdose Rates by Quarter</h4>
-                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Quarter-over-quarter trend for 2024–2025 (same-quarter and next-event windows).</p>
+                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Quarter-over-quarter repeat rates with one smoothed trend line over the same-quarter series.</p>
                                 </div>
                                 <button
                                     type="button"
@@ -302,7 +302,34 @@
                         <div class="border-t border-slate-200/60 bg-slate-50/40 px-5 py-4 text-sm leading-6 text-slate-700 dark:border-slate-700/50 dark:bg-slate-900/40 dark:text-slate-300">
                             <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-600 dark:text-slate-400">Reading the trend</p>
                             <p class="mt-2">
-                                The dashed line is a linear trend fit only on the "same quarter" series - the one window that's never preliminary, since a quarter's own repeats are locked in the moment that quarter ends. The next-event lines (30 / 90 / 180 / 365 days) simply break wherever a window hasn't fully elapsed yet, so a missing dot on the right side of the chart is the calendar, not a data drop. Patients who began overdosing before our program existed still enter as "first" events here, which can inflate the very earliest quarters - the Kaplan-Meier view below sidesteps that.
+                                The light neutral trend line is a 3-quarter moving average of the same-quarter repeat rate. It follows the real shape of the series, including the 2024 ramp-up as data collection matured and the lower levels that follow after late 2024, without adding weighted overlays. The next-event lines (30 / 90 / 180 / 365 days) still break wherever a window has not fully elapsed yet, so a missing dot on the right side is the calendar, not a data drop.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                        <div class="border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 dark:border-slate-700/50 dark:bg-slate-800/20">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Repeat Rates Since 2024 Q4</h4>
+                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Focused view of the post-ramp-up period with a dedicated trend line.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                                    onclick="openOdChartModal('od-chart-repeat-quarterly-post-ramp', 'Repeat Rates Since 2024 Q4')"
+                                    aria-label="Expand post-ramp repeat-overdose-rates chart"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8V3h5M21 8V3h-5M3 16v5h5M21 16v5h-5" /></svg>
+                                    <span>Expand</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="od-chart-repeat-quarterly-post-ramp" class="od-expandable-chart p-5">{{ fig_repeat_overdose_quarterly_post_ramp_trend|safe }}</div>
+                        <div class="border-t border-slate-200/60 bg-slate-50/40 px-5 py-4 text-sm leading-6 text-slate-700 dark:border-slate-700/50 dark:bg-slate-900/40 dark:text-slate-300">
+                            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-600 dark:text-slate-400">Reading this view</p>
+                            <p class="mt-2">
+                                This chart drops the early collection ramp-up and starts at 2024 Q4, so the downward direction after the program matured is easier to see. The solid light line is a short moving average, and the dashed line is a simple trend line fit only on this post-ramp-up slice.
                             </p>
                         </div>
                     </div>
@@ -334,32 +361,6 @@
                         </div>
                     </div>
 
-                    <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
-                        <div class="border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 dark:border-slate-700/50 dark:bg-slate-800/20">
-                            <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-slate-700 dark:text-slate-300">Repeat-Overdose Rate by Index-Year Cohort</h4>
-                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Same Kaplan-Meier math, but split by the year a patient first appeared in our data. If newer cohorts sit lower, the program is helping people repeat less.</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-                                    onclick="openOdChartModal('od-chart-repeat-km-cohort', 'Repeat-Overdose Rate by Index-Year Cohort')"
-                                    aria-label="Expand cohort-stratified repeat-overdose chart"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8V3h5M21 8V3h-5M3 16v5h5M21 16v5h-5" /></svg>
-                                    <span>Expand</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="od-chart-repeat-km-cohort" class="od-expandable-chart p-5">{{ fig_repeat_overdose_km_by_cohort|safe }}</div>
-                        <div class="border-t border-slate-200/60 bg-slate-50/40 px-5 py-4 text-sm leading-6 text-slate-700 dark:border-slate-700/50 dark:bg-slate-900/40 dark:text-slate-300">
-                            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-600 dark:text-slate-400">What to look for</p>
-                            <p class="mt-2">
-                                Each curve is a year's worth of patients, tracked from the day they first showed up in our records. Lower is better. A clean fan with newer years sitting beneath older ones is the most direct evidence of program impact this dataset can offer - it's already adjusted for the fact that the newest cohort hasn't been observed as long. If two curves overlap, the difference between those years isn't real; if a recent curve sits well below the others, that's the signal you've been looking for.
-                            </p>
-                        </div>
-                    </div>
                 </div>
 
                 {# Footer Insights - colored bar, no vertical line or icon #}

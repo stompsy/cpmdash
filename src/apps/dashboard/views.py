@@ -34,7 +34,7 @@ from ..charts.odreferrals.narcan_charts import (
 from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 from ..charts.odreferrals.repeat_overdose_charts import (
     build_chart_repeat_overdose_km,
-    build_chart_repeat_overdose_km_by_cohort,
+    build_chart_repeat_overdose_quarterly_post_ramp_trend,
     build_chart_repeat_overdose_quarterly_trend,
 )
 from ..charts.overdose.od_all_cases_scatter import (
@@ -4262,6 +4262,12 @@ def odreferrals(request):
             quarterly_rows=repeat_overdose_quarterly_rates,
         )
     )
+    fig_repeat_overdose_quarterly_post_ramp_trend = _chart_html(
+        build_chart_repeat_overdose_quarterly_post_ramp_trend(
+            theme=theme,
+            quarterly_rows=repeat_overdose_quarterly_rates,
+        )
+    )
 
     # Kaplan-Meier cumulative incidence of repeat overdose. Input is built
     # from the same per-patient date map the quarterly chart uses, so the two
@@ -4294,42 +4300,6 @@ def odreferrals(request):
         )
     )
 
-    # Cohort-stratified KM: same cohort, sliced by the calendar year of each
-    # patient's first observed OD. The promise of this chart is "look at
-    # patients we picked up in 2024 vs 2025 -- are the newer ones repeating
-    # less?" Patients indexing in the current year are still included so we
-    # can see the program's freshest cohort, even though their curve will
-    # only extend as far as the data cutoff allows.
-    cohort_buckets: dict[int, tuple[list[int], list[int]]] = {}
-    if km_max_date is not None:
-        for dates_for_pid in km_patient_dates.values():
-            if not dates_for_pid:
-                continue
-            index_day = dates_for_pid[0]
-            year = index_day.year
-            durs, evts = cohort_buckets.setdefault(year, ([], []))
-            if len(dates_for_pid) >= 2:
-                durs.append((dates_for_pid[1] - index_day).days)
-                evts.append(1)
-            else:
-                durs.append((km_max_date - index_day).days)
-                evts.append(0)
-    # Drop cohorts with too few patients to read meaningfully -- a curve
-    # built on 3 patients is mostly noise. Threshold is intentionally low so
-    # the most recent cohort still shows up early in the year.
-    MIN_COHORT_SIZE = 10
-    cohort_input: list[tuple[str, list[int], list[int]]] = [
-        (str(year), durs, evts)
-        for year, (durs, evts) in sorted(cohort_buckets.items())
-        if len(durs) >= MIN_COHORT_SIZE
-    ]
-    fig_repeat_overdose_km_by_cohort = _chart_html(
-        build_chart_repeat_overdose_km_by_cohort(
-            theme=theme,
-            cohorts=cohort_input,
-        )
-    )
-
     # Add hotspot map and statistics
     zoom_mode = "full" if request.user.is_authenticated else "restricted"
     fig_od_map = _chart_html(build_chart_od_map(theme=theme, zoom_mode=zoom_mode))
@@ -4349,8 +4319,8 @@ def odreferrals(request):
         "repeat_overdose_stats": repeat_overdose_stats,
         "repeat_overdose_quarterly_rates": repeat_overdose_quarterly_rates,
         "fig_repeat_overdose_quarterly_trend": fig_repeat_overdose_quarterly_trend,
+        "fig_repeat_overdose_quarterly_post_ramp_trend": fig_repeat_overdose_quarterly_post_ramp_trend,
         "fig_repeat_overdose_km": fig_repeat_overdose_km,
-        "fig_repeat_overdose_km_by_cohort": fig_repeat_overdose_km_by_cohort,
         "fig_od_map": fig_od_map,
         "hotspot_stats": hotspot_stats,
         "narcan_grid_chart": narcan_grid_chart,
