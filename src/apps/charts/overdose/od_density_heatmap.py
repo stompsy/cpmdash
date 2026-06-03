@@ -150,11 +150,11 @@ def build_chart_od_density_heatmap(theme):
         gridcolor="rgba(128,128,128,0.3)",
     )
 
-    # Working Hours (08:00-16:00, Mon-Fri) - Bright border for visibility
+    # Working Hours (08:00-18:00, Mon-Fri) - Bright border for visibility
     fig.add_shape(
         type="rect",
         x0=7.5,  # Start at 08:00
-        x1=15.5,  # End at 16:00 (exclusive)
+        x1=17.5,  # End at 18:00 (exclusive)
         y0=-0.5,
         y1=4.5,
         fillcolor="rgba(0, 0, 0, 0)",

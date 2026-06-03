@@ -43,10 +43,6 @@ from ..charts.overdose.od_all_cases_scatter import (
 from ..charts.overdose.od_density_heatmap import (  # noqa: F401 - re-export for tests monkeypatch
     build_chart_od_density_heatmap,
 )
-from ..charts.overdose.od_hourly_breakdown import (  # noqa: F401 - re-export for tests monkeypatch
-    build_chart_day_of_week_totals,
-    build_chart_od_hourly_breakdown,
-)
 from ..charts.overdose.od_map import build_chart_od_map
 from ..charts.overdose.od_repeats_scatter import (  # noqa: F401 - re-export for tests monkeypatch
     build_chart_repeat_interval_hist,
@@ -54,11 +50,6 @@ from ..charts.overdose.od_repeats_scatter import (  # noqa: F401 - re-export for
     build_chart_repeats_aligned_timeline,
     build_chart_repeats_scatter,
     build_repeat_overdose_quick_stats,
-)
-from ..charts.overdose.od_shift_scenarios import (  # noqa: F401 - re-export for tests monkeypatch
-    build_chart_cost_benefit_analysis,
-    build_chart_shift_scenarios,
-    calculate_coverage_scenarios,
 )
 from ..charts.patients.age_chart_variations import build_all_age_chart_variations
 from ..charts.patients.patient_field_charts import build_patients_field_charts
@@ -295,45 +286,6 @@ def _chart_html(chart_result: object) -> str:
     if isinstance(chart_result, str):
         return chart_result
     return ""
-
-
-def _compute_shift_coverage_stats() -> dict[str, float | int]:
-    timestamps = list(
-        ODReferrals.objects.exclude(od_date__isnull=True).values_list("od_date", flat=True)
-    )
-    total = len(timestamps)
-    if total == 0:
-        return {"total": 0, "current": 0.0, "proposed": 0.0, "missed": 0.0}
-
-    current_count = 0
-    proposed_count = 0
-
-    for dt in timestamps:
-        if dt is None:
-            continue
-        local_dt = timezone.localtime(dt) if timezone.is_aware(dt) else dt
-        weekday = local_dt.weekday()
-        hour = local_dt.hour
-
-        in_current = weekday < 5 and 8 <= hour < 16
-        in_extended = weekday < 5 and 17 <= hour < 19
-
-        if in_current:
-            current_count += 1
-
-        if in_current or in_extended:
-            proposed_count += 1
-
-    current_pct = round((current_count / total) * 100, 1) if total else 0.0
-    proposed_pct = round((proposed_count / total) * 100, 1) if total else 0.0
-    missed_pct = round(max(0.0, 100.0 - current_pct), 1)
-
-    return {
-        "total": total,
-        "current": current_pct,
-        "proposed": proposed_pct,
-        "missed": missed_pct,
-    }
 
 
 def _insights_boolean_flag(
@@ -2554,51 +2506,6 @@ def referrals(request):
     return render(request, "dashboard/referrals.html", context)
 
 
-def odreferrals_shift_coverage(request):
-    theme = get_theme_from_request(request)
-
-    fig_density_map = _chart_html(build_chart_od_density_heatmap(theme=theme))
-    fig_day_of_week_totals = _chart_html(build_chart_day_of_week_totals(theme=theme))
-    fig_hourly_breakdown = _chart_html(build_chart_od_hourly_breakdown(theme=theme))
-    fig_shift_scenarios = _chart_html(build_chart_shift_scenarios(theme=theme))
-    fig_cost_benefit_analysis = _chart_html(build_chart_cost_benefit_analysis(theme=theme))
-
-    scenarios = calculate_coverage_scenarios()
-    try:
-        scenarios_data = json.dumps(scenarios)
-    except TypeError:
-        sanitized = {
-            name: {
-                key: value for key, value in data.items() if isinstance(value, int | float | str)
-            }
-            for name, data in scenarios.items()
-        }
-        scenarios_data = json.dumps(sanitized)
-
-    coverage_stats = _compute_shift_coverage_stats()
-
-    context = {
-        "fig_density_map": fig_density_map,
-        "fig_day_of_week_totals": fig_day_of_week_totals,
-        "fig_hourly_breakdown": fig_hourly_breakdown,
-        "fig_shift_scenarios": fig_shift_scenarios,
-        "fig_cost_benefit_analysis": fig_cost_benefit_analysis,
-        "scenarios_data": scenarios_data,
-        "current_coverage": coverage_stats["current"],
-        "missed_opportunities": coverage_stats["missed"],
-        "proposed_coverage": coverage_stats["proposed"],
-        "total_cases": coverage_stats["total"],
-    }
-    updated_on = date(2026, 2, 19)
-    context.update(
-        {
-            "page_header_updated_at": updated_on,
-            "page_header_updated_at_iso": updated_on.isoformat(),
-        }
-    )
-    return render(request, "dashboard/odreferrals_shift_coverage.html", context)
-
-
 def _compute_hotspot_stats() -> dict[str, object]:
     qs = ODReferrals.objects.exclude(lat__isnull=True).exclude(long__isnull=True)
     df = _df_from_queryset(
@@ -4303,6 +4210,7 @@ def odreferrals(request):
     # Add hotspot map and statistics
     zoom_mode = "full" if request.user.is_authenticated else "restricted"
     fig_od_map = _chart_html(build_chart_od_map(theme=theme, zoom_mode=zoom_mode))
+    fig_density_map = _chart_html(build_chart_od_density_heatmap(theme=theme))
     hotspot_stats = _compute_hotspot_stats()
 
     # Add Narcan administration analysis
@@ -4322,6 +4230,7 @@ def odreferrals(request):
         "fig_repeat_overdose_quarterly_post_ramp_trend": fig_repeat_overdose_quarterly_post_ramp_trend,
         "fig_repeat_overdose_km": fig_repeat_overdose_km,
         "fig_od_map": fig_od_map,
+        "fig_density_map": fig_density_map,
         "hotspot_stats": hotspot_stats,
         "narcan_grid_chart": narcan_grid_chart,
         "narcan_timeline_chart": narcan_timeline_chart,

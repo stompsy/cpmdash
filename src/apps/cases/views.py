@@ -1,16 +1,6 @@
 from datetime import date
 
-from django.http import HttpResponse
-from django.shortcuts import redirect, render
-
-from utils.theme import get_theme_from_request
-
-from ..charts.overdose.od_density_heatmap import build_chart_od_density_heatmap
-from ..charts.overdose.od_hourly_breakdown import build_chart_od_hourly_breakdown
-from ..charts.overdose.od_shift_scenarios import (
-    build_chart_cost_benefit_analysis,
-    build_chart_shift_scenarios,
-)
+from django.shortcuts import render
 
 
 def _get_opshielding_context() -> dict[str, object]:
@@ -31,10 +21,6 @@ def cases(request):
 def opshield(request):
     context = _get_opshielding_context()
     return render(request, "cases/opshieldinghope.html", context=context)
-
-
-def shiftcoverage(request):
-    return redirect("dashboard:odreferrals_shift_coverage")
 
 
 def costsavings(request):
@@ -215,34 +201,3 @@ def timeline(request):
     }
 
     return render(request, "timeline/index.html", context)
-
-
-# HTMX Chart Update Views
-
-
-def htmx_heatmap_chart(request):
-    """Return just the heatmap chart HTML for HTMX updates"""
-    theme = get_theme_from_request(request)
-    fig_density_map, _ = build_chart_od_density_heatmap(theme=theme)
-    return HttpResponse(fig_density_map)
-
-
-def htmx_hourly_breakdown_chart(request):
-    """Return just the hourly breakdown chart HTML for HTMX updates"""
-    theme = get_theme_from_request(request)
-    fig_hourly_breakdown = build_chart_od_hourly_breakdown(theme=theme)
-    return HttpResponse(fig_hourly_breakdown)
-
-
-def htmx_shift_scenarios_chart(request):
-    """Return just the shift scenarios chart HTML for HTMX updates"""
-    theme = get_theme_from_request(request)
-    fig_shift_scenarios = build_chart_shift_scenarios(theme=theme)
-    return HttpResponse(fig_shift_scenarios)
-
-
-def htmx_cost_benefit_chart(request):
-    """Return just the cost benefit analysis chart HTML for HTMX updates"""
-    theme = get_theme_from_request(request)
-    fig_cost_benefit_analysis = build_chart_cost_benefit_analysis(theme=theme)
-    return HttpResponse(fig_cost_benefit_analysis)

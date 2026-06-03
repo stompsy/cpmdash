@@ -24,7 +24,6 @@ from .views import (
     od_weekday_detail,
     odreferrals,
     odreferrals_chart_fragment,
-    odreferrals_shift_coverage,
     overview,
     patients,
     patients_chart_fragment,
@@ -118,11 +117,6 @@ urlpatterns = [
         "odreferrals/transport-detail/",
         od_transport_detail,
         name="od_transport_detail",
-    ),
-    path(
-        "odreferrals/shift-coverage/",
-        odreferrals_shift_coverage,
-        name="odreferrals_shift_coverage",
     ),
     # Back-compat alias: route removed per request but referenced in tests
     path("overdoses/by-case/", odreferrals, name="overdoses_by_case"),
