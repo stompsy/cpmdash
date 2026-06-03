@@ -41,6 +41,7 @@
             'disclaimerCookieName': 'cpmdash_beta_disclaimer_accepted',
             'disclaimerOpen': false,
             'cookieNoticeOpen': false,
+            'cookieNoticeMessage': '',
 
             getCookieValue(name) {
                 const value = `; ${document.cookie}`;
@@ -53,13 +54,26 @@
                 const secure = (window.location && window.location.protocol === 'https:') ? '; Secure' : '';
                 document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
             },
+            deleteCookie(name) {
+                document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
+            },
             initDisclaimer() {
-                const accepted = this.getCookieValue(this.disclaimerCookieName) === '1';
-                this.disclaimerOpen = !accepted;
+                // Only suppress the modal if the user has explicitly made a choice.
+                const choice = this.getCookieValue(this.disclaimerCookieName);
+                this.disclaimerOpen = !(choice === '1' || choice === '0');
             },
             acceptDisclaimer() {
                 this.setCookie(this.disclaimerCookieName, '1');
                 this.disclaimerOpen = false;
+                this.cookieNoticeMessage = 'A cookie was saved to remember that you accepted the beta disclaimer.';
+                this.cookieNoticeOpen = true;
+            },
+            rejectDisclaimer() {
+                // No persistent cookie is stored when the user rejects — the
+                // disclaimer will reappear on the next visit.
+                this.deleteCookie(this.disclaimerCookieName);
+                this.disclaimerOpen = false;
+                this.cookieNoticeMessage = 'No cookie was stored. The disclaimer will appear again next time you visit.';
                 this.cookieNoticeOpen = true;
             }
         }"
@@ -174,10 +188,20 @@
                 <h2 class="text-2xl font-bold tracking-tight text-white">Data accuracy disclaimer</h2>
                 <p class="mt-4 text-sm leading-relaxed text-slate-300">
                     This dashboard is a beta release. While the data is intended to be as accurate as possible, it may contain mistakes.
-                    By accepting, you acknowledge this limitation and agree to proceed.
+                    By accepting, you acknowledge this limitation and agree to proceed. A small cookie will be stored on your device to remember your choice so this notice doesn't reappear on every visit.
+                </p>
+                <p class="mt-3 text-xs leading-relaxed text-slate-400">
+                    If you reject, no cookie will be stored and this notice will appear again next time you visit.
                 </p>
 
-                <div class="mt-8 flex items-center justify-end">
+                <div class="mt-8 flex flex-col-reverse items-stretch justify-end gap-3 sm:flex-row sm:items-center">
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center rounded-md border border-white/15 bg-transparent px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                        @click="rejectDisclaimer()"
+                    >
+                        Reject
+                    </button>
                     <button
                         type="button"
                         class="inline-flex items-center justify-center rounded-md bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
@@ -210,8 +234,7 @@
                             <circle cx="10.5" cy="14.5" r="1.1" class="text-slate-900/60" fill="currentColor" />
                         </svg>
                     </div>
-                    <div class="flex-1 leading-relaxed text-slate-200">
-                        This site uses a cookie to remember that you accepted the beta disclaimer.
+                    <div class="flex-1 leading-relaxed text-slate-200" x-text="cookieNoticeMessage || 'This site uses a cookie to remember that you accepted the beta disclaimer.'">
                     </div>
                     <button
                         type="button"

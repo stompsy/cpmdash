@@ -18,7 +18,7 @@
         {# PORT Introduction Section #}
         <section>
             <p class="text-base leading-7 text-gray-700 dark:text-slate-300 sm:text-lg">
-                Every overdose referral represents an <span class="font-semibold text-gray-900 dark:text-white">opportunity to save a life</span>. By analyzing <span class="font-semibold text-gray-900 dark:text-white">referral patterns</span>, <span class="font-semibold text-gray-900 dark:text-white">sources</span>, and <span class="font-semibold text-gray-900 dark:text-white">outcomes</span>, we can optimize our <span class="font-semibold text-gray-900 dark:text-white">response strategies</span>, strengthen <span class="font-semibold text-gray-900 dark:text-white">partnerships</span>, and ensure that no call for help goes unanswered.
+                Every overdose referral is a moment where the system either steps in or steps back. This page pulls together what the Post Overdose Response Team (PORT) sees in the field: <span class="font-semibold text-gray-900 dark:text-white">when overdoses happen</span>, <span class="font-semibold text-gray-900 dark:text-white">where they cluster</span>, <span class="font-semibold text-gray-900 dark:text-white">who reverses them</span>, and <span class="font-semibold text-gray-900 dark:text-white">whether the same person comes back</span>. The goal isn't a tidy story — it's an honest one that helps community paramedics, partners, and the public understand what is working, what isn't, and where the next opportunity to save a life probably lives.
             </p>
 
             {# Key benefits list #}
@@ -29,7 +29,7 @@
                         <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
                         Rapid Response Impact.
                     </dt>
-                    <dd class="inline text-gray-600 dark:text-slate-400"> In the 12 months following PORT's launch, fatal overdose rates in Clallam County dropped 63%, from 73.3 to 34.8 per 100,000 population—demonstrating the power of immediate intervention.</dd>
+                    <dd class="inline text-gray-600 dark:text-slate-400"> In the 12 months following PORT's launch, fatal overdose rates in Clallam County dropped from 73.3 to 34.8 per 100,000 — roughly a 50% reduction. We can't claim PORT alone caused that drop — the national age-adjusted overdose death rate also fell <a class="underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white" href="https://www.cdc.gov/nchs/products/databriefs/db549.htm" target="_blank" rel="noopener">26.2% in the same 2023–2024 window (CDC NCHS Data Brief 549)</a>, driven largely by a 35.6% drop in fentanyl-involved deaths and by community naloxone saturation. But the Clallam decline is roughly double the national one, and consistent post-overdose follow-up is one of the few local interventions that plausibly explains that gap.</dd>
                 </div>
 
                 {# Partnership Networks #}
@@ -38,7 +38,25 @@
                         <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
                         Partnership Networks.
                     </dt>
-                    <dd class="inline text-gray-600 dark:text-slate-400"> Understanding which agencies refer cases helps us strengthen partnerships and ensure coordinated care across the entire safety net, building stronger community connections.</dd>
+                    <dd class="inline text-gray-600 dark:text-slate-400"> Knowing which agencies and bystanders are flagging overdoses tells us where the safety net is holding and where it has holes. The same charts that look like "operational metrics" to staff are, for partners, a map of where outreach, MOUD access, housing, and warm handoffs need to be tightened next.</dd>
+                </div>
+
+                {# State & National Alignment #}
+                <div class="relative pl-8">
+                    <dt class="inline font-semibold text-gray-900 dark:text-white">
+                        <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
+                        State &amp; National Alignment.
+                    </dt>
+                    <dd class="inline text-gray-600 dark:text-slate-400"> Several patterns you'll see below — declining fatal-overdose rates, repeat overdoses concentrating in the days after a first event, and the shift from EMS-administered to bystander-administered naloxone — match what CDC, NIDA, and peer-reviewed research are documenting nationwide and what the <a class="underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white" href="https://doh.wa.gov/data-and-statistical-reports/health-statistics/injury-and-violence-data/drug-overdose-deaths" target="_blank" rel="noopener">Washington State Department of Health</a> is reporting at the state level. Where we can, we link the supporting sources at the bottom of this page.</dd>
+                </div>
+
+                {# Honest Limits #}
+                <div class="relative pl-8">
+                    <dt class="inline font-semibold text-gray-900 dark:text-white">
+                        <div class="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-slate-600 dark:bg-slate-400"></div>
+                        Honest Limits.
+                    </dt>
+                    <dd class="inline text-gray-600 dark:text-slate-400"> Everything here only counts overdoses PAFD knows about. Unwitnessed events, private reversals, and people who refuse contact don't appear. We point this out so the charts inform decisions without being mistaken for the whole picture.</dd>
                 </div>
             </dl>
         </section>
@@ -143,6 +161,48 @@
             {% endif %}
         </div>
 
+        {# Overdose Density Heatmap — when overdoses happen vs. when we're staffed #}
+        {% if fig_density_map %}
+            <section class="mt-20 mb-16">
+                <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
+                    <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 ring-4 ring-red-50 dark:bg-red-500/20 dark:ring-red-900/30">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-red-600 dark:text-red-400">
+                                        <path fill-rule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v.756a49.106 49.106 0 0 1 9.152 1 .75.75 0 0 1-.152 1.485H21v9.643a3 3 0 0 1-2.288 2.913l-.522.13c-.342.085-.685.122-1.024.11-.34.012-.683-.025-1.025-.11l-.523-.13A3 3 0 0 1 13.33 15.97V6.235c-.456.043-.911.096-1.365.158V21a.75.75 0 0 1-1.5 0v-9.643c-.456.043-.911.096-1.365.158V21a.75.75 0 0 1-1.5 0v-9.642c-.454.062-.91.115-1.365.158V19.5a.75.75 0 0 1-1.5 0V11.62c-.456.043-.911.097-1.365.158V18a.75.75 0 0 1-1.5 0V12a49.107 49.107 0 0 1 9.152-1V3a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">Overdose Density by Day &amp; Hour</h3>
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">When overdoses actually happen vs. when CPMs are typically on the clock</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-0">
+                        {{ fig_density_map|safe }}
+                    </div>
+
+                    <div class="border-t border-red-100/70 bg-red-50/40 px-6 py-5 sm:px-8 dark:border-red-900/40 dark:bg-red-950/20">
+                        <div class="my-4 space-y-4 text-base leading-7 text-red-950 dark:text-red-50">
+                            <h4 class="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-red-900/90 dark:text-red-200">Reading the Heatmap</h4>
+                            <p>
+                                Each cell counts how many overdoses occurred during a specific weekday-and-hour combination across the entire dataset. Darker cells are louder hours; lighter cells are quieter ones. The yellow rectangle outlines a standard CPM daytime shift block (Mon–Fri, 08:00–18:00). Anything outside that box is happening on evenings, nights, or weekends — when fewer staff are typically on scene.
+                            </p>
+                            <p>
+                                The factual takeaway is straightforward: overdose risk does not follow a 9-to-5 schedule. Weekday afternoons and early evenings tend to light up, but so do late nights and weekends, when most clinics and outreach offices are closed. The rectangle is a visual reminder that even an "extended" daytime shift leaves real gaps in coverage.
+                            </p>
+                            <p>
+                                <span class="font-semibold">What it might be telling us:</span> hot weekday afternoon hours could reflect the moment people leave work, schools, or court dates and reconnect with using partners — a window where a check-in call, a peer drop-by, or a stocked naloxone supply could prevent an event. Weekend and overnight clusters likely lean on bystander reversals; that is where strengthening bystander naloxone access, hotel and shelter partnerships, and on-call CPM follow-up the next morning probably matters most. Quiet cells aren't necessarily safe — they may simply reflect when overdoses are less likely to be witnessed or reported.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
         {# Repeat Overdose Timeline Section #}
         <section class="mt-20 mb-16">
             {# Chart Container #}
@@ -195,14 +255,14 @@
                         <div>
                             <h4 class="text-base font-bold uppercase tracking-wide text-amber-900 dark:text-amber-300">The Revolving Door</h4>
                             <p class="mt-3 text-base leading-7 text-gray-700 dark:text-slate-300">
-                                <span class="font-semibold text-gray-900 dark:text-white">Every repeat overdose represents a missed opportunity.</span> When patients cycle back through the system, it's rarely random — it's a signal. Treatment fell through. Incarceration interrupted continuity. Housing collapsed. A partner relapsed. Maybe we never connected with them in the first place.
+                                <span class="font-semibold text-gray-900 dark:text-white">A repeat overdose is rarely random.</span> The headline numbers above tell you how many patients we have responded to more than once, how soon those second events tend to occur, and what share of all overdoses come from people we have already met. The lines below show the same data person-by-person so the pattern becomes visible.
                             </p>
                         </div>
                         <p class="text-base leading-7 text-gray-700 dark:text-slate-300">
-                            <span class="font-semibold text-gray-900 dark:text-white">This timeline reveals failure patterns.</span> Clusters show when the system breaks down. Rapid recurrence (days or weeks) suggests immediate post-reversal gaps — no warm handoff, no MAT access, no stable housing. Longer intervals might indicate treatment dropout or life disruption events. Each vertical line is a person we need to reach differently.
+                            <span class="font-semibold text-gray-900 dark:text-white">What we can say from the data:</span> repeats cluster more in the first weeks after an initial event than at any other interval, the people with three or more events make up a small slice of patients but a disproportionate share of total overdoses, and the gap between someone's first and second event has not stayed constant year over year.
                         </p>
                         <p class="text-base leading-7 text-gray-700 dark:text-slate-300">
-                            <span class="font-semibold text-gray-900 dark:text-white">Below the full timeline are three focused views:</span> an aligned timeline (everyone starts at day 0), a seasonality snapshot, and a histogram of days between overdoses. Same data, different angles — because one chart rarely tells the whole story.
+                            <span class="font-semibold text-gray-900 dark:text-white">What it likely points to:</span> tight clusters early on are most consistent with broken handoffs — no follow-up appointment that stuck, no MOUD induction, a return to the same housing situation or using partner. Longer gaps followed by a new event are more consistent with treatment dropout, a life shock (lost housing, lost job, lost relationship), or a change in the local drug supply. We can't prove cause from these views, but they are good places to look first. Nationally, the elevated-risk window immediately after a non-fatal overdose is well documented — <a class="underline decoration-dotted underline-offset-2 hover:text-gray-900 dark:hover:text-white" href="https://www.acpjournals.org/doi/10.7326/M17-3107" target="_blank" rel="noopener">Larochelle et al. (Annals of Internal Medicine, 2018)</a> found that patients started on buprenorphine or methadone after a non-fatal overdose had roughly half the all-cause mortality of those who received neither medication.
                         </p>
                     </div>
                 </div>
@@ -302,7 +362,10 @@
                         <div class="border-t border-slate-200/60 bg-slate-50/40 px-5 py-4 text-sm leading-6 text-slate-700 dark:border-slate-700/50 dark:bg-slate-900/40 dark:text-slate-300">
                             <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-600 dark:text-slate-400">Reading the trend</p>
                             <p class="mt-2">
-                                The light neutral trend line is a 3-quarter moving average of the same-quarter repeat rate. It follows the real shape of the series, including the 2024 ramp-up as data collection matured and the lower levels that follow after late 2024, without adding weighted overlays. The next-event lines (30 / 90 / 180 / 365 days) still break wherever a window has not fully elapsed yet, so a missing dot on the right side is the calendar, not a data drop.
+                                Each point is a quarter. The colored lines track how often a patient seen in that quarter had another overdose within 30, 90, 180, or 365 days. The light neutral line is a 3-quarter moving average, so it smooths out single-quarter spikes and shows the underlying direction. A line breaks on the right where the window hasn't fully elapsed yet — for example, the 365-day series simply can't be calculated for last quarter. That's the calendar, not a data loss.
+                            </p>
+                            <p class="mt-3">
+                                <span class="font-semibold text-slate-900 dark:text-white">Plausibly:</span> the 2024 ramp-up is mostly an artifact of better referral capture as PORT matured rather than people actually overdosing more. The flatter or lower levels after late 2024 are more likely to reflect real change — improved follow-up, better naloxone saturation, or a shift in supply — but quarter-to-quarter noise is real, and a single quarter shouldn't be read as a turning point on its own.
                             </p>
                         </div>
                     </div>
@@ -329,7 +392,10 @@
                         <div class="border-t border-slate-200/60 bg-slate-50/40 px-5 py-4 text-sm leading-6 text-slate-700 dark:border-slate-700/50 dark:bg-slate-900/40 dark:text-slate-300">
                             <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-600 dark:text-slate-400">Reading this view</p>
                             <p class="mt-2">
-                                This chart drops the early collection ramp-up and starts at 2024 Q4, so the downward direction after the program matured is easier to see. The solid light line is a short moving average, and the dashed line is a simple trend line fit only on this post-ramp-up slice.
+                                Same data as above, but the early collection ramp-up is removed and the series starts at 2024 Q4 — the point where referral capture had clearly stabilized. The solid light line is a short moving average; the dashed line is a simple linear trend fit only to this post-ramp window so you can see whether the underlying repeat rate is drifting up, down, or sideways.
+                            </p>
+                            <p class="mt-3">
+                                <span class="font-semibold text-slate-900 dark:text-white">Worth thinking about:</span> a flat or downward slope here, against stable case volume, is the cleanest signal we currently have that follow-up and warm handoffs are bending the curve. It would be premature to call it victory — a few quarters is still a small sample and the local drug supply can change quickly — but if the slope reverses sharply, that is a real prompt to revisit outreach intensity.
                             </p>
                         </div>
                     </div>
@@ -356,7 +422,10 @@
                         <div class="border-t border-slate-200/60 bg-slate-50/40 px-5 py-4 text-sm leading-6 text-slate-700 dark:border-slate-700/50 dark:bg-slate-900/40 dark:text-slate-300">
                             <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-600 dark:text-slate-400">How to read this</p>
                             <p class="mt-2">
-                                Each step up is one patient hitting their second overdose. The shaded band is a 95% confidence interval - wider when fewer patients have been observed that long, narrower as the cohort grows. A rising curve doesn't mean things are getting worse; it just means more time has passed and more repeats have eventually occurred. The slope flattening over time is what improvement actually looks like here.
+                                A Kaplan-Meier curve answers a fair question: by <em>X</em> days after someone's first observed overdose, what share of patients have had a second one? It accounts for the fact that we have not been watching everyone for the same amount of time — recent patients haven't had a chance to relapse yet, and the math handles that honestly. Each upward step is one real patient. The shaded band is a 95% confidence interval; it shrinks as more patients have been observed for longer.
+                            </p>
+                            <p class="mt-3">
+                                <span class="font-semibold text-slate-900 dark:text-white">What it suggests:</span> the curve rising fastest in the first weeks is the clearest argument for front-loading effort — the period right after a reversal is when the next event is most likely. This pattern matches national survival analyses of post-overdose cohorts (see <a class="underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white" href="https://www.acpjournals.org/doi/10.7326/M17-3107" target="_blank" rel="noopener">Larochelle 2018</a>). A slope that flattens out earlier each cohort year (rather than the cumulative curve ever going down) is what "intervention working" actually looks like in survival data, even if it doesn't feel as dramatic as a falling line.
                             </p>
                         </div>
                     </div>
@@ -368,24 +437,28 @@
                     <div class="my-4 space-y-4 text-base leading-7 text-amber-950 dark:text-amber-100">
                         <h4 class="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-amber-900/90 dark:text-amber-200">What This Timeline Is Really Saying</h4>
                         <p>
-                            Each horizontal line on this chart is one person. The dots along that line are their
-                            overdose events, spread out over time. A single dot means a one-time crisis. Multiple dots
-                            for the same person tell you they are caught in a pattern where overdose keeps coming back.
+                            Each horizontal line on the main chart is one patient, and each dot on that line is one
+                            overdose. A line with a single dot is a one-time crisis we responded to. A line with several
+                            dots is a person whose overdoses have become a pattern. The aligned, seasonal, histogram, and
+                            Kaplan-Meier views beneath it are just different ways of asking the same question: how often
+                            does the second event come, and how soon?
                         </p>
                         <p>
-                            Pay attention to how close those dots are to each other. When overdoses cluster just days
-                            or weeks apart, it usually means the support net has holes: no follow-up visit, no stable
-                            place to stay, no medication for opioid use disorder, or a discharge back into the exact same
-                            situation that caused the first crisis. Longer gaps between events can signal people who
-                            stabilize for a while and then lose housing, income, treatment, or key relationships.
+                            Across the views, two facts hold up consistently: a relatively small group of patients
+                            accounts for a large share of total overdoses, and second events are most likely in the days
+                            and weeks immediately after the first. That is not unique to Clallam County — it shows up in
+                            published opioid-use-disorder research nationwide — but seeing it in local data sharpens the
+                            case for fast, persistent follow-up rather than a single post-event visit.
                         </p>
                         <p>
-                            The people with three or more overdoses on their line are your highest-risk group. They rarely
-                            need a "better lecture" in the emergency department; they need someone who stays with them
-                            across time—consistent outreach, help navigating benefits, rides to treatment, and someone who
-                            notices when they disappear. This bar is here to remind you that the timeline is less about
-                            dots on a screen and more about which people need a different kind of relationship to finally
-                            break the cycle.
+                            <span class="font-semibold">A reasonable hypothesis</span>, supported by what CPMs see on the
+                            ground: tightly-clustered repeats usually trace back to gaps in continuity — no MOUD
+                            induction within days of the reversal, no follow-up that the patient could realistically keep,
+                            or a discharge back into the same physical environment that produced the first event.
+                            Longer-gap repeats are more often tied to life shocks (lost housing, lost relationship, lost
+                            job) or a change in what is locally available on the street. Both patterns point in the same
+                            direction for the public and for staff: the highest-leverage move is staying in relationship
+                            across time, not just being present at the worst moment.
                         </p>
                     </div>
                 </div>
@@ -559,24 +632,28 @@
                     <div class="my-4 space-y-4 text-base leading-7 text-purple-950 dark:text-purple-50">
                         <h4 class="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-purple-900/90 dark:text-purple-200">Reading the Narcan Story in the Data</h4>
                         <p>
-                            The charts above show how Narcan use has changed over time and who is giving it. In earlier
-                            years, EMS was almost always the first to administer naloxone, giving small doses through
-                            an IV and waking people up slowly. As high-dose nasal sprays became common in the community,
-                            more overdoses were reversed by friends, family, and bystanders before EMS ever arrived.
+                            The chart above tracks who actually pushed naloxone first — EMS, law enforcement, a friend,
+                            a family member, a coworker, or the patient themselves. Earlier in the dataset, EMS dominates;
+                            more recently, bystander administrations make up a much larger share. The timeline chart shows
+                            when that handoff started shifting, which lines up with broader community access to 4 mg
+                            intranasal naloxone and the <a class="underline decoration-dotted underline-offset-2 hover:text-purple-900 dark:hover:text-white" href="https://www.fda.gov/news-events/press-announcements/fda-approves-first-over-counter-naloxone-nasal-spray" target="_blank" rel="noopener">FDA's March 2023 approval of OTC Narcan</a>.
                         </p>
                         <p>
-                            That shift saves lives but also changes what you walk into. Someone who wakes up fast from
-                            a large dose can feel sick, angry, and scared. They may refuse transport, push responders away,
-                            or leave the scene quickly. On the chart, this looks like more bystander administrations and
-                            a growing gap between "reversed" and "willing to go to the hospital." It is not a failure
-                            of compassionit is a new clinical reality.
+                            That shift is, on net, an unambiguously good thing — reversal happens faster when it doesn’t
+                            have to wait for an ambulance. But it also changes what responders walk into. A high
+                            single-dose nasal reversal can produce abrupt withdrawal: vomiting, agitation, and a strong
+                            urge to leave. On these charts that often shows up as a growing gap between “reversed” and
+                            “transported,” and as more AMA (against medical advice) refusals. That isn’t a failure of
+                            compassion — it’s a predictable consequence of the medication doing exactly what it is
+                            designed to do.
                         </p>
                         <p>
-                            Reading the trend lines together helps answer three questions: Are more people being saved
-                            before EMS arrives? Are refusals climbing at the same time? And where can CPM teams plug in
-                            after the reversalthrough next-day visits, phone outreach, or partnerships with shelters and
-                            treatment providersso that a life saved on the sidewalk has a real chance to turn into a life
-                            connected to care.
+                            <span class="font-semibold">A reasonable read:</span> as more reversals happen before EMS
+                            arrives, the high-leverage moment for connection moves later — to the next-day phone call,
+                            the follow-up visit at a motel or shelter, or the warm handoff to a SUD counselor a CPM can
+                            schedule. Sustaining the drop in fatal overdoses probably depends less on getting to scenes
+                            faster and more on what happens in the 24–72 hours after a bystander reversal. That is
+                            squarely where CPM augmentation is designed to plug in.
                         </p>
                     </div>
                 </div>
@@ -674,24 +751,16 @@
                             <div class="my-4 space-y-4 text-base leading-6 text-red-950 dark:text-red-50">
                                 <h4 class="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-red-900/90 dark:text-red-200">How to Read This Hotspot Map</h4>
                                 <p>
-                                    Each point on this map is a real overdose at a specific place: an apartment complex,
-                                    a motel, a shelter, a park, a parking lot. When many events stack up in the same spot,
-                                    it forms a hotspot. Those clusters highlight where people are actually overdosing—not just
-                                    where we think the problem lives.
+                                    Each marker is a real overdose that PORT was dispatched to at a specific address — an apartment complex, a motel, a shelter, a park, a parking lot. When markers stack at the same place, that's a hotspot: a location the data says is producing more events than the rest of the map.
                                 </p>
                                 <p>
-                                    Some hotspots are expected: familiar encampments, high-turnover motels, busy intersections.
-                                    Others are surprising: a single address that appears again and again, a quiet residential
-                                    street, or a small business that has quietly become a gathering place. {{ hotspot_stats.unique_locations }}
-                                    different locations appear here, with the top address alone accounting for
-                                    {{ hotspot_stats.top_location_share }}% of mapped responses.
+                                    The numbers up top come straight from this dataset: {{ hotspot_stats.unique_locations }} unique geocoded locations, with the single highest-volume address accounting for {{ hotspot_stats.top_location_share }}% of mapped responses. Some clusters are unsurprising — known encampments, high-turnover motels, busy intersections. Others are more telling: a single residential address that appears again and again, a quiet block, or a small business that has quietly become a gathering point.
                                 </p>
                                 <p>
-                                    The goal is not to blame a building or a block, but to point outreach, naloxone, and
-                                    relationship-building toward the places where they will matter most. A cluster might call
-                                    for a conversation with a landlord, a new drop-in time at a shelter, or regular CPM visits
-                                    to a specific corner. The map turns scattered incidents into a picture of where your
-                                    community is quietly asking for help.
+                                    <span class="font-semibold">What it likely means in practice:</span> a recurring address rarely reflects "a bad building" so much as a stable mix of people, supply, and circumstances that keeps producing risk in the same place. That makes hotspots high-leverage targets for very specific moves — a conversation with a property manager, a stocked naloxone box at the front desk, a recurring CPM walk-by, or a coordinated outreach time with a partner agency. The map's job is to point that work somewhere concrete instead of "everywhere."
+                                </p>
+                                <p class="text-sm text-red-900/80 dark:text-red-200/80">
+                                    <span class="font-semibold">A note on privacy:</span> markers are positioned at the address level. We deliberately avoid identifying individual people, and individual incidents should not be inferred from a single dot.
                                 </p>
                             </div>
                         </div>
@@ -709,6 +778,71 @@
                     </div>
                 </div>
             {% endif %}
+        </section>
+
+        {# Sources & Further Reading #}
+        <section class="mt-24 mb-8">
+            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+                <div class="border-b border-slate-200/60 bg-slate-50/50 px-6 py-4 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
+                    <h3 class="text-sm font-bold uppercase tracking-[0.18em] text-slate-700 dark:text-slate-300">Sources &amp; Further Reading</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Public-data and peer-reviewed sources that corroborate or contextualize the patterns shown above.</p>
+                </div>
+                <div class="px-6 py-6 sm:px-8">
+                    <dl class="grid gap-6 text-sm leading-6 text-slate-700 sm:grid-cols-2 dark:text-slate-300">
+                        <div>
+                            <dt class="font-semibold text-slate-900 dark:text-white">National overdose trend, 2023–2024</dt>
+                            <dd class="mt-1">
+                                Garnett MF, Miño AM. <em>Drug Overdose Deaths in the United States, 2023–2024.</em> NCHS Data Brief No. 549, Jan 2026.
+                                <a class="block underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white" href="https://www.cdc.gov/nchs/products/databriefs/db549.htm" target="_blank" rel="noopener">cdc.gov/nchs/products/databriefs/db549.htm</a>
+                                <span class="block text-slate-500 dark:text-slate-400">Age-adjusted overdose death rate fell 26.2% (31.3 → 23.1 per 100,000); synthetic-opioid deaths fell 35.6%. The local Clallam decline aligns with, and outpaces, the national trajectory.</span>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="font-semibold text-slate-900 dark:text-white">Washington State overdose data</dt>
+                            <dd class="mt-1">
+                                Washington State Department of Health, Drug Overdose Deaths dashboard.
+                                <a class="block underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white" href="https://doh.wa.gov/data-and-statistical-reports/health-statistics/injury-and-violence-data/drug-overdose-deaths" target="_blank" rel="noopener">doh.wa.gov – Drug Overdose Deaths</a>
+                                <span class="block text-slate-500 dark:text-slate-400">State-level surveillance of fatal overdoses, including county-level breakdowns and demographic detail.</span>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="font-semibold text-slate-900 dark:text-white">Post-overdose mortality risk &amp; MOUD</dt>
+                            <dd class="mt-1">
+                                Larochelle MR, Bernson D, Land T, et al. <em>Medication for Opioid Use Disorder After Nonfatal Opioid Overdose and Association With Mortality.</em> Ann Intern Med. 2018;169(3):137–145.
+                                <a class="block underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white" href="https://www.acpjournals.org/doi/10.7326/M17-3107" target="_blank" rel="noopener">acpjournals.org/doi/10.7326/M17-3107</a>
+                                <span class="block text-slate-500 dark:text-slate-400">Patients started on buprenorphine or methadone after a non-fatal overdose had roughly half the all-cause mortality of those who received neither – the strongest published evidence for fast MOUD linkage in the post-overdose window the timeline charts visualize.</span>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="font-semibold text-slate-900 dark:text-white">OTC naloxone &amp; bystander reversal</dt>
+                            <dd class="mt-1">
+                                U.S. Food &amp; Drug Administration. <em>FDA Approves First Over-the-Counter Naloxone Nasal Spray.</em> March 29, 2023.
+                                <a class="block underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white" href="https://www.fda.gov/news-events/press-announcements/fda-approves-first-over-counter-naloxone-nasal-spray" target="_blank" rel="noopener">fda.gov – OTC Narcan approval</a>
+                                <span class="block text-slate-500 dark:text-slate-400">Regulatory inflection point that maps to the shift from EMS-administered to bystander-administered naloxone visible in the Narcan section above.</span>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="font-semibold text-slate-900 dark:text-white">Community-level overdose response</dt>
+                            <dd class="mt-1">
+                                HEALing Communities Study Consortium. <em>Community-Based Cluster-Randomized Trial to Reduce Opioid Overdose Deaths.</em> N Engl J Med. 2024;391(11):989–1001.
+                                <a class="block underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white" href="https://pubmed.ncbi.nlm.nih.gov/38884347/" target="_blank" rel="noopener">pubmed.ncbi.nlm.nih.gov/38884347</a>
+                                <span class="block text-slate-500 dark:text-slate-400">Multi-site randomized trial of community-based overdose interventions; the model and the menu of evidence-based practices it tested overlap substantially with what PORT does on a smaller scale.</span>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="font-semibold text-slate-900 dark:text-white">NIDA overdose trend hub</dt>
+                            <dd class="mt-1">
+                                National Institute on Drug Abuse. <em>Drug Overdose Deaths: Facts and Figures.</em>
+                                <a class="block underline decoration-dotted underline-offset-2 hover:text-slate-900 dark:hover:text-white" href="https://nida.nih.gov/research-topics/trends-statistics/overdose-death-rates" target="_blank" rel="noopener">nida.nih.gov – Overdose Death Rates</a>
+                                <span class="block text-slate-500 dark:text-slate-400">Visual time series of US overdose deaths by drug class, sex, and year – useful for sanity-checking local trends against the national curve.</span>
+                            </dd>
+                        </div>
+                    </dl>
+                    <p class="mt-6 text-xs text-slate-500 dark:text-slate-400">
+                        These citations support the directional story shown on this page; they do not establish causation for the Clallam County numbers specifically. Where a claim is local, we say so. Where it matches state or national findings, we link the source.
+                    </p>
+                </div>
+            </div>
         </section>
 
     </div>

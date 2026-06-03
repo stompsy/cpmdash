@@ -381,10 +381,10 @@
               href="{% url 'cases:opshield' %}"
               @click.prevent="selected = (selected === 'System Case Studies' ? '' : 'System Case Studies')"
               class="menu-item group"
-              :class="(selected === 'System Case Studies') || ['costSavings','od-referrals-shift-coverage'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
+              :class="(selected === 'System Case Studies') || ['costSavings'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'System Case Studies') || ['costSavings','od-referrals-shift-coverage'].includes(page) ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
+                :class="(selected === 'System Case Studies') || ['costSavings'].includes(page) ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -448,21 +448,6 @@
                     :class="page === 'costSavings' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
                     Cost Savings Analysis
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'dashboard:odreferrals_shift_coverage' %}"
-                    hx-get="{% url 'dashboard:odreferrals_shift_coverage' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    class="menu-dropdown-item group"
-                    :class="page === 'od-referrals-shift-coverage' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                    @click="page = 'od-referrals-shift-coverage'; if (window.innerWidth < 1024) sidebarToggle = false"
-                  >
-                    Shift Coverage Analysis
                   </a>
                 </li>
               </ul>
