@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.4.0 (2026-06-03)
+
+### Features
+
+- **dashboard**: Refresh overdose narrative
+  ([`f8d2ad4`](https://github.com/stompsy/cpmdash/commit/f8d2ad4f8e4f0c5cc45e1c7e5413822ca1f2a77b))
+
+
 ## v1.3.0 (2026-05-03)
 
 ### Features
