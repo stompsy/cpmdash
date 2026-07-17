@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.utils import OperationalError, ProgrammingError
 
 
 class County(models.Model):
@@ -33,16 +34,20 @@ class Agency(models.Model):
 
 
 def get_default_agency_id() -> int:
-    clallam, _ = County.objects.get_or_create(
-        slug="clallam-county",
-        defaults={"name": "Clallam County"},
-    )
-    agency, _ = Agency.objects.get_or_create(
-        county=clallam,
-        slug="port-angeles",
-        defaults={"name": "Port Angeles"},
-    )
-    return int(agency.pk)
+    try:
+        clallam, _ = County.objects.get_or_create(
+            slug="clallam-county",
+            defaults={"name": "Clallam County"},
+        )
+        agency, _ = Agency.objects.get_or_create(
+            county=clallam,
+            slug="port-angeles",
+            defaults={"name": "Port Angeles"},
+        )
+        return int(agency.pk)
+    except (ProgrammingError, OperationalError):
+        # Startup checks can run before migrations in some deploy flows.
+        return 1
 
 
 class Patients(models.Model):

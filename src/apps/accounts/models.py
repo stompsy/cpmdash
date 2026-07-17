@@ -2,21 +2,27 @@ from django.apps import apps
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.files.storage import default_storage
 from django.db import models
+from django.db.utils import OperationalError, ProgrammingError
 
 
 def get_default_agency_id() -> int:
     County = apps.get_model("core", "County")
     Agency = apps.get_model("core", "Agency")
-    clallam, _ = County.objects.get_or_create(
-        slug="clallam-county",
-        defaults={"name": "Clallam County"},
-    )
-    agency, _ = Agency.objects.get_or_create(
-        county=clallam,
-        slug="port-angeles",
-        defaults={"name": "Port Angeles"},
-    )
-    return int(agency.pk)
+    try:
+        clallam, _ = County.objects.get_or_create(
+            slug="clallam-county",
+            defaults={"name": "Clallam County"},
+        )
+        agency, _ = Agency.objects.get_or_create(
+            county=clallam,
+            slug="port-angeles",
+            defaults={"name": "Port Angeles"},
+        )
+        return int(agency.pk)
+    except (ProgrammingError, OperationalError):
+        # During bootstrapping (before migrations), Django system checks can
+        # evaluate field defaults while tenant tables do not exist yet.
+        return 1
 
 
 class User(AbstractUser):
