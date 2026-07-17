@@ -148,7 +148,11 @@
                 {% endif %}
 
                 <!-- ===== Main Content Start ===== -->
-                <main id="dashboard-main">
+                <main
+                    id="dashboard-main"
+                    data-tenant-scope-query="{{ tenant_scope_query|default:'' }}"
+                    data-tenant-scope-mode="{{ tenant_scope_mode|default:'' }}"
+                >
                     {% block page_header %}{% endblock page_header %}
                     <div class="mx-auto w-full max-w-7xl space-y-8">
                         <div class="grid grid-cols-12 gap-6 px-6">
@@ -254,6 +258,45 @@
         <script>
             // Ensure HTMX requests include CSRF token
             (function() {
+                function parseScopeParamsFromQuery(queryString) {
+                    const params = new URLSearchParams(queryString || '');
+                    const scope = params.get('scope');
+                    if (!scope) {
+                        return null;
+                    }
+                    if (scope === 'agency') {
+                        const agencyId = params.get('agency_id');
+                        if (agencyId) {
+                            return { scope: 'agency', agency_id: agencyId };
+                        }
+                    }
+                    if (scope === 'county') {
+                        const countyId = params.get('county_id');
+                        if (countyId) {
+                            return { scope: 'county', county_id: countyId };
+                        }
+                    }
+                    if (scope === 'multi') {
+                        const agencyIds = params.get('agency_ids');
+                        if (agencyIds) {
+                            return { scope: 'multi', agency_ids: agencyIds };
+                        }
+                    }
+                    return null;
+                }
+
+                function tenantScopeParams() {
+                    const main = document.getElementById('dashboard-main');
+                    if (main) {
+                        const scopeQuery = main.getAttribute('data-tenant-scope-query') || '';
+                        const fromMain = parseScopeParamsFromQuery(scopeQuery);
+                        if (fromMain) {
+                            return fromMain;
+                        }
+                    }
+                    return parseScopeParamsFromQuery(window.location.search || '');
+                }
+
                 function getCookie(name) {
                     const value = `; ${document.cookie}`;
                     const parts = value.split(`; ${name}=`);
@@ -264,6 +307,39 @@
                         const token = getCookie('csrftoken');
                         if (token) {
                             evt.detail.headers['X-CSRFToken'] = token;
+                        }
+
+                        if (evt.detail.verb !== 'get') {
+                            return;
+                        }
+
+                        const requestPath = String(evt.detail.path || '');
+                        if (!requestPath.includes('/dashboard/')) {
+                            return;
+                        }
+
+                        const queryIndex = requestPath.indexOf('?');
+                        if (queryIndex >= 0) {
+                            const existingQuery = new URLSearchParams(requestPath.slice(queryIndex + 1));
+                            if (
+                                existingQuery.has('scope') ||
+                                existingQuery.has('agency_id') ||
+                                existingQuery.has('county_id') ||
+                                existingQuery.has('agency_ids')
+                            ) {
+                                return;
+                            }
+                        }
+
+                        const scope = tenantScopeParams();
+                        if (!scope) {
+                            return;
+                        }
+
+                        for (const [key, value] of Object.entries(scope)) {
+                            if (evt.detail.parameters[key] == null) {
+                                evt.detail.parameters[key] = value;
+                            }
                         }
                     });
 

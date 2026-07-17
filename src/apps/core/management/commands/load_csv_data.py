@@ -91,7 +91,12 @@ class Command(BaseCommand):
     # Entry point
     # ------------------------------------------------------------------
     def handle(self, *args: Any, **options: Any) -> None:
-        tables = options["only"] or list(ALL_TABLES)
+        # Always process in dependency order (patients → referrals → odreferrals →
+        # encounters), regardless of the order the user passed to --only. Downstream
+        # datasets read committed patient data for age-at-event and PCP fallbacks, so
+        # the sequence matters.
+        selected = set(options["only"] or ALL_TABLES)
+        tables = [t for t in ALL_TABLES if t in selected]
         dry_run: bool = options["dry_run"]
         no_input: bool = options["no_input"]
 
@@ -102,9 +107,9 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("DRY RUN — no database writes."))
 
         service = DataCleaningService()
-        results: dict[str, pd.DataFrame] = {}
 
-        # Map table names → service methods
+        # Map table names → service methods. Only clean_patients lacks a patients_df
+        # parameter; the downstream cleaners all accept one.
         clean_methods = {
             "patients": service.clean_patients,
             "referrals": service.clean_referrals,
@@ -112,32 +117,10 @@ class Command(BaseCommand):
             "encounters": service.clean_encounters,
         }
 
-        for table in tables:
-            src = ASSETS_DIR / SOURCE_MAP[table]
-            if not src.exists():
-                raise CommandError(f"Missing source file: {src}")
-
-            self.stdout.write(self.style.HTTP_INFO(f"Cleaning {table}..."))
-            result = clean_methods[table](src)
-
-            # Print log lines
-            for line in result.log:
-                self.stdout.write(f"  {line}")
-
-            results[table] = result.df
-
-        # --- Write cleaned CSVs -----------------------------------------
-        for table, df in results.items():
-            out_path = ASSETS_DIR / OUTPUT_MAP[table]
-            df.to_csv(out_path, index=False)
-            self.stdout.write(self.style.SUCCESS(f"Wrote {len(df)} rows → {out_path.name}"))
-
-        if dry_run:
-            self.stdout.write(self.style.SUCCESS("Dry run complete. No DB changes."))
-            return
-
         # --- Confirm before wiping existing data ------------------------
-        if not no_input:
+        # The prompt moves up front because we now commit each table to the DB as soon
+        # as it's cleaned, rather than batching all DB writes at the end.
+        if not dry_run and not no_input:
             self.stdout.write(
                 self.style.WARNING(
                     "\nThis will DELETE all existing rows in the target tables "
@@ -148,12 +131,81 @@ class Command(BaseCommand):
             if confirm.lower() != "yes":
                 raise CommandError("Aborted by user.")
 
-        # --- Load into database -----------------------------------------
-        for table, df in results.items():
-            model = MODEL_MAP[table]
-            self._load_into_db(model, df, table)
+        # Patient lookup frame passed to downstream cleaners. If patients aren't part of
+        # this run, seed it from production so referrals/encounters can still resolve
+        # ages and PCP agencies against existing data.
+        patients_df: pd.DataFrame | None = None
+        if "patients" not in tables:
+            patients_df = self._patients_df_from_db()
+
+        # --- Process each table: clean → write CSV → commit -------------
+        for table in tables:
+            df = self._process_table(table, clean_methods[table], patients_df, dry_run)
+
+            # Refresh the patient lookup frame once patients are committed so the
+            # referral/encounter cleaners pull from freshly committed production data.
+            # During a dry run there are no DB writes, so fall back to the in-memory
+            # cleaned frame (it already carries id/age/insurance/pcp_agency).
+            if table == "patients":
+                patients_df = df if dry_run else self._patients_df_from_db()
+
+        if dry_run:
+            self.stdout.write(self.style.SUCCESS("Dry run complete. No DB changes."))
+            return
 
         self.stdout.write(self.style.SUCCESS("\nAll done. Data loaded successfully."))
+
+    def _process_table(
+        self,
+        table: str,
+        clean_method: Any,
+        patients_df: pd.DataFrame | None,
+        dry_run: bool,
+    ) -> pd.DataFrame:
+        """Clean a single table, write its CSV, and commit it to the DB.
+
+        Returns the cleaned DataFrame so the caller can reuse it (e.g. seeding the
+        patient lookup frame during a dry run).
+        """
+        src = ASSETS_DIR / SOURCE_MAP[table]
+        if not src.exists():
+            raise CommandError(f"Missing source file: {src}")
+
+        self.stdout.write(self.style.HTTP_INFO(f"Cleaning {table}..."))
+        # Only clean_patients lacks a patients_df parameter; the downstream cleaners
+        # all accept one for age/PCP lookups.
+        if table == "patients":
+            result = clean_method(src)
+        else:
+            result = clean_method(src, patients_df=patients_df)
+
+        for line in result.log:
+            self.stdout.write(f"  {line}")
+
+        df = result.df
+
+        # Write the cleaned CSV alongside the raw export.
+        out_path = ASSETS_DIR / OUTPUT_MAP[table]
+        df.to_csv(out_path, index=False)
+        self.stdout.write(self.style.SUCCESS(f"Wrote {len(df)} rows → {out_path.name}"))
+
+        # Commit this table before moving on so downstream datasets see it as
+        # production data.
+        if not dry_run:
+            self._load_into_db(MODEL_MAP[table], df, table)
+
+        return df
+
+    def _patients_df_from_db(self) -> pd.DataFrame | None:
+        """Build a patient lookup frame from production for downstream cleaners.
+
+        Returns ``None`` when no patients exist yet so callers can treat the lookup as
+        unavailable instead of passing an empty frame around.
+        """
+        records = list(Patients.objects.values("id", "age", "insurance", "pcp_agency"))
+        if not records:
+            return None
+        return pd.DataFrame.from_records(records)
 
     # ==================================================================
     # Database loading

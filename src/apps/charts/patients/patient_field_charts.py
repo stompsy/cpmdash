@@ -1,4 +1,5 @@
 from collections.abc import Collection
+from typing import Any
 
 import pandas as pd
 import plotly.express as px
@@ -8,6 +9,7 @@ from plotly.offline import plot
 from utils.chart_colors import CHART_COLORS_VIBRANT
 from utils.chart_normalization import add_share_columns
 from utils.plotly import get_theme_colors, style_plotly_layout
+from utils.scope import uses_curated_quarter_history
 from utils.tailwind_colors import TAILWIND_COLORS
 
 from ...core.models import Patients
@@ -518,12 +520,14 @@ def build_patients_field_charts(
     *,
     zip_include_missing: bool = False,
     include_missing: bool = True,
+    scope_filters: dict[str, Any] | None = None,
 ) -> dict[str, str]:
     """
     Build a chart (HTML div) for each relevant field in Patients.
     Returns a mapping of field name -> chart HTML.
     """
-    qs = Patients.objects.all().values(
+    filters = scope_filters or {}
+    qs = Patients.objects.filter(**filters).values(
         "age",
         "insurance",
         "pcp_agency",
@@ -573,19 +577,31 @@ def build_patients_field_charts(
         if chart:
             charts[name] = chart
 
-    add_chart("patient_counts_quarterly", _build_quarterly_patient_bar)
+    add_chart(
+        "patient_counts_quarterly",
+        lambda theme_arg: _build_quarterly_patient_bar(
+            theme_arg,
+            source_df=df if scope_filters else None,
+            scope_filters=scope_filters,
+        ),
+    )
     # Removed sex_age_boxplot - redundant with stacked age chart
     add_chart(
         "race_age_boxplot",
         lambda theme_arg: build_patients_age_by_race_boxplot(
-            theme_arg, include_missing=include_missing
+            theme_arg, include_missing=include_missing, scope_filters=scope_filters
         ),
     )
 
     # Add enhanced production charts
     from .production_age_charts import build_enhanced_age_referral_sankey
 
-    add_chart("age_referral_sankey", build_enhanced_age_referral_sankey)
+    add_chart(
+        "age_referral_sankey",
+        lambda theme_arg: build_enhanced_age_referral_sankey(
+            theme_arg, scope_filters=scope_filters
+        ),
+    )
 
     if requested is not None:
         charts = {k: v for k, v in charts.items() if k in requested}
@@ -593,9 +609,54 @@ def build_patients_field_charts(
     return charts
 
 
-def _build_quarterly_patient_bar(theme: str) -> str | None:  # noqa: C901
+def _should_use_curated_quarter_history(scope_filters: dict[str, Any] | None) -> bool:
+    """Curated history applies only to county totals and Port Angeles totals."""
+    return uses_curated_quarter_history(scope_filters)
+
+
+def _build_quarterly_patient_bar(  # noqa: C901
+    theme: str,
+    source_df: pd.DataFrame | None = None,
+    scope_filters: dict[str, Any] | None = None,
+) -> str | None:
     q = get_quarterly_patient_counts()
-    qdf = q.get("df")
+    base_qdf = q.get("df")
+    use_curated_history = _should_use_curated_quarter_history(scope_filters)
+
+    scoped_qdf = pd.DataFrame()
+    if source_df is not None and not source_df.empty and "created_date" in source_df.columns:
+        created_series = pd.to_datetime(source_df["created_date"], errors="coerce").dropna()
+        if not created_series.empty:
+            scoped_qdf = pd.DataFrame(
+                {
+                    "year": created_series.dt.year,
+                    "quarter": created_series.dt.quarter,
+                }
+            )
+            scoped_qdf = (
+                scoped_qdf.groupby(["year", "quarter"], dropna=True)
+                .size()
+                .reset_index(name="count")
+            )
+
+    if isinstance(base_qdf, pd.DataFrame) and not base_qdf.empty:
+        if use_curated_history:
+            # Lock curated historical quarters through 2024 for county/all and Port Angeles views.
+            historical_qdf = base_qdf[base_qdf["year"] <= 2024].copy()
+
+            # For 2025+ use scoped data when present, otherwise keep the base dynamic values.
+            if not scoped_qdf.empty:
+                recent_qdf = scoped_qdf[scoped_qdf["year"] >= 2025].copy()
+            else:
+                recent_qdf = base_qdf[base_qdf["year"] >= 2025].copy()
+
+            qdf = pd.concat([historical_qdf, recent_qdf], ignore_index=True)
+        else:
+            # Agency-specific non-Port Angeles scopes (e.g., Sequim) should only show real scoped data.
+            qdf = scoped_qdf
+    else:
+        qdf = scoped_qdf
+
     if not isinstance(qdf, pd.DataFrame) or qdf.empty:
         return None
 
@@ -639,12 +700,13 @@ def _build_quarterly_patient_bar(theme: str) -> str | None:  # noqa: C901
         ]
     )
 
-    # Add annotation for Q1 2025 - 2 new CPMs hired
+    # Add annotation for Q1 2025 - 2 new CPMs hired (curated Port Angeles history only)
     q1_2025_idx = None
-    for i, (year, quarter) in enumerate(zip(x_years, x_quarters, strict=False)):
-        if year == "2025" and quarter == "1":
-            q1_2025_idx = i
-            break
+    if use_curated_history:
+        for i, (year, quarter) in enumerate(zip(x_years, x_quarters, strict=False)):
+            if year == "2025" and quarter == "1":
+                q1_2025_idx = i
+                break
 
     if q1_2025_idx is not None and q1_2025_idx < len(qdf2):
         q1_count = qdf2.iloc[q1_2025_idx]["count"]
@@ -698,105 +760,106 @@ def _build_quarterly_patient_bar(theme: str) -> str | None:  # noqa: C901
     normalized_quarterly_avg = round(baseline_data["count"].mean(), 1)
 
     # Collect all annotations (including year labels above bars)
-    all_annotations = []
+    all_annotations: list[dict] = []
+    shapes: list[dict] = []
 
-    # Add the existing "2 New CPMs Hired" annotation if it exists
-    if fig.layout.annotations:
-        all_annotations.extend(list(fig.layout.annotations))
+    # Curated decorations (year backgrounds, year labels, baseline line) only apply to
+    # the Port Angeles / county-total view. Agency scopes like Sequim show plain bars.
+    if use_curated_history:
+        # Add the existing "2 New CPMs Hired" annotation if it exists
+        if fig.layout.annotations:
+            all_annotations.extend(list(fig.layout.annotations))
 
-    # Add year-based context annotations ABOVE bars (vertical text)
-    unique_years = sorted(set(x_years))
+        # Add year-based context annotations ABOVE bars (vertical text)
+        unique_years = sorted(set(x_years))
 
-    year_labels = {
-        "2021": "COVID-19",
-        "2022": "Behavioral<br>Health",
-        "2023": "Normalization",
-        "2024": "Normalization",
-        "2025": "+2 Community<br>Paramedics",
-    }
+        year_labels = {
+            "2021": "COVID-19",
+            "2022": "Behavioral<br>Health",
+            "2023": "Normalization",
+            "2024": "Normalization",
+            "2025": "+2 Community<br>Paramedics",
+        }
 
-    # Position annotations at y=270 (with chart top at y=300)
-    annotation_y = 270
+        # Position annotations at y=270 (with chart top at y=300)
+        annotation_y = 270
 
-    for year in unique_years:
-        if year in year_labels:
+        for year in unique_years:
+            if year in year_labels:
+                # Find all quarter indices for this year
+                year_indices = [i for i, y in enumerate(x_years) if y == year]
+                if year_indices:
+                    # Calculate center position (middle of the year's quarters)
+                    # For multicategory axis, use numeric position at the center
+                    center_idx = (year_indices[0] + year_indices[-1]) / 2.0
+
+                    # Add vertical text annotation centered over the year
+                    all_annotations.append(
+                        dict(
+                            x=center_idx,  # Numeric position at center of year
+                            xref="x",
+                            y=annotation_y,  # Positioned at y=275 in data coordinates
+                            yref="y",  # Use data coordinates for precise positioning
+                            text=f"<b>{year_labels[year]}</b>",  # Semibold text for readability
+                            textangle=270,  # Vertical text reading top-to-bottom
+                            showarrow=False,
+                            font=dict(size=12, color="#1e293b", family="Arial, sans-serif"),
+                            xanchor="center",
+                            yanchor="middle",  # Anchor to middle for centered alignment
+                        )
+                    )
+
+        # Define year colors from the patient chart palette
+        year_colors = {
+            "2021": PATIENT_CHART_COLORS[0],  # Violet
+            "2022": PATIENT_CHART_COLORS[1],  # Cyan
+            "2023": PATIENT_CHART_COLORS[3],  # Emerald
+            "2024": PATIENT_CHART_COLORS[4],  # Amber
+            "2025": PATIENT_CHART_COLORS[5],  # Blue
+        }
+
+        for year in unique_years:
             # Find all quarter indices for this year
             year_indices = [i for i, y in enumerate(x_years) if y == year]
             if year_indices:
-                # Calculate center position (middle of the year's quarters)
-                # For multicategory axis, use numeric position at the center
-                center_idx = (year_indices[0] + year_indices[-1]) / 2.0
+                # Calculate the span of this year's quarters (left and right edges)
+                x0 = year_indices[0] - 0.5  # Left edge of first quarter
+                x1 = year_indices[-1] + 0.5  # Right edge of last quarter
 
-                # Add vertical text annotation centered over the year
-                all_annotations.append(
+                # Add semi-transparent background rectangle for this year
+                shapes.append(
                     dict(
-                        x=center_idx,  # Numeric position at center of year
+                        type="rect",
                         xref="x",
-                        y=annotation_y,  # Positioned at y=275 in data coordinates
-                        yref="y",  # Use data coordinates for precise positioning
-                        text=f"<b>{year_labels[year]}</b>",  # Semibold text for readability
-                        textangle=270,  # Vertical text reading top-to-bottom
-                        showarrow=False,
-                        font=dict(size=12, color="#1e293b", family="Arial, sans-serif"),
-                        xanchor="center",
-                        yanchor="middle",  # Anchor to middle for centered alignment
+                        yref="paper",
+                        x0=x0,
+                        x1=x1,
+                        y0=0,
+                        y1=1,  # Full height - annotations positioned inside with clearance
+                        fillcolor=year_colors.get(year, PATIENT_CHART_COLORS[0]),
+                        opacity=0.08,  # Very subtle background
+                        layer="below",
+                        line_width=0,
                     )
                 )
 
-    # Create background rectangles for each year with distinct colors
-    shapes = []
-
-    # Define year colors from the patient chart palette
-    year_colors = {
-        "2021": PATIENT_CHART_COLORS[0],  # Violet
-        "2022": PATIENT_CHART_COLORS[1],  # Cyan
-        "2023": PATIENT_CHART_COLORS[3],  # Emerald
-        "2024": PATIENT_CHART_COLORS[4],  # Amber
-        "2025": PATIENT_CHART_COLORS[5],  # Blue
-    }
-
-    for year in unique_years:
-        # Find all quarter indices for this year
-        year_indices = [i for i, y in enumerate(x_years) if y == year]
-        if year_indices:
-            # Calculate the span of this year's quarters (left and right edges)
-            x0 = year_indices[0] - 0.5  # Left edge of first quarter
-            x1 = year_indices[-1] + 0.5  # Right edge of last quarter
-
-            # Add semi-transparent background rectangle for this year
-            shapes.append(
-                dict(
-                    type="rect",
-                    xref="x",
-                    yref="paper",
-                    x0=x0,
-                    x1=x1,
-                    y0=0,
-                    y1=1,  # Full height - annotations positioned inside with clearance
-                    fillcolor=year_colors.get(year, PATIENT_CHART_COLORS[0]),
-                    opacity=0.08,  # Very subtle background
-                    layer="below",
-                    line_width=0,
-                )
+        # Add the baseline average line
+        shapes.append(
+            dict(
+                type="line",
+                xref="paper",
+                yref="y",
+                x0=0,
+                x1=1,
+                y0=normalized_quarterly_avg,
+                y1=normalized_quarterly_avg,
+                line=dict(
+                    color="rgba(255, 255, 255, 0.5)",  # White with 50% opacity
+                    width=2,
+                    dash="dash",
+                ),
             )
-
-    # Add the baseline average line
-    shapes.append(
-        dict(
-            type="line",
-            xref="paper",
-            yref="y",
-            x0=0,
-            x1=1,
-            y0=normalized_quarterly_avg,
-            y1=normalized_quarterly_avg,
-            line=dict(
-                color="rgba(255, 255, 255, 0.5)",  # White with 50% opacity
-                width=2,
-                dash="dash",
-            ),
         )
-    )
 
     fig.update_layout(
         bargap=0.15,

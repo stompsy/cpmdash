@@ -23,6 +23,7 @@ import hashlib
 import json
 import time
 from pathlib import Path
+from typing import Any
 
 import geopandas as gpd
 import numpy as np
@@ -507,7 +508,7 @@ def _prepare_jurisdictions_geojson():
     return json.dumps({"type": "FeatureCollection", "features": features})
 
 
-def _get_patient_markers_data():
+def _get_patient_markers_data(scope_filters: dict[str, Any] | None = None):
     """
     Build location-aggregated marker data and per-location record totals.
 
@@ -525,23 +526,32 @@ def _get_patient_markers_data():
         referral_total, encounter_total, od_referral_total)``
     """
     # ---- Fetch patient coordinates ----
+    filters = scope_filters or {}
+
     patients = {
         row["id"]: (row["latitude"], row["longitude"])
-        for row in Patients.objects.exclude(latitude__isnull=True)
+        for row in Patients.objects.filter(**filters)
+        .exclude(latitude__isnull=True)
         .exclude(longitude__isnull=True)
         .values("id", "latitude", "longitude")
     }
 
     # ---- Referrals: count per patient ----
-    ref_qs = list(Referrals.objects.exclude(patient_ID__isnull=True).values("patient_ID"))
+    ref_qs = list(
+        Referrals.objects.filter(**filters).exclude(patient_ID__isnull=True).values("patient_ID")
+    )
     ref_df = pd.DataFrame.from_records(ref_qs) if ref_qs else pd.DataFrame(columns=["patient_ID"])
 
     # ---- Encounters: count per patient ----
-    enc_qs = list(Encounters.objects.exclude(patient_ID__isnull=True).values("patient_ID"))
+    enc_qs = list(
+        Encounters.objects.filter(**filters).exclude(patient_ID__isnull=True).values("patient_ID")
+    )
     enc_df = pd.DataFrame.from_records(enc_qs) if enc_qs else pd.DataFrame(columns=["patient_ID"])
 
     # ---- OD Referrals: count per patient ----
-    od_qs = list(ODReferrals.objects.exclude(patient_id__isnull=True).values("patient_id"))
+    od_qs = list(
+        ODReferrals.objects.filter(**filters).exclude(patient_id__isnull=True).values("patient_id")
+    )
     od_df = pd.DataFrame.from_records(od_qs) if od_qs else pd.DataFrame(columns=["patient_id"])
     if not od_df.empty:
         od_df = od_df.rename(columns={"patient_id": "patient_ID"})
@@ -745,7 +755,7 @@ def _compute_density_contours(location_totals):
 # ---------------------------------------------------------------------------
 
 
-def build_chart_patient_map(theme, zoom_mode="full"):
+def build_chart_patient_map(theme, zoom_mode="full", scope_filters: dict[str, Any] | None = None):
     """
     Build an interactive Leaflet map showing patient addresses for every
     referral, encounter, and OD referral — with density contour overlay and
@@ -771,7 +781,7 @@ def build_chart_patient_map(theme, zoom_mode="full"):
         referral_total,
         encounter_total,
         od_referral_total,
-    ) = _get_patient_markers_data()
+    ) = _get_patient_markers_data(scope_filters=scope_filters)
     total_records = referral_total + encounter_total + od_referral_total
 
     # Compute density contour polygons from combined location data

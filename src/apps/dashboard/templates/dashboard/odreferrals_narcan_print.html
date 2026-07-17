@@ -1,0 +1,302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="robots" content="noindex" />
+        <meta name="description" content="Printable view of the Narcan Administration Comparison analysis from the overdose referrals dashboard." />
+        <meta name="keywords" content="community paramedicine, naloxone, narcan, overdose response, bystander administration, EMS" />
+        <title>Administration Comparison — Print View</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'media/favicon.ico' %}" />
+        <link rel="stylesheet" href="{% static 'css/output.css' %}" />
+        {% comment %} # Plotly.js must load synchronously BEFORE the body parses: the chart
+           divs from the narcan builders emit inline `Plotly.newPlot(...)` init
+           scripts (they're built with include_plotlyjs=False to avoid bundling
+           the library on the live dashboard, where another chart already loads
+           it). Without this, the figures render as empty containers. Pinned to
+           match the version bundled with plotly.py (see get_plotlyjs_version). {% endcomment %}
+        <script src="https://cdn.plot.ly/plotly-3.1.0.min.js" charset="utf-8"></script>
+        <style>
+            /* Print-friendly base. Force a light, white-paper look so the
+               PDF/printed output is legible without the dashboard dark theme. */
+            html, body {
+                background: #ffffff !important;
+                color: #0f172a;
+            }
+
+            /* Top toolbar with print button — only visible on screen. */
+            .print-toolbar {
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                display: flex;
+                justify-content: flex-end;
+                gap: 0.5rem;
+                padding: 0.75rem 1.5rem;
+                background: rgba(248, 250, 252, 0.96);
+                border-bottom: 1px solid #e2e8f0;
+                backdrop-filter: blur(6px);
+            }
+
+            .print-toolbar button,
+            .print-toolbar a {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                padding: 0.5rem 1rem;
+                border-radius: 9999px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                cursor: pointer;
+                border: 1px solid #cbd5e1;
+                background: #ffffff;
+                color: #0f172a;
+                text-decoration: none;
+                transition: background 0.15s ease, border-color 0.15s ease;
+            }
+
+            .print-toolbar button.primary {
+                background: #0f172a;
+                border-color: #0f172a;
+                color: #ffffff;
+            }
+
+            .print-toolbar button:hover,
+            .print-toolbar a:hover {
+                background: #f1f5f9;
+            }
+
+            .print-toolbar button.primary:hover {
+                background: #1e293b;
+            }
+
+            /* Header band for the printable doc. */
+            .print-header {
+                padding: 2rem 2.5rem 1.25rem;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .print-header .eyebrow {
+                font-size: 0.7rem;
+                font-weight: 700;
+                letter-spacing: 0.3em;
+                text-transform: uppercase;
+                color: #64748b;
+            }
+
+            .print-header h1 {
+                margin-top: 0.5rem;
+                font-size: 2rem;
+                line-height: 1.15;
+                font-weight: 700;
+                color: #0f172a;
+            }
+
+            .print-header p.lede {
+                margin-top: 0.75rem;
+                max-width: 60rem;
+                font-size: 0.95rem;
+                line-height: 1.55;
+                color: #334155;
+            }
+
+            .print-header .meta {
+                margin-top: 0.85rem;
+                font-size: 0.7rem;
+                font-weight: 600;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: #64748b;
+            }
+
+            .print-header .meta span + span::before {
+                content: "•";
+                margin: 0 0.6rem;
+                color: #cbd5e1;
+            }
+
+            /* Body container. The shared partial opens with `mt-20 mb-16`
+               spacing intended for the full dashboard; neutralize it here so
+               the section sits flush under the print header. */
+            .print-body {
+                padding: 1.5rem 2rem 3rem;
+            }
+
+            .print-body > section {
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* Prevent horizontal overflow on screen so the page body width
+               is the same reference point JS uses when resizing charts. */
+            body {
+                overflow-x: hidden;
+            }
+
+            /* Chart containers must be block-level and fill available width
+               so Plotly.Plots.resize() reads the right container dimensions. */
+            .od-expandable-chart {
+                width: 100%;
+                min-width: 0;
+                overflow: hidden;
+            }
+
+            /* @media print: hide controls, keep colors, prevent ugly breaks. */
+            @media print {
+                .print-toolbar,
+                .od-print-hide {
+                    display: none !important;
+                }
+
+                .print-header {
+                    padding: 0.5in 0.5in 0.25in;
+                    border-bottom: 1px solid #cbd5e1;
+                }
+
+                .print-body {
+                    padding: 0.25in 0.5in 0.5in;
+                }
+
+                /* Force browsers to actually print backgrounds/colors. */
+                * {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+
+                /* Keep chart cards from being sliced across a page boundary. */
+                .od-expandable-chart,
+                .js-plotly-plot,
+                .group\/metric {
+                    break-inside: avoid;
+                    page-break-inside: avoid;
+                }
+
+                @page {
+                    size: Letter portrait;
+                    margin: 0.4in;
+                }
+
+                /* Belt-and-suspenders: constrain SVG containers so nothing
+                   overflows if JS resize ran before the layout was fully known. */
+                .od-expandable-chart,
+                .js-plotly-plot,
+                .js-plotly-plot .plot-container,
+                .js-plotly-plot .svg-container {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    overflow: hidden !important;
+                }
+
+                .js-plotly-plot svg.main-svg {
+                    max-width: 100% !important;
+                }
+
+                /* Plotly modebar hidden via config but belt-and-suspenders. */
+                .modebar-container,
+                .modebar {
+                    display: none !important;
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-white text-slate-900">
+        <!-- Screen-only toolbar. Hidden during printing. -->
+        <div class="print-toolbar">
+            <a href="{% url 'dashboard:odreferrals' %}" rel="noopener">← Back to dashboard</a>
+            <button type="button" class="primary" onclick="window.print();">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8" rx="1"></rect>
+                </svg>
+                Print / Save as PDF
+            </button>
+        </div>
+
+        <header class="print-header">
+            <p class="eyebrow">Overdose Response Briefing</p>
+            <h1>Administration Comparison</h1>
+            <p class="lede">
+                The shift from EMS-first to bystander-first Narcan response — who administers naloxone
+                first, how that changed over time, and what it means for follow-up care.
+            </p>
+            <div class="meta">
+                {% if page_header_updated_at %}
+                    <span>
+                        {% if page_header_updated_at_iso %}
+                            <time datetime="{{ page_header_updated_at_iso }}">{{ page_header_updated_at|date:"F j, Y" }}</time>
+                        {% else %}
+                            {{ page_header_updated_at|date:"F j, Y" }}
+                        {% endif %}
+                    </span>
+                {% endif %}
+                <span>Printable Edition</span>
+            </div>
+        </header>
+
+        <main class="print-body">
+            {% include "dashboard/partials/narcan_comparison_body.html" %}
+        </main>
+
+        <script>
+            // ─── Plotly responsive resize ────────────────────────────────────────
+            // Plotly bakes a fixed pixel width into the SVG at render time.
+            // CSS max-width cannot override an inline SVG attribute, so we must
+            // call Plotly's own resize/relayout API.
+            //
+            // KEY ISSUE: `beforeprint` fires while the page is still in SCREEN
+            // layout, so Plotly.Plots.resize() reads the screen container width
+            // (often 500-600px on a laptop window) and sizes charts to that —
+            // then those narrow charts get printed onto the portrait paper.
+            //
+            // FIX: in `beforeprint`, call Plotly.relayout() with an EXPLICIT
+            // target width derived from the paper size, not the screen container.
+            //
+            // Portrait Letter: 8.5in page
+            //   @page margin 0.4in × 2  = 0.8in
+            //   .print-body padding 0.5in × 2 = 1.0in
+            //   card inner padding ~0.5in est  = 0.5in
+            //   ─────────────────────────────────────
+            //   Usable chart width ≈ 6.2in × 96dpi ≈ 595px
+            var PRINT_CHART_WIDTH = 595;
+
+            function resizeAllPlotlyCharts() {
+                document.querySelectorAll('.js-plotly-plot').forEach(function (div) {
+                    try { Plotly.Plots.resize(div); } catch (e) {}
+                });
+            }
+
+            function resizeForPrint() {
+                document.querySelectorAll('.js-plotly-plot').forEach(function (div) {
+                    try {
+                        Plotly.relayout(div, { width: PRINT_CHART_WIDTH });
+                    } catch (e) {}
+                });
+            }
+
+            function restoreScreenSize() {
+                // After printing, snap back to whatever the screen container holds.
+                setTimeout(resizeAllPlotlyCharts, 100);
+            }
+
+            // 1. Resize to screen container on load.
+            window.addEventListener('load', function () {
+                setTimeout(resizeAllPlotlyCharts, 300);
+            });
+
+            // 2. Track browser window resizing on screen.
+            window.addEventListener('resize', resizeAllPlotlyCharts);
+
+            // 3. Before printing: resize to explicit print width.
+            window.addEventListener('beforeprint', resizeForPrint);
+            window.onbeforeprint = resizeForPrint; // Safari fallback
+
+            // 4. After printing: restore screen size.
+            window.addEventListener('afterprint', restoreScreenSize);
+            window.onafterprint = restoreScreenSize; // Safari fallback
+
+
+        </script>
+    </body>
+</html>

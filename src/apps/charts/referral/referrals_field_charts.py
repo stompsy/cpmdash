@@ -1,4 +1,5 @@
 from collections.abc import Collection
+from typing import Any
 
 import pandas as pd
 import plotly.express as px
@@ -8,6 +9,7 @@ from plotly.offline import plot
 from utils.chart_colors import CHART_COLORS_VIBRANT
 from utils.chart_normalization import add_share_columns, count_share_text
 from utils.plotly import get_theme_colors, style_plotly_layout
+from utils.scope import uses_curated_quarter_history
 from utils.tailwind_colors import TAILWIND_COLORS
 
 from ...core.models import Referrals
@@ -617,7 +619,11 @@ def _process_encounter_categories(
                 )
 
 
-def _build_hierarchical_encounter_treemap(df: pd.DataFrame, theme: str) -> str | None:
+def _build_hierarchical_encounter_treemap(
+    df: pd.DataFrame,
+    theme: str,
+    scope_filters: dict[str, Any] | None = None,
+) -> str | None:
     """Build a treemap showing three category sections: Cat1, Cat2, Cat3 with their values.
 
     This function combines data from both Referrals (passed as df) and Encounters tables
@@ -640,7 +646,8 @@ def _build_hierarchical_encounter_treemap(df: pd.DataFrame, theme: str) -> str |
 
     # Now fetch and process encounters data
     try:
-        encounters_qs = Encounters.objects.all().values(
+        filters = scope_filters or {}
+        encounters_qs = Encounters.objects.filter(**filters).values(
             "encounter_type_cat1",
             "encounter_type_cat2",
             "encounter_type_cat3",
@@ -1020,10 +1027,16 @@ def _build_chart_for_field(df: pd.DataFrame, field: str, theme: str) -> str:
     return plot(fig, output_type="div", config=config)
 
 
-def _build_quarterly_referrals_chart(df: pd.DataFrame, theme: str) -> str | None:  # noqa: C901
+def _build_quarterly_referrals_chart(  # noqa: C901
+    df: pd.DataFrame,
+    theme: str,
+    scope_filters: dict[str, Any] | None = None,
+) -> str | None:
     """Build quarterly referrals bar chart styled like the patients quarterly chart."""
     if df.empty or "date_received" not in df.columns:
         return None
+
+    curated = uses_curated_quarter_history(scope_filters)
 
     dates = pd.to_datetime(df["date_received"], errors="coerce")
     qdf = pd.DataFrame(
@@ -1037,32 +1050,52 @@ def _build_quarterly_referrals_chart(df: pd.DataFrame, theme: str) -> str | None
     if qdf.empty:
         return None
 
-    # Move 2022 Q3 referral(s) to 2023 Q1
-    q3_2022_count = qdf.loc[(qdf["year"] == 2022) & (qdf["quarter"] == 3), "count"].sum()
-    if q3_2022_count > 0:
-        # Remove 2022 Q3
-        qdf = qdf[~((qdf["year"] == 2022) & (qdf["quarter"] == 3))]
-        # Add to 2023 Q1
-        q1_2023_idx = qdf[(qdf["year"] == 2023) & (qdf["quarter"] == 1)].index
-        if len(q1_2023_idx) > 0:
-            qdf.loc[q1_2023_idx[0], "count"] += q3_2022_count
-        else:
-            # Create 2023 Q1 if it doesn't exist
-            qdf = pd.concat(
-                [qdf, pd.DataFrame([{"year": 2023, "quarter": 1, "count": q3_2022_count}])],
-                ignore_index=True,
-            )
+    if curated:
+        # Move 2022 Q3 referral(s) to 2023 Q1
+        q3_2022_count = qdf.loc[(qdf["year"] == 2022) & (qdf["quarter"] == 3), "count"].sum()
+        if q3_2022_count > 0:
+            # Remove 2022 Q3
+            qdf = qdf[~((qdf["year"] == 2022) & (qdf["quarter"] == 3))]
+            # Add to 2023 Q1
+            q1_2023_idx = qdf[(qdf["year"] == 2023) & (qdf["quarter"] == 1)].index
+            if len(q1_2023_idx) > 0:
+                qdf.loc[q1_2023_idx[0], "count"] += q3_2022_count
+            else:
+                # Create 2023 Q1 if it doesn't exist
+                qdf = pd.concat(
+                    [qdf, pd.DataFrame([{"year": 2023, "quarter": 1, "count": q3_2022_count}])],
+                    ignore_index=True,
+                )
 
-    # Add placeholder rows for 2022 Q1, Q2, and Q3 (did not track referrals)
-    placeholder_rows = pd.DataFrame(
-        [
-            {"year": 2022, "quarter": 1, "count": 0},
-            {"year": 2022, "quarter": 2, "count": 0},
-            {"year": 2022, "quarter": 3, "count": 0},
-        ]
-    )
-    qdf = pd.concat([qdf, placeholder_rows], ignore_index=True)
-    qdf = qdf.drop_duplicates(subset=["year", "quarter"], keep="first")
+        # Add placeholder rows for 2022 Q1, Q2, and Q3 (did not track referrals)
+        placeholder_rows = pd.DataFrame(
+            [
+                {"year": 2022, "quarter": 1, "count": 0},
+                {"year": 2022, "quarter": 2, "count": 0},
+                {"year": 2022, "quarter": 3, "count": 0},
+            ]
+        )
+        qdf = pd.concat([qdf, placeholder_rows], ignore_index=True)
+        qdf = qdf.drop_duplicates(subset=["year", "quarter"], keep="first")
+    else:
+        # Agency scopes like Sequim: move 2024 Q3 & Q4 referrals into 2025 Q1, then drop
+        # the empty 2022 and 2024 years entirely (no curated placeholders/decorations).
+        move_mask = (qdf["year"] == 2024) & (qdf["quarter"].isin([3, 4]))
+        moved_count = qdf.loc[move_mask, "count"].sum()
+        qdf = qdf[~move_mask]
+        if moved_count > 0:
+            q1_2025_idx = qdf[(qdf["year"] == 2025) & (qdf["quarter"] == 1)].index
+            if len(q1_2025_idx) > 0:
+                qdf.loc[q1_2025_idx[0], "count"] += moved_count
+            else:
+                qdf = pd.concat(
+                    [qdf, pd.DataFrame([{"year": 2025, "quarter": 1, "count": moved_count}])],
+                    ignore_index=True,
+                )
+        qdf = qdf[~qdf["year"].isin([2022, 2024])]
+
+    if qdf.empty:
+        return None
 
     qdf2 = qdf.sort_values(["year", "quarter"]).reset_index(drop=True)
     qdf2 = add_share_columns(qdf2, "count")
@@ -1139,107 +1172,110 @@ def _build_quarterly_referrals_chart(df: pd.DataFrame, theme: str) -> str | None
     )
 
     # Initialize annotations list
-    all_annotations = []
+    all_annotations: list[dict] = []
+    shapes: list[dict] = []
 
-    # Add "Did not track" annotations for 2022 Q1, Q2, and Q3
-    for i, (year, quarter) in enumerate(zip(x_years, x_quarters, strict=False)):
-        if year == "2022" and quarter in ["Q1", "Q2", "Q3"]:
-            all_annotations.append(
-                dict(
-                    x=i,
-                    xref="x",
-                    y=normalized_quarterly_avg * 0.5,  # Position at half the baseline
-                    yref="y",
-                    text="<b>Did not track</b>",
-                    textangle=270,  # Vertical text
-                    showarrow=False,
-                    font=dict(size=11, color="#64748b", family="Arial, sans-serif"),
-                    xanchor="center",
-                    yanchor="middle",
-                )
-            )
-
-    # Add year-based context annotations above bars
-    unique_years = sorted(set(x_years))
-    year_labels = {
-        "2021": "COVID-19",
-        "2022": "Behavioral<br>Health",
-        "2023": "Normalization",
-        "2024": "Normalization",
-        "2025": "+2 Community<br>Paramedics",
-    }
-
-    # Position annotations at y=270 (with chart top at y=300)
-    annotation_y = 270
-
-    for year in unique_years:
-        if year in year_labels:
-            year_indices = [i for i, y in enumerate(x_years) if y == year]
-            if year_indices:
-                center_idx = (year_indices[0] + year_indices[-1]) / 2.0
+    # Curated decorations (placeholders, year labels/backgrounds, baseline line) only apply
+    # to the Port Angeles / county-total view. Agency scopes like Sequim show plain bars.
+    if curated:
+        # Add "Did not track" annotations for 2022 Q1, Q2, and Q3
+        for i, (year, quarter) in enumerate(zip(x_years, x_quarters, strict=False)):
+            if year == "2022" and quarter in ["Q1", "Q2", "Q3"]:
                 all_annotations.append(
                     dict(
-                        x=center_idx,
+                        x=i,
                         xref="x",
-                        y=annotation_y,  # Positioned at y=275 in data coordinates
-                        yref="y",  # Use data coordinates for precise positioning
-                        text=f"<b>{year_labels[year]}</b>",
-                        textangle=270,  # Vertical text reading top-to-bottom
+                        y=normalized_quarterly_avg * 0.5,  # Position at half the baseline
+                        yref="y",
+                        text="<b>Did not track</b>",
+                        textangle=270,  # Vertical text
                         showarrow=False,
-                        font=dict(size=12, color="#1e293b", family="Arial, sans-serif"),
+                        font=dict(size=11, color="#64748b", family="Arial, sans-serif"),
                         xanchor="center",
-                        yanchor="middle",  # Anchor to middle for centered alignment
+                        yanchor="middle",
                     )
                 )
 
-    # Create background rectangles for each year
-    shapes = []
-    year_colors = {
-        "2021": PATIENT_CHART_COLORS[0],  # Violet
-        "2022": PATIENT_CHART_COLORS[1],  # Cyan
-        "2023": PATIENT_CHART_COLORS[3],  # Emerald
-        "2024": PATIENT_CHART_COLORS[4],  # Amber
-        "2025": PATIENT_CHART_COLORS[5],  # Blue
-    }
+        # Add year-based context annotations above bars
+        unique_years = sorted(set(x_years))
+        year_labels = {
+            "2021": "COVID-19",
+            "2022": "Behavioral<br>Health",
+            "2023": "Normalization",
+            "2024": "Normalization",
+            "2025": "+2 Community<br>Paramedics",
+        }
 
-    for year in unique_years:
-        year_indices = [i for i, y in enumerate(x_years) if y == year]
-        if year_indices:
-            x0 = year_indices[0] - 0.5
-            x1 = year_indices[-1] + 0.5
-            shapes.append(
-                dict(
-                    type="rect",
-                    xref="x",
-                    yref="paper",
-                    x0=x0,
-                    x1=x1,
-                    y0=0,
-                    y1=1,
-                    fillcolor=year_colors.get(year, PATIENT_CHART_COLORS[0]),
-                    opacity=0.08,
-                    layer="below",
-                    line_width=0,
+        # Position annotations at y=270 (with chart top at y=300)
+        annotation_y = 270
+
+        for year in unique_years:
+            if year in year_labels:
+                year_indices = [i for i, y in enumerate(x_years) if y == year]
+                if year_indices:
+                    center_idx = (year_indices[0] + year_indices[-1]) / 2.0
+                    all_annotations.append(
+                        dict(
+                            x=center_idx,
+                            xref="x",
+                            y=annotation_y,  # Positioned at y=275 in data coordinates
+                            yref="y",  # Use data coordinates for precise positioning
+                            text=f"<b>{year_labels[year]}</b>",
+                            textangle=270,  # Vertical text reading top-to-bottom
+                            showarrow=False,
+                            font=dict(size=12, color="#1e293b", family="Arial, sans-serif"),
+                            xanchor="center",
+                            yanchor="middle",  # Anchor to middle for centered alignment
+                        )
+                    )
+
+        # Create background rectangles for each year
+        year_colors = {
+            "2021": PATIENT_CHART_COLORS[0],  # Violet
+            "2022": PATIENT_CHART_COLORS[1],  # Cyan
+            "2023": PATIENT_CHART_COLORS[3],  # Emerald
+            "2024": PATIENT_CHART_COLORS[4],  # Amber
+            "2025": PATIENT_CHART_COLORS[5],  # Blue
+        }
+
+        for year in unique_years:
+            year_indices = [i for i, y in enumerate(x_years) if y == year]
+            if year_indices:
+                x0 = year_indices[0] - 0.5
+                x1 = year_indices[-1] + 0.5
+                shapes.append(
+                    dict(
+                        type="rect",
+                        xref="x",
+                        yref="paper",
+                        x0=x0,
+                        x1=x1,
+                        y0=0,
+                        y1=1,
+                        fillcolor=year_colors.get(year, PATIENT_CHART_COLORS[0]),
+                        opacity=0.08,
+                        layer="below",
+                        line_width=0,
+                    )
                 )
-            )
 
-    # Add baseline average line
-    shapes.append(
-        dict(
-            type="line",
-            xref="paper",
-            yref="y",
-            x0=0,
-            x1=1,
-            y0=normalized_quarterly_avg,
-            y1=normalized_quarterly_avg,
-            line=dict(
-                color="rgba(255, 255, 255, 0.5)",
-                width=2,
-                dash="dash",
-            ),
+        # Add baseline average line
+        shapes.append(
+            dict(
+                type="line",
+                xref="paper",
+                yref="y",
+                x0=0,
+                x1=1,
+                y0=normalized_quarterly_avg,
+                y1=normalized_quarterly_avg,
+                line=dict(
+                    color="rgba(255, 255, 255, 0.5)",
+                    width=2,
+                    dash="dash",
+                ),
+            )
         )
-    )
 
     fig.update_layout(
         bargap=0.15,
@@ -1271,22 +1307,27 @@ def _build_quarterly_referrals_chart(df: pd.DataFrame, theme: str) -> str | None
     )
 
 
-def _build_quarterly_encounters_chart(theme: str) -> str | None:  # noqa: C901
+def _build_quarterly_encounters_chart(  # noqa: C901
+    theme: str,
+    scope_filters: dict[str, Any] | None = None,
+) -> str | None:
     """Build stacked quarterly chart showing referrals and encounters."""
     from ...core.models import ODReferrals
     from ..encounters.encounters_field_charts import Encounters
 
     try:
         # Get referrals data
-        referrals_qs = Referrals.objects.all().values("date_received")
+        filters = scope_filters or {}
+        curated = uses_curated_quarter_history(scope_filters)
+        referrals_qs = Referrals.objects.filter(**filters).values("date_received")
         referrals_data = list(referrals_qs)
 
         # Get encounters data
-        encounters_qs = Encounters.objects.all().values("encounter_date")
+        encounters_qs = Encounters.objects.filter(**filters).values("encounter_date")
         encounters_data = list(encounters_qs)
 
         # Get PORT referrals data from ODReferrals table
-        od_referrals_qs = ODReferrals.objects.all().values("od_date")
+        od_referrals_qs = ODReferrals.objects.filter(**filters).values("od_date")
         od_referrals_data = list(od_referrals_qs)
 
         if not referrals_data and not encounters_data and not od_referrals_data:
@@ -1424,6 +1465,31 @@ def _build_quarterly_encounters_chart(theme: str) -> str | None:  # noqa: C901
         qdf["is_missing"] = (
             (qdf["total_count"] == 0) & (qdf["year"] == 2022) & (qdf["quarter"].isin([1, 2, 3]))
         )
+
+        if not curated:
+            # Agency scopes like Sequim: fold 2024 Q3 & Q4 counts into 2025 Q1, then drop the
+            # empty 2022 and 2024 years entirely (no curated placeholders/decorations).
+            count_cols = ["referrals_count", "port_referrals_count", "encounters_count"]
+            move_mask = (qdf["year"] == 2024) & (qdf["quarter"].isin([3, 4]))
+            if move_mask.any():
+                moved = qdf.loc[move_mask, count_cols].sum()
+                target = qdf[(qdf["year"] == 2025) & (qdf["quarter"] == 1)].index
+                if len(target) > 0:
+                    for col in count_cols:
+                        qdf.loc[target[0], col] += int(moved[col])
+                else:
+                    new_row = {"year": 2025, "quarter": 1}
+                    new_row.update({col: int(moved[col]) for col in count_cols})
+                    qdf = pd.concat([qdf, pd.DataFrame([new_row])], ignore_index=True)
+                qdf = qdf[~move_mask].reset_index(drop=True)
+            qdf = qdf[~qdf["year"].isin([2022, 2024])].reset_index(drop=True)
+            qdf["total_count"] = (
+                qdf["referrals_count"] + qdf["port_referrals_count"] + qdf["encounters_count"]
+            )
+            qdf["is_missing"] = False
+
+        if qdf.empty:
+            return None
 
         qdf = qdf.sort_values(["year", "quarter"]).reset_index(drop=True)
 
@@ -1651,6 +1717,11 @@ def _build_quarterly_encounters_chart(theme: str) -> str | None:  # noqa: C901
                     )
                 )
 
+        # Agency scopes like Sequim show plain stacked bars with no curated decorations.
+        if not curated:
+            all_annotations = []
+            shapes = []
+
         fig.update_layout(
             barmode="stack",
             bargap=0.15,
@@ -1709,9 +1780,11 @@ def _build_individual_field_charts(
 def build_referrals_field_charts(
     theme: str,
     fields: Collection[str] | None = None,
+    scope_filters: dict[str, Any] | None = None,
 ) -> dict[str, str]:
     target_fields = {field for field in fields} if fields is not None else None
-    qs = Referrals.objects.all().values(
+    filters = scope_filters or {}
+    qs = Referrals.objects.filter(**filters).values(
         "age",
         "sex",
         "date_received",
@@ -1742,7 +1815,11 @@ def build_referrals_field_charts(
     )
 
     if wants_encounter_type and not df.empty and has_columns:
-        encounter_type_chart = _build_hierarchical_encounter_treemap(df, theme)
+        encounter_type_chart = _build_hierarchical_encounter_treemap(
+            df,
+            theme,
+            scope_filters=filters,
+        )
         if encounter_type_chart:
             charts["encounter_type"] = encounter_type_chart
 
@@ -1750,7 +1827,7 @@ def build_referrals_field_charts(
     try:
         wants_quarterly = target_fields is None or "referrals_counts_quarterly" in target_fields
         if wants_quarterly:
-            quarterly_chart = _build_quarterly_referrals_chart(df, theme)
+            quarterly_chart = _build_quarterly_referrals_chart(df, theme, scope_filters=filters)
             if quarterly_chart:
                 charts["referrals_counts_quarterly"] = quarterly_chart
     except Exception:
@@ -1762,7 +1839,10 @@ def build_referrals_field_charts(
             target_fields is None or "encounters_counts_quarterly" in target_fields
         )
         if wants_encounters_quarterly:
-            encounters_quarterly_chart = _build_quarterly_encounters_chart(theme)
+            encounters_quarterly_chart = _build_quarterly_encounters_chart(
+                theme,
+                scope_filters=filters,
+            )
             if encounters_quarterly_chart:
                 charts["encounters_counts_quarterly"] = encounters_quarterly_chart
     except Exception:

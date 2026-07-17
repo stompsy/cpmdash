@@ -11,9 +11,10 @@ from utils.tailwind_colors import TAILWIND_COLORS
 from ...core.models import ODReferrals
 
 
-def build_chart_od_hist_monthly(theme):
+def build_chart_od_hist_monthly(theme, scope_filters: dict[str, Any] | None = None):
     # Get data including suspected drug information
-    odreferrals = ODReferrals.objects.all()
+    filters = scope_filters or {}
+    odreferrals = ODReferrals.objects.filter(**filters)
     df = pd.DataFrame.from_records(
         list(odreferrals.values("disposition", "od_date", "suspected_drug"))
     )
@@ -263,11 +264,12 @@ def build_chart_od_hist_monthly(theme):
     return plot(fig, output_type="div", config=chart_config)
 
 
-def build_chart_top5_drugs_monthly(theme):
+def build_chart_top5_drugs_monthly(theme, scope_filters: dict[str, Any] | None = None):
     """
     Build a stacked area chart showing top 3 drugs by month
     """
-    odreferrals = ODReferrals.objects.all()
+    filters = scope_filters or {}
+    odreferrals = ODReferrals.objects.filter(**filters)
     df = pd.DataFrame.from_records(list(odreferrals.values("od_date", "suspected_drug")))
     df["od_date"] = pd.to_datetime(df["od_date"], errors="coerce")
     df = df.dropna(subset=["od_date"])

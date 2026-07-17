@@ -471,7 +471,16 @@
         {% if not item.rationale and item.field != 'age' and not item.meta %}
             <div class="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-gray-600 dark:text-slate-400">Hover chart elements for detailed values · Theme-aware visualization</p>
-                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-400 dark:text-slate-500">Updated {% now "M j, Y" %}</p>
+                {% if item.updated_at %}
+                    <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-400 dark:text-slate-500">
+                        Updated
+                        {% if item.updated_at_iso %}
+                            <time datetime="{{ item.updated_at_iso }}">{{ item.updated_at|date:"M j, Y" }}</time>
+                        {% else %}
+                            {{ item.updated_at|date:"M j, Y" }}
+                        {% endif %}
+                    </p>
+                {% endif %}
             </div>
         {% endif %}
     </div>

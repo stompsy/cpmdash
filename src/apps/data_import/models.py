@@ -20,6 +20,20 @@ class DataImportBatch(models.Model):
         null=True,
         related_name="data_import_batches",
     )
+    county = models.ForeignKey(
+        "core.County",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="data_import_batches",
+    )
+    agency = models.ForeignKey(
+        "core.Agency",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="data_import_batches",
+    )
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.UPLOADING)
     notes = models.TextField(blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -102,6 +116,7 @@ class StagingPatient(models.Model):
     row_status = models.CharField(max_length=10, choices=RowStatus.choices, default=RowStatus.NEW)
     validation_notes = models.TextField(blank=True, default="")
     source_id = models.IntegerField(help_text="Original ID from source system")
+    agency = models.ForeignKey("core.Agency", on_delete=models.PROTECT, null=True, blank=True)
 
     # Mirror of core.Patients fields
     age = models.IntegerField(null=True, blank=True)
@@ -143,6 +158,7 @@ class StagingReferral(models.Model):
     row_status = models.CharField(max_length=10, choices=RowStatus.choices, default=RowStatus.NEW)
     validation_notes = models.TextField(blank=True, default="")
     source_id = models.IntegerField(help_text="Original ID from source system")
+    agency = models.ForeignKey("core.Agency", on_delete=models.PROTECT, null=True, blank=True)
 
     # Mirror of core.Referrals fields
     patient_ID = models.IntegerField(null=True, blank=True)
@@ -182,6 +198,7 @@ class StagingODReferral(models.Model):
     row_status = models.CharField(max_length=10, choices=RowStatus.choices, default=RowStatus.NEW)
     validation_notes = models.TextField(blank=True, default="")
     source_id = models.IntegerField(help_text="Original ID from source system")
+    agency = models.ForeignKey("core.Agency", on_delete=models.PROTECT, null=True, blank=True)
 
     # Mirror of core.ODReferrals fields
     patient_id = models.IntegerField(null=True, blank=True)
@@ -266,6 +283,7 @@ class StagingEncounter(models.Model):
     row_status = models.CharField(max_length=10, choices=RowStatus.choices, default=RowStatus.NEW)
     validation_notes = models.TextField(blank=True, default="")
     source_id = models.IntegerField(help_text="Original ID from source system")
+    agency = models.ForeignKey("core.Agency", on_delete=models.PROTECT, null=True, blank=True)
 
     # Mirror of core.Encounters fields
     referral_ID = models.IntegerField(null=True, blank=True)

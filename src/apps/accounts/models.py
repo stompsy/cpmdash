@@ -1,6 +1,22 @@
+from django.apps import apps
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.files.storage import default_storage
 from django.db import models
+
+
+def get_default_agency_id() -> int:
+    County = apps.get_model("core", "County")
+    Agency = apps.get_model("core", "Agency")
+    clallam, _ = County.objects.get_or_create(
+        slug="clallam-county",
+        defaults={"name": "Clallam County"},
+    )
+    agency, _ = Agency.objects.get_or_create(
+        county=clallam,
+        slug="port-angeles",
+        defaults={"name": "Port Angeles"},
+    )
+    return int(agency.pk)
 
 
 class User(AbstractUser):
@@ -32,6 +48,14 @@ class User(AbstractUser):
     # Save uploaded avatars under MEDIA_ROOT/user so they are served via MEDIA_URL.
     # Fallback avatars remain in the static pipeline under static/media/user.
     avatar = models.ImageField(upload_to="user/", blank=True, null=True)
+    agency = models.ForeignKey(
+        "core.Agency",
+        on_delete=models.PROTECT,
+        null=False,
+        blank=False,
+        default=get_default_agency_id,
+        related_name="users",
+    )
 
     def save(self, *args, **kwargs):  # type: ignore[no-untyped-def]
         try:

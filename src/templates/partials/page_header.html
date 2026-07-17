@@ -20,6 +20,7 @@ Expected context variables:
     breadcrumbs: Optional list of {'label': str, 'url': str|None}
     updated_at: Optional datetime or formatted string for "Last updated"
     updated_at_iso: Optional ISO-8601 string for the datetime attribute
+    page_header_freshness_badge_text: Optional supporting freshness text
     read_time: Optional preformatted read-time label (e.g., "6 min read")
     print_url: Optional URL for a "Print" button rendered alongside the meta row (opens in new tab)
     show_stats: Optional boolean to display cost savings stats (requires cost_metrics context)
@@ -138,6 +139,18 @@ Expected context variables:
                             Print
                         </a>
                     {% endif %}
+                </div>
+            {% endif %}
+
+            {% if page_header_freshness_badge_text and updated_at %}
+                <div class="max-w-2xl rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-4 shadow-lg shadow-emerald-950/20 backdrop-blur-sm">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                        </svg>
+                        <p class="text-sm font-medium leading-relaxed text-emerald-50/95">{{ page_header_freshness_badge_text }}</p>
+                    </div>
                 </div>
             {% endif %}
 

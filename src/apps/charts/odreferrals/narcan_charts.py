@@ -20,7 +20,7 @@ def build_narcan_administration_grid(theme: str) -> str:
     Build visual grid showing maximum Narcan doses and dosages comparing
     bystander vs EMS administration patterns.
 
-    This chart tells the story of how widespread naloxone distribution has changed
+    This chart tells the story of how widespread Narcan distribution has changed
     overdose response dynamics - bystanders now often give higher doses before
     EMS arrival, leaving patients in precipitated withdrawal and less cooperative.
 
@@ -98,7 +98,7 @@ def build_narcan_administration_grid(theme: str) -> str:
         )
     )
 
-    # Add annotation about the paradigm shift
+    # Add annotation about the response shift
     shift_pct = (
         (bystander_led / (bystander_led + ems_led + equal) * 100)
         if (bystander_led + ems_led + equal) > 0
@@ -108,7 +108,7 @@ def build_narcan_administration_grid(theme: str) -> str:
     annotations = [
         dict(
             text=(
-                f"<b>Paradigm Shift:</b> In {shift_pct:.0f}% of cases, bystanders administered more Narcan "
+                f"<b>The Shift:</b> In {shift_pct:.0f}% of cases, bystanders administered more Narcan "
                 f"doses than EMS<br>"
                 f"<b>Clinical Impact:</b> Patients often awake in precipitated withdrawal before EMS arrival, "
                 f"reducing cooperation & transport rates"
@@ -154,7 +154,7 @@ def build_narcan_response_timeline(theme: str) -> str:
     Build timeline chart showing the evolution of who administers Narcan first.
 
     This chart visualizes the temporal shift from EMS-first to bystander-first
-    Narcan administration by total dosage, helping illustrate when the paradigm changed.
+    Narcan administration by total dosage, helping illustrate when the response shifted.
 
     Returns:
         HTML string containing the Plotly visualization

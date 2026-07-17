@@ -91,7 +91,7 @@
                         <article
                             id="odreferral-chart-{{ card.field }}"
                             class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-300/60 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50 dark:hover:shadow-slate-900/80"
-                            hx-get="{% url 'dashboard:odreferrals_chart_fragment' card.field %}"
+                            hx-get="{% url 'dashboard:odreferrals_chart_fragment' card.field %}{{ tenant_scope_suffix }}"
                             hx-trigger="load"
                             hx-target="this"
                             hx-swap="outerHTML"
@@ -465,200 +465,25 @@
             </div>
         </section>
 
-        {# Narcan Administration Analysis Section #}
-        <section class="mt-20 mb-16">
-            {# Narcan Analysis Container #}
-            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-700/60 dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-800/95 dark:shadow-slate-900/50">
-                {# Card Header #}
-                <div class="border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent px-6 py-5 sm:px-8 dark:border-slate-700/50 dark:from-slate-800/30">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 ring-4 ring-purple-50 dark:bg-purple-500/20 dark:ring-purple-900/30">
-                                <svg class="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">Administration Comparison</h3>
-                                <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">The paradigm shift from EMS-first to bystander-first Narcan response</p>
-                            </div>
-                        </div>
-                        <button
-                            type="button"
-                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                            onclick="openOdChartModal('od-chart-narcan-grid', 'Administration Comparison')"
-                            aria-label="Expand administration comparison chart"
-                        >
-                            <svg class="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" d="M3 8V3h5M21 8V3h-5M3 16v5h5M21 16v5h-5" />
-                            </svg>
-                            <span>Expand</span>
-                        </button>
-                    </div>
-                </div>
+        {# Print / Save-as-PDF action for the Administration Comparison section. #}
+        <div class="mt-20 -mb-12 flex justify-end">
+            <a
+                href="{% url 'dashboard:odreferrals_narcan_print' %}?auto=1"
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                aria-label="Open a printable PDF view of the Administration Comparison section"
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8" rx="1"></rect>
+                </svg>
+                <span>Print / Save as PDF</span>
+            </a>
+        </div>
 
-                {# Quick Stats Grid #}
-                <div class="border-b border-slate-200/60 bg-slate-50/30 px-6 py-4 sm:px-8 dark:border-slate-700/50 dark:bg-slate-800/20">
-                    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                        {% for stat in narcan_stats %}
-                        <div class="group/metric relative overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50 px-4 py-3 transition-all duration-200 hover:border-purple-300 hover:shadow-lg dark:border-slate-700/60 dark:from-slate-800/50 dark:to-slate-900/30 dark:hover:border-purple-500/50">
-                            <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-purple-500/5 transition-all duration-300 group-hover/metric:scale-150 dark:bg-purple-400/5"></div>
-                            <div class="relative">
-                                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stat.value }}</p>
-                                <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-slate-400">{{ stat.label }}</p>
-                                <p class="mt-1 text-xs text-gray-500 dark:text-slate-500">{{ stat.description }}</p>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                {# Narrative Context #}
-                <div class="border-b border-slate-200/60 bg-slate-50/50 px-6 py-6 sm:px-8 dark:border-slate-700/50 dark:bg-slate-900/20">
-                    <div class="mb-6">
-                        <h4 class="text-base font-bold uppercase tracking-wide text-slate-900 dark:text-white">The Evolution of Overdose Response</h4>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-slate-400">How the shift in Narcan availability changed patient outcomes—and how we're adapting.</p>
-                    </div>
-
-                    <div class="grid gap-6 lg:grid-cols-3">
-                        {# Era 1: Traditional EMS #}
-                        <div class="relative flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-700 dark:bg-slate-800/50">
-                            <div class="mb-4 flex items-center gap-3">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-bold text-slate-900 dark:text-white">Pre-Narcan Saturation</h4>
-                            </div>
-                            <div class="flex-1 space-y-4">
-                                <div class="relative border-l-2 border-blue-100 pl-4 dark:border-blue-900/30">
-                                    <div class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
-                                        <p><span class="font-semibold text-blue-700 dark:text-blue-400">1.</span> EMS arrives first on scene</p>
-                                        <p><span class="font-semibold text-blue-700 dark:text-blue-400">2.</span> Ventilate & establish IV access</p>
-                                        <p><span class="font-semibold text-blue-700 dark:text-blue-400">3.</span> Carefully titrate low-dose Narcan</p>
-                                        <p><span class="font-semibold text-blue-700 dark:text-blue-400">4.</span> Gradual awakening</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-5 border-t border-slate-100 pt-4 dark:border-slate-700/50">
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Outcome</p>
-                                <p class="mt-1 text-sm font-medium text-slate-900 dark:text-white">High transport rate. Treatment advocacy possible.</p>
-                            </div>
-                        </div>
-
-                        {# Era 2: High Dose Era #}
-                        <div class="relative flex flex-col rounded-xl border border-red-200 bg-red-50/50 p-5 shadow-sm transition-all hover:shadow-md dark:border-red-900/30 dark:bg-red-900/10">
-                            <div class="mb-4 flex items-center gap-3">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-bold text-slate-900 dark:text-white">High-Dose Era</h4>
-                            </div>
-                            <div class="flex-1 space-y-4">
-                                <div class="relative border-l-2 border-red-200 pl-4 dark:border-red-800/30">
-                                    <div class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
-                                        <p><span class="font-semibold text-red-700 dark:text-red-400">1.</span> Bystanders give 4mg+ spray</p>
-                                        <p><span class="font-semibold text-red-700 dark:text-red-400">2.</span> Wakes in precipitated withdrawal</p>
-                                        <p><span class="font-semibold text-red-700 dark:text-red-400">3.</span> Vomiting, agitated, combative</p>
-                                        <p><span class="font-semibold text-red-700 dark:text-red-400">4.</span> EMS arrives to refusal (AMA)</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-5 border-t border-red-200/60 pt-4 dark:border-red-800/30">
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-red-800 dark:text-red-300">Outcome</p>
-                                <p class="mt-1 text-sm font-medium text-slate-900 dark:text-white">No transport. Engagement window closed.</p>
-                            </div>
-                        </div>
-
-                        {# Era 3: CPM Augmentation #}
-                        <div class="relative flex flex-col rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm transition-all hover:shadow-md dark:border-emerald-900/30 dark:bg-emerald-900/10">
-                            <div class="mb-4 flex items-center gap-3">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-bold text-slate-900 dark:text-white">CPM Augmentation</h4>
-                            </div>
-                            <div class="flex-1 space-y-4">
-                                <div class="relative border-l-2 border-emerald-200 pl-4 dark:border-emerald-800/30">
-                                    <div class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
-                                        <p><span class="font-semibold text-emerald-700 dark:text-emerald-400">1.</span> CPMs arrive to advocate</p>
-                                        <p><span class="font-semibold text-emerald-700 dark:text-emerald-400">2.</span> Help manage withdrawal symptoms</p>
-                                        <p><span class="font-semibold text-emerald-700 dark:text-emerald-400">3.</span> Call SUD pros for warm handoff</p>
-                                        <p><span class="font-semibold text-emerald-700 dark:text-emerald-400">4.</span> Evaluate treatment options</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-5 border-t border-emerald-200/60 pt-4 dark:border-emerald-800/30">
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">Outcome</p>
-                                <p class="mt-1 text-sm font-medium text-slate-900 dark:text-white">Continuity restored. 70%+ linkage to care.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {# Charts Section #}
-                <div class="p-6 sm:p-8">
-                    <div id="od-chart-narcan-grid" class="od-expandable-chart">
-                        {{ narcan_grid_chart|safe }}
-                    </div>
-
-                    {# Timeline Chart #}
-                    {% if narcan_timeline_chart %}
-                    <div class="mt-8 border-t border-slate-200/60 pt-8 dark:border-slate-700/50">
-                        <div class="mb-4 flex items-start justify-between gap-3">
-                            <h4 class="text-base font-semibold text-gray-900 dark:text-white">Temporal Evolution: When Did the Shift Happen?</h4>
-                            <button
-                                type="button"
-                                class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-                                onclick="openOdChartModal('od-chart-narcan-timeline', 'Temporal Evolution: When Did the Shift Happen?')"
-                                aria-label="Expand temporal evolution chart"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8V3h5M21 8V3h-5M3 16v5h5M21 16v5h-5" /></svg>
-                                <span>Expand</span>
-                            </button>
-                        </div>
-                        <div id="od-chart-narcan-timeline" class="od-expandable-chart">{{ narcan_timeline_chart|safe }}</div>
-                    </div>
-                    {% endif %}
-                </div>
-
-                {# Footer Insights - colored bar, no vertical line or icon #}
-                <div class="border-t border-purple-100/70 bg-purple-50/40 px-6 py-5 sm:px-8 dark:border-purple-900/40 dark:bg-purple-950/20">
-                    <div class="my-4 space-y-4 text-base leading-7 text-purple-950 dark:text-purple-50">
-                        <h4 class="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-purple-900/90 dark:text-purple-200">Reading the Narcan Story in the Data</h4>
-                        <p>
-                            The chart above tracks who actually pushed naloxone first — EMS, law enforcement, a friend,
-                            a family member, a coworker, or the patient themselves. Earlier in the dataset, EMS dominates;
-                            more recently, bystander administrations make up a much larger share. The timeline chart shows
-                            when that handoff started shifting, which lines up with broader community access to 4 mg
-                            intranasal naloxone and the <a class="underline decoration-dotted underline-offset-2 hover:text-purple-900 dark:hover:text-white" href="https://www.fda.gov/news-events/press-announcements/fda-approves-first-over-counter-naloxone-nasal-spray" target="_blank" rel="noopener">FDA's March 2023 approval of OTC Narcan</a>.
-                        </p>
-                        <p>
-                            That shift is, on net, an unambiguously good thing — reversal happens faster when it doesn’t
-                            have to wait for an ambulance. But it also changes what responders walk into. A high
-                            single-dose nasal reversal can produce abrupt withdrawal: vomiting, agitation, and a strong
-                            urge to leave. On these charts that often shows up as a growing gap between “reversed” and
-                            “transported,” and as more AMA (against medical advice) refusals. That isn’t a failure of
-                            compassion — it’s a predictable consequence of the medication doing exactly what it is
-                            designed to do.
-                        </p>
-                        <p>
-                            <span class="font-semibold">A reasonable read:</span> as more reversals happen before EMS
-                            arrives, the high-leverage moment for connection moves later — to the next-day phone call,
-                            the follow-up visit at a motel or shelter, or the warm handoff to a SUD counselor a CPM can
-                            schedule. Sustaining the drop in fatal overdoses probably depends less on getting to scenes
-                            faster and more on what happens in the 24–72 hours after a bystander reversal. That is
-                            squarely where CPM augmentation is designed to plug in.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        {% include "dashboard/partials/narcan_comparison_body.html" %}
 
         {# Overdose Hotspots Section #}
         <section class="mt-20">

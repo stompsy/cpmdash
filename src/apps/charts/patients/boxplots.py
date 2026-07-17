@@ -1,3 +1,5 @@
+from typing import Any
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -235,7 +237,12 @@ def _build_patients_age_by_race_boxplot(
     )
 
 
-def build_patients_age_by_race_boxplot(theme: str, *, include_missing: bool = False) -> str:
-    qs = Patients.objects.all().values("age", "race")
+def build_patients_age_by_race_boxplot(
+    theme: str,
+    *,
+    include_missing: bool = False,
+    scope_filters: dict[str, Any] | None = None,
+) -> str:
+    qs = Patients.objects.filter(**(scope_filters or {})).values("age", "race")
     df = pd.DataFrame.from_records(list(qs))
     return _build_patients_age_by_race_boxplot(theme=theme, df=df, include_missing=include_missing)

@@ -10,37 +10,76 @@ from typing import Any
 
 import pytest
 
-from apps.core.models import Patients
+from apps.core.models import Agency, County, Patients
 from apps.data_import.models import (
     DataImportBatch,
     RowStatus,
     StagingPatient,
 )
 from apps.data_import.views import (
+    CHANGE_DETECT_SKIP,
+    _apply_id_namespace,
     _build_staging_kwargs,
     _classify_row,
+    _classify_staging_record,
     _detect_field_changes,
     _do_commit,
+    _namespaced_id_for_agency,
     _staging_to_core_kwargs,
 )
 
 pytestmark = pytest.mark.django_db
 
 
+def _patient_compare_fields() -> list[str]:
+    exclude = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
+    skip_fields = CHANGE_DETECT_SKIP.get("patients", set())
+    return [
+        f.name
+        for f in StagingPatient._meta.get_fields()
+        if hasattr(f, "name") and f.name not in exclude and f.name not in skip_fields
+    ]
+
+
 # ======================================================================
 # Fixtures
 # ======================================================================
 @pytest.fixture()
-def batch(django_user_model: Any) -> DataImportBatch:
+def tenant_agency() -> Agency:
+    county, _ = County.objects.get_or_create(
+        slug="clallam-county", defaults={"name": "Clallam County"}
+    )
+    agency, _ = Agency.objects.get_or_create(
+        county=county,
+        slug="port-angeles",
+        defaults={"name": "Port Angeles"},
+    )
+    return agency
+
+
+@pytest.fixture()
+def sequim_agency(tenant_agency: Agency) -> Agency:
+    agency, _ = Agency.objects.get_or_create(
+        county=tenant_agency.county,
+        slug="sequim",
+        defaults={"name": "Sequim"},
+    )
+    return agency
+
+
+@pytest.fixture()
+def batch(django_user_model: Any, tenant_agency: Agency) -> DataImportBatch:
     user = django_user_model.objects.create_user(username="tester", password="testing123")
     return DataImportBatch.objects.create(
         created_by=user,
+        county=tenant_agency.county,
+        agency=tenant_agency,
         status=DataImportBatch.Status.REVIEW,
     )
 
 
 @pytest.fixture()
-def existing_patient() -> Patients:
+def existing_patient(tenant_agency: Agency) -> Patients:
     return Patients.objects.create(
         id=1,
         age=42,
@@ -51,6 +90,7 @@ def existing_patient() -> Patients:
         zip_code="98362",
         marital_status="Single",
         veteran_status="No",
+        agency=tenant_agency,
     )
 
 
@@ -122,12 +162,7 @@ class TestClassifyRow:
         """A row not in existing_pks and without warnings → NEW."""
         record = {"id": "99", "age": "30", "insurance": "Medicaid"}
         result = self._make_result()
-        exclude = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
-        compare_fields = [
-            f.name
-            for f in StagingPatient._meta.get_fields()
-            if hasattr(f, "name") and f.name not in exclude
-        ]
+        compare_fields = _patient_compare_fields()
         status, notes = _classify_row(
             99,
             0,
@@ -150,12 +185,7 @@ class TestClassifyRow:
         """
         record = {"id": "99", "age": "30", "insurance": "Not disclosed"}
         result = self._make_result(row_warnings={0: ["Insurance not disclosed"]})
-        exclude = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
-        compare_fields = [
-            f.name
-            for f in StagingPatient._meta.get_fields()
-            if hasattr(f, "name") and f.name not in exclude
-        ]
+        compare_fields = _patient_compare_fields()
         status, notes = _classify_row(
             99,
             0,
@@ -198,12 +228,7 @@ class TestClassifyRow:
             "veteran_status": "No",
         }
         result = self._make_result()
-        exclude = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
-        compare_fields = [
-            f.name
-            for f in StagingPatient._meta.get_fields()
-            if hasattr(f, "name") and f.name not in exclude
-        ]
+        compare_fields = _patient_compare_fields()
         existing_rows = {
             1: {fname: getattr(existing_patient, fname, None) for fname in compare_fields}
         }
@@ -260,10 +285,11 @@ class TestStagingToCoreKwargs:
         )
         exclude = {"id", "batch", "batch_id", "row_status", "validation_notes", "source_id"}
         core_fields = {f.name for f in Patients._meta.get_fields() if hasattr(f, "name")}
-        kwargs = _staging_to_core_kwargs(StagingPatient, staging, "id", exclude, core_fields)
+        kwargs = _staging_to_core_kwargs(StagingPatient, staging, "id", exclude, core_fields, batch)
         assert kwargs["id"] == 99
         assert kwargs["age"] == 50
         assert kwargs["insurance"] == "Medicaid"
+        assert kwargs["agency"] == batch.agency
         assert "batch" not in kwargs
         assert "row_status" not in kwargs
 
@@ -290,6 +316,7 @@ class TestDoCommit:
         patient = Patients.objects.get(id=999)
         assert patient.age == 30
         assert patient.insurance == "Medicaid"
+        assert patient.agency == batch.agency
         assert batch.status == DataImportBatch.Status.COMMITTED
 
     def test_updates_changed_rows(self, batch: DataImportBatch, existing_patient: Patients) -> None:
@@ -309,6 +336,7 @@ class TestDoCommit:
         existing_patient.refresh_from_db()
         assert existing_patient.age == 43
         assert existing_patient.insurance == "Medicaid"
+        assert existing_patient.agency == batch.agency
 
     def test_skips_existing_rows(self, batch: DataImportBatch) -> None:
         StagingPatient.objects.create(
@@ -337,3 +365,173 @@ class TestDoCommit:
         commit_summary = {"patients": {"new": 1, "changed": 0}}
         _do_commit(batch, commit_summary)
         assert batch.committed_patients == 1
+
+    def test_new_row_late_collision_converts_to_update(
+        self, batch: DataImportBatch, existing_patient: Patients
+    ) -> None:
+        # Simulate stale staging status where an already-existing PK is still marked NEW.
+        StagingPatient.objects.create(
+            batch=batch,
+            source_id=1,
+            row_status=RowStatus.NEW,
+            age=99,
+            insurance="Medicaid",
+            race="White",
+            sex="Male",
+            zip_code="98362",
+        )
+
+        _do_commit(batch, {"patients": {"new": 1, "changed": 0}})
+
+        existing_patient.refresh_from_db()
+        assert existing_patient.age == 99
+        assert existing_patient.insurance == "Medicaid"
+
+    def test_changed_row_does_not_overwrite_other_agency_id_collision(
+        self,
+        django_user_model: Any,
+        tenant_agency: Agency,
+        sequim_agency: Agency,
+        existing_patient: Patients,
+    ) -> None:
+        # Existing patient belongs to Port Angeles with source ID 1.
+        assert existing_patient.agency == tenant_agency
+
+        user = django_user_model.objects.create_user(
+            username="sequim-tester", password="testing123"
+        )
+        sequim_batch = DataImportBatch.objects.create(
+            created_by=user,
+            county=sequim_agency.county,
+            agency=sequim_agency,
+            status=DataImportBatch.Status.REVIEW,
+        )
+
+        # Sequim row uses same source ID. This must not update Port Angeles data.
+        StagingPatient.objects.create(
+            batch=sequim_batch,
+            source_id=1,
+            row_status=RowStatus.CHANGED,
+            age=99,
+            insurance="Overwritten",
+            race="Other",
+            sex="Male",
+            zip_code="98382",
+            agency=sequim_agency,
+        )
+
+        with pytest.raises(RuntimeError, match="Cross-agency ID collision"):
+            _do_commit(sequim_batch, {"patients": {"new": 0, "changed": 1}})
+
+        existing_patient.refresh_from_db()
+        assert existing_patient.age == 42
+        assert existing_patient.insurance == "Medicare"
+        assert existing_patient.agency == tenant_agency
+
+
+class TestDeterministicIdNamespacing:
+    @staticmethod
+    def _make_result() -> Any:
+        class _Stub:
+            pass
+
+        stub = _Stub()
+        stub.row_warnings = {}  # type: ignore[attr-defined]
+        stub.row_errors = {}  # type: ignore[attr-defined]
+        return stub
+
+    def test_same_source_id_maps_stably(self, batch: DataImportBatch) -> None:
+        mapped_once = _namespaced_id_for_agency(batch, 1000)
+        mapped_twice = _namespaced_id_for_agency(batch, 1000)
+        assert mapped_once == mapped_twice
+
+    def test_different_agencies_get_different_ids(
+        self,
+        django_user_model: Any,
+        tenant_agency: Agency,
+        sequim_agency: Agency,
+    ) -> None:
+        user = django_user_model.objects.create_user(username="id-map-user", password="testing123")
+        batch_pa = DataImportBatch.objects.create(
+            created_by=user,
+            county=tenant_agency.county,
+            agency=tenant_agency,
+            status=DataImportBatch.Status.REVIEW,
+        )
+        batch_seq = DataImportBatch.objects.create(
+            created_by=user,
+            county=sequim_agency.county,
+            agency=sequim_agency,
+            status=DataImportBatch.Status.REVIEW,
+        )
+
+        assert _namespaced_id_for_agency(batch_pa, 1000) != _namespaced_id_for_agency(
+            batch_seq, 1000
+        )
+
+    def test_reimport_existing_vs_new_detection(self, batch: DataImportBatch) -> None:
+        existing_pks = {_namespaced_id_for_agency(batch, 1000)}
+        existing_rows = {
+            _namespaced_id_for_agency(batch, 1000): {
+                "age": 42,
+                "insurance": "Medicare",
+            }
+        }
+
+        # Existing source ID (1000) should map and classify as EXISTING.
+        existing_record = {"id": 1000, "age": 42, "insurance": "Medicare"}
+        mapped_existing = _apply_id_namespace("patients", existing_record, "id", batch)
+        status_existing, _ = _classify_staging_record(
+            mapped_existing,
+            0,
+            existing_record,
+            "id",
+            "patients",
+            existing_pks,
+            existing_rows,
+            StagingPatient,
+            ["age", "insurance"],
+            batch,
+            self._make_result(),
+            set(),
+        )
+        assert status_existing == RowStatus.EXISTING
+
+        # New source ID (1001) should map and classify as NEW.
+        new_record = {"id": 1001, "age": 33, "insurance": "Medicaid"}
+        mapped_new = _apply_id_namespace("patients", new_record, "id", batch)
+        status_new, _ = _classify_staging_record(
+            mapped_new,
+            0,
+            new_record,
+            "id",
+            "patients",
+            existing_pks,
+            existing_rows,
+            StagingPatient,
+            ["age", "insurance"],
+            batch,
+            self._make_result(),
+            set(),
+        )
+        assert status_new == RowStatus.NEW
+
+    def test_linked_ids_remap_for_referrals_and_encounters(self, batch: DataImportBatch) -> None:
+        referral_record = {"ID": 1500, "patient_ID": 1000}
+        mapped_ref = _apply_id_namespace("referrals", referral_record, "ID", batch)
+
+        encounter_record = {
+            "ID": 2500,
+            "patient_ID": 1000,
+            "referral_ID": 1500,
+            "port_referral_ID": 1500,
+        }
+        mapped_enc = _apply_id_namespace("encounters", encounter_record, "ID", batch)
+
+        assert mapped_ref == _namespaced_id_for_agency(batch, 1500)
+        assert referral_record["patient_ID"] == _namespaced_id_for_agency(batch, 1000)
+
+        assert mapped_enc == _namespaced_id_for_agency(batch, 2500)
+        assert encounter_record["patient_ID"] == _namespaced_id_for_agency(batch, 1000)
+        assert encounter_record["referral_ID"] == _namespaced_id_for_agency(batch, 1500)
+        assert encounter_record["port_referral_ID"] == _namespaced_id_for_agency(batch, 1500)

@@ -42,8 +42,8 @@
           <!-- Menu Item Home -->
           <li>
             <a
-              href="{% url 'home' %}"
-              hx-get="{% url 'home' %}"
+              href="{% url 'home' %}{{ tenant_scope_suffix }}"
+              hx-get="{% url 'home' %}{{ tenant_scope_suffix }}"
               hx-target="#dashboard-main"
               hx-select="#dashboard-main"
               hx-swap="outerHTML"
@@ -82,15 +82,19 @@
 
 
           <!-- Menu Item Program Overviews -->
-          <li>
-            <a
-              href="{% url 'dashboard:patients' %}"
-              @click.prevent="selected = (selected === 'Program Overviews' ? '' : 'Program Overviews')"
-              class="menu-item group"
-              :class="(selected === 'Program Overviews') || ['patientsOverview','referralsOverview','od-referrals-overview'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
+          <li
+            x-data="{
+              openSection: ['patientsOverview','referralsOverview','od-referrals-overview'].includes(page),
+            }"
+          >
+            <button
+              type="button"
+              @click="openSection = !openSection"
+              class="menu-item group w-full text-left"
+              :class="['patientsOverview','referralsOverview','od-referrals-overview'].includes(page) ? 'menu-item-active' : 'menu-item-inactive'"
             >
               <svg
-                :class="(selected === 'Program Overviews') || ['patientsOverview','referralsOverview','od-referrals-overview'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
+                :class="['patientsOverview','referralsOverview','od-referrals-overview'].includes(page) ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -106,16 +110,11 @@
                 />
               </svg>
 
-              <span
-                class="menu-item-text"
-                :class="sidebarToggle ? 'lg:hidden' : ''"
-              >
-                Program Overviews
-              </span>
+              <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">Program Overviews</span>
 
               <svg
                 class="menu-item-arrow"
-                :class="[(selected === 'Program Overviews') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                :class="[openSection ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
                 width="20"
                 height="20"
                 viewBox="0 0 20 20"
@@ -130,62 +129,141 @@
                   stroke-linejoin="round"
                 />
               </svg>
-            </a>
+            </button>
 
             <!-- Dropdown Menu -->
-            <div
-              class="overflow-hidden transform translate"
-              :class="(selected === 'Program Overviews') ? 'block' : 'hidden'"
-            >
-              <ul
-                :class="sidebarToggle ? 'lg:hidden' : 'flex'"
-                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
-              >
-                <li>
-                  <a
-                    href="{% url 'dashboard:patients' %}"
-                    hx-get="{% url 'dashboard:patients' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    @click="page = 'patientsOverview'; if (window.innerWidth < 1024) sidebarToggle = false"
-                    class="menu-dropdown-item group"
-                    :class="page === 'patientsOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
+            <div class="overflow-hidden transform translate" :class="openSection ? 'block' : 'hidden'">
+              <ul :class="sidebarToggle ? 'lg:hidden' : 'flex'" class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">
+                {% for section in tenant_scope_program_sections %}
+                <li
+                  x-data="{
+                    openProgram: page === '{{ section.page }}',
+                    allAgencyIds: [{% for agency in tenant_scope_agencies %}{{ agency.id }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    selectedAgencies: (page === '{{ section.page }}') ? [{% for agency_id in tenant_scope_selected_agency_ids %}{{ agency_id }}{% if not forloop.last %}, {% endif %}{% endfor %}] : [],
+                    defaultAgencyId: {{ tenant_scope_selected_agency_id|default:'null' }},
+                    countyId: {{ tenant_scope_selected_county_id|default:'null' }},
+                    isAllSelected() {
+                      return this.allAgencyIds.length > 0 && this.selectedAgencies.length === this.allAgencyIds.length;
+                    },
+                    toggleCounty() {
+                      if (this.isAllSelected()) {
+                        this.selectedAgencies = [];
+                      } else {
+                        this.selectedAgencies = [...this.allAgencyIds];
+                      }
+                    },
+                    toggleAgency(id) {
+                      if (this.selectedAgencies.includes(id)) {
+                        this.selectedAgencies = this.selectedAgencies.filter((item) => item !== id);
+                      } else {
+                        this.selectedAgencies = [...this.selectedAgencies, id];
+                      }
+                    },
+                    buildScopeQuery() {
+                      const params = new URLSearchParams();
+                      if (this.selectedAgencies.length === 0) {
+                        if (this.defaultAgencyId) {
+                          params.set('scope', 'agency');
+                          params.set('agency_id', String(this.defaultAgencyId));
+                        } else if (this.countyId) {
+                          params.set('scope', 'county');
+                          params.set('county_id', String(this.countyId));
+                        }
+                        return params.toString();
+                      }
+
+                      if (this.isAllSelected() && this.countyId) {
+                        params.set('scope', 'county');
+                        params.set('county_id', String(this.countyId));
+                        return params.toString();
+                      }
+
+                      if (this.selectedAgencies.length === 1) {
+                        params.set('scope', 'agency');
+                        params.set('agency_id', String(this.selectedAgencies[0]));
+                        return params.toString();
+                      }
+
+                      params.set('scope', 'multi');
+                      params.set('agency_ids', this.selectedAgencies.join(','));
+                      return params.toString();
+                    },
+                    applyScope(sectionUrl, sectionPage) {
+                      const query = this.buildScopeQuery();
+                      const targetUrl = query ? `${sectionUrl}?${query}` : sectionUrl;
+                      if (window.htmx) {
+                        window.htmx.ajax('GET', targetUrl, {
+                          target: '#dashboard-main',
+                          swap: 'outerHTML',
+                          select: '#dashboard-main',
+                          pushURL: true,
+                        });
+                      } else {
+                        window.location.href = targetUrl;
+                      }
+                      page = sectionPage;
+                      if (window.innerWidth < 1024) sidebarToggle = false;
+                    },
+                  }"
+                >
+
+                  <!-- Program label row with its own expand arrow -->
+                  <button
+                    type="button"
+                    @click="openProgram = !openProgram"
+                    class="menu-dropdown-item group flex w-full items-center justify-between"
+                    :class="page === '{{ section.page }}' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
                   >
-                    Patients
-                  </a>
+                    <span>{{ section.label }}</span>
+                    <svg
+                      class="h-3.5 w-3.5 shrink-0 transition-transform duration-150"
+                      :class="openProgram ? 'rotate-180' : ''"
+                      viewBox="0 0 20 20" fill="none"
+                    >
+                      <path d="M5 7.5 10 12.5 15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+
+                  <!-- Highlight selection list — county row first, then cities flat at same level -->
+                  <div x-show="openProgram" x-cloak class="mt-1 pl-2 space-y-0.5">
+                    {% for county in tenant_scope_counties %}
+                    <!-- County "all" row -->
+                    <button
+                      type="button"
+                      @click="toggleCounty()"
+                      class="menu-dropdown-item group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left transition"
+                      :class="isAllSelected() ? 'bg-indigo-600 text-white font-semibold' : 'font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'"
+                    >
+                      <span>{{ county.name }} (Totals)</span>
+                    </button>
+
+                    <!-- City rows — same indent level as county -->
+                    {% for agency in county.agencies %}
+                    <button
+                      type="button"
+                      @click="toggleAgency({{ agency.id }})"
+                      class="menu-dropdown-item group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left transition"
+                      :class="selectedAgencies.includes({{ agency.id }}) ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'"
+                    >
+                      <span>{{ agency.name }}</span>
+                    </button>
+                    {% endfor %}
+                    {% endfor %}
+
+                    <!-- Apply button — visible and styled like a primary action -->
+                    <div class="pt-2 pb-3">
+                      <button
+                        type="button"
+                        class="w-full rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-offset-slate-900"
+                        @click="applyScope('{{ section.url }}', '{{ section.page }}')"
+                      >
+                        Apply Selection
+                      </button>
+                    </div>
+                  </div>
+
                 </li>
-                <li>
-                  <a
-                    href="{% url 'dashboard:referrals' %}"
-                    hx-get="{% url 'dashboard:referrals' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    @click="page = 'referralsOverview'; if (window.innerWidth < 1024) sidebarToggle = false"
-                    class="menu-dropdown-item group"
-                    :class="page === 'referralsOverview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    Referrals
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{% url 'dashboard:odreferrals' %}"
-                    hx-get="{% url 'dashboard:odreferrals' %}"
-                    hx-target="#dashboard-main"
-                    hx-select="#dashboard-main"
-                    hx-swap="outerHTML"
-                    hx-push-url="true"
-                    @click="page = 'od-referrals-overview'; if (window.innerWidth < 1024) sidebarToggle = false"
-                    class="menu-dropdown-item group"
-                    :class="page === 'od-referrals-overview' ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'"
-                  >
-                    OD Referrals
-                  </a>
-                </li>
+                {% endfor %}
               </ul>
             </div>
             <!-- End Dropdown Menu -->

@@ -24,6 +24,7 @@ from .views import (
     od_weekday_detail,
     odreferrals,
     odreferrals_chart_fragment,
+    odreferrals_narcan_print,
     overview,
     patients,
     patients_chart_fragment,
@@ -47,6 +48,11 @@ urlpatterns = [
     ),
     path("referrals/types-table/", referral_types_table, name="referral_types_table"),
     path("odreferrals/", odreferrals, name="odreferrals"),
+    path(
+        "odreferrals/narcan/print/",
+        odreferrals_narcan_print,
+        name="odreferrals_narcan_print",
+    ),
     path(
         "odreferrals/charts/<slug:field>/",
         odreferrals_chart_fragment,
