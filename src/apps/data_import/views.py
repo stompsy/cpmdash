@@ -152,11 +152,47 @@ ID_COLUMN = {
 # would flag every existing row as "changed" (e.g. lat/long are populated
 # in prod via geocoding but the raw CSV doesn't contain them).
 CHANGE_DETECT_SKIP: dict[str, set[str]] = {
-    "patients": {"latitude", "longitude", "address"},
-    "referrals": set(),
-    "odreferrals": {"lat", "long"},
-    "encounters": set(),
+    "patients": {"latitude", "longitude", "address", "agency"},
+    "referrals": {"agency"},
+    "odreferrals": {"lat", "long", "agency"},
+    "encounters": {"agency"},
 }
+
+
+def _batch_queryset_for_user(request: HttpRequest) -> dm.QuerySet[DataImportBatch]:
+    qs = DataImportBatch.objects.select_related("created_by", "county", "agency")
+    if request.user.is_superuser:
+        return qs
+    agency_id = getattr(request.user, "agency_id", None)
+    if not agency_id:
+        return qs.none()
+    return qs.filter(agency_id=agency_id)
+
+
+def _get_authorized_batch(request: HttpRequest, batch_id: int) -> DataImportBatch:
+    return get_object_or_404(_batch_queryset_for_user(request), pk=batch_id)
+
+
+def _log_queryset_for_user(request: HttpRequest) -> dm.QuerySet[ProcessingLog]:
+    qs = ProcessingLog.objects.select_related("batch")
+    if request.user.is_superuser:
+        return qs
+    agency_id = getattr(request.user, "agency_id", None)
+    if not agency_id:
+        return qs.none()
+    return qs.filter(batch__agency_id=agency_id)
+
+
+def _core_queryset_for_user(request: HttpRequest, model: type[dm.Model]) -> dm.QuerySet[Any]:
+    qs = model.objects.all()
+    if request.user.is_superuser:
+        return qs
+    agency_id = getattr(request.user, "agency_id", None)
+    if not agency_id:
+        return qs.none()
+    if "agency" in {f.name for f in model._meta.get_fields() if hasattr(f, "name")}:
+        return qs.filter(agency_id=agency_id)
+    return qs
 
 
 # Clallam County zip-code centroids (approximate) for geocoding patients
@@ -193,7 +229,7 @@ ZIP_CENTROIDS: dict[str, tuple[float, float]] = {
 # ======================================================================
 @staff_member_required
 def batch_list(request: HttpRequest) -> HttpResponse:
-    batches = DataImportBatch.objects.select_related("created_by").all()
+    batches = _batch_queryset_for_user(request)
     return render(request, "data_import/history.html", {"batches": batches})
 
 
@@ -207,6 +243,8 @@ def upload(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             batch = DataImportBatch.objects.create(
                 created_by=cast(AbstractUser, request.user),
+                county=form.cleaned_data["county"],
+                agency=form.cleaned_data["agency"],
                 notes=form.cleaned_data.get("notes", ""),
                 status=DataImportBatch.Status.UPLOADING,
             )
@@ -231,7 +269,14 @@ def upload(request: HttpRequest) -> HttpResponse:
 # ======================================================================
 @staff_member_required
 def upload_to_batch(request: HttpRequest, batch_id: int) -> HttpResponse:
-    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+    batch = _get_authorized_batch(request, batch_id)
+
+    if batch.county_id is None or batch.agency_id is None:
+        messages.error(
+            request,
+            "This batch is missing county/agency metadata. Create a new batch with tenant selection.",
+        )
+        return redirect("data_import:batch_list")
 
     # Which file types are already uploaded for this batch?
     existing_types = set(
@@ -280,7 +325,7 @@ def upload_to_batch(request: HttpRequest, batch_id: int) -> HttpResponse:
 # ======================================================================
 @staff_member_required
 def process_view(request: HttpRequest, batch_id: int) -> HttpResponse:
-    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+    batch = _get_authorized_batch(request, batch_id)
     return render(request, "data_import/process.html", {"batch": batch})
 
 
@@ -421,7 +466,16 @@ def _stage_records(
     """Delta-detect against production and create staging rows. Yields progress."""
     core_model = CORE_MODELS[file_type_key]
     pk_field = CORE_PK_FIELDS[file_type_key]
-    existing_pks = set(core_model.objects.values_list(pk_field, flat=True))
+
+    core_field_names = {f.name for f in core_model._meta.get_fields() if hasattr(f, "name")}
+    tenant_filter = _tenant_filter_for_batch(core_field_names, batch)
+
+    # Existing rows must be scoped to the selected tenant so identical source IDs
+    # across agencies are treated as distinct records.
+    scoped_core_qs = (
+        core_model.objects.filter(**tenant_filter) if tenant_filter else core_model.objects.all()
+    )
+    existing_pks = set(scoped_core_qs.values_list(pk_field, flat=True))
 
     id_col = ID_COLUMN[file_type_key]
     staging_model = STAGING_MODELS[file_type_key]
@@ -451,23 +505,32 @@ def _stage_records(
         {str(k): v for k, v in row.items()} for row in result.df.to_dict("records")
     ]
 
+    # Detect source-ID collisions in other agencies so we fail safely instead of
+    # silently overwriting another tenant's row during commit.
+    incoming_ids = {int(r[id_col]) for r in raw_records}
+    conflicting_pks = _find_cross_agency_pk_collisions(
+        core_model,
+        pk_field,
+        core_field_names,
+        batch,
+        incoming_ids,
+    )
+
     staging_instances = []
     total_records = len(raw_records)
     for i, record in enumerate(raw_records):
-        source_id = int(record[id_col])
-
-        row_status, notes_parts = _classify_row(
-            source_id,
-            i,
+        source_id, row_status, notes_parts = _prepare_and_classify_record(
+            file_type_key,
             record,
             id_col,
-            file_type_key,
+            i,
             existing_pks,
             existing_rows,
             staging_model,
             compare_fields,
             batch,
             result,
+            conflicting_pks,
         )
 
         if row_status == RowStatus.NEW:
@@ -483,6 +546,7 @@ def _stage_records(
         staging_kwargs = _build_staging_kwargs(
             file_type_key, record, id_col, batch, row_status, notes_parts
         )
+        staging_kwargs["agency"] = batch.agency
         _backfill_skip_fields(staging_kwargs, source_id, existing_rows, skip_fields)
         staging_instances.append(staging_model(**staging_kwargs))
 
@@ -506,6 +570,140 @@ def _stage_records(
     yield ("log", summary)
 
 
+def _tenant_filter_for_batch(core_field_names: set[str], batch: DataImportBatch) -> dict[str, Any]:
+    if "agency" in core_field_names and batch.agency_id:
+        return {"agency_id": batch.agency_id}
+    return {}
+
+
+def _find_cross_agency_pk_collisions(
+    core_model: type[dm.Model],
+    pk_field: str,
+    core_field_names: set[str],
+    batch: DataImportBatch,
+    incoming_ids: set[int],
+) -> set[int]:
+    if "agency" not in core_field_names or not batch.agency_id or not incoming_ids:
+        return set()
+    return set(
+        core_model.objects.filter(**{f"{pk_field}__in": incoming_ids})
+        .exclude(agency_id=batch.agency_id)
+        .values_list(pk_field, flat=True)
+    )
+
+
+def _namespaced_id_for_agency(batch: DataImportBatch, source_id: int) -> int:
+    """Build a deterministic tenant-specific ID namespace.
+
+    Reserve 7 digits for source IDs per agency (up to 9,999,999 records/agency).
+    """
+    if not batch.agency_id:
+        return source_id
+    return (batch.agency_id * 10_000_000) + source_id
+
+
+def _parse_optional_int(value: Any) -> int | None:
+    if value in (None, "", "nan"):
+        return None
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _apply_id_namespace(
+    file_type_key: str, record: dict[str, Any], id_col: str, batch: DataImportBatch
+) -> int:
+    """Apply deterministic agency namespace to primary and linked source IDs."""
+    source_id = int(record[id_col])
+    mapped_id = _namespaced_id_for_agency(batch, source_id)
+    record[id_col] = mapped_id
+
+    linked_fields_by_type = {
+        "referrals": ["patient_ID"],
+        "encounters": ["patient_ID", "referral_ID", "port_referral_ID"],
+        "odreferrals": ["patient_id"],
+    }
+
+    for field_name in linked_fields_by_type.get(file_type_key, []):
+        raw_fk = record.get(field_name)
+        fk_value = _parse_optional_int(raw_fk)
+        if fk_value is None:
+            continue
+        record[field_name] = _namespaced_id_for_agency(batch, fk_value)
+
+    return mapped_id
+
+
+def _prepare_and_classify_record(
+    file_type_key: str,
+    record: dict[str, Any],
+    id_col: str,
+    row_index: int,
+    existing_pks: set[Any],
+    existing_rows: dict[int, dict[str, Any]],
+    staging_model: type[dm.Model],
+    compare_fields: list[str],
+    batch: DataImportBatch,
+    result: CleaningResult,
+    conflicting_pks: set[int],
+) -> tuple[int, str, list[str]]:
+    source_id = _apply_id_namespace(file_type_key, record, id_col, batch)
+
+    row_status, notes_parts = _classify_staging_record(
+        source_id,
+        row_index,
+        record,
+        id_col,
+        file_type_key,
+        existing_pks,
+        existing_rows,
+        staging_model,
+        compare_fields,
+        batch,
+        result,
+        conflicting_pks,
+    )
+    return source_id, row_status, notes_parts
+
+
+def _classify_staging_record(
+    source_id: int,
+    row_index: int,
+    record: dict[str, Any],
+    id_col: str,
+    file_type_key: str,
+    existing_pks: set[Any],
+    existing_rows: dict[int, dict[str, Any]],
+    staging_model: type[dm.Model],
+    compare_fields: list[str],
+    batch: DataImportBatch,
+    result: CleaningResult,
+    conflicting_pks: set[int],
+) -> tuple[str, list[str]]:
+    if source_id in conflicting_pks and file_type_key not in {"referrals", "encounters"}:
+        return (
+            RowStatus.ERROR,
+            [
+                f"Source ID {source_id} exists in another agency; import this row with a namespaced ID strategy before commit."
+            ],
+        )
+
+    return _classify_row(
+        source_id,
+        row_index,
+        record,
+        id_col,
+        file_type_key,
+        existing_pks,
+        existing_rows,
+        staging_model,
+        compare_fields,
+        batch,
+        result,
+    )
+
+
 def _stream_file_events(
     import_file: DataImportFile,
     batch: DataImportBatch,
@@ -524,12 +722,15 @@ def _stream_file_events(
 
 
 @staff_member_required
-def process_stream(request: HttpRequest, batch_id: int) -> StreamingHttpResponse:
+def process_stream(request: HttpRequest, batch_id: int) -> StreamingHttpResponse:  # noqa: C901
     """SSE endpoint that runs ETL processing and streams log output."""
-    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+    batch = _get_authorized_batch(request, batch_id)
 
     def event_stream() -> Iterator[str]:
         try:
+            if batch.county_id is None or batch.agency_id is None:
+                raise RuntimeError("Batch is missing required county/agency metadata")
+
             yield _sse("status", "Processing started...")
             t_total = time.monotonic()
             batch.status = DataImportBatch.Status.PROCESSING
@@ -553,27 +754,40 @@ def process_stream(request: HttpRequest, batch_id: int) -> StreamingHttpResponse
                     unprocessed, key=lambda f: _FILE_TYPE_ORDER.get(f.file_type, 99)
                 )
 
-                # Build patients_df from production data (will be replaced
-                # if a patients file is in this batch)
+                # Build patients_df lookup in priority order:
+                # 1) existing staged patients in this batch (if patients were processed earlier)
+                # 2) production patients for this batch's agency
+                # 3) if unavailable and we're processing non-patient files without a patients file,
+                #    emit warning so age/pcp fallbacks are understood.
                 patients_df: pd.DataFrame | None = None
-                if Patients.objects.exists():
-                    patients_df = pd.DataFrame.from_records(
-                        Patients.objects.values("id", "age", "insurance", "pcp_agency")
-                    )
+                staged_patients_qs = StagingPatient.objects.filter(batch=batch).values(
+                    "source_id", "age", "insurance", "pcp_agency"
+                )
+                if staged_patients_qs.exists():
+                    patients_df = pd.DataFrame.from_records(staged_patients_qs)
+                    patients_df = patients_df.rename(columns={"source_id": "id"})
                 else:
-                    # Check if any non-patients files are in the batch without patients
-                    has_patients_file = any(
-                        f.file_type == DataImportFile.FileType.PATIENTS for f in sorted_files
+                    prod_patients_qs = Patients.objects.filter(agency=batch.agency).values(
+                        "id", "age", "insurance", "pcp_agency"
                     )
-                    non_patient_files = [
-                        f for f in sorted_files if f.file_type != DataImportFile.FileType.PATIENTS
-                    ]
-                    if non_patient_files and not has_patients_file:
-                        yield _sse(
-                            "log",
-                            "⚠ No patients data in production or batch — "
-                            "age/pcp lookups will be unavailable",
+                    if prod_patients_qs.exists():
+                        patients_df = pd.DataFrame.from_records(prod_patients_qs)
+                    else:
+                        # Check if any non-patients files are in the batch without patients
+                        has_patients_file = any(
+                            f.file_type == DataImportFile.FileType.PATIENTS for f in sorted_files
                         )
+                        non_patient_files = [
+                            f
+                            for f in sorted_files
+                            if f.file_type != DataImportFile.FileType.PATIENTS
+                        ]
+                        if non_patient_files and not has_patients_file:
+                            yield _sse(
+                                "log",
+                                "⚠ No patients data in production, current batch staging, or queued files — "
+                                "age/pcp lookups will be unavailable",
+                            )
 
                 for import_file in sorted_files:
                     yield from _stream_file_events(import_file, batch, service, patients_df)
@@ -614,7 +828,7 @@ def process_stream(request: HttpRequest, batch_id: int) -> StreamingHttpResponse
 # ======================================================================
 @staff_member_required
 def review(request: HttpRequest, batch_id: int) -> HttpResponse:
-    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+    batch = _get_authorized_batch(request, batch_id)
     active_tab = request.GET.get("tab", "patients")
 
     # Gather summary stats for each dataset
@@ -689,7 +903,7 @@ def _apply_empty_filter(qs: Any, staging_model: type[dm.Model], field_names: lis
 @staff_member_required
 def review_table(request: HttpRequest, batch_id: int, dataset: str) -> HttpResponse:
     """HTMX partial: paginated data table for a dataset."""
-    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+    batch = _get_authorized_batch(request, batch_id)
     staging_model = STAGING_MODELS.get(dataset)
     if not staging_model:
         return HttpResponse("Invalid dataset", status=400)
@@ -787,6 +1001,7 @@ def review_table(request: HttpRequest, batch_id: int, dataset: str) -> HttpRespo
 @staff_member_required
 def row_edit(request: HttpRequest, batch_id: int, dataset: str, row_pk: int) -> HttpResponse:
     """Return an inline edit form for a single staging row."""
+    _get_authorized_batch(request, batch_id)
     staging_model = STAGING_MODELS.get(dataset)
     if not staging_model:
         return HttpResponse("Invalid dataset", status=400)
@@ -820,6 +1035,7 @@ def row_edit(request: HttpRequest, batch_id: int, dataset: str, row_pk: int) -> 
 @staff_member_required
 def row_update(request: HttpRequest, batch_id: int, dataset: str, row_pk: int) -> HttpResponse:
     """Save inline edits for a staging row."""
+    _get_authorized_batch(request, batch_id)
     staging_model = STAGING_MODELS.get(dataset)
     if not staging_model:
         return HttpResponse("Invalid dataset", status=400)
@@ -871,6 +1087,7 @@ def row_update(request: HttpRequest, batch_id: int, dataset: str, row_pk: int) -
 @staff_member_required
 def row_cancel(request: HttpRequest, batch_id: int, dataset: str, row_pk: int) -> HttpResponse:
     """Cancel editing and return the display row."""
+    _get_authorized_batch(request, batch_id)
     staging_model = STAGING_MODELS.get(dataset)
     if not staging_model:
         return HttpResponse("Invalid dataset", status=400)
@@ -906,6 +1123,7 @@ def cell_update(
     request: HttpRequest, batch_id: int, dataset: str, row_pk: int, field_name: str
 ) -> HttpResponse:
     """Save a single cell value (HTMX inline edit). Returns just the updated cell HTML."""
+    _get_authorized_batch(request, batch_id)
     staging_model = STAGING_MODELS.get(dataset)
     if not staging_model:
         return HttpResponse("Invalid dataset", status=400)
@@ -973,6 +1191,7 @@ def cell_update(
 @staff_member_required
 def production_reference(request: HttpRequest, batch_id: int) -> HttpResponse:
     """HTMX partial: show production DB stats — last record ID, most recent dates, counts."""
+    _get_authorized_batch(request, batch_id)
     ref_data: dict[str, dict[str, Any]] = {}
 
     date_fields = {
@@ -984,16 +1203,17 @@ def production_reference(request: HttpRequest, batch_id: int) -> HttpResponse:
 
     for key, core_model in CORE_MODELS.items():
         pk_field = CORE_PK_FIELDS[key]
-        total = core_model.objects.count()
+        core_qs = _core_queryset_for_user(request, core_model)
+        total = core_qs.count()
         if total == 0:
             ref_data[key] = {"total": 0, "max_id": None, "latest_date": None}
             continue
 
-        max_id = core_model.objects.aggregate(max_id=dm.Max(pk_field))["max_id"]
+        max_id = core_qs.aggregate(max_id=dm.Max(pk_field))["max_id"]
         date_field = date_fields.get(key)
         latest_date = None
         if date_field:
-            latest_date = core_model.objects.aggregate(latest=dm.Max(date_field))["latest"]
+            latest_date = core_qs.aggregate(latest=dm.Max(date_field))["latest"]
 
         ref_data[key] = {
             "total": total,
@@ -1015,6 +1235,7 @@ def production_reference(request: HttpRequest, batch_id: int) -> HttpResponse:
 @staff_member_required
 def batch_update_field(request: HttpRequest, batch_id: int, dataset: str) -> HttpResponse:
     """Apply a field value change to selected rows."""
+    _get_authorized_batch(request, batch_id)
     staging_model = STAGING_MODELS.get(dataset)
     if not staging_model:
         return HttpResponse("Invalid dataset", status=400)
@@ -1056,7 +1277,11 @@ def batch_update_field(request: HttpRequest, batch_id: int, dataset: str) -> Htt
 # ======================================================================
 @staff_member_required
 def commit_view(request: HttpRequest, batch_id: int) -> HttpResponse:
-    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+    batch = _get_authorized_batch(request, batch_id)
+
+    if batch.county_id is None or batch.agency_id is None:
+        messages.error(request, "Cannot commit — batch is missing county/agency metadata.")
+        return redirect("data_import:review", batch_id=batch_id)
 
     if batch.status != DataImportBatch.Status.REVIEW:
         messages.error(request, "This batch is not ready for commit.")
@@ -1118,7 +1343,7 @@ def commit_view(request: HttpRequest, batch_id: int) -> HttpResponse:
 
 @staff_member_required
 def post_commit(request: HttpRequest, batch_id: int) -> HttpResponse:
-    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+    batch = _get_authorized_batch(request, batch_id)
     return render(request, "data_import/post_commit.html", {"batch": batch})
 
 
@@ -1126,7 +1351,7 @@ def post_commit(request: HttpRequest, batch_id: int) -> HttpResponse:
 @staff_member_required
 def purge_staging(request: HttpRequest, batch_id: int) -> HttpResponse:
     """Purge staging data for a committed batch."""
-    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+    batch = _get_authorized_batch(request, batch_id)
     for model in STAGING_MODELS.values():
         model.objects.filter(batch=batch).delete()
     messages.success(request, "Staging data purged.")
@@ -1137,7 +1362,7 @@ def purge_staging(request: HttpRequest, batch_id: int) -> HttpResponse:
 @staff_member_required
 def batch_delete(request: HttpRequest, batch_id: int) -> HttpResponse:
     """Delete a batch and all its staging data + uploaded files."""
-    batch = get_object_or_404(DataImportBatch, pk=batch_id)
+    batch = _get_authorized_batch(request, batch_id)
     label = f"Import #{batch.pk}"
 
     # Delete staging rows
@@ -1166,7 +1391,7 @@ def batch_delete(request: HttpRequest, batch_id: int) -> HttpResponse:
 # ======================================================================
 @staff_member_required
 def log_list(request: HttpRequest) -> HttpResponse:
-    logs = ProcessingLog.objects.select_related("batch").all()
+    logs = _log_queryset_for_user(request)
     # Group logs by batch for accordion display
     batches_seen: dict[int | None, dict[str, Any]] = {}
     for log in logs:
@@ -1185,7 +1410,7 @@ def log_list(request: HttpRequest) -> HttpResponse:
 @require_POST
 @staff_member_required
 def log_delete(request: HttpRequest, log_id: int) -> HttpResponse:
-    log = get_object_or_404(ProcessingLog, pk=log_id)
+    log = get_object_or_404(_log_queryset_for_user(request), pk=log_id)
     log.delete()
     messages.success(request, "Log deleted.")
     if request.headers.get("HX-Request"):
@@ -1532,7 +1757,7 @@ def _coerce_non_empty(field: Any, value: Any) -> Any:
 
 
 @transaction.atomic
-def _do_commit(batch: DataImportBatch, commit_summary: dict[str, dict[str, int]]) -> None:
+def _do_commit(batch: DataImportBatch, commit_summary: dict[str, dict[str, int]]) -> None:  # noqa: C901
     """Commit new and changed staging rows to production tables inside a transaction."""
     log_lines = [f"Commit started at {timezone.now():%Y-%m-%d %H:%M:%S}"]
 
@@ -1564,16 +1789,53 @@ def _do_commit(batch: DataImportBatch, commit_summary: dict[str, dict[str, int]]
 
         # --- Insert NEW rows ---
         if new_count > 0:
-            new_rows = staging_model.objects.filter(batch=batch, row_status=RowStatus.NEW)
+            new_rows = list(staging_model.objects.filter(batch=batch, row_status=RowStatus.NEW))
+            new_source_ids = [int(row.source_id) for row in new_rows]
+
+            existing_new_ids: set[int] = set()
+            if new_source_ids:
+                existing_new_ids = set(
+                    core_model.objects.filter(**{f"{pk_field}__in": new_source_ids}).values_list(
+                        pk_field, flat=True
+                    )
+                )
+
             instances = []
+            late_update_rows: list[tuple[int, dict[str, Any]]] = []
             for staging_row in new_rows:
                 kwargs = _staging_to_core_kwargs(
-                    staging_model, staging_row, pk_field, exclude_fields, core_field_names
+                    staging_model,
+                    staging_row,
+                    pk_field,
+                    exclude_fields,
+                    core_field_names,
+                    batch,
                 )
+                pk_val = int(kwargs[pk_field])
+                if pk_val in existing_new_ids:
+                    update_kwargs = {k: v for k, v in kwargs.items() if k != pk_field}
+                    late_update_rows.append((pk_val, update_kwargs))
+                    continue
                 instances.append(core_model(**kwargs))
+
+            late_updates = 0
+            for pk_val, update_kwargs in late_update_rows:
+                update_qs = core_model.objects.filter(**{pk_field: pk_val})
+                if "agency" in core_field_names and batch.agency_id:
+                    update_qs = update_qs.filter(agency_id=batch.agency_id)
+                late_updates += update_qs.update(**update_kwargs)
+
             core_model.objects.bulk_create(instances, batch_size=500)
             total_new += len(instances)
-            log_lines.append(f"  {file_type}: inserted {len(instances)} new rows")
+            total_updated += late_updates
+            log_lines.append(
+                f"  {file_type}: inserted {len(instances)} new rows"
+                + (
+                    f", converted {late_updates} late-collision NEW rows to updates"
+                    if late_updates
+                    else ""
+                )
+            )
 
         # --- Update CHANGED rows ---
         if changed_count > 0:
@@ -1581,10 +1843,24 @@ def _do_commit(batch: DataImportBatch, commit_summary: dict[str, dict[str, int]]
             updated = 0
             for staging_row in changed_rows:
                 kwargs = _staging_to_core_kwargs(
-                    staging_model, staging_row, pk_field, exclude_fields, core_field_names
+                    staging_model,
+                    staging_row,
+                    pk_field,
+                    exclude_fields,
+                    core_field_names,
+                    batch,
                 )
                 pk_val = kwargs.pop(pk_field)
-                core_model.objects.filter(**{pk_field: pk_val}).update(**kwargs)
+                update_qs = core_model.objects.filter(**{pk_field: pk_val})
+                if "agency" in core_field_names and batch.agency_id:
+                    update_qs = update_qs.filter(agency_id=batch.agency_id)
+
+                rows_updated = update_qs.update(**kwargs)
+                if rows_updated == 0:
+                    raise RuntimeError(
+                        f"Cross-agency ID collision detected while committing {file_type} row "
+                        f"with source ID {pk_val}."
+                    )
                 updated += 1
             total_updated += updated
             log_lines.append(f"  {file_type}: updated {updated} changed rows")
@@ -1616,6 +1892,7 @@ def _staging_to_core_kwargs(
     pk_field: str,
     exclude_fields: set[str],
     core_field_names: set[str],
+    batch: DataImportBatch,
 ) -> dict[str, Any]:
     """Build a dict of kwargs for creating/updating a core model instance from a staging row."""
     kwargs: dict[str, Any] = {pk_field: staging_row.source_id}
@@ -1627,4 +1904,6 @@ def _staging_to_core_kwargs(
     for fname in staging_field_names:
         if fname in core_field_names:
             kwargs[fname] = getattr(staging_row, fname)
+    if "agency" in core_field_names and batch.agency is not None:
+        kwargs["agency"] = batch.agency
     return kwargs

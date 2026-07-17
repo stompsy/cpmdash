@@ -11,9 +11,9 @@ from .models import User
 class CustomUserAdmin(UserAdmin):
     def get_fieldsets(self, request: HttpRequest, obj: User | None = None) -> Any:
         fieldsets = list(super().get_fieldsets(request, obj))
-        fieldsets.append(("Profile", {"fields": ("bio", "avatar")}))
+        fieldsets.append(("Profile", {"fields": ("bio", "avatar", "agency")}))
         return fieldsets
 
     def get_list_display(self, request: HttpRequest) -> tuple[Any, ...]:
         base_display = tuple(super().get_list_display(request))
-        return (*base_display, "bio")
+        return (*base_display, "agency", "bio")

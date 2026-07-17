@@ -298,10 +298,6 @@ def get_quarterly_patient_counts() -> dict:
         "2024 Q2": 117,
         "2024 Q3": 104,
         "2024 Q4": 99,
-        "2025 Q1": 165,
-        "2025 Q2": 133,
-        "2025 Q3": 113,
-        "2025 Q4": 141,
     }
 
     try:
@@ -313,7 +309,7 @@ def get_quarterly_patient_counts() -> dict:
 
     merged = static_defaults.copy()
     if dynamic_map:
-        cutoff = (2025, 4)
+        cutoff = (2024, 4)
         for label, count in dynamic_map.items():
             parsed = _parse_year_quarter(label)
             if parsed is None:

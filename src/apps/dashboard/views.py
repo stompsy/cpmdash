@@ -3,7 +3,6 @@ import re
 from collections import Counter, defaultdict
 from contextlib import suppress
 from datetime import date, timedelta
-from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypedDict, cast
 
@@ -55,7 +54,8 @@ from ..charts.patients.age_chart_variations import build_all_age_chart_variation
 from ..charts.patients.patient_field_charts import build_patients_field_charts
 from ..charts.referral.patient_map import build_chart_patient_map
 from ..charts.referral.referrals_field_charts import build_referrals_field_charts
-from ..core.models import Encounters, ODReferrals, Patients, Referrals
+from ..core.models import Agency, Encounters, ODReferrals, Patients, Referrals
+from ..data_import.models import DataImportBatch
 
 OD_HOTSPOT_CONTEXT_PATH = (
     Path(settings.BASE_DIR) / "src" / "static" / "data" / "od_hotspot_context.json"
@@ -72,6 +72,13 @@ HARGROVE_METRICS_PATH = (
 HARGROVE_NARRATIVES_PATH = (
     Path(settings.BASE_DIR) / "src" / "static" / "data" / "hargrove_grant_narratives.json"
 )
+
+DATASET_COMMIT_FIELDS = {
+    "patients": "committed_patients",
+    "referrals": "committed_referrals",
+    "odreferrals": "committed_odreferrals",
+    "encounters": "committed_encounters",
+}
 
 
 def _load_hotspot_context() -> list[dict[str, str]]:
@@ -111,6 +118,141 @@ class ReferralTypeTable(TypedDict):
 
 def overview(request):
     return redirect("home")
+
+
+def _query_int_param(request: HttpRequest, param_name: str) -> int | None:
+    raw_value = request.GET.get(param_name)
+    if raw_value in {None, ""}:
+        return None
+    try:
+        return int(raw_value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _tenant_scope_filters(request: HttpRequest) -> dict[str, int]:  # noqa: C901
+    def _parse_agency_ids() -> list[int]:
+        parsed: list[int] = []
+        raw_values = request.GET.getlist("agency_ids")
+        if not raw_values:
+            raw_single = request.GET.get("agency_ids", "")
+            if raw_single:
+                raw_values = [raw_single]
+        for raw in raw_values:
+            for piece in str(raw).split(","):
+                token = piece.strip()
+                if not token:
+                    continue
+                try:
+                    parsed.append(int(token))
+                except (TypeError, ValueError):
+                    continue
+        # Preserve order while de-duplicating
+        return list(dict.fromkeys(parsed))
+
+    selected_agency_id = _query_int_param(request, "agency_id")
+    selected_county_id = _query_int_param(request, "county_id")
+    scope_mode = (request.GET.get("scope") or "").strip().lower()
+    selected_agency_ids = _parse_agency_ids()
+
+    user = request.user
+    # Staff users can intentionally switch scope via sidebar controls.
+    # Keep hard agency lock only for authenticated non-staff users.
+    if (
+        getattr(user, "is_authenticated", False)
+        and not getattr(user, "is_superuser", False)
+        and not getattr(user, "is_staff", False)
+    ):
+        user_agency_id = getattr(user, "agency_id", None)
+        if user_agency_id is not None:
+            user_agency = getattr(user, "agency", None)
+            user_county_id = getattr(user_agency, "county_id", None)
+            allowed_agency_ids: set[int] = set()
+            if user_county_id is not None:
+                allowed_agency_ids = set(
+                    Agency.objects.filter(county_id=int(user_county_id)).values_list(
+                        "id", flat=True
+                    )
+                )
+
+            if selected_agency_id is not None:
+                if selected_agency_id in allowed_agency_ids:
+                    return {"agency_id": selected_agency_id}
+                return {"agency_id": int(user_agency_id)}
+
+            if scope_mode == "county" and user_county_id is not None:
+                return {"agency__county_id": int(user_county_id)}
+
+            if scope_mode == "multi" and user_county_id is not None:
+                valid_multi_ids = [aid for aid in selected_agency_ids if aid in allowed_agency_ids]
+                if valid_multi_ids:
+                    return {"agency_id__in": valid_multi_ids}  # type: ignore[return-value]
+                return {"agency_id": int(user_agency_id)}
+
+            if (
+                selected_county_id is not None
+                and user_county_id is not None
+                and selected_county_id == int(user_county_id)
+            ):
+                return {"agency__county_id": int(user_county_id)}
+
+            return {"agency_id": int(user_agency_id)}
+
+    if selected_agency_id is not None:
+        return {"agency_id": selected_agency_id}
+
+    if scope_mode == "multi" and selected_agency_ids:
+        return {"agency_id__in": selected_agency_ids}  # type: ignore[return-value]
+
+    if selected_county_id is not None:
+        return {"agency__county_id": selected_county_id}
+
+    return {}
+
+
+def _latest_dataset_commit(
+    dataset_keys: tuple[str, ...], scope_filters: dict[str, Any] | None = None
+) -> DataImportBatch | None:
+    dataset_filter = Q()
+    for dataset_key in dataset_keys:
+        commit_field = DATASET_COMMIT_FIELDS.get(dataset_key)
+        if commit_field is not None:
+            dataset_filter |= Q(**{f"{commit_field}__gt": 0})
+
+    if not dataset_filter:
+        return None
+
+    return (
+        DataImportBatch.objects.filter(
+            status=DataImportBatch.Status.COMMITTED,
+            committed_at__isnull=False,
+        )
+        .filter(**(scope_filters or {}))
+        .filter(dataset_filter)
+        .order_by("-committed_at", "-pk")
+        .first()
+    )
+
+
+def _page_header_update_context(
+    *dataset_keys: str, scope_filters: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    latest_batch = _latest_dataset_commit(dataset_keys, scope_filters=scope_filters)
+    if latest_batch is None or latest_batch.committed_at is None:
+        return {}
+
+    updated_at = latest_batch.committed_at
+    if timezone.is_aware(updated_at):
+        updated_at = timezone.localtime(updated_at)
+
+    return {
+        "page_header_updated_at": updated_at,
+        "page_header_updated_at_iso": updated_at.isoformat(),
+        "page_header_freshness_badge_text": (
+            f"Data is current through the last committed import "
+            f"({updated_at:%B %-d, %Y}, import batch #{latest_batch.pk:04d}) and is ready for reporting."
+        ),
+    }
 
 
 # Patients
@@ -399,33 +541,67 @@ def _insights_quarterly() -> list[dict[str, object]] | None:
         return None
 
 
-@lru_cache(maxsize=1)
-def _build_patient_quick_stats() -> dict[str, list[dict[str, str]]]:
+def _build_patient_quick_stats(
+    scope_filters: dict[str, int] | None = None,
+) -> dict[str, list[dict[str, str]]]:
     """Build quick stat cards for patient charts."""
+    vaccination_clinic_offset = 1003
     stats: dict[str, list[dict[str, str]]] = {}
 
     # Quarterly patient counts stats
     try:
-        q = get_quarterly_patient_counts()
-        qdf = q.get("df")
+        if scope_filters:
+            df = _load_patients_dataframe(scope_filters)
+            created_series = pd.to_datetime(df.get("created_date"), errors="coerce").dropna()
+            if not created_series.empty:
+                qdf = (
+                    pd.DataFrame(
+                        {
+                            "year": created_series.dt.year,
+                            "quarter": created_series.dt.quarter,
+                        }
+                    )
+                    .groupby(["year", "quarter"], dropna=True)
+                    .size()
+                    .reset_index(name="count")
+                )
+            else:
+                qdf = pd.DataFrame()
+        else:
+            q = get_quarterly_patient_counts()
+            qdf = q.get("df")
         if qdf is not None and not qdf.empty:
             total_patients = int(qdf["count"].sum())
+            clinic_adjusted_total = total_patients
+            if not scope_filters:
+                clinic_adjusted_total += vaccination_clinic_offset
+
             # Calculate baseline average from 2021, 2023, and 2024 only
             # These are the "normal" years excluding 2022 (Behavioral Health spike) and 2025 (+2 CPMs)
             baseline_years = [2021, 2023, 2024]
             baseline_data = qdf[qdf["year"].isin(baseline_years)]
-            avg_per_quarter = round(baseline_data["count"].mean(), 1)
+            if not baseline_data.empty:
+                avg_per_quarter = round(baseline_data["count"].mean(), 1)
+            else:
+                avg_per_quarter = round(qdf["count"].mean(), 1)
+
             stats["patient_counts_quarterly"] = [
                 {
                     "label": "Total Patients",
-                    "value": f"{total_patients:,}",
-                    "description": "All-time patient count",
+                    "value": f"{clinic_adjusted_total:,}",
+                    "description": "All-time patient count (clinic-adjusted)",
                     "icon": "users",
+                },
+                {
+                    "label": "Vaccination Clinic Add",
+                    "value": f"+{vaccination_clinic_offset:,}" if not scope_filters else "+0",
+                    "description": "Historical clinic patients not stored in source table",
+                    "icon": "plus",
                 },
                 {
                     "label": "Baseline Avg",
                     "value": f"{avg_per_quarter}",
-                    "description": "Average patients per quarter (baseline years)",
+                    "description": "Average patients per quarter (dashed line)",
                     "icon": "chart",
                 },
             ]
@@ -435,8 +611,9 @@ def _build_patient_quick_stats() -> dict[str, list[dict[str, str]]]:
     return stats
 
 
-@lru_cache(maxsize=1)
-def _build_referral_quick_stats() -> dict[str, list[dict[str, str]]]:
+def _build_referral_quick_stats(
+    scope_filters: dict[str, int] | None = None,
+) -> dict[str, list[dict[str, str]]]:
     """Build quick stat cards for referral charts."""
     stats: dict[str, list[dict[str, str]]] = {}
 
@@ -444,7 +621,8 @@ def _build_referral_quick_stats() -> dict[str, list[dict[str, str]]]:
     try:
         from ..core.models import Referrals
 
-        qs = Referrals.objects.all().values("date_received")
+        filters = scope_filters or {}
+        qs = Referrals.objects.filter(**filters).values("date_received")
         data = list(qs)
         if data:
             df = pd.DataFrame.from_records(data)
@@ -486,8 +664,9 @@ def _build_referral_quick_stats() -> dict[str, list[dict[str, str]]]:
     return stats
 
 
-@lru_cache(maxsize=1)
-def _build_odreferrals_quick_stats() -> dict[str, list[dict[str, str]]]:
+def _build_odreferrals_quick_stats(
+    scope_filters: dict[str, int] | None = None,
+) -> dict[str, list[dict[str, str]]]:
     """Build quick stat cards for OD referral charts."""
     stats: dict[str, list[dict[str, str]]] = {}
 
@@ -495,7 +674,7 @@ def _build_odreferrals_quick_stats() -> dict[str, list[dict[str, str]]]:
     try:
         from ..core.models import ODReferrals
 
-        qs = ODReferrals.objects.all().values(
+        qs = ODReferrals.objects.filter(**(scope_filters or {})).values(
             "od_date", "disposition", "patient_id", "referral_to_sud_agency", "referral_source"
         )
         data = list(qs)
@@ -754,8 +933,9 @@ def _merge_quarterly_data(
     return qdf
 
 
-@lru_cache(maxsize=1)
-def _build_encounters_quarterly_quick_stats() -> dict[str, list[dict[str, str]]]:
+def _build_encounters_quarterly_quick_stats(
+    scope_filters: dict[str, int] | None = None,
+) -> dict[str, list[dict[str, str]]]:
     """Build quick stat cards for encounters quarterly chart."""
     stats: dict[str, list[dict[str, str]]] = {}
 
@@ -763,9 +943,10 @@ def _build_encounters_quarterly_quick_stats() -> dict[str, list[dict[str, str]]]
         from ..core.models import Encounters, ODReferrals, Referrals
 
         # Get data
-        encounters_data = list(Encounters.objects.all().values("encounter_date"))
-        referrals_data = list(Referrals.objects.all().values("date_received"))
-        od_referrals_data = list(ODReferrals.objects.all().values("od_date"))
+        filters = scope_filters or {}
+        encounters_data = list(Encounters.objects.filter(**filters).values("encounter_date"))
+        referrals_data = list(Referrals.objects.filter(**filters).values("date_received"))
+        od_referrals_data = list(ODReferrals.objects.filter(**filters).values("od_date"))
 
         if not encounters_data and not referrals_data and not od_referrals_data:
             return stats
@@ -881,17 +1062,20 @@ def _insights_boxplot_by(df_all: pd.DataFrame, group_field: str) -> list[dict[st
     return items
 
 
-def _insights_age_referral_sankey() -> list[dict[str, object]] | None:  # noqa: C901
+def _insights_age_referral_sankey(  # noqa: C901
+    scope_filters: dict[str, int] | None = None,
+) -> list[dict[str, object]] | None:
     """Generate insights for the age → referral type Sankey diagram."""
     try:
         # Get referrals count
-        referrals_qs = Referrals.objects.all().values(
+        filters = scope_filters or {}
+        referrals_qs = Referrals.objects.filter(**filters).values(
             "referral_1", "referral_2", "referral_3", "referral_4", "referral_5"
         )
         referrals_data = list(referrals_qs)
 
         # Get OD referrals count
-        od_count = ODReferrals.objects.count()
+        od_count = ODReferrals.objects.filter(**filters).count()
 
         if not referrals_data and od_count == 0:
             return None
@@ -960,10 +1144,12 @@ def _insights_age_referral_sankey() -> list[dict[str, object]] | None:  # noqa: 
         return None
 
 
-def _insights_age_gender_pyramid() -> list[dict[str, object]] | None:
+def _insights_age_gender_pyramid(
+    scope_filters: dict[str, int] | None = None,
+) -> list[dict[str, object]] | None:
     """Generate insights for the age/gender population pyramid."""
     try:
-        patients_qs = Patients.objects.all().values("age", "sex")
+        patients_qs = Patients.objects.filter(**(scope_filters or {})).values("age", "sex")
         patients_data = list(patients_qs)
         if not patients_data:
             return None
@@ -998,7 +1184,9 @@ def _insights_age_gender_pyramid() -> list[dict[str, object]] | None:
 
 
 def _build_patients_chart_insights(  # noqa: C901
-    df_all: pd.DataFrame, age_insights: dict[str, object] | None
+    df_all: pd.DataFrame,
+    age_insights: dict[str, object] | None,
+    scope_filters: dict[str, int] | None = None,
 ) -> dict[str, list[dict[str, object]]]:
     if df_all.empty:
         return {}
@@ -1031,7 +1219,7 @@ def _build_patients_chart_insights(  # noqa: C901
     race_box = _insights_boxplot_by(df_all, "race")
     if race_box:
         insights["race_age_boxplot"] = race_box
-    sankey_list = _insights_age_referral_sankey()
+    sankey_list = _insights_age_referral_sankey(scope_filters)
     if sankey_list:
         insights["age_referral_sankey"] = sankey_list
     return insights
@@ -1058,7 +1246,10 @@ def _format_bool_label(value: object) -> str:
     return "Unknown"
 
 
-def _load_patient_touchpoint_datasets() -> dict[str, pd.DataFrame]:
+def _load_patient_touchpoint_datasets(
+    scope_filters: dict[str, int] | None = None,
+) -> dict[str, pd.DataFrame]:
+    filters = scope_filters or {}
     patient_fields = [
         "id",
         "created_date",
@@ -1073,9 +1264,12 @@ def _load_patient_touchpoint_datasets() -> dict[str, pd.DataFrame]:
         "marital_status",
         "veteran_status",
     ]
-    patients_df = _df_from_queryset(Patients.objects.all().values(*patient_fields), patient_fields)
+    patients_df = _df_from_queryset(
+        Patients.objects.filter(**filters).values(*patient_fields),
+        patient_fields,
+    )
 
-    datasets = _load_referral_datasets()
+    datasets = _load_referral_datasets(filters)
     datasets["patients"] = patients_df
     return datasets
 
@@ -1350,7 +1544,8 @@ def _build_patient_insight_sections(enriched: pd.DataFrame) -> list[dict[str, ob
 
 def top_engaged_patients(request):
     """Return just the top engaged patients table for display in modals/popovers."""
-    datasets = _load_patient_touchpoint_datasets()
+    scope_filters = _tenant_scope_filters(request)
+    datasets = _load_patient_touchpoint_datasets(scope_filters)
     patients_df = datasets.get("patients", pd.DataFrame())
 
     if patients_df.empty:
@@ -1368,7 +1563,8 @@ def top_engaged_patients(request):
 
 def referral_types_table(request):
     """Return combined referral types breakdown table for display in modal."""
-    df_all = _load_referrals_dataframe()
+    scope_filters = _tenant_scope_filters(request)
+    df_all = _load_referrals_dataframe(scope_filters)
 
     if df_all.empty:
         context = {"referral_types": [], "total_types": 0, "total_referrals": 0}
@@ -1710,10 +1906,10 @@ REFERRALS_LABEL_OVERRIDES = {
 }
 
 
-@lru_cache(maxsize=1)
-def _load_referrals_dataframe() -> pd.DataFrame:
+def _load_referrals_dataframe(scope_filters: dict[str, int] | None = None) -> pd.DataFrame:
+    filters = scope_filters or {}
     try:
-        values = list(Referrals.objects.all().values(*REFERRALS_QUERY_FIELDS))
+        values = list(Referrals.objects.filter(**filters).values(*REFERRALS_QUERY_FIELDS))
     except Exception:
         values = []
     df = _df_from_queryset(values, REFERRALS_QUERY_FIELDS)
@@ -1895,10 +2091,10 @@ PATIENTS_STORY_CARDS = [
 ]
 
 
-@lru_cache(maxsize=1)
-def _load_patients_dataframe() -> pd.DataFrame:
+def _load_patients_dataframe(scope_filters: dict[str, int] | None = None) -> pd.DataFrame:
+    filters = scope_filters or {}
     try:
-        data = list(Patients.objects.all().values(*PATIENT_BASE_FIELDS))
+        data = list(Patients.objects.filter(**filters).values(*PATIENT_BASE_FIELDS))
     except Exception:
         data = []
     return pd.DataFrame.from_records(data, columns=PATIENT_BASE_FIELDS)
@@ -1931,9 +2127,12 @@ def _build_patient_chart_meta() -> dict[str, object]:
     return meta
 
 
-def _load_patients_story_frames() -> tuple[pd.DataFrame, pd.DataFrame] | None:
+def _load_patients_story_frames(
+    scope_filters: dict[str, int] | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame] | None:
+    filters = scope_filters or {}
     patients_records = list(
-        Patients.objects.all().values(
+        Patients.objects.filter(**filters).values(
             "id", "age", "zip_code", "sud", "behavioral_health", "created_date"
         )
     )
@@ -1948,7 +2147,9 @@ def _load_patients_story_frames() -> tuple[pd.DataFrame, pd.DataFrame] | None:
     df_patients["id"] = df_patients["id"].astype(int)
 
     encounters_records = list(
-        Encounters.objects.exclude(patient_ID__isnull=True).values("patient_ID", "encounter_date")
+        Encounters.objects.filter(**filters)
+        .exclude(patient_ID__isnull=True)
+        .values("patient_ID", "encounter_date")
     )
     df_enc = pd.DataFrame.from_records(encounters_records)
     if df_enc.empty:
@@ -2155,7 +2356,7 @@ def _patients_story_impact_section(
 
         sud_mask = df_patients.get("sud")
         if sud_mask is not None:
-            sud_mask = sud_mask.fillna(False).astype(bool)
+            sud_mask = pd.to_numeric(sud_mask, errors="coerce").fillna(0).astype(int).ne(0)
             sud_ids = df_patients.loc[sud_mask, "id"]
             sud_count = int(sud_ids.nunique())
             if sud_count:
@@ -2217,8 +2418,10 @@ def _patients_story_impact_section(
     }
 
 
-def _build_patients_story_sections() -> list[dict[str, object]]:
-    frames = _load_patients_story_frames()
+def _build_patients_story_sections(
+    scope_filters: dict[str, int] | None = None,
+) -> list[dict[str, object]]:
+    frames = _load_patients_story_frames(scope_filters)
     if frames is None:
         return []
 
@@ -2234,10 +2437,12 @@ def _build_patients_story_sections() -> list[dict[str, object]]:
     return [demand_section, response_section, impact_section]
 
 
-def _build_yearly_accordions() -> list[dict[str, object]]:
+def _build_yearly_accordions(
+    scope_filters: dict[str, int] | None = None,
+) -> list[dict[str, object]]:
     """Build accordion data for each year with Community Need, Response, and Impact."""
     # Get current year data (2025 - using real data)
-    frames = _load_patients_story_frames()
+    frames = _load_patients_story_frames(scope_filters)
     current_sections = []
     if frames is not None:
         df_patients, df_enc = frames
@@ -2330,7 +2535,8 @@ def _get_placeholder_sections(year: int) -> list[dict[str, object]]:
 
 def patients(request):
     theme = get_theme_from_request(request)
-    df_all = _load_patients_dataframe()
+    scope_filters = _tenant_scope_filters(request)
+    df_all = _load_patients_dataframe(scope_filters)
     ordered_fields = _ordered_patient_fields(df_all)
 
     chart_cards = [
@@ -2345,23 +2551,19 @@ def patients(request):
     context = {
         "chart_cards": chart_cards,
         "theme": theme,
-        "story_sections": _build_patients_story_sections(),
-        "yearly_accordions": _build_yearly_accordions(),
+        "story_sections": _build_patients_story_sections(scope_filters),
+        "yearly_accordions": _build_yearly_accordions(scope_filters),
     }
-    updated_on = date(2026, 2, 19)
-    context.update(
-        {
-            "page_header_updated_at": updated_on,
-            "page_header_updated_at_iso": updated_on.isoformat(),
-        }
-    )
+    context.update(_page_header_update_context("patients", scope_filters=scope_filters))
     return render(request, "dashboard/patients.html", context)
 
 
 @require_GET
 def patients_chart_fragment(request, field: str):
     theme = get_theme_from_request(request)
-    df_all = _load_patients_dataframe()
+    scope_filters = _tenant_scope_filters(request)
+    update_context = _page_header_update_context("patients", scope_filters=scope_filters)
+    df_all = _load_patients_dataframe(scope_filters)
     valid_fields = set(_ordered_patient_fields(df_all))
     if field not in valid_fields:
         raise Http404
@@ -2382,13 +2584,14 @@ def patients_chart_fragment(request, field: str):
         fields=[field],
         zip_include_missing=zip_include_missing,
         include_missing=include_missing,
+        scope_filters=scope_filters,
     )
     chart_html = charts.get(field, "")
     has_chart = bool(chart_html)
     age_insights = _compute_age_insights(df_all)
-    chart_insights = _build_patients_chart_insights(df_all, age_insights)
+    chart_insights = _build_patients_chart_insights(df_all, age_insights, scope_filters)
     chart_meta = _build_patient_chart_meta()
-    quick_stats = _build_patient_quick_stats()
+    quick_stats = _build_patient_quick_stats(scope_filters)
 
     item = {
         "field": field,
@@ -2401,6 +2604,8 @@ def patients_chart_fragment(request, field: str):
         "meta": chart_meta.get(field),
         "quick_stats": quick_stats.get(field),
         "include_missing": include_missing,
+        "updated_at": update_context.get("page_header_updated_at"),
+        "updated_at_iso": update_context.get("page_header_updated_at_iso"),
     }
 
     return render(request, "dashboard/partials/patient_chart_fragment.html", {"item": item})
@@ -2409,7 +2614,9 @@ def patients_chart_fragment(request, field: str):
 @require_GET
 def referrals_chart_fragment(request, field: str):
     theme = get_theme_from_request(request)
-    df_all = _load_referrals_dataframe()
+    scope_filters = _tenant_scope_filters(request)
+    update_context = _page_header_update_context("referrals", scope_filters=scope_filters)
+    df_all = _load_referrals_dataframe(scope_filters)
     valid_fields = set(_ordered_referral_fields(df_all))
     if field not in valid_fields:
         raise Http404
@@ -2417,15 +2624,21 @@ def referrals_chart_fragment(request, field: str):
     # Patient map is a Leaflet map, not a Plotly chart — build it separately
     if field == "patient_map":
         zoom_mode = "full" if request.user.is_authenticated else "restricted"
-        chart_html = _chart_html(build_chart_patient_map(theme=theme, zoom_mode=zoom_mode))
+        chart_html = _chart_html(
+            build_chart_patient_map(theme=theme, zoom_mode=zoom_mode, scope_filters=scope_filters)
+        )
     else:
-        charts = build_referrals_field_charts(theme=theme, fields=[field])
+        charts = build_referrals_field_charts(
+            theme=theme,
+            fields=[field],
+            scope_filters=scope_filters,
+        )
         chart_html = charts.get(field, "")
     has_chart = bool(chart_html)
 
     chart_insights = _build_referrals_chart_insights(df_all)
-    quick_stats = _build_referral_quick_stats()
-    encounters_stats = _build_encounters_quarterly_quick_stats()
+    quick_stats = _build_referral_quick_stats(scope_filters)
+    encounters_stats = _build_encounters_quarterly_quick_stats(scope_filters)
     quick_stats.update(encounters_stats)
 
     item = {
@@ -2439,6 +2652,8 @@ def referrals_chart_fragment(request, field: str):
         "rationale_heading": REFERRALS_RATIONALE_HEADINGS.get(field),
         "meta": None,
         "quick_stats": quick_stats.get(field),
+        "updated_at": update_context.get("page_header_updated_at"),
+        "updated_at_iso": update_context.get("page_header_updated_at_iso"),
     }
 
     return render(request, "dashboard/partials/patient_chart_fragment.html", {"item": item})
@@ -2447,17 +2662,23 @@ def referrals_chart_fragment(request, field: str):
 @require_GET
 def odreferrals_chart_fragment(request, field: str):
     theme = get_theme_from_request(request)
-    df_all = _load_odreferrals_dataframe()
+    scope_filters = _tenant_scope_filters(request)
+    update_context = _page_header_update_context("odreferrals", scope_filters=scope_filters)
+    df_all = _load_odreferrals_dataframe(scope_filters)
     valid_fields = set(_ordered_odreferral_fields(df_all))
     if field not in valid_fields:
         raise Http404
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=[field])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=[field],
+        scope_filters=scope_filters,
+    )
     chart_html = charts.get(field, "")
     has_chart = bool(chart_html)
 
     chart_insights = _build_odreferrals_chart_insights(df_all)
-    quick_stats = _build_odreferrals_quick_stats()
+    quick_stats = _build_odreferrals_quick_stats(scope_filters)
 
     item = {
         "field": field,
@@ -2469,6 +2690,8 @@ def odreferrals_chart_fragment(request, field: str):
         "rationale": OD_REFERRALS_RATIONALE_MAP.get(field),
         "meta": None,
         "quick_stats": quick_stats.get(field),
+        "updated_at": update_context.get("page_header_updated_at"),
+        "updated_at_iso": update_context.get("page_header_updated_at_iso"),
     }
 
     return render(request, "dashboard/partials/patient_chart_fragment.html", {"item": item})
@@ -2479,7 +2702,8 @@ def odreferrals_chart_fragment(request, field: str):
 
 def referrals(request):
     theme = get_theme_from_request(request)
-    df_all = _load_referrals_dataframe()
+    scope_filters = _tenant_scope_filters(request)
+    df_all = _load_referrals_dataframe(scope_filters)
     ordered_fields = _ordered_referral_fields(df_all)
 
     chart_cards = [
@@ -2496,18 +2720,13 @@ def referrals(request):
         "theme": theme,
         "story_cards": REFERRALS_STORY_CARDS,
     }
-    updated_on = date(2026, 2, 19)
-    context.update(
-        {
-            "page_header_updated_at": updated_on,
-            "page_header_updated_at_iso": updated_on.isoformat(),
-        }
-    )
+    context.update(_page_header_update_context("referrals", scope_filters=scope_filters))
     return render(request, "dashboard/referrals.html", context)
 
 
-def _compute_hotspot_stats() -> dict[str, object]:
-    qs = ODReferrals.objects.exclude(lat__isnull=True).exclude(long__isnull=True)
+def _compute_hotspot_stats(scope_filters: dict[str, int] | None = None) -> dict[str, object]:
+    filters = scope_filters or {}
+    qs = ODReferrals.objects.filter(**filters).exclude(lat__isnull=True).exclude(long__isnull=True)
     df = _df_from_queryset(
         qs.values("lat", "long", "disposition", "od_date"),
         expected_columns=["lat", "long", "disposition", "od_date"],
@@ -2563,9 +2782,10 @@ def _compute_hotspot_stats() -> dict[str, object]:
 
 def odreferrals_hotspots(request):
     theme = get_theme_from_request(request)
+    scope_filters = _tenant_scope_filters(request)
     zoom_mode = "full" if request.user.is_authenticated else "restricted"
     fig_od_map = _chart_html(build_chart_od_map(theme=theme, zoom_mode=zoom_mode))
-    stats = _compute_hotspot_stats()
+    stats = _compute_hotspot_stats(scope_filters)
     document_metrics = _load_hotspot_context()
 
     insights: list[dict[str, str]] = []
@@ -2604,19 +2824,14 @@ def odreferrals_hotspots(request):
         "hotspot_insights": insights,
         "document_metrics": document_metrics,
     }
-    updated_on = date(2026, 2, 19)
-    context.update(
-        {
-            "page_header_updated_at": updated_on,
-            "page_header_updated_at_iso": updated_on.isoformat(),
-            "page_header_read_time": "6 min read",
-        }
-    )
+    context.update(_page_header_update_context("odreferrals", scope_filters=scope_filters))
+    context["page_header_read_time"] = "6 min read"
     return render(request, "dashboard/odreferrals_hotspots.html", context)
 
 
 # Referrals insights helpers
-def _load_referral_datasets() -> dict[str, pd.DataFrame]:
+def _load_referral_datasets(scope_filters: dict[str, int] | None = None) -> dict[str, pd.DataFrame]:
+    filters = scope_filters or {}
     referral_fields = [
         "ID",
         "patient_ID",
@@ -2643,9 +2858,9 @@ def _load_referral_datasets() -> dict[str, pd.DataFrame]:
     ]
     odreferral_fields = ["ID", "patient_id", "od_date", "referral_agency"]
 
-    referrals_values = list(Referrals.objects.all().values(*referral_fields))
-    encounters_values = list(Encounters.objects.all().values(*encounter_fields))
-    odreferral_values = list(ODReferrals.objects.all().values(*odreferral_fields))
+    referrals_values = list(Referrals.objects.filter(**filters).values(*referral_fields))
+    encounters_values = list(Encounters.objects.filter(**filters).values(*encounter_fields))
+    odreferral_values = list(ODReferrals.objects.filter(**filters).values(*odreferral_fields))
 
     referrals_df = _df_from_queryset(referrals_values, referral_fields)
     encounters_df = _df_from_queryset(encounters_values, encounter_fields)
@@ -3010,8 +3225,10 @@ def _build_referral_table_insights(
     return insights[:3]
 
 
-def _prepare_referrals_insights_context() -> dict[str, object]:
-    datasets = _load_referral_datasets()
+def _prepare_referrals_insights_context(
+    scope_filters: dict[str, int] | None = None,
+) -> dict[str, object]:
+    datasets = _load_referral_datasets(scope_filters)
     referrals_df = datasets["referrals"]
     encounters_df = datasets["encounters"]
     od_df = datasets["odreferrals"]
@@ -3290,8 +3507,10 @@ def _build_encounter_type_percentage_tables(encounters_df: pd.DataFrame) -> list
     return tables
 
 
-def _prepare_encounters_insights_context() -> dict[str, object]:
-    datasets = _load_patient_touchpoint_datasets()
+def _prepare_encounters_insights_context(
+    scope_filters: dict[str, int] | None = None,
+) -> dict[str, object]:
+    datasets = _load_patient_touchpoint_datasets(scope_filters)
     encounters_df = datasets.get("encounters", pd.DataFrame())
     if encounters_df.empty:
         return {
@@ -3461,8 +3680,8 @@ def _build_odreferrals_chart_insights(df_all: pd.DataFrame) -> dict[str, list[di
     return insights
 
 
-@lru_cache(maxsize=1)
-def _load_odreferrals_dataframe() -> pd.DataFrame:
+def _load_odreferrals_dataframe(scope_filters: dict[str, int] | None = None) -> pd.DataFrame:
+    filters = scope_filters or {}
     fields = [
         "ID",
         "patient_id",
@@ -3478,7 +3697,7 @@ def _load_odreferrals_dataframe() -> pd.DataFrame:
         "leave_behind_narcan_amount",
         "persons_trained",
     ]
-    values = list(ODReferrals.objects.all().values(*fields))
+    values = list(ODReferrals.objects.filter(**filters).values(*fields))
     df = _df_from_queryset(values, fields)
 
     if df.empty:
@@ -3498,11 +3717,11 @@ def _load_odreferrals_dataframe() -> pd.DataFrame:
 
     df["narcan_flag"] = 0
     if "narcan_given" in df.columns:
-        df["narcan_flag"] = df["narcan_given"].fillna(False).astype(bool).astype(int)
+        df["narcan_flag"] = df["narcan_given"].eq(True).astype(int)
 
     df["sud_flag"] = 0
     if "referral_to_sud_agency" in df.columns:
-        df["sud_flag"] = df["referral_to_sud_agency"].fillna(False).astype(bool).astype(int)
+        df["sud_flag"] = df["referral_to_sud_agency"].eq(True).astype(int)
 
     fatal_terms = {"fatal", "death", "deceased", "doa", "cpr attempted", "cpr"}
     df["fatal_flag"] = 0
@@ -3749,8 +3968,10 @@ def _build_odreferrals_takeaways(
     return takeaways[:4]
 
 
-def _prepare_odreferrals_insights_context() -> dict[str, object]:
-    df = _load_odreferrals_dataframe()
+def _prepare_odreferrals_insights_context(
+    scope_filters: dict[str, int] | None = None,
+) -> dict[str, object]:
+    df = _load_odreferrals_dataframe(scope_filters)
     if df.empty:
         return {
             "data_is_empty": True,
@@ -3904,12 +4125,10 @@ OD_REFERRALS_STORY_CARDS = [
 
 
 def _ordered_odreferral_fields(df: pd.DataFrame) -> list[str]:
+    virtual_fields = {"odreferrals_counts_monthly", "odreferrals_counts_weekday"}
     fields: list[str] = []
-    fields.extend(["odreferrals_counts_monthly"])
-    for field in [
-        "referral_agency",
-    ]:
-        if field in df.columns:
+    for field in OD_REFERRALS_DISPLAY_FIELDS:
+        if field in virtual_fields or field in df.columns:
             fields.append(field)
     return fields
 
@@ -4133,7 +4352,8 @@ def _build_repeat_overdose_quarterly_rates(years: list[int]) -> list[dict[str, o
 
 def odreferrals(request):
     theme = get_theme_from_request(request)
-    df_all = _load_odreferrals_dataframe()
+    scope_filters = _tenant_scope_filters(request)
+    df_all = _load_odreferrals_dataframe(scope_filters)
     ordered_fields = _ordered_odreferral_fields(df_all)
 
     chart_cards = [
@@ -4211,7 +4431,7 @@ def odreferrals(request):
     zoom_mode = "full" if request.user.is_authenticated else "restricted"
     fig_od_map = _chart_html(build_chart_od_map(theme=theme, zoom_mode=zoom_mode))
     fig_density_map = _chart_html(build_chart_od_density_heatmap(theme=theme))
-    hotspot_stats = _compute_hotspot_stats()
+    hotspot_stats = _compute_hotspot_stats(scope_filters)
 
     # Add Narcan administration analysis
     narcan_grid_chart = _chart_html(build_narcan_administration_grid(theme=theme))
@@ -4238,14 +4458,26 @@ def odreferrals(request):
         "theme": theme,
         "story_cards": OD_REFERRALS_STORY_CARDS,
     }
-    updated_on = date(2026, 2, 19)
-    context.update(
-        {
-            "page_header_updated_at": updated_on,
-            "page_header_updated_at_iso": updated_on.isoformat(),
-        }
-    )
+    context.update(_page_header_update_context("odreferrals", scope_filters=scope_filters))
     return render(request, "dashboard/odreferrals.html", context)
+
+
+def odreferrals_narcan_print(request):
+    """Printer/PDF-friendly variant of the "Administration Comparison" (Narcan)
+    section of the OD referrals dashboard.
+
+    Renders only that section without the dashboard chrome (sidebar, nav,
+    footer) and forces the chart theme to ``light`` so the resulting PDF is
+    legible on white paper. Shares the same body partial as the live page.
+    """
+    context = {
+        "narcan_grid_chart": _chart_html(build_narcan_administration_grid(theme="light")),
+        "narcan_timeline_chart": _chart_html(build_narcan_response_timeline(theme="light")),
+        "narcan_stats": build_narcan_stats(),
+        "theme": "light",
+    }
+    context.update(_page_header_update_context("odreferrals"))
+    return render(request, "dashboard/odreferrals_narcan_print.html", context)
 
 
 def od_weekday_detail(request):
@@ -4255,11 +4487,15 @@ def od_weekday_detail(request):
     # Build weekday chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["odreferrals_counts_weekday"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["odreferrals_counts_weekday"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     weekday_chart = charts.get("odreferrals_counts_weekday", "")
 
     # Get quick stats for weekday
-    quick_stats = _build_odreferrals_quick_stats()
+    quick_stats = _build_odreferrals_quick_stats(_tenant_scope_filters(request))
     weekday_stats = quick_stats.get("odreferrals_counts_weekday", [])
 
     context = {
@@ -4280,7 +4516,11 @@ def od_referral_source_detail(request):
     # Build referral source chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["referral_source"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["referral_source"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     referral_source_chart = charts.get("referral_source", "")
 
     # Calculate referral source stats
@@ -4288,7 +4528,7 @@ def od_referral_source_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values(
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
         "referral_source", "disposition", "referral_to_sud_agency"
     )
     data = list(qs)
@@ -4342,7 +4582,11 @@ def od_suspected_drug_detail(request):
     # Build suspected drug chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["suspected_drug"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["suspected_drug"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     suspected_drug_chart = charts.get("suspected_drug", "")
 
     # Calculate suspected drug stats
@@ -4350,7 +4594,9 @@ def od_suspected_drug_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values("suspected_drug", "disposition", "narcan_given")
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
+        "suspected_drug", "disposition", "narcan_given"
+    )
     data = list(qs)
 
     drug_stats = []
@@ -4406,7 +4652,11 @@ def od_living_situation_detail(request):
     # Build living situation chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["living_situation"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["living_situation"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     living_situation_chart = charts.get("living_situation", "")
 
     # Calculate living situation stats
@@ -4414,7 +4664,7 @@ def od_living_situation_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values(
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
         "living_situation", "disposition", "referral_to_sud_agency"
     )
     data = list(qs)
@@ -4486,7 +4736,11 @@ def od_engagement_location_detail(request):
     # Build engagement location chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["engagement_location"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["engagement_location"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     engagement_location_chart = charts.get("engagement_location", "")
 
     # Calculate engagement location stats
@@ -4494,7 +4748,9 @@ def od_engagement_location_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values("engagement_location", "disposition", "narcan_given")
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
+        "engagement_location", "disposition", "narcan_given"
+    )
     data = list(qs)
 
     location_stats = []
@@ -4572,7 +4828,11 @@ def od_sud_referral_detail(request):
 
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["referral_to_sud_agency"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["referral_to_sud_agency"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     sud_referral_chart = charts.get("referral_to_sud_agency", "")
     non_referral_chart = ""
 
@@ -4581,7 +4841,7 @@ def od_sud_referral_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values(
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
         "referral_to_sud_agency",
         "disposition",
         "referral_source",
@@ -4736,7 +4996,11 @@ def od_narcan_detail(request):
     # Build narcan chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["narcan_given"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["narcan_given"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     narcan_chart = charts.get("narcan_given", "")
 
     # Calculate narcan stats
@@ -4744,7 +5008,9 @@ def od_narcan_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values("narcan_given", "disposition", "suspected_drug")
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
+        "narcan_given", "disposition", "suspected_drug"
+    )
     data = list(qs)
 
     narcan_stats = []
@@ -4817,7 +5083,11 @@ def od_referral_delay_detail(request):
     # Build delay_in_referral chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["delay_in_referral"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["delay_in_referral"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     delay_chart = charts.get("delay_in_referral", "")
 
     # Calculate delay stats
@@ -4825,7 +5095,9 @@ def od_referral_delay_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values("delay_in_referral", "disposition", "od_date")
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
+        "delay_in_referral", "disposition", "od_date"
+    )
     data = list(qs)
 
     delay_stats = []
@@ -4890,7 +5162,11 @@ def od_cpm_notification_detail(request):
     # Build cpm_notification chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["cpm_notification"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["cpm_notification"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     notification_chart = charts.get("cpm_notification", "")
 
     # Calculate notification stats
@@ -4898,7 +5174,9 @@ def od_cpm_notification_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values("cpm_notification", "disposition", "referral_source")
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
+        "cpm_notification", "disposition", "referral_source"
+    )
     data = list(qs)
 
     notification_stats = []
@@ -4973,7 +5251,7 @@ def od_scene_responders_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values(
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
         "number_of_nonems_onscene",
         "number_of_ems_onscene",
         "number_of_peers_onscene",
@@ -5136,7 +5414,11 @@ def od_cpr_administered_detail(request):
     # Build CPR chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["cpr_administered"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["cpr_administered"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     cpr_chart = charts.get("cpr_administered", "")
 
     # Calculate CPR stats
@@ -5144,7 +5426,9 @@ def od_cpr_administered_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values("cpr_administered", "disposition", "narcan_given")
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
+        "cpr_administered", "disposition", "narcan_given"
+    )
     data = list(qs)
 
     cpr_stats = []
@@ -5216,7 +5500,11 @@ def od_police_ita_detail(request):
     # Build Police ITA chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["police_ita"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["police_ita"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     ita_chart = charts.get("police_ita", "")
 
     # Calculate Police ITA stats
@@ -5224,7 +5512,9 @@ def od_police_ita_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values("police_ita", "disposition", "living_situation")
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
+        "police_ita", "disposition", "living_situation"
+    )
     data = list(qs)
 
     ita_stats = []
@@ -5271,7 +5561,11 @@ def od_disposition_detail(request):
     # Build disposition chart
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
-    charts = build_odreferrals_field_charts(theme=theme, fields=["disposition"])
+    charts = build_odreferrals_field_charts(
+        theme=theme,
+        fields=["disposition"],
+        scope_filters=_tenant_scope_filters(request),
+    )
     disposition_chart = charts.get("disposition", "")
 
     # Calculate disposition stats
@@ -5279,7 +5573,9 @@ def od_disposition_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values("disposition", "narcan_given", "cpr_administered")
+    qs = ODReferrals.objects.filter(**_tenant_scope_filters(request)).values(
+        "disposition", "narcan_given", "cpr_administered"
+    )
     data = list(qs)
 
     disposition_stats = []
@@ -5347,12 +5643,15 @@ def od_disposition_detail(request):
 def od_transport_detail(request):
     """Serve detailed transport analysis modal content."""
     theme = get_theme_from_request(request)
+    scope_filters = _tenant_scope_filters(request)
 
     # Build transport charts
     from ..charts.odreferrals.odreferrals_field_charts import build_odreferrals_field_charts
 
     charts = build_odreferrals_field_charts(
-        theme=theme, fields=["transport_to_location", "transported_by"]
+        theme=theme,
+        fields=["transport_to_location", "transported_by"],
+        scope_filters=scope_filters,
     )
     transport_location_chart = charts.get("transport_to_location", "")
     transported_by_chart = charts.get("transported_by", "")
@@ -5362,7 +5661,11 @@ def od_transport_detail(request):
 
     from ..core.models import ODReferrals
 
-    qs = ODReferrals.objects.all().values("transport_to_location", "transported_by", "disposition")
+    qs = ODReferrals.objects.filter(**scope_filters).values(
+        "transport_to_location",
+        "transported_by",
+        "disposition",
+    )
     data = list(qs)
 
     transport_stats = []
@@ -5433,20 +5736,16 @@ def od_transport_detail(request):
 
 
 def odreferrals_insights(request):
-    context = _prepare_odreferrals_insights_context()
-    updated_on = date(2026, 2, 19)
-    context.update(
-        {
-            "page_header_updated_at": updated_on,
-            "page_header_updated_at_iso": updated_on.isoformat(),
-            "page_header_read_time": "7 min read",
-        }
-    )
+    scope_filters = _tenant_scope_filters(request)
+    context = _prepare_odreferrals_insights_context(scope_filters)
+    context.update(_page_header_update_context("odreferrals", scope_filters=scope_filters))
+    context["page_header_read_time"] = "7 min read"
     return render(request, "dashboard/odreferrals_insights.html", context)
 
 
 # Encounters
-def _load_encounters_dataframe() -> pd.DataFrame:
+def _load_encounters_dataframe(scope_filters: dict[str, int] | None = None) -> pd.DataFrame:
+    filters = scope_filters or {}
     fields = [
         "encounter_date",
         "pcp_agency",
@@ -5455,7 +5754,7 @@ def _load_encounters_dataframe() -> pd.DataFrame:
         "encounter_type_cat3",
     ]
     try:
-        values = list(Encounters.objects.all().values(*fields))
+        values = list(Encounters.objects.filter(**filters).values(*fields))
     except Exception:
         values = []
     df = _df_from_queryset(values, fields)
@@ -7103,7 +7402,10 @@ def cooccurring_deep_dive(request):
     """Standalone deep-dive page for co-occurring behavioral health, substance
     use, and alcohol use disorder analysis across the OUD/SUD cohorts."""
     theme = get_theme_from_request(request)
-    context = _build_cooccurring_context(theme=theme)
+    context = _build_cooccurring_context(
+        theme=theme,
+        scope_filters=_tenant_scope_filters(request),
+    )
     # Surface a link to the printable variant in the page header.
     context["page_header_print_url"] = reverse("dashboard:cooccurring_print") + "?auto=1"
     return render(request, "dashboard/cooccurring.html", context)
@@ -7120,7 +7422,9 @@ def cooccurring_deep_dive_print(request):
     return render(request, "dashboard/cooccurring_print.html", context)
 
 
-def _build_cooccurring_context(theme: str) -> dict:
+def _build_cooccurring_context(
+    theme: str, scope_filters: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Build the shared template context for the co-occurring deep-dive page.
 
     Extracted so that both the standard dashboard view and the print-friendly
@@ -7148,7 +7452,6 @@ def _build_cooccurring_context(theme: str) -> dict:
         build_sud_substance_breakdown,
     )
 
-    updated_on = date(2026, 4, 19)
     current_period_label = timezone.now().strftime("%B %Y")
 
     return {
@@ -7178,21 +7481,29 @@ def _build_cooccurring_context(theme: str) -> dict:
         "odreferrals_stats": build_odreferrals_cooccurring_stats(),
         "referrals_stats": build_referrals_cooccurring_stats(),
         # Page metadata
-        "page_header_updated_at": updated_on,
-        "page_header_updated_at_iso": updated_on.isoformat(),
         "page_header_read_time": "12 min read",
         "current_period_label": current_period_label,
+        **_page_header_update_context(
+            "patients",
+            "referrals",
+            "odreferrals",
+            scope_filters=scope_filters,
+        ),
     }
 
 
 def hargrove_grant(request):
     years_data = _build_hargrove_accordions()
-    updated_on = date(2026, 2, 19)
     context = {
         "years_data": years_data,
-        "page_header_updated_at": updated_on,
-        "page_header_updated_at_iso": updated_on.isoformat(),
         "page_header_read_time": "5 min read",
+        **_page_header_update_context(
+            "patients",
+            "referrals",
+            "odreferrals",
+            "encounters",
+            scope_filters=_tenant_scope_filters(request),
+        ),
     }
     return render(request, "dashboard/hargrove_grant.html", context)
 

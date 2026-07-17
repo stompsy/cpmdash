@@ -167,6 +167,26 @@
                     Referrals, OD referrals, and encounters can be added after you review patient data.
                 </p>
 
+                <div>
+                    <label for="{{ form.county.id_for_label }}" class="block text-sm font-medium text-slate-300 mb-1.5">
+                        {{ form.county.label }}
+                    </label>
+                    {{ form.county }}
+                    {% if form.county.errors %}
+                        <p class="mt-1 text-xs text-rose-400">{{ form.county.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.agency.id_for_label }}" class="block text-sm font-medium text-slate-300 mb-1.5">
+                        {{ form.agency.label }}
+                    </label>
+                    {{ form.agency }}
+                    {% if form.agency.errors %}
+                        <p class="mt-1 text-xs text-rose-400">{{ form.agency.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
                 <div class="text-xs text-slate-500 mt-1">
                     <p>
                         Expected file: <span class="text-brand-400 font-mono">patients.csv</span>

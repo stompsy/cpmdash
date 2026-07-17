@@ -45,6 +45,7 @@ scripts/geocode_call_volume.py
 db.sqlite3
 notes.txt
 docs/*.md
+!docs/tenant-rollout-checklist.md
 *.docx
 xcollage/
 copilot-instructions.md
@@ -59,3 +60,4 @@ assets/FDA_RxNorm_1000_Unique_Ingredients.xlsx
 assets/med_clean.py
 assets/med_filter.py
 assets/products.txt
+backups/

@@ -19,6 +19,7 @@ from __future__ import annotations
 import contextlib
 import json
 import random
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -231,6 +232,9 @@ class DataCleaningService:
 
         # --- Sex: prefer patient_sex, fall back to Sex -----------------
         # "0" and "Select Sex" get a random Male/Female assignment.
+        # Guard both source columns so sparse CSVs don't KeyError.
+        _col(df, "patient_sex")  # ensure column exists for .get()
+        _col(df, "Sex")  # ensure column exists for .get()
         df["sex_clean"] = df.apply(
             lambda r: _coalesce(r.get("patient_sex", ""), r.get("Sex", "")), axis=1
         )
@@ -251,24 +255,25 @@ class DataCleaningService:
         df["pcp_clean"] = df["pcp_clean"].map(PCP_AGENCY_CLEANUP).fillna(df["pcp_clean"])
 
         # --- Race cleanup ----------------------------------------------
-        df["race_clean"] = df["race"].map(RACE_CLEANUP).fillna(df["race"])
+        df["race_clean"] = _col(df, "race").map(RACE_CLEANUP).fillna(_col(df, "race"))
 
         # --- Boolean fields → 1/0 --------------------------------------
-        df["sud_clean"] = df["SUD"].apply(_bool_to_int)
-        df["bh_clean"] = df["behavioral_health"].apply(_bool_to_int)
-        df["aud_clean"] = df["aud"].apply(_bool_to_int)
-        df["3c_clean"] = df["3C Client"].apply(_bool_to_int)
-        df["case_mgmt_clean"] = df["Case Management"].apply(_bool_to_int)
-        df["flyer_clean"] = df["flyer"].apply(_bool_to_int)
-        df["safety_plan_clean"] = df["safety_plan"].apply(_bool_to_int)
-        df["high_util_clean"] = df["High_Utilizer"].apply(_bool_to_int)
-        df["bh_sus_clean"] = df["bh_sus"].apply(_bool_to_int)
-        df["sud_sus_clean"] = df["sud_sus"].apply(_bool_to_int)
-        df["aud_sus_clean"] = df["aud_sus"].apply(_bool_to_int)
+        # Use _col() so missing columns default to "" → 0 instead of KeyError.
+        df["sud_clean"] = _col(df, "SUD").apply(_bool_to_int)
+        df["bh_clean"] = _col(df, "behavioral_health").apply(_bool_to_int)
+        df["aud_clean"] = _col(df, "aud").apply(_bool_to_int)
+        df["3c_clean"] = _col(df, "3C Client").apply(_bool_to_int)
+        df["case_mgmt_clean"] = _col(df, "Case Management").apply(_bool_to_int)
+        df["flyer_clean"] = _col(df, "flyer").apply(_bool_to_int)
+        df["safety_plan_clean"] = _col(df, "safety_plan").apply(_bool_to_int)
+        df["high_util_clean"] = _col(df, "High_Utilizer").apply(_bool_to_int)
+        df["bh_sus_clean"] = _col(df, "bh_sus").apply(_bool_to_int)
+        df["sud_sus_clean"] = _col(df, "sud_sus").apply(_bool_to_int)
+        df["aud_sus_clean"] = _col(df, "aud_sus").apply(_bool_to_int)
 
         # --- Dates → YYYY-MM-DD ----------------------------------------
-        df["created_clean"] = df["Created"].apply(_parse_date)
-        df["modified_clean"] = df["Modified"].apply(_parse_date)
+        df["created_clean"] = _col(df, "Created").apply(_parse_date)
+        df["modified_clean"] = _col(df, "Modified").apply(_parse_date)
 
         # --- Geocode from Address column --------------------------------
         # Only geocode rows where there's an address to work with.
@@ -278,6 +283,10 @@ class DataCleaningService:
             geocode_od_addresses,
             is_non_geocodable,
         )
+
+        # Normalize key source columns so downstream direct access is safe.
+        df["ID"] = _col(df, "ID")
+        df["Address"] = _col(df, "Address").fillna("").astype(str)
 
         df["lat_clean"], df["long_clean"] = geocode_od_addresses(
             df, address_col="Address", zip_col="zip_clean", log=log
@@ -301,13 +310,13 @@ class DataCleaningService:
                 "sex": df["sex_clean"],
                 "sud": df["sud_clean"],
                 "zip_code": df["zip_clean"],
-                "address": df["Address"].fillna("").str.strip(),
+                "address": df["Address"].fillna("").astype(str).str.strip(),
                 "created_date": df["created_clean"],
                 "modified_date": df["modified_clean"],
-                "marital_status": df["marital_status"].replace(
+                "marital_status": _col(df, "marital_status").replace(
                     {"": "Not disclosed", "Single": "Not Married/Widowed"}
                 ),
-                "veteran_status": df["veteran_status"].replace("", "Not disclosed"),
+                "veteran_status": _col(df, "veteran_status").replace("", "Not disclosed"),
                 "behavioral_health": df["bh_clean"],
                 "aud": df["aud_clean"],
                 "latitude": df["lat_clean"],
@@ -359,6 +368,10 @@ class DataCleaningService:
         df = self._read_csv(source)
         log.append(f"  Read {len(df)} raw rows")
 
+        # Normalize key columns so optional/misaligned headers don't hard-fail processing.
+        df["ID"] = _col(df, "ID")
+        df["patient_ID"] = _col(df, "patient_ID")
+
         # Sex: prefer RefPatientSex, fall back to PatientSex
         df["sex_clean"] = df.apply(
             lambda r: _coalesce(r.get("RefPatientSex", ""), r.get("PatientSex", "")), axis=1
@@ -368,17 +381,17 @@ class DataCleaningService:
         )
 
         # Date received
-        df["date_clean"] = df["date_received"].apply(_parse_date)
+        df["date_clean"] = _col(df, "date_received").apply(_parse_date)
 
         # Referral type: JSON array → referral_1 through referral_5
-        ref_cols = df["referral_type"].apply(_split_referral_type)
+        ref_cols = _col(df, "referral_type").apply(_split_referral_type)
         ref_df = pd.DataFrame(ref_cols.tolist(), columns=[f"referral_{i}" for i in range(1, 6)])
         # Normalize stray "Unknown" values to "Other" across all referral slots
         for col in ref_df.columns:
             ref_df[col] = ref_df[col].replace("Unknown", "Other")
 
         # Insurance: normalize, then strip trailing ", Other" fragments
-        df["insurance_clean"] = df["PatientInsurance"].apply(self._normalize_insurance)
+        df["insurance_clean"] = _col(df, "PatientInsurance").apply(self._normalize_insurance)
 
         # Empty string fields → "No data"
         for col in [
@@ -388,14 +401,16 @@ class DataCleaningService:
             "encounter_type_cat3",
             "referral_closed_reason",
         ]:
-            df[col] = df[col].replace("", "No data")
+            df[col] = _col(df, col).replace("", "No data")
 
         # Normalize referral agency names (abbreviations, typos, inconsistencies)
         df["referral_agency"] = (
             df["referral_agency"].map(REFERRAL_AGENCY_CLEANUP).fillna(df["referral_agency"])
         )
 
-        df["zip_clean"] = df["PatientZipcode"].map(ZIP_CLEANUP).fillna(df["PatientZipcode"])
+        df["zip_clean"] = (
+            _col(df, "PatientZipcode").map(ZIP_CLEANUP).fillna(_col(df, "PatientZipcode"))
+        )
         df["zip_clean"] = df["zip_clean"].replace("", "No data")
 
         # Age: compute from RefBirthdate → date_received, fall back to PatientAge, then patients
@@ -412,7 +427,7 @@ class DataCleaningService:
 
         # --- New fields: diversion + boolean (strip ref_ prefix from CSV names) ---
         for col in ["diversion_type_cat1", "diversion_type_cat2"]:
-            df[col] = df[col].replace("", "No data")
+            df[col] = _col(df, col).replace("", "No data")
 
         for csv_col, model_col in [
             ("ref_med_manage", "med_manage_int"),
@@ -420,7 +435,7 @@ class DataCleaningService:
             ("ref_pcp_connect", "pcp_connect_int"),
             ("ref_survey_willing", "survey_willing_int"),
         ]:
-            df[model_col] = df[csv_col].apply(_bool_to_int)
+            df[model_col] = _col(df, csv_col).apply(_bool_to_int)
 
         out = pd.DataFrame(
             {
@@ -719,6 +734,11 @@ class DataCleaningService:
         df = self._read_csv(source)
         log.append(f"  Read {len(df)} raw rows")
 
+        # Normalize key columns so optional/misaligned headers don't hard-fail processing.
+        df["ID"] = _col(df, "ID")
+        df["patient_ID"] = _col(df, "patient_ID")
+        df["encounter_date"] = _col(df, "encounter_date")
+
         # Filter out rows with empty patient_ID
         before = len(df)
         df = df[df["patient_ID"].str.strip() != ""]
@@ -737,7 +757,7 @@ class DataCleaningService:
             "encounter_type_cat3",
         ]
         for col in cat_cols:
-            df[col] = df[col].str.strip()
+            df[col] = _col(df, col).str.strip()
 
         # Normalize Unicode dashes (em-dash, en-dash, mojibake) → regular hyphen
         df["pcp_agency"] = (
@@ -771,21 +791,21 @@ class DataCleaningService:
 
         # --- New fields: diversion types --------------------------------
         for col in ["diversion_type_cat1", "diversion_type_cat2"]:
-            df[col] = df[col].str.strip().replace("", "No data")
+            df[col] = _col(df, col).str.strip().replace("", "No data")
 
         # --- New boolean fields → 1/0 ----------------------------------
         for col in ["med_manage", "med_script", "pcp_connect", "survey_willing"]:
-            df[f"{col}_int"] = df[col].apply(_bool_to_int)
+            df[f"{col}_int"] = _col(df, col).apply(_bool_to_int)
 
         # port_referral_ID: empty → 0
         df["port_ref_clean"] = (
-            pd.to_numeric(df["port_referral_ID"], errors="coerce").fillna(0).astype(int)
+            pd.to_numeric(_col(df, "port_referral_ID"), errors="coerce").fillna(0).astype(int)
         )
 
         out = pd.DataFrame(
             {
                 "ID": df["ID"].astype(int),
-                "referral_ID": pd.to_numeric(df["referral_ID"], errors="coerce")
+                "referral_ID": pd.to_numeric(_col(df, "referral_ID"), errors="coerce")
                 .fillna(0)
                 .astype(int),
                 "port_referral_ID": df["port_ref_clean"],
@@ -1221,7 +1241,13 @@ def _parse_date(raw: str) -> str:
     raw = str(raw).strip()
     if not raw or raw == "nan":
         return ""
-    for fmt in ("%m/%d/%Y %H:%M", "%m/%d/%Y", "%Y-%m-%d", "%Y-%m-%d %H:%M:%S"):
+    for fmt in (
+        "%m/%d/%Y %I:%M %p",
+        "%m/%d/%Y %H:%M",
+        "%m/%d/%Y",
+        "%Y-%m-%d",
+        "%Y-%m-%d %H:%M:%S",
+    ):
         try:
             return datetime.strptime(raw, fmt).strftime("%Y-%m-%d")
         except ValueError:
@@ -1236,6 +1262,31 @@ def _parse_bool_or_none(raw: str) -> str:
     if raw in ("false", "0", "no"):
         return "False"
     return ""
+
+
+def _col(df: pd.DataFrame, name: str, default: object = "") -> pd.Series:
+    """Return a best-effort matching column for *name*.
+
+    Match order:
+    1) exact column name
+    2) normalized name (case-insensitive, punctuation-insensitive)
+    3) default-filled series
+
+    This lets the cleaning pipeline tolerate small CSV header differences like
+    ``Address`` vs ``address`` vs ``Address ``.
+    """
+    if name in df.columns:
+        return df[name]
+
+    def _norm(value: str) -> str:
+        return re.sub(r"[^a-z0-9]", "", value.lower())
+
+    want = _norm(name)
+    for col_name in df.columns:
+        if _norm(str(col_name)) == want:
+            return df[col_name]
+
+    return pd.Series([default] * len(df), index=df.index, dtype=object)
 
 
 def _bool_to_int(raw: str) -> int:

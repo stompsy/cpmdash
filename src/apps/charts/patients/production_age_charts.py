@@ -5,6 +5,7 @@ Production-ready age visualization charts for the patients dashboard.
 """
 
 import math
+from typing import Any
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -323,7 +324,10 @@ def build_age_gender_pyramid(theme: str) -> str:
 # ==============================================================================
 
 
-def build_enhanced_age_referral_sankey(theme: str) -> str:  # noqa: C901
+def build_enhanced_age_referral_sankey(  # noqa: C901
+    theme: str,
+    scope_filters: dict[str, Any] | None = None,
+) -> str:
     """
     Enhanced Sankey diagram showing flow from age groups to specific referral types.
 
@@ -339,8 +343,10 @@ def build_enhanced_age_referral_sankey(theme: str) -> str:  # noqa: C901
     groups receive which types of services. The consistent distribution across
     age groups highlights systemic care needs rather than age-specific issues.
     """
+    filters = scope_filters or {}
+
     # Get patients with age data
-    patients_qs = Patients.objects.all().values("id", "age")
+    patients_qs = Patients.objects.filter(**filters).values("id", "age")
     patients_data = list(patients_qs)
     df_patients = pd.DataFrame.from_records(patients_data) if patients_data else pd.DataFrame()
 
@@ -348,7 +354,7 @@ def build_enhanced_age_referral_sankey(theme: str) -> str:  # noqa: C901
         return "<p>No patient data available</p>"
 
     # Get referrals
-    referrals_qs = Referrals.objects.all().values(
+    referrals_qs = Referrals.objects.filter(**filters).values(
         "patient_ID", "referral_1", "referral_2", "referral_3", "referral_4", "referral_5"
     )
     referrals_data = list(referrals_qs)
@@ -358,7 +364,7 @@ def build_enhanced_age_referral_sankey(theme: str) -> str:  # noqa: C901
         return "<p>No referral data available</p>"
 
     # Get OD referrals to combine with regular referrals for overdose count
-    od_referrals_qs = ODReferrals.objects.all().values("patient_id")
+    od_referrals_qs = ODReferrals.objects.filter(**filters).values("patient_id")
     od_referrals_data = list(od_referrals_qs)
     df_od = pd.DataFrame.from_records(od_referrals_data) if od_referrals_data else pd.DataFrame()
 

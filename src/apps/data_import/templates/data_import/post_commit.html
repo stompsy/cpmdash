@@ -23,6 +23,50 @@
                 </p>
             </div>
 
+            <div class="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 p-5 text-left shadow-lg shadow-emerald-950/20">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div class="space-y-3">
+                        <div class="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            Fresh Data Confirmed
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-emerald-100">
+                                Dashboard freshness dates now reflect this commit{% if batch.committed_at %} from <time datetime="{{ batch.committed_at|date:'c' }}">{{ batch.committed_at|date:"F j, Y g:i A" }}</time>{% endif %}.
+                            </p>
+                            <p class="mt-1 text-sm leading-relaxed text-emerald-50/85">
+                                You can use the updated CPM dashboards and quarterly metrics to prepare grant reporting with confidence instead of guessing whether the data is stale. Radical concept, I know.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2 text-xs font-medium text-emerald-100/90">
+                            {% if batch.committed_patients %}
+                                <a href="{% url 'dashboard:patients' %}" class="rounded-full border border-emerald-300/20 bg-slate-950/25 px-3 py-1 hover:bg-slate-950/40 transition">Patients dashboard refreshed</a>
+                            {% endif %}
+                            {% if batch.committed_referrals %}
+                                <a href="{% url 'dashboard:referrals' %}" class="rounded-full border border-emerald-300/20 bg-slate-950/25 px-3 py-1 hover:bg-slate-950/40 transition">Referrals dashboard refreshed</a>
+                            {% endif %}
+                            {% if batch.committed_odreferrals %}
+                                <a href="{% url 'dashboard:odreferrals' %}" class="rounded-full border border-emerald-300/20 bg-slate-950/25 px-3 py-1 hover:bg-slate-950/40 transition">OD referrals dashboard refreshed</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex shrink-0 flex-col gap-3 lg:w-64">
+                        <a href="{% url 'dashboard:hargrove_grant' %}"
+                           class="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-950/30 transition hover:bg-emerald-400">
+                            Open Hargrove Grant Reporting
+                        </a>
+                        <p class="text-xs leading-relaxed text-emerald-100/75 lg:text-right">
+                            Use the quarterly reporting page to review the latest grant metrics pulled from the freshly committed dataset.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {# Committed counts #}
             <div class="flex justify-center gap-6">
                 {% if batch.committed_patients %}

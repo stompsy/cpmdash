@@ -1,6 +1,50 @@
 from django.db import models
 
 
+class County(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Agency(models.Model):
+    name = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=150)
+    county = models.ForeignKey(County, on_delete=models.PROTECT, related_name="agencies")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["county", "name"], name="unique_agency_name_per_county"
+            ),
+            models.UniqueConstraint(
+                fields=["county", "slug"], name="unique_agency_slug_per_county"
+            ),
+        ]
+        ordering = ["county__name", "name"]
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.county.name})"
+
+
+def get_default_agency_id() -> int:
+    clallam, _ = County.objects.get_or_create(
+        slug="clallam-county",
+        defaults={"name": "Clallam County"},
+    )
+    agency, _ = Agency.objects.get_or_create(
+        county=clallam,
+        slug="port-angeles",
+        defaults={"name": "Port Angeles"},
+    )
+    return int(agency.pk)
+
+
 class Patients(models.Model):
     id = models.AutoField(primary_key=True)
     age = models.IntegerField(null=True, blank=True)
@@ -27,6 +71,13 @@ class Patients(models.Model):
     bh_sus = models.BooleanField(null=True, blank=True)
     sud_sus = models.BooleanField(null=True, blank=True)
     aud_sus = models.BooleanField(null=True, blank=True)
+    agency = models.ForeignKey(
+        "core.Agency",
+        on_delete=models.PROTECT,
+        null=False,
+        blank=False,
+        default=get_default_agency_id,
+    )
 
     def __str__(self) -> str:
         return "Patient ID: " + str(self.id)
@@ -49,6 +100,13 @@ class Encounters(models.Model):
     med_script = models.BooleanField(null=True, blank=True)
     pcp_connect = models.BooleanField(null=True, blank=True)
     survey_willing = models.BooleanField(null=True, blank=True)
+    agency = models.ForeignKey(
+        "core.Agency",
+        on_delete=models.PROTECT,
+        null=False,
+        blank=False,
+        default=get_default_agency_id,
+    )
 
     def __str__(self) -> str:
         return "Encounter ID: " + str(self.ID)
@@ -78,6 +136,13 @@ class Referrals(models.Model):
     med_script = models.BooleanField(null=True, blank=True)
     pcp_connect = models.BooleanField(null=True, blank=True)
     survey_willing = models.BooleanField(null=True, blank=True)
+    agency = models.ForeignKey(
+        "core.Agency",
+        on_delete=models.PROTECT,
+        null=False,
+        blank=False,
+        default=get_default_agency_id,
+    )
 
     def __str__(self) -> str:
         return "Referral ID: " + str(self.ID)
@@ -152,6 +217,13 @@ class ODReferrals(models.Model):
     med_script = models.BooleanField(null=True, blank=True)
     pcp_connect = models.BooleanField(null=True, blank=True)
     survey_willing = models.BooleanField(null=True, blank=True)
+    agency = models.ForeignKey(
+        "core.Agency",
+        on_delete=models.PROTECT,
+        null=False,
+        blank=False,
+        default=get_default_agency_id,
+    )
 
     def __str__(self) -> str:
         return "OD Referral ID: " + str(self.ID)

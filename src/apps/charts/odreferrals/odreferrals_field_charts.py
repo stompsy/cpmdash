@@ -1,4 +1,5 @@
 from collections.abc import Collection
+from typing import Any
 
 import pandas as pd
 import plotly.express as px
@@ -356,9 +357,11 @@ def _build_weekday_chart(df: pd.DataFrame, theme: str) -> str | None:
 def build_odreferrals_field_charts(
     theme: str,
     fields: Collection[str] | None = None,
+    scope_filters: dict[str, Any] | None = None,
 ) -> dict[str, str]:
     target_fields = {field for field in fields} if fields is not None else None
-    qs = ODReferrals.objects.all().values(
+    filters = scope_filters or {}
+    qs = ODReferrals.objects.filter(**filters).values(
         "od_date",
         "referral_source",
         "suspected_drug",
@@ -384,8 +387,8 @@ def build_odreferrals_field_charts(
 
     wants_monthly = target_fields is None or "odreferrals_counts_monthly" in target_fields
     if wants_monthly:
-        monthly_chart = build_chart_od_hist_monthly(theme)
-        top5_drugs_chart = build_chart_top5_drugs_monthly(theme)
+        monthly_chart = build_chart_od_hist_monthly(theme, scope_filters=filters)
+        top5_drugs_chart = build_chart_top5_drugs_monthly(theme, scope_filters=filters)
         if monthly_chart and top5_drugs_chart:
             # Combine both charts with a separator
             combined_chart = f"""
