@@ -6248,6 +6248,11 @@ def _hargrove_narrative_metric_key(index: int) -> str:
     return f"narrative::q{index}"
 
 
+def _hargrove_override_metric_key(raw_key: str) -> str:
+    """Normalize override keys to the DB field limit."""
+    return (raw_key or "").strip()[:500]
+
+
 def _hargrove_substitute_placeholders(text: str, context: dict[str, str] | None) -> str:
     if not context:
         return text
@@ -7272,9 +7277,7 @@ def _build_dynamic_hargrove_metrics(year: int, q: int) -> list[dict[str, object]
 def _hargrove_apply_overrides(
     sections: list[dict[str, Any]], year: int, q: int
 ) -> list[dict[str, Any]]:
-    """Mark rows editable and apply any saved DB overrides for year >= 2026."""
-    if year < 2026:
-        return sections
+    """Mark rows editable and apply any saved DB overrides for a quarter."""
     from .models import HargroveMetricOverride
 
     overrides = {
@@ -7303,7 +7306,7 @@ def _hargrove_apply_table_overrides(
             row["is_zip_total"] = True
             continue
         row["editable"] = True
-        key = str(row.get("metric", ""))
+        key = _hargrove_override_metric_key(str(row.get("metric", "")))
         obj = overrides.get(key)
         if obj is None:
             continue
@@ -7379,6 +7382,7 @@ def _build_hargrove_accordions() -> list[dict[str, object]]:
 
             if year_metrics and str_q in year_metrics:
                 sections = _build_historical_hargrove_metrics(year_metrics, str_q)
+                sections = _hargrove_apply_overrides(sections, year, q)
             elif 2025 <= year <= current_year:
                 # Live metrics are now year-agnostic. We intentionally compute
                 # 2025+ from the database when historical JSON isn't available.
@@ -7578,6 +7582,7 @@ def hargrove_grant_export(request: HttpRequest, year: int, q: int) -> HttpRespon
     sections: list[dict[str, Any]] = []
     if year_metrics and str(q) in year_metrics:
         sections = _build_historical_hargrove_metrics(year_metrics, str(q))
+        sections = _hargrove_apply_overrides(sections, year, q)
     elif 2025 <= year <= current_year:
         sections = _build_dynamic_hargrove_metrics(year, q)
 
@@ -7637,7 +7642,7 @@ def hargrove_grant_export(request: HttpRequest, year: int, q: int) -> HttpRespon
 
 @require_POST
 def hargrove_metric_save(request: HttpRequest) -> HttpResponse:
-    """Upsert a HargroveMetricOverride for an editable metric row (year >= 2026)."""
+    """Upsert a HargroveMetricOverride for an editable metric/narrative row."""
     from .models import HargroveMetricOverride
 
     # For HTMX inline edits, a redirect to login looks like a successful 200
@@ -7651,13 +7656,11 @@ def hargrove_metric_save(request: HttpRequest) -> HttpResponse:
     try:
         year = int(request.POST["year"])
         quarter = int(request.POST["quarter"])
-        metric_key = request.POST["metric_key"].strip()
+        metric_key = _hargrove_override_metric_key(request.POST["metric_key"])
         field = request.POST["field"]
         content = request.POST.get("content", "").strip()
     except (KeyError, ValueError):
         return HttpResponse("Invalid request", status=400)
-    if year < 2026:
-        return HttpResponse("Edits only allowed for 2026+", status=403)
     if field not in ("value", "notes"):
         return HttpResponse("Invalid field", status=400)
     if not metric_key:

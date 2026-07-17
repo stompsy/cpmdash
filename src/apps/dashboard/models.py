@@ -18,7 +18,7 @@ class HargroveMetricOverride(models.Model):
     quarter = models.PositiveSmallIntegerField()
     metric_id = models.CharField(max_length=20, blank=True)
     metric_key = models.CharField(max_length=500)
-    value = models.CharField(max_length=500, blank=True)
+    value = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     updated_by = models.ForeignKey(
