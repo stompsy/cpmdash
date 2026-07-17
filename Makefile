@@ -1,4 +1,4 @@
-.PHONY: setup lint fmt type test run migrate shell tailwind loaddata loaddata-dry analyze-initiated-referrals analyze-initiated-referrals-db
+.PHONY: setup lint fmt type test run migrate shell tailwind loaddata loaddata-dry
 setup:
 	uv sync --dev
 	pre-commit install || uvx pre-commit install
