@@ -357,7 +357,6 @@
                                                                                             x-ref="inp"
                                                                                             x-model="current"
                                                                                             @keydown.escape.prevent="cancel()"
-                                                                                            @blur="$el.closest('form').dispatchEvent(new Event('submit', {bubbles:true}))"
                                                                                             class="w-full rounded-md border border-blue-300 bg-white px-2 py-1.5 text-xs text-gray-900 focus:outline-none dark:border-blue-600 dark:bg-slate-800 dark:text-white"
                                                                                             rows="6"
                                                                                             placeholder="Enter narrative response..."
@@ -382,9 +381,15 @@
                                                                                             x-show="saveStatus === 'error'"
                                                                                             class="text-xs font-medium text-red-600 dark:text-red-400"
                                                                                         >
-                                                                                            Save failed. Please try again.
+                                                                                            <span x-text="saveErrorMessage"></span>
                                                                                         </p>
                                                                                     </form>
+                                                                                    <p
+                                                                                        x-show="!editing && saveStatus === 'saved'"
+                                                                                        class="mt-1 text-xs font-medium text-green-600 dark:text-green-400"
+                                                                                    >
+                                                                                        Saved.
+                                                                                    </p>
                                                                                 </div>
                                                                             {% elif item.response %}
                                                                                 <div class="min-h-[36px] rounded-md bg-slate-50/50 p-2 text-xs text-gray-700 dark:bg-slate-800/50 dark:text-slate-300">{{ item.response_html|safe }}</div>
@@ -464,6 +469,8 @@ function hgEditCell(initVal, year, quarter, metricKey, metricId, field, opts) {
         field,
         hasSaveButton: !!opts.hasSaveButton,
         saveStatus: 'idle',
+        saveErrorMessage: 'Save failed. Please try again.',
+        lastStatusCode: null,
         isZipRow: !!opts.isZipRow,
         startEdit() {
             this.editing = true;
@@ -477,12 +484,15 @@ function hgEditCell(initVal, year, quarter, metricKey, metricId, field, opts) {
         },
         handleBeforeSave() {
             this.hasError = false;
+            this.lastStatusCode = null;
+            this.saveErrorMessage = 'Save failed. Please try again.';
             if (this.hasSaveButton) {
                 this.saveStatus = 'saving';
             }
         },
         handleSave(event) {
             const statusCode = Number(event?.detail?.xhr?.status || 0);
+            this.lastStatusCode = statusCode || null;
             const didPersist = statusCode === 204;
             if (didPersist) {
                 this.original = this.current;
@@ -498,8 +508,8 @@ function hgEditCell(initVal, year, quarter, metricKey, metricId, field, opts) {
                     setTimeout(() => {
                         this.saved = false;
                         this.saveStatus = 'idle';
-                        this.editing = false;
-                    }, 900);
+                    }, 2500);
+                    this.editing = false;
                 } else {
                     this.editing = false;
                     setTimeout(() => { this.saved = false; }, 2000);
@@ -508,14 +518,14 @@ function hgEditCell(initVal, year, quarter, metricKey, metricId, field, opts) {
                 this.current = this.original;
                 this.hasError = true;
                 this.saveStatus = 'error';
+                this.saveErrorMessage = this.lastStatusCode
+                    ? `Save failed (status ${this.lastStatusCode}). Please try again.`
+                    : 'Save failed. Please try again.';
                 if (!this.hasSaveButton) {
                     this.editing = false;
                 }
                 setTimeout(() => {
                     this.hasError = false;
-                    if (this.hasSaveButton) {
-                        this.saveStatus = 'idle';
-                    }
                 }, 3000);
             }
         },
