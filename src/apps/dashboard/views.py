@@ -7635,11 +7635,18 @@ def hargrove_grant_export(request: HttpRequest, year: int, q: int) -> HttpRespon
     return http_response
 
 
-@login_required
 @require_POST
 def hargrove_metric_save(request: HttpRequest) -> HttpResponse:
     """Upsert a HargroveMetricOverride for an editable metric row (year >= 2026)."""
     from .models import HargroveMetricOverride
+
+    # For HTMX inline edits, a redirect to login looks like a successful 200
+    # from the frontend's perspective. Return explicit auth errors so the UI
+    # can show a clear "please sign in" message instead of failing silently.
+    if not request.user.is_authenticated:
+        if request.headers.get("HX-Request") == "true":
+            return HttpResponse("Authentication required", status=401)
+        return HttpResponse("Authentication required", status=401)
 
     try:
         year = int(request.POST["year"])

@@ -324,7 +324,7 @@
                                                                     {% for item in section.questions_responses %}
                                                                         <div class="rounded-md border border-slate-200/70 bg-white p-2 dark:border-slate-700/50 dark:bg-slate-900/50">
                                                                             <p class="mb-1 text-[11px] font-medium text-gray-700 dark:text-slate-300">{{ forloop.counter }}. {{ item.question }}</p>
-                                                                            {% if item.editable %}
+                                                                            {% if item.editable and request.user.is_authenticated %}
                                                                                 <div
                                                                                     x-data="hgEditCell('{{ item.response|escapejs }}', {{ year_data.year }}, {{ quarter.q }}, '{{ item.narrative_key|escapejs }}', '', 'value', {hasSaveButton:true})"
                                                                                 >
@@ -393,6 +393,10 @@
                                                                                 </div>
                                                                             {% elif item.response %}
                                                                                 <div class="min-h-[36px] rounded-md bg-slate-50/50 p-2 text-xs text-gray-700 dark:bg-slate-800/50 dark:text-slate-300">{{ item.response_html|safe }}</div>
+                                                                            {% elif item.editable and not request.user.is_authenticated %}
+                                                                                <div class="min-h-[36px] rounded-md border border-dashed border-amber-300 bg-amber-50/60 p-2 text-xs text-amber-700 dark:border-amber-700/60 dark:bg-amber-900/20 dark:text-amber-300">
+                                                                                    Sign in to edit and save narrative responses.
+                                                                                </div>
                                                                             {% else %}
                                                                                 <div class="min-h-[36px] rounded-md border border-dashed border-slate-300 bg-slate-50/50 p-2 text-xs italic text-gray-400 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-500">
                                                                                     Response will be entered manually...
@@ -492,8 +496,12 @@ function hgEditCell(initVal, year, quarter, metricKey, metricId, field, opts) {
         },
         handleSave(event) {
             const statusCode = Number(event?.detail?.xhr?.status || 0);
+            const responseUrl = String(event?.detail?.xhr?.responseURL || '');
             this.lastStatusCode = statusCode || null;
             const didPersist = statusCode === 204;
+            const authRedirect =
+                statusCode === 200 &&
+                (responseUrl.includes('/accounts/login') || responseUrl.includes('/account/login'));
             if (didPersist) {
                 this.original = this.current;
                 this.saved = true;
@@ -518,9 +526,13 @@ function hgEditCell(initVal, year, quarter, metricKey, metricId, field, opts) {
                 this.current = this.original;
                 this.hasError = true;
                 this.saveStatus = 'error';
-                this.saveErrorMessage = this.lastStatusCode
-                    ? `Save failed (status ${this.lastStatusCode}). Please try again.`
-                    : 'Save failed. Please try again.';
+                if (statusCode === 401 || statusCode === 403 || authRedirect) {
+                    this.saveErrorMessage = 'Your session expired. Please sign in again, then retry.';
+                } else {
+                    this.saveErrorMessage = this.lastStatusCode
+                        ? `Save failed (status ${this.lastStatusCode}). Please try again.`
+                        : 'Save failed. Please try again.';
+                }
                 if (!this.hasSaveButton) {
                     this.editing = false;
                 }
