@@ -6239,6 +6239,15 @@ def _hargrove_narrative_questions() -> list[str]:
     ]
 
 
+def _hargrove_narrative_metric_key(index: int) -> str:
+    """Return a stable override key for a narrative answer slot.
+
+    Keys based on full question text are brittle when wording evolves.
+    Slot-based keys keep saved answers attached to the same question index.
+    """
+    return f"narrative::q{index}"
+
+
 def _hargrove_substitute_placeholders(text: str, context: dict[str, str] | None) -> str:
     if not context:
         return text
@@ -6297,13 +6306,14 @@ def _hargrove_normalize_narratives(
         responses = [x for x in narratives if isinstance(x, str)]
 
     items: list[dict[str, str]] = []
-    for idx, question in enumerate(_hargrove_narrative_questions()):
-        response = responses[idx] if idx < len(responses) else ""
+    for idx, question in enumerate(_hargrove_narrative_questions(), start=1):
+        response = responses[idx - 1] if (idx - 1) < len(responses) else ""
         items.append(
             {
                 "question": question,
                 "response": response,
                 "response_html": _hargrove_render_narrative_html(response, context=context),
+                "narrative_key": _hargrove_narrative_metric_key(idx),
             }
         )
     return items
@@ -6324,16 +6334,17 @@ def _hargrove_load_narratives(
         responses = []
 
     items: list[dict[str, str]] = []
-    for idx, question in enumerate(_hargrove_narrative_questions()):
+    for idx, question in enumerate(_hargrove_narrative_questions(), start=1):
         response = ""
-        if idx < len(responses) and isinstance(responses[idx], str):
-            response = responses[idx]
+        if (idx - 1) < len(responses) and isinstance(responses[idx - 1], str):
+            response = responses[idx - 1]
         response = _hargrove_substitute_placeholders(response, context)
         items.append(
             {
                 "question": question,
                 "response": response,
                 "response_html": _hargrove_render_narrative_html(response, context=context),
+                "narrative_key": _hargrove_narrative_metric_key(idx),
             }
         )
     return items
@@ -7307,11 +7318,12 @@ def _hargrove_apply_table_overrides(
 def _hargrove_apply_narrative_overrides(
     items: list[dict[str, Any]], overrides: dict[str, Any]
 ) -> None:
-    for item in items:
+    for idx, item in enumerate(items, start=1):
         item["editable"] = True
-        key = ("narrative::" + str(item.get("question", "")))[:490]
-        item["narrative_key"] = key
-        obj = overrides.get(key)
+        stable_key = _hargrove_narrative_metric_key(idx)
+        legacy_key = ("narrative::" + str(item.get("question", "")))[:490]
+        item["narrative_key"] = stable_key
+        obj = overrides.get(stable_key) or overrides.get(legacy_key)
         if obj is None or obj.value is None:
             continue
         item["response"] = obj.value
