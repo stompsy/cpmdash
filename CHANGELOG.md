@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.6.0 (2026-07-21)
+
+### Chores
+
+- **workflow**: Auto-stage output.css and relax CI css diff gate
+  ([`a7a37d0`](https://github.com/stompsy/cpmdash/commit/a7a37d025799a5095bd7ff1d99a6f633646f3e68))
+
+### Features
+
+- **dashboard**: Simplify narrative feedback and enforce output.css sync
+  ([`803e380`](https://github.com/stompsy/cpmdash/commit/803e3802675e4629960cfeb5f529aff601a92e9b))
+
+
 ## v1.5.0 (2026-07-21)
 
 ### Features
