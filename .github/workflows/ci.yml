@@ -34,8 +34,6 @@ jobs:
               run: |
                   npm install --no-audit --no-fund
                   npm run build
-            - name: Verify committed output.css is up to date
-              run: git diff --exit-code -- src/static/css/output.css
             - name: Sync deps
               run: uv sync --dev
             - name: Lint & format

@@ -1,4 +1,11 @@
 repos:
+  - repo: local
+    hooks:
+      - id: tailwind-build-and-stage
+        name: tailwind build and stage output.css
+        entry: bash -c 'npx @tailwindcss/cli -i assets/css/input.css -o src/static/css/output.css >/dev/null && git add src/static/css/output.css'
+        language: system
+        pass_filenames: false
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.0
     hooks:
