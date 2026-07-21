@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.4.1 (2026-07-21)
+
+### Bug Fixes
+
+- **dashboard**: Harden hargrove docx export for production
+  ([`d9b38d9`](https://github.com/stompsy/cpmdash/commit/d9b38d9dac1cea53fd07e646fd594efabbe8ac94))
+
+
 ## Unreleased
 
 ### Features
