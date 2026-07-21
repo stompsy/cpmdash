@@ -1,3 +1,4 @@
+import builtins
 from datetime import datetime
 
 import pytest
@@ -149,6 +150,34 @@ def test_hargrove_page_uses_latest_import_date(rf, monkeypatch):
         "Data is current through the last committed import "
         f"(July 1, 2026, import batch #{grant_batch.pk:04d}) and is ready for reporting."
     )
+
+
+def test_hargrove_docx_export_returns_file(authenticated_client):
+    resp = authenticated_client.get(reverse("dashboard:hargrove_grant_export", args=[2026, 2]))
+
+    assert resp.status_code == 200
+    assert (
+        resp["Content-Type"]
+        == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+    assert 'filename="hargrove_grant_2026_Q2.docx"' in resp["Content-Disposition"]
+    assert resp.content.startswith(b"PK")
+
+
+def test_hargrove_docx_export_missing_dependency_returns_503(authenticated_client, monkeypatch):
+    real_import = builtins.__import__
+
+    def _import_with_missing_docx(name, *args, **kwargs):
+        if name == "docx" or name.startswith("docx."):
+            raise ModuleNotFoundError("No module named 'docx'")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", _import_with_missing_docx)
+
+    resp = authenticated_client.get(reverse("dashboard:hargrove_grant_export", args=[2026, 2]))
+
+    assert resp.status_code == 503
+    assert b"Install python-docx" in resp.content
 
 
 # Test removed - odreferrals_monthly page has been removed

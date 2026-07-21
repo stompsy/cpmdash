@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from collections import Counter, defaultdict
 from contextlib import suppress
@@ -56,6 +57,8 @@ from ..charts.referral.patient_map import build_chart_patient_map
 from ..charts.referral.referrals_field_charts import build_referrals_field_charts
 from ..core.models import Agency, Encounters, ODReferrals, Patients, Referrals
 from ..data_import.models import DataImportBatch
+
+logger = logging.getLogger(__name__)
 
 OD_HOTSPOT_CONTEXT_PATH = (
     Path(settings.BASE_DIR) / "src" / "static" / "data" / "od_hotspot_context.json"
@@ -7530,7 +7533,8 @@ def _docx_render_table_section(doc: Any, rows: list[dict[str, Any]]) -> None:
         doc.add_paragraph("No data recorded for this section.")
         return
     tbl = doc.add_table(rows=1, cols=4)
-    tbl.style = "Table Grid"
+    with suppress(KeyError):
+        tbl.style = "Table Grid"
     hdr_cells = tbl.rows[0].cells
     for idx, col_name in enumerate(["ID", "Metric", "Value", "Notes"]):
         hdr_cells[idx].text = col_name
@@ -7565,9 +7569,18 @@ def hargrove_grant_export(request: HttpRequest, year: int, q: int) -> HttpRespon
     """
     from io import BytesIO
 
-    import docx  # python-docx
-    from docx.enum.text import WD_ALIGN_PARAGRAPH  # type: ignore[attr-defined]
-    from docx.shared import Pt  # type: ignore[attr-defined]
+    try:
+        import docx  # python-docx
+        from docx.enum.text import WD_ALIGN_PARAGRAPH  # type: ignore[attr-defined]
+        from docx.shared import Pt  # type: ignore[attr-defined]
+    except ModuleNotFoundError:
+        logger.exception(
+            "DOCX export failed for Hargrove report because python-docx is not installed."
+        )
+        return HttpResponse(
+            "DOCX export dependency missing on server. Install python-docx and redeploy.",
+            status=503,
+        )
 
     # ------------------------------------------------------------------ data
     historical_data: dict[str, Any] = {}
