@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.6.1 (2026-07-21)
+
+### Bug Fixes
+
+- **dashboard**: Remove narrative saved helper text
+  ([`cd93bb9`](https://github.com/stompsy/cpmdash/commit/cd93bb9cae9a01e122a92d58c21547218c23a888))
+
+
 ## v1.6.0 (2026-07-21)
 
 ### Chores
