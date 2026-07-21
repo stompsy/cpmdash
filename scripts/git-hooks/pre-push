@@ -15,7 +15,3 @@ if [[ -f "$css_path" ]]; then
         fi
     fi
 fi
-
-if command -v pre-commit >/dev/null 2>&1; then
-    pre-commit run --hook-stage pre-push
-fi

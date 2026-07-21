@@ -32,7 +32,6 @@
     --color-amber-950: oklch(27.9% 0.077 45.635);
     --color-yellow-400: oklch(85.2% 0.199 91.936);
     --color-yellow-500: oklch(79.5% 0.184 86.047);
-    --color-yellow-600: oklch(68.1% 0.162 75.834);
     --color-lime-50: oklch(98.6% 0.031 120.757);
     --color-lime-950: oklch(27.4% 0.072 132.109);
     --color-green-50: oklch(98.2% 0.018 155.826);
@@ -208,7 +207,6 @@
     --blur-sm: 8px;
     --blur-md: 12px;
     --blur-lg: 16px;
-    --blur-2xl: 40px;
     --blur-3xl: 64px;
     --default-transition-duration: 150ms;
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
