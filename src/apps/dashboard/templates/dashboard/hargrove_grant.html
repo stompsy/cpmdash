@@ -398,12 +398,6 @@
                                                                                             <span x-text="saveErrorMessage"></span>
                                                                                         </p>
                                                                                     </form>
-                                                                                    <p
-                                                                                        x-show="!editing && saveStatus === 'saved'"
-                                                                                        class="mt-1 text-xs font-medium text-green-600 dark:text-green-400"
-                                                                                    >
-                                                                                        Saved.
-                                                                                    </p>
                                                                                 </div>
                                                                             {% elif item.response %}
                                                                                 <div class="min-h-[36px] rounded-md bg-slate-50/50 p-2 text-xs text-gray-700 dark:bg-slate-800/50 dark:text-slate-300">{{ item.response_html|safe }}</div>
