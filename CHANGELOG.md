@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.6.2 (2026-07-21)
+
+### Bug Fixes
+
+- **workflow**: Avoid pre-push pre-commit recursion
+  ([`e8cac74`](https://github.com/stompsy/cpmdash/commit/e8cac748391219a0eabb472f404c98a7f4a67483))
+
+### Chores
+
+- **css**: Sync tailwind output.css before push
+  ([`0b209a5`](https://github.com/stompsy/cpmdash/commit/0b209a5d342395df1ac83fd3682c7a8d5a867a5c))
+
+- **css**: Sync tailwind output.css before push
+  ([`e1e9501`](https://github.com/stompsy/cpmdash/commit/e1e95013f2a74d7e4ec908a64db5485bf54ea85b))
+
+- **workflow**: Install custom pre-push css sync hook
+  ([`ed6a60d`](https://github.com/stompsy/cpmdash/commit/ed6a60d0eec325a9f7a7838a25de8fecdfc77a3a))
+
+
 ## v1.6.1 (2026-07-21)
 
 ### Bug Fixes
