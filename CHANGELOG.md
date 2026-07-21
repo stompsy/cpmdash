@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.6.3 (2026-07-21)
+
+### Bug Fixes
+
+- **profile**: Use city emblem as default avatar fallback
+  ([`5f9f621`](https://github.com/stompsy/cpmdash/commit/5f9f6216f65c1dbb304fbf833aecd5ca325df9b4))
+
+### Chores
+
+- **css**: Sync tailwind output.css before push
+  ([`ff2a8eb`](https://github.com/stompsy/cpmdash/commit/ff2a8ebb6c8ff8a6b7cd2124c0acf90bc69e7f8c))
+
+
 ## v1.6.2 (2026-07-21)
 
 ### Bug Fixes
