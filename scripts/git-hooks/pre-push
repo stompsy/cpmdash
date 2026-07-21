@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+css_path="src/static/css/output.css"
+
+if [[ -f "$css_path" ]]; then
+    if ! git diff --quiet -- "$css_path" || ! git diff --cached --quiet -- "$css_path"; then
+        git add "$css_path"
+        if ! git diff --cached --quiet -- "$css_path"; then
+            echo "pre-push: committing updated $css_path"
+            git commit -m "chore(css): sync tailwind output.css before push" -- "$css_path"
+        fi
+    fi
+fi
+
+if command -v pre-commit >/dev/null 2>&1; then
+    pre-commit run --hook-stage pre-push
+fi

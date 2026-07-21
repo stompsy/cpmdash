@@ -1,7 +1,10 @@
 .PHONY: setup lint fmt type test run migrate shell tailwind loaddata loaddata-dry
 setup:
 	uv sync --dev
-	pre-commit install || uvx pre-commit install
+	pre-commit install --hook-type pre-commit || uvx pre-commit install --hook-type pre-commit
+	mkdir -p .git/hooks
+	cp scripts/git-hooks/pre-push .git/hooks/pre-push
+	chmod +x .git/hooks/pre-push
 lint:
 	uv run ruff check
 fmt:
