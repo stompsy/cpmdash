@@ -338,13 +338,7 @@
                                                                                         <span x-show="current" x-text="current" class="whitespace-pre-wrap"></span>
                                                                                         <span x-show="!current" class="italic text-gray-400 dark:text-slate-500">Click to add a response...</span>
                                                                                     </div>
-                                                                                    <div x-show="!editing" class="mt-2 flex items-center justify-between gap-2">
-                                                                                        <p
-                                                                                            x-show="hasPersisted"
-                                                                                            class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400"
-                                                                                        >
-                                                                                            Answer saved. You can update it anytime.
-                                                                                        </p>
+                                                                                    <div x-show="!editing" class="mt-2 flex items-center justify-end gap-2">
                                                                                         <button
                                                                                             type="button"
                                                                                             @click="startEdit()"
