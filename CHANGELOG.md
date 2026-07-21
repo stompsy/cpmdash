@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.5.0 (2026-07-21)
+
+### Features
+
+- **dashboard**: Add persistent narrative save feedback and update labels
+  ([`6ee2d5a`](https://github.com/stompsy/cpmdash/commit/6ee2d5a4da4d4aea9a55f3baebbeaed7d5688b3f))
+
+
 ## v1.4.1 (2026-07-21)
 
 ### Bug Fixes
