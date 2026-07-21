@@ -27,7 +27,7 @@
           {% if task.user.avatar %}
             <img src="{{ task.user.avatar.url }}" alt="{{ task.user.get_full_name|default:task.user.username }}" width="20" height="20" class="h-5 w-5 rounded-full object-cover ring-1 ring-white/10" />
           {% else %}
-            <img src="{% static 'media/user/user-01.jpg' %}" alt="{{ task.user.get_full_name|default:task.user.username }}" width="20" height="20" class="h-5 w-5 rounded-full object-cover ring-1 ring-white/10" />
+            <img src="{% static 'media/logo/fire_dept_emblem.svg' %}" alt="{{ task.user.get_full_name|default:task.user.username }}" width="20" height="20" class="h-5 w-5 rounded-full object-cover ring-1 ring-white/10" />
           {% endif %}
           <span class="font-medium text-slate-300">{{ task.user.get_full_name|default:task.user.username }}</span>
         </div>

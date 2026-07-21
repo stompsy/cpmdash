@@ -1,3 +1,4 @@
+{% load static %}
 <div
   x-show="isProfileInfoModal"
   class="fixed inset-0 flex items-center justify-center p-5 overflow-y-auto z-99999"
@@ -38,7 +39,7 @@
         Update your details to keep your profile up-to-date.
       </p>
     </div>
-  <form method="post" action="{% url 'dashboard:user_profile' %}" enctype="multipart/form-data" class="flex flex-col" x-data="{ previewUrl: {% if request.user.avatar %}'{{ request.user.avatar.url }}'{% else %}''{% endif %} }">
+  <form method="post" action="{% url 'dashboard:user_profile' %}" enctype="multipart/form-data" class="flex flex-col" x-data="{ previewUrl: {% if request.user.avatar %}'{{ request.user.avatar.url }}'{% else %}'{% static "media/logo/fire_dept_emblem.svg" %}'{% endif %} }">
       {% csrf_token %}
       <div class="custom-scrollbar h-[450px] overflow-y-auto px-2">
         <div>
@@ -194,7 +195,7 @@
               <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Avatar</label>
               <div class="flex items-center gap-4">
                 <div class="h-16 w-16 overflow-hidden rounded-full ring-1 ring-white/10 bg-gray-200 dark:bg-gray-800">
-                  <img x-show="previewUrl" :src="previewUrl" alt="Avatar preview" height="64" width="64" class="h-full w-full object-cover" />
+                  <img :src="previewUrl" alt="Avatar preview" height="64" width="64" class="h-full w-full object-cover" />
                 </div>
                 <input
                   type="file"

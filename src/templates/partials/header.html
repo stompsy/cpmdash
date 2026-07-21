@@ -641,7 +641,7 @@
               {% if user.avatar %}
                 <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}" height="44" width="44" class="h-full w-full object-cover" />
               {% else %}
-                <img src="{% static 'media/user/user-bgerdes.png' %}" alt="{{ user.get_full_name|default:user.username }}" height="44" width="44" class="h-full w-full object-cover" />
+                <img src="{% static 'media/logo/fire_dept_emblem.svg' %}" alt="{{ user.get_full_name|default:user.username }}" height="44" width="44" class="h-full w-full object-cover" />
               {% endif %}
             </span>
 
