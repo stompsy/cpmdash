@@ -13,6 +13,7 @@ import pandas as pd
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import AbstractUser
+from django.core.management import call_command
 from django.db import models as dm
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse, StreamingHttpResponse
@@ -20,7 +21,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from apps.core.models import Encounters, ODReferrals, Patients, Referrals
+from apps.core.models import Agency, Encounters, ODReferrals, Patients, Referrals
 
 from .etl_service import CleaningResult, DataCleaningService
 from .forms import DataUploadForm, DataUploadToBatchForm
@@ -231,6 +232,77 @@ ZIP_CENTROIDS: dict[str, tuple[float, float]] = {
 def batch_list(request: HttpRequest) -> HttpResponse:
     batches = _batch_queryset_for_user(request)
     return render(request, "data_import/history.html", {"batches": batches})
+
+
+@staff_member_required
+def repair_duplicates(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_superuser:
+        messages.error(request, "Only superusers can run production duplicate repair.")
+        return redirect("data_import:batch_list")
+
+    agencies = Agency.objects.order_by("county__name", "name")
+    output = ""
+    mode = "dry-run"
+    selected_agency_id = ""
+
+    if request.method == "POST":
+        mode = request.POST.get("mode", "dry-run")
+        selected_agency_id = request.POST.get("agency_id", "").strip()
+        confirm_text = request.POST.get("confirm_text", "")
+
+        if mode == "apply" and confirm_text != "REPAIR":
+            messages.error(request, "Type REPAIR to execute apply mode.")
+        else:
+            out = io.StringIO()
+            err = io.StringIO()
+            cmd_kwargs: dict[str, Any] = {}
+            if mode == "apply":
+                cmd_kwargs["apply"] = True
+
+            if selected_agency_id:
+                try:
+                    cmd_kwargs["agency_id"] = int(selected_agency_id)
+                except ValueError:
+                    messages.error(request, "Agency ID must be numeric.")
+                    return render(
+                        request,
+                        "data_import/repair_duplicates.html",
+                        {
+                            "agencies": agencies,
+                            "output": output,
+                            "mode": mode,
+                            "selected_agency_id": selected_agency_id,
+                        },
+                    )
+
+            call_command(
+                "repair_namespaced_import_duplicates", stdout=out, stderr=err, **cmd_kwargs
+            )
+            output = out.getvalue().strip()
+            err_output = err.getvalue().strip()
+            if err_output:
+                output = f"{output}\n\n[stderr]\n{err_output}" if output else err_output
+
+            summary = "Duplicate repair run"
+            if mode == "apply":
+                summary = "Duplicate repair APPLY run"
+            ProcessingLog.objects.create(batch=None, file_type="", content=output, summary=summary)
+
+            if mode == "apply":
+                messages.success(request, "Duplicate repair applied. Output logged.")
+            else:
+                messages.success(request, "Duplicate repair dry-run completed. Output logged.")
+
+    return render(
+        request,
+        "data_import/repair_duplicates.html",
+        {
+            "agencies": agencies,
+            "output": output,
+            "mode": mode,
+            "selected_agency_id": selected_agency_id,
+        },
+    )
 
 
 # ======================================================================
@@ -516,6 +588,12 @@ def _stage_records(
         incoming_ids,
     )
 
+    # Resolve incoming IDs against current production state.
+    # If this tenant already uses legacy raw IDs, keep using them to avoid
+    # creating duplicate rows during the raw->namespaced transition.
+    primary_id_map = _build_id_resolution_map(core_model, pk_field, batch, incoming_ids)
+    linked_id_maps = _build_linked_id_maps(file_type_key, raw_records, batch)
+
     staging_instances = []
     total_records = len(raw_records)
     for i, record in enumerate(raw_records):
@@ -531,6 +609,8 @@ def _stage_records(
             batch,
             result,
             conflicting_pks,
+            primary_id_map,
+            linked_id_maps,
         )
 
         if row_status == RowStatus.NEW:
@@ -611,12 +691,90 @@ def _parse_optional_int(value: Any) -> int | None:
         return None
 
 
+def _build_id_resolution_map(
+    core_model: type[dm.Model],
+    pk_field: str,
+    batch: DataImportBatch,
+    source_ids: set[int],
+) -> dict[int, int]:
+    """Resolve raw source IDs to the correct PK strategy for this tenant.
+
+    Preference order:
+    1) Existing namespaced ID for this agency
+    2) Existing legacy raw ID for this agency
+    3) Namespaced ID for new records
+    """
+    if not source_ids:
+        return {}
+
+    agency_qs = core_model.objects.all()
+    core_field_names = {f.name for f in core_model._meta.get_fields() if hasattr(f, "name")}
+    if "agency" in core_field_names and batch.agency_id:
+        agency_qs = agency_qs.filter(agency_id=batch.agency_id)
+
+    namespaced_by_source = {sid: _namespaced_id_for_agency(batch, sid) for sid in source_ids}
+    raw_existing = set(
+        agency_qs.filter(**{f"{pk_field}__in": source_ids}).values_list(pk_field, flat=True)
+    )
+    ns_existing = set(
+        agency_qs.filter(**{f"{pk_field}__in": set(namespaced_by_source.values())}).values_list(
+            pk_field, flat=True
+        )
+    )
+
+    mapped: dict[int, int] = {}
+    for sid in source_ids:
+        ns_id = namespaced_by_source[sid]
+        if ns_id in ns_existing:
+            mapped[sid] = ns_id
+        elif sid in raw_existing:
+            mapped[sid] = sid
+        else:
+            mapped[sid] = ns_id
+    return mapped
+
+
+def _build_linked_id_maps(
+    file_type_key: str,
+    raw_records: list[dict[str, Any]],
+    batch: DataImportBatch,
+) -> dict[str, dict[int, int]]:
+    linked_targets: dict[str, tuple[type[dm.Model], str]] = {}
+    if file_type_key == "referrals":
+        linked_targets["patient_ID"] = (Patients, "id")
+    elif file_type_key == "odreferrals":
+        linked_targets["patient_id"] = (Patients, "id")
+    elif file_type_key == "encounters":
+        linked_targets["patient_ID"] = (Patients, "id")
+        linked_targets["referral_ID"] = (Referrals, "ID")
+        linked_targets["port_referral_ID"] = (Referrals, "ID")
+
+    linked_id_maps: dict[str, dict[int, int]] = {}
+    for field_name, (model, pk_field) in linked_targets.items():
+        source_ids: set[int] = set()
+        for row in raw_records:
+            parsed = _parse_optional_int(row.get(field_name))
+            if parsed is not None:
+                source_ids.add(parsed)
+        linked_id_maps[field_name] = _build_id_resolution_map(model, pk_field, batch, source_ids)
+
+    return linked_id_maps
+
+
 def _apply_id_namespace(
-    file_type_key: str, record: dict[str, Any], id_col: str, batch: DataImportBatch
+    file_type_key: str,
+    record: dict[str, Any],
+    id_col: str,
+    batch: DataImportBatch,
+    primary_id_map: dict[int, int] | None = None,
+    linked_id_maps: dict[str, dict[int, int]] | None = None,
 ) -> int:
     """Apply deterministic agency namespace to primary and linked source IDs."""
     source_id = int(record[id_col])
-    mapped_id = _namespaced_id_for_agency(batch, source_id)
+    if primary_id_map is not None:
+        mapped_id = primary_id_map.get(source_id, _namespaced_id_for_agency(batch, source_id))
+    else:
+        mapped_id = _namespaced_id_for_agency(batch, source_id)
     record[id_col] = mapped_id
 
     linked_fields_by_type = {
@@ -630,7 +788,11 @@ def _apply_id_namespace(
         fk_value = _parse_optional_int(raw_fk)
         if fk_value is None:
             continue
-        record[field_name] = _namespaced_id_for_agency(batch, fk_value)
+        field_map = (linked_id_maps or {}).get(field_name)
+        if field_map is not None:
+            record[field_name] = field_map.get(fk_value, _namespaced_id_for_agency(batch, fk_value))
+        else:
+            record[field_name] = _namespaced_id_for_agency(batch, fk_value)
 
     return mapped_id
 
@@ -647,8 +809,17 @@ def _prepare_and_classify_record(
     batch: DataImportBatch,
     result: CleaningResult,
     conflicting_pks: set[int],
+    primary_id_map: dict[int, int],
+    linked_id_maps: dict[str, dict[int, int]],
 ) -> tuple[int, str, list[str]]:
-    source_id = _apply_id_namespace(file_type_key, record, id_col, batch)
+    source_id = _apply_id_namespace(
+        file_type_key,
+        record,
+        id_col,
+        batch,
+        primary_id_map=primary_id_map,
+        linked_id_maps=linked_id_maps,
+    )
 
     row_status, notes_parts = _classify_staging_record(
         source_id,

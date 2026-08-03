@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block pageName %}dataImportRepairDuplicates{% endblock pageName %}
+{% block title %}Repair Import Duplicates{% endblock title %}
+
+{% block content %}
+<div class="col-span-12 mx-auto w-full max-w-4xl">
+    <div class="w-full py-10 space-y-8">
+        <div>
+            <a href="{% url 'data_import:batch_list' %}"
+               class="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition">
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                Import History
+            </a>
+            <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">Repair Import Duplicates</h2>
+            <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
+                Superuser-only repair utility for accidental duplicate rows from import ID transitions.
+                Dry-run mode is safe and default.
+            </p>
+        </div>
+
+        <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            Apply mode writes directly to production tables. Use dry-run first and review output.
+        </div>
+
+        <form method="post" class="rounded-2xl border border-white/10 bg-slate-900/40 p-6 space-y-5">
+            {% csrf_token %}
+
+            <div>
+                <label for="mode" class="mb-2 block text-sm font-medium text-slate-300">Mode</label>
+                <select id="mode" name="mode" class="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-100">
+                    <option value="dry-run" {% if mode == 'dry-run' %}selected{% endif %}>Dry run (no writes)</option>
+                    <option value="apply" {% if mode == 'apply' %}selected{% endif %}>Apply changes</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="agency_id" class="mb-2 block text-sm font-medium text-slate-300">Agency Scope (optional)</label>
+                <select id="agency_id" name="agency_id" class="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-100">
+                    <option value="" {% if not selected_agency_id %}selected{% endif %}>All agencies</option>
+                    {% for agency in agencies %}
+                    <option value="{{ agency.id }}" {% if selected_agency_id == agency.id|stringformat:'s' %}selected{% endif %}>
+                        {{ agency.id }} - {{ agency.name }} ({{ agency.county.name }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="confirm_text" class="mb-2 block text-sm font-medium text-slate-300">Confirmation (required for apply mode)</label>
+                <input
+                    id="confirm_text"
+                    name="confirm_text"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="Type REPAIR for apply mode"
+                    class="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+            </div>
+
+            <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:shadow-xl hover:scale-[1.02]">
+                Run Repair
+            </button>
+        </form>
+
+        {% if output %}
+        <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-6">
+            <h3 class="text-sm font-semibold text-slate-200 mb-3">Command Output</h3>
+            <pre class="max-h-[26rem] overflow-auto whitespace-pre-wrap rounded-lg bg-slate-950/80 p-4 text-xs text-slate-300">{{ output }}</pre>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
