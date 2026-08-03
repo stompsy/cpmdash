@@ -145,9 +145,9 @@
                             <div class="mt-4 rounded-lg bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-900/50 dark:text-slate-400">
                                 <p class="mb-2">
                                     <span class="font-semibold text-slate-900 dark:text-slate-200">Estimation Rationale:</span>
-                                    Based on 51% patient ED utilization rate, with 69% showing reduced visits after engagement.
+                                    Based on 51% patient ED utilization rate, with 69% showing reduced visits after engagement. Unit cost is blended from Harborview, UWMC, and Olympic Medical Center published gross charges across ED visit levels 1-5 (CPT 99281-99285).
                                 </p>
-                                <p class="text-xs text-slate-500">Savings estimated at ~$1,146 per ED encounter.</p>
+                                <p class="text-xs text-slate-500">Savings estimated at ~${{ cost_metrics.ed_encounter_unit_cost|intcomma }} per ED encounter.</p>
                             </div>
                         </div>
                     </div>
@@ -162,46 +162,167 @@
             <div class="border-b border-amber-200/60 px-6 py-4 dark:border-amber-900/40 sm:px-8">
                 <h3 class="text-lg font-semibold text-amber-900 dark:text-amber-200">Important context on cost estimates</h3>
                 <p class="mt-2 text-sm text-amber-800/90 dark:text-amber-300/90">
-                    The ED savings figure shown above reflects the base cost of an emergency department encounter. In many real-world cases,
-                    that is only the starting point.
+                    The ED savings figure shown above now uses a blended baseline of
+                    <span class="font-semibold text-amber-900 dark:text-amber-200">${{ cost_metrics.ed_encounter_unit_cost|intcomma }}</span>
+                    per encounter (average of Harborview + UWMC + Olympic Medical Center CPT 99281-99285 gross charges). Real encounters often include added diagnostics and treatment services beyond that base.
                 </p>
             </div>
 
             <div class="px-6 py-6 sm:px-8">
-                <div class="grid gap-6 lg:grid-cols-2">
+                <div class="grid gap-6 lg:grid-cols-3">
                     <div class="rounded-xl border border-amber-200/70 bg-white/70 p-5 dark:border-amber-900/40 dark:bg-slate-900/40">
-                        <h4 class="text-sm font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">Often excluded from the base ED estimate</h4>
-                        <ul class="mt-3 space-y-2.5 text-sm leading-relaxed text-amber-900/85 dark:text-amber-100/85">
-                            <li class="flex items-start gap-2"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-amber-700 dark:bg-amber-300"></span><span>Diagnostic add-ons like labs, X-rays, CT, MRI, cardiac monitoring, and specialty consults.</span></li>
-                            <li class="flex items-start gap-2"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-amber-700 dark:bg-amber-300"></span><span>Extended ED observation, overnight boarding, or transition to inpatient care.</span></li>
-                            <li class="flex items-start gap-2"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-amber-700 dark:bg-amber-300"></span><span>Escalation to higher-acuity units (e.g., ICU or medical/surgical admission).</span></li>
-                        </ul>
-                        <p class="mt-4 text-xs text-amber-800/90 dark:text-amber-300/80">
-                            Even one overnight observation stay can add several thousand dollars to total cost of care.
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">Taxpayers and public systems</h4>
+                        <p class="mt-3 text-sm leading-relaxed text-amber-900/85 dark:text-amber-100/85">
+                            Avoided ED utilization helps reduce public payer pressure and downstream burden on county-funded systems.
                         </p>
                     </div>
 
                     <div class="rounded-xl border border-amber-200/70 bg-white/70 p-5 dark:border-amber-900/40 dark:bg-slate-900/40">
-                        <h4 class="text-sm font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">Why readmissions amplify system cost</h4>
-                        <ul class="mt-3 space-y-2.5 text-sm leading-relaxed text-amber-900/85 dark:text-amber-100/85">
-                            <li class="flex items-start gap-2"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-amber-700 dark:bg-amber-300"></span><span>Repeated admissions for COPD, heart failure, pneumonia, and diabetes-related complications compound total spend.</span></li>
-                            <li class="flex items-start gap-2"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-amber-700 dark:bg-amber-300"></span><span>Under CMS’s Hospital Readmissions Reduction Program (HRRP), hospitals can face reimbursement reductions for excess 30-day readmissions.</span></li>
-                            <li class="flex items-start gap-2"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-amber-700 dark:bg-amber-300"></span><span>Covered conditions include AMI, COPD, HF, pneumonia, CABG, and elective THA/TKA.</span></li>
-                        </ul>
-                        <p class="mt-4 text-xs text-amber-800/90 dark:text-amber-300/80">
-                            See CMS program details:
-                            <a
-                                href="https://www.cms.gov/medicare/quality/value-based-programs/hospital-readmissions"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="font-semibold text-amber-900 underline decoration-amber-500/60 underline-offset-2 transition hover:text-amber-700 dark:text-amber-200 dark:hover:text-amber-100"
-                            >Hospital Readmissions Reduction Program (HRRP)</a>.
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">Hospitals and ED throughput</h4>
+                        <p class="mt-3 text-sm leading-relaxed text-amber-900/85 dark:text-amber-100/85">
+                            Fewer preventable encounters support capacity for true emergencies and reduce unreimbursed resource utilization.
+                        </p>
+                    </div>
+
+                    <div class="rounded-xl border border-amber-200/70 bg-white/70 p-5 dark:border-amber-900/40 dark:bg-slate-900/40">
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">EMS, fire, and law enforcement</h4>
+                        <p class="mt-3 text-sm leading-relaxed text-amber-900/85 dark:text-amber-100/85">
+                            Reduced crisis-driven utilization means fewer repetitive high-acuity dispatches and better unit availability across the response system.
                         </p>
                     </div>
                 </div>
 
+                <div class="mt-6 overflow-hidden rounded-xl border border-amber-200/70 bg-white/80 dark:border-amber-900/40 dark:bg-slate-900/40">
+                    <div class="border-b border-amber-200/70 px-5 py-3 dark:border-amber-900/40">
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">Common emergency department procedure gross charges</h4>
+                        <p class="mt-1 text-xs text-amber-800/90 dark:text-amber-300/85">Published standard charges from Harborview Medical Center, UW Medical Center, and Olympic Medical Center. Values are gross charges (before payer-specific negotiated rates).</p>
+                    </div>
+                    <div
+                        x-data="(() => {
+                            const source = document.getElementById('common-ed-procedure-data');
+                            const rows = source ? JSON.parse(source.textContent) : [];
+                            return {
+                                rows,
+                                query: '',
+                                group: 'all',
+                                sortKey: 'average_gross_charge',
+                                sortDir: 'desc',
+                                setSort(key) {
+                                    if (this.sortKey === key) {
+                                        this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+                                    } else {
+                                        this.sortKey = key;
+                                        this.sortDir = key === 'procedure_code' ? 'asc' : 'desc';
+                                    }
+                                },
+                                normalized(val) {
+                                    return String(val ?? '').toLowerCase();
+                                },
+                                filteredRows() {
+                                    const q = this.normalized(this.query).trim();
+                                    return this.rows.filter((row) => {
+                                        const inSearch = !q
+                                            || this.normalized(row.label).includes(q)
+                                            || this.normalized(row.procedure_code).includes(q);
+                                        const isVisitCode = this.normalized(row.procedure_code).startsWith('9928');
+                                        const inGroup = this.group === 'all'
+                                            || (this.group === 'ed_visit' && isVisitCode)
+                                            || (this.group === 'diagnostics' && !isVisitCode);
+                                        return inSearch && inGroup;
+                                    });
+                                },
+                                sortedRows() {
+                                    return [...this.filteredRows()].sort((a, b) => {
+                                        const va = a[this.sortKey] ?? -1;
+                                        const vb = b[this.sortKey] ?? -1;
+                                        const cmp = va === vb ? 0 : va > vb ? 1 : -1;
+                                        return this.sortDir === 'asc' ? cmp : -cmp;
+                                    });
+                                },
+                                formatCurrency(n) {
+                                    if (n === null || n === undefined || Number.isNaN(n)) return '-';
+                                    return '$' + new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(n);
+                                }
+                            }
+                        })()"
+                        class="space-y-4 p-4 sm:p-5"
+                    >
+                        <script type="application/json" id="common-ed-procedure-data">
+                            [
+                            {% for procedure in ed_cost_reference.common_procedure_costs %}
+                                {
+                                    "label": "{{ procedure.label|escapejs }}",
+                                    "procedure_code": "{{ procedure.procedure_code|escapejs }}",
+                                    "harborview_cost": {{ procedure.harborview_cost|default:'null' }},
+                                    "uwmc_cost": {{ procedure.uwmc_cost|default:'null' }},
+                                    "olympic_cost": {{ procedure.olympic_cost|default:'null' }},
+                                    "average_gross_charge": {{ procedure.average_gross_charge|default:'null' }}
+                                }{% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                            ]
+                        </script>
+
+                        <div class="grid gap-3 md:grid-cols-3">
+                            <div class="md:col-span-2">
+                                <label for="procedure-query" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">Filter procedures</label>
+                                <input id="procedure-query" x-model="query" type="text" placeholder="Search by code or procedure" class="w-full rounded-lg border border-amber-300/70 bg-white px-3 py-2 text-sm text-amber-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:border-amber-900/40 dark:bg-slate-900/70 dark:text-amber-100 dark:focus:border-amber-400 dark:focus:ring-amber-900/40">
+                            </div>
+                            <div>
+                                <label for="procedure-group" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">Group</label>
+                                <select id="procedure-group" x-model="group" class="w-full rounded-lg border border-amber-300/70 bg-white px-3 py-2 text-sm text-amber-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:border-amber-900/40 dark:bg-slate-900/70 dark:text-amber-100 dark:focus:border-amber-400 dark:focus:ring-amber-900/40">
+                                    <option value="all">All procedures</option>
+                                    <option value="ed_visit">ED visit codes (99281-99285)</option>
+                                    <option value="diagnostics">Diagnostics and add-ons</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-amber-200/70 dark:divide-amber-900/40">
+                            <thead class="bg-amber-100/60 dark:bg-amber-900/20">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">
+                                        <button type="button" @click="setSort('label')" class="inline-flex items-center gap-1">Procedure</button>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">
+                                        <button type="button" @click="setSort('procedure_code')" class="inline-flex items-center gap-1">Code</button>
+                                    </th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">
+                                        <button type="button" @click="setSort('harborview_cost')" class="inline-flex items-center gap-1">Harborview</button>
+                                    </th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">
+                                        <button type="button" @click="setSort('uwmc_cost')" class="inline-flex items-center gap-1">UWMC</button>
+                                    </th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">
+                                        <button type="button" @click="setSort('olympic_cost')" class="inline-flex items-center gap-1">Olympic MC</button>
+                                    </th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">
+                                        <button type="button" @click="setSort('average_gross_charge')" class="inline-flex items-center gap-1">Blended avg</button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-amber-200/70 dark:divide-amber-900/40">
+                                <template x-for="row in sortedRows()" :key="`${row.procedure_code}-${row.label}`">
+                                    <tr class="hover:bg-amber-100/30 dark:hover:bg-amber-900/10">
+                                        <td class="px-4 py-3 text-sm text-amber-900/90 dark:text-amber-100/90" x-text="row.label"></td>
+                                        <td class="px-4 py-3 text-sm font-semibold text-amber-900 dark:text-amber-100" x-text="row.procedure_code"></td>
+                                        <td class="px-4 py-3 text-right text-sm text-amber-900/90 dark:text-amber-100/90" x-text="formatCurrency(row.harborview_cost)"></td>
+                                        <td class="px-4 py-3 text-right text-sm text-amber-900/90 dark:text-amber-100/90" x-text="formatCurrency(row.uwmc_cost)"></td>
+                                        <td class="px-4 py-3 text-right text-sm text-amber-900/90 dark:text-amber-100/90" x-text="formatCurrency(row.olympic_cost)"></td>
+                                        <td class="px-4 py-3 text-right text-sm font-semibold text-amber-900 dark:text-amber-100" x-text="formatCurrency(row.average_gross_charge)"></td>
+                                    </tr>
+                                </template>
+                                <tr x-show="sortedRows().length === 0">
+                                    <td colspan="6" class="px-4 py-6 text-center text-sm text-amber-800/90 dark:text-amber-200/85">No procedures matched the current filter.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+
                 <div class="mt-6 rounded-xl border border-amber-200/70 bg-white/70 px-5 py-4 text-sm leading-relaxed text-amber-900/90 dark:border-amber-900/40 dark:bg-slate-900/40 dark:text-amber-100/90">
-                    Taken together, these realities indicate that the cost of preventable clinical deterioration extends well beyond the initial ED encounter.
+                    Base ED visit cost is a floor, not a ceiling. Additional diagnostics, treatment escalation, observation stays, and readmissions can materially increase real-world total cost of care.
                 </div>
             </div>
         </div>

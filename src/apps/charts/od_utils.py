@@ -1,6 +1,8 @@
 import pandas as pd
 from django.db.models import Q
 
+from utils.ed_pricing import get_ed_encounter_unit_cost
+
 from ..core.models import ODReferrals, Patients
 
 
@@ -91,6 +93,7 @@ def get_cost_savings_metrics() -> dict:
     total_ed_visits_avoided = 0
     total_savings = 0
     yearly_breakdown: list[dict] = []
+    ed_encounter_unit_cost = get_ed_encounter_unit_cost()
 
     # Process each year
     for year_data in patients_by_year:
@@ -118,7 +121,7 @@ def get_cost_savings_metrics() -> dict:
         # ED Visits Calculations
         patients_used_ed = int(total_patients * 0.51)  # 51% of patients used ED
         ed_visits_avoided_year = int(patients_used_ed * 0.69)  # 69% had reduction in ED usage
-        savings_ed_visits = ed_visits_avoided_year * 1146  # $1,146 per ED visit avoided
+        savings_ed_visits = ed_visits_avoided_year * ed_encounter_unit_cost
 
         # Total yearly savings
         yearly_savings = savings_transports + savings_911_non_transport + savings_ed_visits
@@ -160,8 +163,9 @@ def get_cost_savings_metrics() -> dict:
         "savings_breakdown": {
             "transports": total_transports_averted * 3800,
             "911_non_transport": (total_calls_prevented - total_transports_averted) * 1900,
-            "ed_visits": total_ed_visits_avoided * 1146,
+            "ed_visits": total_ed_visits_avoided * ed_encounter_unit_cost,
         },
+        "ed_encounter_unit_cost": ed_encounter_unit_cost,
         "total_patients": sum(year_data["total_patients"] for year_data in patients_by_year),
         "years_calculated": len(patients_by_year),
         "yearly_breakdown": yearly_breakdown,
