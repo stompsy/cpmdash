@@ -7,6 +7,7 @@ app_name = "data_import"
 urlpatterns = [
     # History
     path("", views.batch_list, name="batch_list"),
+    path("repair-duplicates/", views.repair_duplicates, name="repair_duplicates"),
     # Upload
     path("upload/", views.upload, name="upload"),
     path("<int:batch_id>/upload/", views.upload_to_batch, name="upload_to_batch"),

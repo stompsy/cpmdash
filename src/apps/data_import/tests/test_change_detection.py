@@ -19,6 +19,7 @@ from apps.data_import.models import (
 from apps.data_import.views import (
     CHANGE_DETECT_SKIP,
     _apply_id_namespace,
+    _build_id_resolution_map,
     _build_staging_kwargs,
     _classify_row,
     _classify_staging_record,
@@ -535,3 +536,24 @@ class TestDeterministicIdNamespacing:
         assert encounter_record["patient_ID"] == _namespaced_id_for_agency(batch, 1000)
         assert encounter_record["referral_ID"] == _namespaced_id_for_agency(batch, 1500)
         assert encounter_record["port_referral_ID"] == _namespaced_id_for_agency(batch, 1500)
+
+
+class TestAdaptiveIdResolution:
+    def test_prefers_existing_legacy_raw_id(
+        self, batch: DataImportBatch, tenant_agency: Agency
+    ) -> None:
+        Patients.objects.create(
+            id=77,
+            age=40,
+            insurance="Medicare",
+            agency=tenant_agency,
+        )
+
+        mapping = _build_id_resolution_map(Patients, "id", batch, {77})
+
+        assert mapping[77] == 77
+
+    def test_uses_namespaced_for_new_id(self, batch: DataImportBatch) -> None:
+        mapping = _build_id_resolution_map(Patients, "id", batch, {88})
+
+        assert mapping[88] == _namespaced_id_for_agency(batch, 88)
