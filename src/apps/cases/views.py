@@ -1,6 +1,10 @@
 from datetime import date
 
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import render
+
+from utils.ed_pricing import get_ed_pricing_reference_data
 
 
 def _get_opshielding_context() -> dict[str, object]:
@@ -32,6 +36,7 @@ def costsavings(request):
 
     # Get dynamic cost savings metrics
     cost_metrics = get_cost_savings_metrics()
+    ed_cost_reference = get_ed_pricing_reference_data()
 
     # Calculate rounded total savings to nearest $500,000 for grant justification
     total_savings = cost_metrics["total_savings"]
@@ -43,11 +48,85 @@ def costsavings(request):
         "title": title,
         "description": description,
         "cost_metrics": cost_metrics,
+        "ed_cost_reference": ed_cost_reference,
         "rounded_total_savings": rounded_savings,
         "page_header_updated_at": updated_on,
         "page_header_updated_at_iso": updated_on.isoformat(),
     }
     return render(request, "cases/costsavings.html", context)
+
+
+@login_required
+def ed_pricing_explorer(request):
+    """Render a searchable ED pricing explorer for staff users."""
+    if not request.user.is_staff:
+        return render(request, "access_denied.html")
+
+    pricing_data = get_ed_pricing_reference_data()
+    all_rows = pricing_data.get("ed_rows", [])
+
+    facility = request.GET.get("facility", "all").strip()
+    code_type = request.GET.get("code_type", "all").strip().upper()
+    query = request.GET.get("q", "").strip().lower()
+    sort_key = request.GET.get("sort", "gross_charge").strip()
+    sort_dir = request.GET.get("dir", "desc").strip().lower()
+
+    filtered_rows = all_rows
+    if facility and facility != "all":
+        filtered_rows = [row for row in filtered_rows if row["facility"] == facility]
+
+    if code_type and code_type != "ALL":
+        filtered_rows = [row for row in filtered_rows if row["code_type"] == code_type]
+
+    if query:
+        filtered_rows = [
+            row
+            for row in filtered_rows
+            if query in row["procedure_description"].lower()
+            or query in row["procedure_code"].lower()
+            or query in row["code_type"].lower()
+        ]
+
+    sort_options = {
+        "facility": lambda row: row["facility"],
+        "procedure_code": lambda row: row["procedure_code"],
+        "procedure_description": lambda row: row["procedure_description"],
+        "gross_charge": lambda row: row["gross_charge"] if row["gross_charge"] is not None else -1,
+        "discounted_cash": lambda row: (
+            row["discounted_cash"] if row["discounted_cash"] is not None else -1
+        ),
+        "setting": lambda row: row["settings"],
+    }
+    sort_key_fn = sort_options.get(sort_key, sort_options["gross_charge"])
+    reverse = sort_dir != "asc"
+    filtered_rows = sorted(filtered_rows, key=sort_key_fn, reverse=reverse)
+
+    code_type_options = sorted({row["code_type"] for row in all_rows if row.get("code_type")})
+
+    paginator = Paginator(filtered_rows, 50)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    updated_on = date(2026, 7, 27)
+
+    context = {
+        "title": "ED Procedure Pricing Explorer",
+        "description": "Search emergency department procedure costs from public hospital standard charge files.",
+        "page_obj": page_obj,
+        "facility": facility,
+        "code_type": code_type,
+        "query": request.GET.get("q", "").strip(),
+        "facility_options": pricing_data.get("facilities", []),
+        "code_type_options": code_type_options,
+        "sort": sort_key,
+        "dir": sort_dir,
+        "total_results": len(filtered_rows),
+        "total_ed_rows": len(all_rows),
+        "ed_cost_reference": pricing_data,
+        "page_header_updated_at": updated_on,
+        "page_header_updated_at_iso": updated_on.isoformat(),
+    }
+    return render(request, "cases/ed_pricing_explorer.html", context)
 
 
 def timeline(request):

@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     cases,
     costsavings,
+    ed_pricing_explorer,
     opshield,
 )
 
@@ -14,4 +15,5 @@ urlpatterns = [
     path("opshield/", opshield, name="opshield"),
     path("cases/", cases, name="odreferrals"),
     path("costsavings/", costsavings, name="costsavings"),
+    path("ed-pricing/", ed_pricing_explorer, name="ed_pricing"),
 ]

@@ -15,6 +15,18 @@ def authenticated_client(client, django_user_model):
     return client
 
 
+@pytest.fixture()
+def staff_authenticated_client(client, django_user_model):
+    user = django_user_model.objects.create_user(
+        "staffuser",
+        "staff@example.com",
+        "password123",
+        is_staff=True,
+    )
+    client.force_login(user)
+    return client
+
+
 @pytest.fixture
 def odreferral_factory():
     def make(**kwargs):
@@ -40,6 +52,18 @@ def test_costsavings_page(authenticated_client):
     resp = authenticated_client.get(reverse("cases:costsavings"))
     assert resp.status_code == 200
     assert b"Cost Savings" in resp.content or b"Cost" in resp.content
+
+
+def test_ed_pricing_explorer_staff_only_access_denied_for_non_staff(authenticated_client):
+    resp = authenticated_client.get(reverse("cases:ed_pricing"))
+    assert resp.status_code == 200
+    assert b"Access Restricted" in resp.content
+
+
+def test_ed_pricing_explorer_renders_for_staff(staff_authenticated_client):
+    resp = staff_authenticated_client.get(reverse("cases:ed_pricing"))
+    assert resp.status_code == 200
+    assert b"ED procedure pricing explorer" in resp.content
 
 
 # Utility tests

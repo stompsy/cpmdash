@@ -61,3 +61,5 @@ assets/med_clean.py
 assets/med_filter.py
 assets/products.txt
 backups/
+docs/*.pdf
+docs/*.json

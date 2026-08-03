@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% block pageName %}edPricing{% endblock pageName %}
+{% block title %}ED Procedure Pricing Explorer{% endblock title %}
+{% block page_header %}
+    {% static 'media/jacob-grishey-j8iPllhcWWg-unsplash.jpg' as pricing_header_image %}
+    {% include "partials/page_header.html" with eyebrow="Administration" title="ED procedure pricing explorer" description="Search emergency department procedure charges from Harborview, UWMC, and Olympic Medical Center standard-charge files." image_src=pricing_header_image image_alt="Emergency department hallway" image_width="960" image_height="640" updated_at=page_header_updated_at updated_at_iso=page_header_updated_at_iso %}
+{% endblock page_header %}
+{% block content %}
+<div class="col-span-12 mx-auto w-full">
+    <span data-page-name="edPricing" class="hidden" hidden></span>
+    <div class="w-full py-20 space-y-16">
+        <section class="mx-auto max-w-7xl">
+            <div class="grid gap-4 md:grid-cols-3">
+                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                    <p class="text-sm uppercase tracking-wide text-slate-500">Blended ED encounter baseline</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">${{ ed_cost_reference.ed_encounter_average_rounded|intcomma }}</p>
+                    <p class="mt-2 text-xs text-slate-500">Average gross charge across CPT 99281-99285 from all included facilities.</p>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                    <p class="text-sm uppercase tracking-wide text-slate-500">ED-related procedure rows</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{{ total_ed_rows|intcomma }}</p>
+                    <p class="mt-2 text-xs text-slate-500">Rows include emergency-keyword and ED coding matches.</p>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                    <p class="text-sm uppercase tracking-wide text-slate-500">Current filtered results</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{{ total_results|intcomma }}</p>
+                    <p class="mt-2 text-xs text-slate-500">Filter by facility and procedure code or description.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mx-auto max-w-7xl">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <form method="get" class="grid gap-4 md:grid-cols-6">
+                    <div class="md:col-span-2">
+                        <label for="q" class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Procedure search</label>
+                        <input
+                            id="q"
+                            name="q"
+                            type="text"
+                            value="{{ query }}"
+                            placeholder="Try 99283, CT head, chest x-ray, ECG"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-slate-400 dark:focus:ring-slate-700"
+                        >
+                    </div>
+                    <div>
+                        <label for="facility" class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Facility</label>
+                        <select
+                            id="facility"
+                            name="facility"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-400 dark:focus:ring-slate-700"
+                        >
+                            <option value="all" {% if facility == "all" %}selected{% endif %}>All facilities</option>
+                            {% for option in facility_options %}
+                                <option value="{{ option }}" {% if facility == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="code_type" class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Code type</label>
+                        <select
+                            id="code_type"
+                            name="code_type"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-400 dark:focus:ring-slate-700"
+                        >
+                            <option value="all" {% if code_type == "ALL" %}selected{% endif %}>All code types</option>
+                            {% for option in code_type_options %}
+                                <option value="{{ option }}" {% if code_type == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <input type="hidden" name="sort" value="{{ sort }}">
+                    <input type="hidden" name="dir" value="{{ dir }}">
+                    <div class="flex items-end gap-3">
+                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-300">Search</button>
+                        <a href="{% url 'cases:ed_pricing' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="mx-auto max-w-7xl">
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                        <thead class="bg-slate-50 dark:bg-slate-800/60">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    <a href="?q={{ query|urlencode }}&facility={{ facility|urlencode }}&code_type={{ code_type|urlencode }}&sort=facility&dir={% if sort == 'facility' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200">Facility</a>
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    <a href="?q={{ query|urlencode }}&facility={{ facility|urlencode }}&code_type={{ code_type|urlencode }}&sort=procedure_code&dir={% if sort == 'procedure_code' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200">Code</a>
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    <a href="?q={{ query|urlencode }}&facility={{ facility|urlencode }}&code_type={{ code_type|urlencode }}&sort=procedure_description&dir={% if sort == 'procedure_description' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200">Procedure</a>
+                                </th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    <a href="?q={{ query|urlencode }}&facility={{ facility|urlencode }}&code_type={{ code_type|urlencode }}&sort=gross_charge&dir={% if sort == 'gross_charge' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200">Gross charge</a>
+                                </th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    <a href="?q={{ query|urlencode }}&facility={{ facility|urlencode }}&code_type={{ code_type|urlencode }}&sort=discounted_cash&dir={% if sort == 'discounted_cash' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200">Discounted cash</a>
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    <a href="?q={{ query|urlencode }}&facility={{ facility|urlencode }}&code_type={{ code_type|urlencode }}&sort=setting&dir={% if sort == 'setting' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200">Setting</a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            {% for row in page_obj %}
+                                <tr class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                                    <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{{ row.facility }}</td>
+                                    <td class="px-4 py-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ row.procedure_code }} <span class="text-xs font-normal text-slate-500">({{ row.code_type }})</span></td>
+                                    <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{{ row.procedure_description }}</td>
+                                    <td class="px-4 py-3 text-right text-sm font-semibold text-slate-900 dark:text-slate-100">${{ row.gross_charge|floatformat:2|intcomma }}</td>
+                                    <td class="px-4 py-3 text-right text-sm text-slate-700 dark:text-slate-300">{% if row.discounted_cash %}${{ row.discounted_cash|floatformat:2|intcomma }}{% else %}-{% endif %}</td>
+                                    <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">{{ row.settings|default:'-' }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-500">No procedures matched this filter.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if page_obj.paginator.num_pages > 1 %}
+                    <div class="flex items-center justify-between border-t border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
+                        <p class="text-slate-500">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
+                        <div class="flex items-center gap-2">
+                            {% if page_obj.has_previous %}
+                                <a href="?q={{ query|urlencode }}&facility={{ facility|urlencode }}&code_type={{ code_type|urlencode }}&sort={{ sort|urlencode }}&dir={{ dir|urlencode }}&page={{ page_obj.previous_page_number }}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700">Previous</a>
+                            {% endif %}
+                            {% if page_obj.has_next %}
+                                <a href="?q={{ query|urlencode }}&facility={{ facility|urlencode }}&code_type={{ code_type|urlencode }}&sort={{ sort|urlencode }}&dir={{ dir|urlencode }}&page={{ page_obj.next_page_number }}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700">Next</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock content %}
