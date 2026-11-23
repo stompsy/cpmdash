@@ -1987,7 +1987,8 @@ PATIENT_SINGLE_COLUMN_FIELDS = {
 PATIENT_LABEL_OVERRIDES = {
     "pcp_agency": "Primary Care Agency",
     "zip_code": "ZIP Code",
-    "patient_counts_quarterly": "Patients by Quarter",
+    "patient_counts_quarterly": "New Patients by Quarter (All-Time Unique)",
+    "unique_referred_patients_quarterly": "Unique Referred Patients by Quarter",
     "race_age_boxplot": "Age Distribution by Race",
     "sud": "Substance Use Disorder",
     "age": "Age Distribution by Sex",
@@ -2026,13 +2027,26 @@ PATIENT_CHART_RATIONALE = {
         "Understanding SUD patterns guides resource allocation and partnership development with treatment providers."
     ),
     "patient_counts_quarterly": (
-        "This chart tracks quarterly patient enrollment trends with contextual intelligence. Bar colors dynamically "
+        "This chart groups new patients by their enrollment quarter, rather than counting repeat referrals. "
+        "Each patient record belongs to one creation quarter across all time. Curated historical totals "
+        "are retained through 2024 for county-wide and Port Angeles views. Bar colors dynamically "
         "distinguish above-average quarters (emerald green) from at or below-average quarters (cyan blue). The "
         "baseline average is calculated specifically from 2021, 2023, and 2024 data—our 'normal' operational years—"
         "excluding 2022's Behavioral Health program expansion spike and 2025's ongoing growth from adding 2 new "
         "Community Paramedics. This selective baseline provides a more meaningful reference point for evaluating "
         "current performance. Vertical year labels identify key contextual factors: COVID-19 impact (2021), "
         "Behavioral Health expansion (2022), Normalization period (2023-2024), and staffing increase (2025). "
+    ),
+    "unique_referred_patients_quarterly": (
+        "Counts distinct patient IDs across regular referrals and OD referrals in each calendar quarter, "
+        "using the selected agency or county scope. Regular referrals use the received date; OD referrals "
+        "use the overdose date. Multiple referrals for the same patient in one quarter count once, "
+        "including patients appearing in both sources; "
+        "the same patient can count again in a later quarter, regardless of their enrollment date. "
+        "Records without a patient ID or the relevant date are excluded. Quarters between the first and "
+        "last recorded referrals with no eligible patients show zero. Counts use referral records only, "
+        "without curated historical estimates. Quarterly counts must not be summed as an all-time "
+        "distinct patient total."
     ),
     "race_age_boxplot": (
         "Age distribution by race helps detect potential disparities and informs culturally responsive, "
@@ -2104,8 +2118,7 @@ def _load_patients_dataframe(scope_filters: dict[str, int] | None = None) -> pd.
 
 
 def _ordered_patient_fields(df: pd.DataFrame) -> list[str]:
-    # Start with quarterly chart at the top
-    ordered = ["patient_counts_quarterly"]
+    ordered = ["patient_counts_quarterly", "unique_referred_patients_quarterly"]
 
     # Then age-related charts grouped together
     age_charts = ["age", "race_age_boxplot", "age_referral_sankey"]
@@ -2557,7 +2570,11 @@ def patients(request):
         "story_sections": _build_patients_story_sections(scope_filters),
         "yearly_accordions": _build_yearly_accordions(scope_filters),
     }
-    context.update(_page_header_update_context("patients", scope_filters=scope_filters))
+    context.update(
+        _page_header_update_context(
+            "patients", "referrals", "odreferrals", scope_filters=scope_filters
+        )
+    )
     return render(request, "dashboard/patients.html", context)
 
 
@@ -2565,7 +2582,12 @@ def patients(request):
 def patients_chart_fragment(request, field: str):
     theme = get_theme_from_request(request)
     scope_filters = _tenant_scope_filters(request)
-    update_context = _page_header_update_context("patients", scope_filters=scope_filters)
+    datasets = (
+        ("referrals", "odreferrals")
+        if field == "unique_referred_patients_quarterly"
+        else ("patients",)
+    )
+    update_context = _page_header_update_context(*datasets, scope_filters=scope_filters)
     df_all = _load_patients_dataframe(scope_filters)
     valid_fields = set(_ordered_patient_fields(df_all))
     if field not in valid_fields:
