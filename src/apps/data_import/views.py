@@ -21,6 +21,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from apps.core.cpimpact_export import build_export, write_zip
 from apps.core.models import Agency, Encounters, ODReferrals, Patients, Referrals
 
 from .etl_service import CleaningResult, DataCleaningService
@@ -2078,3 +2079,55 @@ def _staging_to_core_kwargs(
     if "agency" in core_field_names and batch.agency is not None:
         kwargs["agency"] = batch.agency
     return kwargs
+
+
+# ======================================================================
+# CP Impact export (de-identified download)
+# ======================================================================
+@staff_member_required
+def cpimpact_export(request: HttpRequest) -> HttpResponse:
+    """Superusers download the de-identified CP Impact zip straight from the browser.
+
+    The zip is built in memory and streamed back, so nothing is left on the server
+    and nobody needs database credentials or the Railway console.
+    """
+    if not request.user.is_superuser:
+        messages.error(request, "Only superusers can download the CP Impact export.")
+        return redirect("data_import:batch_list")
+
+    agencies = Agency.objects.select_related("county").order_by("county__name", "name")
+    ctx: dict[str, Any] = {"agencies": agencies, "selected": [], "since_year": "", "min_count": 3}
+    if request.method == "POST":
+        selected = [s for s in request.POST.getlist("agency") if s]
+        known = set(agencies.filter(slug__in=selected).values_list("slug", flat=True))
+        since_raw = request.POST.get("since_year", "").strip()
+        min_raw = request.POST.get("min_count", "3").strip()
+        ctx.update(selected=selected, since_year=since_raw, min_count=min_raw)
+        try:
+            since_year = int(since_raw) if since_raw else None
+            min_count = max(1, int(min_raw or 3))
+        except ValueError:
+            messages.error(request, "Year and minimum count must be whole numbers.")
+            return render(request, "data_import/cpimpact_export.html", ctx)
+        if set(selected) - known:
+            messages.error(request, "Pick agencies from the list.")
+            return render(request, "data_import/cpimpact_export.html", ctx)
+
+        tables, manifest = build_export(selected or None, since_year, min_count)
+        buf = io.BytesIO()
+        write_zip(buf, tables, manifest)
+        counts = ", ".join(f"{name} {n}" for name, n in manifest["rows"].items())
+        ProcessingLog.objects.create(
+            batch=None,
+            file_type="",
+            summary="CP Impact export downloaded",
+            content=f"By {request.user.get_username()}. Rows: {counts}. "
+            f"Agencies: {', '.join(selected) or 'all'}. Since: {since_year or 'all years'}. "
+            f"Rare-value threshold: {min_count}.",
+        )
+        stamp = timezone.localdate().isoformat()
+        response = HttpResponse(buf.getvalue(), content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="cpimpact_export_{stamp}.zip"'
+        response["Cache-Control"] = "no-store"
+        return response
+    return render(request, "data_import/cpimpact_export.html", ctx)

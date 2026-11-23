@@ -16,6 +16,15 @@
             <div class="flex gap-3">
                 {% if request.user.is_superuser %}
                 <a
+                    href="{% url 'data_import:cpimpact_export' %}"
+                    class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-slate-800/60 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700/60"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    CP Impact Export
+                </a>
+                <a
                     href="{% url 'data_import:repair_duplicates' %}"
                     class="inline-flex items-center gap-2 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-2.5 text-sm font-medium text-amber-300 transition hover:bg-amber-500/20"
                 >

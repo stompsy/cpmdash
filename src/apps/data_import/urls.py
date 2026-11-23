@@ -8,6 +8,7 @@ urlpatterns = [
     # History
     path("", views.batch_list, name="batch_list"),
     path("repair-duplicates/", views.repair_duplicates, name="repair_duplicates"),
+    path("cpimpact-export/", views.cpimpact_export, name="cpimpact_export"),
     # Upload
     path("upload/", views.upload, name="upload"),
     path("<int:batch_id>/upload/", views.upload_to_batch, name="upload_to_batch"),

@@ -128,3 +128,31 @@ def test_unknown_agency_errors(data):
 
     with pytest.raises(CommandError):
         call_command("export_cpimpact", agencies=["nope"], out="/dev/null")
+
+
+def test_admin_download_superuser_only(data, client, django_user_model):
+    from django.urls import reverse
+
+    from apps.data_import.models import ProcessingLog
+
+    staff = django_user_model.objects.create_user("staff", "s@x.org", "pw-123456789", is_staff=True)
+    client.force_login(staff)
+    r = client.get(reverse("data_import:cpimpact_export"))
+    assert r.status_code == 302  # staff but not superuser: sent back to history
+
+    boss = django_user_model.objects.create_superuser("boss", "b@x.org", "pw-123456789")
+    client.force_login(boss)
+    assert client.get(reverse("data_import:cpimpact_export")).status_code == 200
+    r = client.post(
+        reverse("data_import:cpimpact_export"), {"agency": ["test-fd"], "min_count": "3"}
+    )
+    assert r.status_code == 200 and r["Content-Type"] == "application/zip"
+    assert r["Content-Disposition"].startswith('attachment; filename="cpimpact_export_')
+    zf = zipfile.ZipFile(io.BytesIO(r.content))
+    assert {"patients.csv", "encounters.csv", "codebook.csv", "manifest.json"} <= set(zf.namelist())
+    assert b"123 Main" not in b"".join(zf.read(n) for n in zf.namelist())
+    log = ProcessingLog.objects.get(summary="CP Impact export downloaded")
+    assert "boss" in log.content and "123 Main" not in log.content
+
+    r = client.post(reverse("data_import:cpimpact_export"), {"agency": ["nope"]})
+    assert r.status_code == 200 and r["Content-Type"].startswith("text/html")

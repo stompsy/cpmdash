@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block pageName %}dataImportCpImpactExport{% endblock pageName %}
+{% block title %}CP Impact Export{% endblock title %}
+
+{% block content %}
+<div class="col-span-12 mx-auto w-full max-w-4xl">
+    <div class="w-full py-10 space-y-8">
+        <div>
+            <a href="{% url 'data_import:batch_list' %}"
+               class="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition">
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                Import History
+            </a>
+            <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">CP Impact Export</h2>
+            <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
+                Downloads a de-identified zip of patients, encounters, referrals and OD referrals for import into CP Impact.
+                It's built when you click and sent straight to your browser. Nothing is saved on the server.
+            </p>
+        </div>
+
+        <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-6 text-sm text-slate-300 space-y-2">
+            <h3 class="font-semibold text-slate-100">What's removed on the way out</h3>
+            <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                <li>Addresses, coordinates, ZIP codes, districts and jail dates</li>
+                <li>All dates: rows get a year and quarter instead</li>
+                <li>Sex, race and marital status. Ages become age bands</li>
+                <li>Text values that appear only a few times in a column (in case a name was typed into a category field)</li>
+            </ul>
+            <p class="text-slate-400">Patients are keyed P + their cpmdash row id. Open <code>codebook.csv</code> in the zip and check it before sharing the file.</p>
+        </div>
+
+        <form method="post" class="rounded-2xl border border-white/10 bg-slate-900/40 p-6 space-y-5">
+            {% csrf_token %}
+            <div>
+                <label for="agency" class="mb-2 block text-sm font-medium text-slate-300">Agencies</label>
+                <select id="agency" name="agency" multiple size="{{ agencies|length|default:3|stringformat:'s' }}"
+                        class="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-100">
+                    {% for agency in agencies %}
+                    <option value="{{ agency.slug }}" {% if agency.slug in selected %}selected{% endif %}>{{ agency.name }} ({{ agency.county.name }})</option>
+                    {% endfor %}
+                </select>
+                <p class="mt-1 text-xs text-slate-500">Leave none selected for all agencies. Ctrl or Cmd + click to pick several.</p>
+            </div>
+            <div class="grid gap-5 sm:grid-cols-2">
+                <div>
+                    <label for="since_year" class="mb-2 block text-sm font-medium text-slate-300">From year (optional)</label>
+                    <input id="since_year" name="since_year" type="number" inputmode="numeric" min="2000" max="2100"
+                           value="{{ since_year }}" placeholder="All years"
+                           class="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-100" />
+                </div>
+                <div>
+                    <label for="min_count" class="mb-2 block text-sm font-medium text-slate-300">Hide text values seen fewer than</label>
+                    <input id="min_count" name="min_count" type="number" inputmode="numeric" min="1" max="50"
+                           value="{{ min_count }}"
+                           class="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-100" />
+                    <p class="mt-1 text-xs text-slate-500">Default 3. Set to 1 to turn it off.</p>
+                </div>
+            </div>
+            <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:shadow-xl hover:scale-[1.02]">
+                Download CP Impact export
+            </button>
+            <p class="text-xs text-slate-500">Each download is noted in Processing Logs (who, when, row counts; no patient data).</p>
+        </form>
+    </div>
+</div>
+{% endblock content %}

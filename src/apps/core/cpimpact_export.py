@@ -26,7 +26,7 @@ from collections import Counter, defaultdict
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from typing import Any
+from typing import IO, Any
 
 from django.db.models import QuerySet
 
@@ -518,7 +518,8 @@ def build_export(
     return tables, manifest
 
 
-def write_zip(path: str, tables: list[Table], manifest: dict[str, Any]) -> None:
+def write_zip(path: str | IO[bytes], tables: list[Table], manifest: dict[str, Any]) -> None:
+    """Write to a file path, or to an open binary stream (the admin download uses BytesIO)."""
     with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for t in tables:
             zf.writestr(f"{t.name}.csv", _csv(t.columns, t.rows))
