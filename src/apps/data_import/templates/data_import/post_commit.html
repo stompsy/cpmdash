@@ -56,6 +56,7 @@
                     </div>
 
                     <div class="flex shrink-0 flex-col gap-3 lg:w-64">
+                        {% if can_view_hargrove %}
                         <a href="{% url 'dashboard:hargrove_grant' %}"
                            class="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-950/30 transition hover:bg-emerald-400">
                             Open Hargrove Grant Reporting
@@ -63,6 +64,7 @@
                         <p class="text-xs leading-relaxed text-emerald-100/75 lg:text-right">
                             Use the quarterly reporting page to review the latest grant metrics pulled from the freshly committed dataset.
                         </p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

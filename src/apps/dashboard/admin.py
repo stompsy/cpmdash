@@ -7,10 +7,19 @@ from .models import HargroveMetricOverride
 
 @admin.register(HargroveMetricOverride)
 class HargroveMetricOverrideAdmin(admin.ModelAdmin):
-    list_display = ("year", "quarter", "metric_key", "value", "notes", "updated_by", "updated_at")
-    list_filter = ("year", "quarter")
+    list_display = (
+        "agency",
+        "year",
+        "quarter",
+        "metric_key",
+        "value",
+        "notes",
+        "updated_by",
+        "updated_at",
+    )
+    list_filter = ("agency", "year", "quarter")
     search_fields = ("metric_key", "value", "notes")
-    ordering = ("year", "quarter", "metric_key")
+    ordering = ("agency", "year", "quarter", "metric_key")
     readonly_fields = ("updated_at",)
     actions = ["clear_values"]
 

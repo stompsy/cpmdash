@@ -14,6 +14,7 @@ class HargroveMetricOverride(models.Model):
     seeded manually through the admin if needed.
     """
 
+    agency = models.ForeignKey("core.Agency", on_delete=models.PROTECT)
     year = models.PositiveSmallIntegerField()
     quarter = models.PositiveSmallIntegerField()
     metric_id = models.CharField(max_length=20, blank=True)
@@ -30,7 +31,12 @@ class HargroveMetricOverride(models.Model):
     )
 
     class Meta:
-        unique_together = [("year", "quarter", "metric_key")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["agency", "year", "quarter", "metric_key"],
+                name="unique_hargrove_override_per_agency_period_metric",
+            )
+        ]
         ordering = ["year", "quarter", "metric_key"]
 
     def __str__(self) -> str:
