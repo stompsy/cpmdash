@@ -4,6 +4,8 @@ from typing import Any
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from django.db.models import DateField, F
+from django.db.models.functions import Cast, TruncQuarter
 from plotly.offline import plot
 
 from utils.chart_colors import CHART_COLORS_VIBRANT
@@ -12,7 +14,7 @@ from utils.plotly import get_theme_colors, style_plotly_layout
 from utils.scope import uses_curated_quarter_history
 from utils.tailwind_colors import TAILWIND_COLORS
 
-from ...core.models import Patients
+from ...core.models import ODReferrals, Patients, Referrals
 from ..od_utils import get_quarterly_patient_counts
 from .boxplots import build_patients_age_by_race_boxplot
 
@@ -585,6 +587,14 @@ def build_patients_field_charts(
             scope_filters=scope_filters,
         ),
     )
+    referral_chart = (
+        _build_unique_referred_patients_quarterly_bar(theme, scope_filters=scope_filters)
+        if wants("unique_referred_patients_quarterly")
+        else None
+    )
+    if referral_chart:
+        charts["unique_referred_patients_quarterly"] = referral_chart
+
     # Removed sex_age_boxplot - redundant with stacked age chart
     add_chart(
         "race_age_boxplot",
@@ -603,10 +613,65 @@ def build_patients_field_charts(
         ),
     )
 
-    if requested is not None:
-        charts = {k: v for k, v in charts.items() if k in requested}
-
     return charts
+
+
+def _build_unique_referred_patients_quarterly_bar(
+    theme: str,
+    *,
+    scope_filters: dict[str, Any] | None = None,
+) -> str | None:
+    """Count patient IDs once per quarter across regular and OD referrals."""
+    filters = scope_filters or {}
+    referrals = (
+        Referrals.objects.filter(**filters, date_received__isnull=False, patient_ID__isnull=False)
+        .annotate(quarter_start=TruncQuarter("date_received"), reference_id=F("patient_ID"))
+        .values_list("quarter_start", "reference_id")
+        .order_by()
+    )
+    od_referrals = (
+        ODReferrals.objects.filter(**filters, od_date__isnull=False, patient_id__isnull=False)
+        .annotate(
+            quarter_start=Cast(TruncQuarter("od_date"), output_field=DateField()),
+            reference_id=F("patient_id"),
+        )
+        .values_list("quarter_start", "reference_id")
+        .order_by()
+    )
+    records = list(referrals.union(od_referrals))
+    if not records:
+        return None
+
+    qdf = pd.DataFrame.from_records(records, columns=["quarter_start", "patient_id"])
+    qdf = qdf.groupby("quarter_start")["patient_id"].nunique().reset_index(name="count")
+    qdf.index = pd.PeriodIndex(pd.to_datetime(qdf["quarter_start"]), freq="Q")
+    quarters = pd.period_range(qdf.index.min(), qdf.index.max(), freq="Q")
+    patient_counts = qdf["count"].reindex(quarters, fill_value=0).tolist()
+    labels = [f"{quarter.year} Q{quarter.quarter}" for quarter in quarters]
+
+    fig = go.Figure(
+        go.Bar(
+            x=labels,
+            y=patient_counts,
+            marker_color=PATIENT_CHART_COLORS[1],
+            text=patient_counts,
+            textposition="outside",
+            cliponaxis=False,
+            hovertemplate=("%{x}<br>Unique referred patients: %{y:,}<extra></extra>"),
+        )
+    )
+    fig = style_plotly_layout(
+        fig,
+        theme=theme,
+        height=620,
+        x_title="Quarter (Referral Received / Overdose Date)",
+        y_title="Unique Patients",
+        margin={"t": 40, "l": 90, "r": 20, "b": 60},
+        show_legend=False,
+    )
+    fig.update_xaxes(type="category", showgrid=False)
+    fig.update_yaxes(rangemode="tozero", tickformat=",d")
+    return plot(fig, include_plotlyjs=False, output_type="div", config={"displayModeBar": False})
 
 
 def _should_use_curated_quarter_history(scope_filters: dict[str, Any] | None) -> bool:

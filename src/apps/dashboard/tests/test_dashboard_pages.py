@@ -77,19 +77,20 @@ def test_dataset_update_context_uses_latest_matching_committed_batch():
     )
 
 
-def test_patients_page_uses_last_patient_commit_date(rf, monkeypatch):
+@pytest.mark.parametrize("latest_dataset", ["referrals", "odreferrals"])
+def test_patients_page_uses_latest_patient_or_referral_commit_date(rf, monkeypatch, latest_dataset):
     patient_commit = make_dt(2026, 5, 12, 11)
     later_referral_commit = make_dt(2026, 6, 1, 16)
 
-    patient_batch = DataImportBatch.objects.create(
+    DataImportBatch.objects.create(
         status=DataImportBatch.Status.COMMITTED,
         committed_at=patient_commit,
         committed_patients=5,
     )
-    DataImportBatch.objects.create(
+    referral_batch = DataImportBatch.objects.create(
         status=DataImportBatch.Status.COMMITTED,
         committed_at=later_referral_commit,
-        committed_referrals=7,
+        **{f"committed_{latest_dataset}": 7},
     )
 
     User = get_user_model()
@@ -110,11 +111,11 @@ def test_patients_page_uses_last_patient_commit_date(rf, monkeypatch):
     response = dashboard_views.patients(request)
 
     assert response.status_code == 200
-    assert captured_context["page_header_updated_at"] == patient_commit
-    assert captured_context["page_header_updated_at_iso"] == patient_commit.isoformat()
+    assert captured_context["page_header_updated_at"] == later_referral_commit
+    assert captured_context["page_header_updated_at_iso"] == later_referral_commit.isoformat()
     assert captured_context["page_header_freshness_badge_text"] == (
         "Data is current through the last committed import "
-        f"(May 12, 2026, import batch #{patient_batch.pk:04d}) and is ready for reporting."
+        f"(June 1, 2026, import batch #{referral_batch.pk:04d}) and is ready for reporting."
     )
 
 
