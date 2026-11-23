@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.7.0 (2026-11-23)
+
+### Chores
+
+- Sync uv.lock project version
+  ([`629e376`](https://github.com/stompsy/cpmdash/commit/629e376b5b5bd18d230f009d56efbdad2e667cba))
+
+- **dev**: Make local dev server reachable over IPv6 and http
+  ([`04b103f`](https://github.com/stompsy/cpmdash/commit/04b103f27f6823a5c76fe439a7726fe9d5afbed9))
+
+### Features
+
+- **hargrove**: Scope grant reporting to Port Angeles
+  ([`b53ac7b`](https://github.com/stompsy/cpmdash/commit/b53ac7b9c3cb22811cb024341df8ee568c488705))
+
+- **patients**: Add unique referred patients by quarter chart
+  ([`4124514`](https://github.com/stompsy/cpmdash/commit/4124514737312fdbe7e22d75b9b9779c85465758))
+
+
 ## v1.6.3 (2026-07-21)
 
 ### Bug Fixes
