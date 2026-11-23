@@ -1,6 +1,7 @@
 # src/config/settings.py
 import importlib.util
 import os
+import socket
 from pathlib import Path
 
 import dj_database_url
@@ -40,9 +41,34 @@ def _normalize_csrf_trusted_origins(origins: list[str]) -> list[str]:
     return normalized
 
 
+def _outbound_ip_addresses() -> list[str]:
+    """Best-effort lookup of this machine's outbound IPv4 address.
+
+    When the dev server runs inside a VM/WSL, a browser on the host often has to reach
+    it by that IP instead of ``localhost``. The address is assigned at boot, so it cannot
+    be pinned in ``.env``. Opening a UDP socket sends no packets; it just asks the kernel
+    which local address would be used to reach the target.
+    """
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect(("10.255.255.255", 1))
+            return [sock.getsockname()[0]]
+    except OSError:
+        return []
+
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "dummy-key-for-pre-commit-checks")
 ALLOWED_HOSTS = _split_env_csv("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = _normalize_csrf_trusted_origins(_split_env_csv("CSRF_TRUSTED_ORIGINS"))
+
+if DEBUG:
+    # Django only falls back to its own dev host list when ALLOWED_HOSTS is empty, so a
+    # partially-populated .env silently rejects valid local requests with DisallowedHost.
+    # "localhost" may resolve to ::1 before 127.0.0.1, and host browsers reach a VM by IP.
+    for _dev_host in ("localhost", "127.0.0.1", "[::1]", *_outbound_ip_addresses()):
+        if _dev_host not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(_dev_host)
+
 JAWG_ACCESS_TOKEN = os.environ.get("JAWG_ACCESS_TOKEN", "")
 
 INSTALLED_APPS = [
@@ -138,8 +164,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Browsers silently discard "Secure" cookies over plain http://, which would make local
+# login appear to succeed and then bounce straight back to the login form. Keep them on
+# everywhere except DEBUG, where the dev server speaks http.
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # --- Internationalization ---
 LANGUAGE_CODE = "en-us"
