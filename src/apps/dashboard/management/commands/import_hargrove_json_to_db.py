@@ -8,6 +8,7 @@ from typing import Any
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from apps.core.models import Agency
 from apps.dashboard.models import HargroveMetricOverride
 from apps.dashboard.views import (
     _build_historical_hargrove_metrics,
@@ -33,6 +34,7 @@ def _safe_int(value: object, default: int = 0) -> int:
 
 class Command(BaseCommand):
     help = "Import Hargrove historical JSON metrics/narratives into HargroveMetricOverride."
+    legacy_agency_id: int
 
     def add_arguments(self, parser) -> None:  # type: ignore[no-untyped-def]
         parser.add_argument(
@@ -43,6 +45,9 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         overwrite = bool(options.get("overwrite"))
+        self.legacy_agency_id = Agency.objects.get(
+            county__slug="clallam-county", slug="port-angeles"
+        ).id
 
         metrics_path = (
             Path(settings.BASE_DIR) / "src" / "static" / "data" / "HARGROVE_GRANT_METRICS.json"
@@ -296,6 +301,7 @@ class Command(BaseCommand):
         skipped: int,
     ) -> tuple[int, int, int]:
         obj, was_created = HargroveMetricOverride.objects.get_or_create(
+            agency_id=self.legacy_agency_id,
             year=year,
             quarter=quarter,
             metric_key=metric_key,

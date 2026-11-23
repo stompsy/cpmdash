@@ -74,6 +74,7 @@ def get_cost_savings_metrics() -> dict:
 
     Patient counts are derived dynamically from get_quarterly_patient_counts() so new
     quarters/years appear automatically without code changes.
+    Keep fractional estimates until each final event count is truncated.
     """
     # Pull annual patient totals from the quarterly counts (which already handle
     # static fallbacks + dynamic DB queries for new quarters).
@@ -100,15 +101,12 @@ def get_cost_savings_metrics() -> dict:
         total_patients = year_data["total_patients"]
 
         # 911 Services Usage Calculation
-        patients_used_911 = int(total_patients * 0.42)  # 42% of patients used 911 services
-        patients_reduced_911 = int(patients_used_911 * 0.71)  # 71% had reduction in 911 usage
-        calls_prevented_year = (
-            patients_reduced_911  # Total calls prevented = patients with reduction
-        )
+        estimated_calls_prevented = total_patients * 0.42 * 0.71
+        calls_prevented_year = int(estimated_calls_prevented)
 
         # Transport Calculations
         transports_prevented_year = int(
-            calls_prevented_year * 0.56
+            estimated_calls_prevented * 0.56
         )  # 56% of 911 calls result in transport
         non_transport_calls = calls_prevented_year - transports_prevented_year
 
@@ -119,8 +117,7 @@ def get_cost_savings_metrics() -> dict:
         )  # $1,900 per 911 call without transport
 
         # ED Visits Calculations
-        patients_used_ed = int(total_patients * 0.51)  # 51% of patients used ED
-        ed_visits_avoided_year = int(patients_used_ed * 0.69)  # 69% had reduction in ED usage
+        ed_visits_avoided_year = int(total_patients * 0.51 * 0.69)
         savings_ed_visits = ed_visits_avoided_year * ed_encounter_unit_cost
 
         # Total yearly savings

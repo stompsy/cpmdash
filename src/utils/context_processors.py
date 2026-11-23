@@ -10,6 +10,7 @@ from django.http import HttpRequest
 from django.urls import reverse
 
 from apps.core.models import Agency
+from apps.dashboard.hargrove_access import can_access_hargrove
 
 _CHANGELOG = Path(__file__).resolve().parent.parent.parent / "CHANGELOG.md"
 
@@ -170,5 +171,6 @@ def app_context(request: HttpRequest) -> dict[str, Any]:  # noqa: C901
     return {
         "app_version": _parse_app_version(),
         "current_year": datetime.now().year,
+        "can_view_hargrove": can_access_hargrove(user),
         **tenant_scope,
     }

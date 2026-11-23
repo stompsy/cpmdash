@@ -546,6 +546,7 @@
             </svg>
           </h3>
           <ul class="flex flex-col gap-4 mb-6">
+            {% if can_view_hargrove %}
             <li>
                 <a
                     href="{% url 'dashboard:hargrove_grant' %}"
@@ -574,6 +575,7 @@
                     <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">Hargrove Grant</span>
                 </a>
             </li>
+            {% endif %}
             <li>
               <a
                 href="{% url 'contact_submissions' %}"

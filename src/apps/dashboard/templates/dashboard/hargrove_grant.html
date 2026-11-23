@@ -12,7 +12,22 @@
 {% endblock page_header %}
 
 {% block content %}
-    <div class="col-span-12 mx-auto w-full max-w-none px-4 sm:px-6 lg:px-8">
+    <style>
+        .hargrove-report-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+        .hargrove-report-table th,
+        .hargrove-report-table td {
+            overflow-wrap: anywhere;
+        }
+        .hargrove-report-table input,
+        .hargrove-report-table textarea {
+            min-width: 0;
+            max-width: 100%;
+        }
+    </style>
+    <div class="col-span-12 mx-auto w-full min-w-0 max-w-none px-4 sm:px-6 lg:px-8">
         <span data-page-name="hargrove-grant" class="hidden" hidden></span>
         <div class="w-full py-10 space-y-12">
 
@@ -22,6 +37,24 @@
             <p class="text-sm text-gray-700 leading-relaxed dark:text-slate-300">
                 The Hargrove Grant is funded through a <strong class="font-semibold text-gray-900 dark:text-white">1/10 of 1% sales tax</strong> dedicated to programs that respond to and provide services for individuals experiencing substance use disorder (SUD) and behavioral health challenges. This dashboard automates the collection and calculation of quarterly metrics required for grant reporting, ensuring accurate documentation of program impact and compliance with funding requirements.
             </p>
+            <p class="mt-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                Report scope: {{ report_agency.name }} only. Metrics exclude records from other agencies.
+            </p>
+            <p class="mt-2 text-sm text-gray-700 dark:text-slate-300">
+                Tables show the selected quarter, saved earlier-quarter values (most recent first), and one Running YTD result.
+                Counts and dollars are summed; people served in multiple quarters count in each quarter.
+                Percentages use summed numerators divided by summed denominators, not an average of percentages.
+                Averages use pooled counts and service types use distinct names. Existing YTD, comparison, and goal-status
+                rows show their latest result. “Not available” means the required inputs are missing.
+                When editing a rate or average, include its counts, for example “10% (1 of 10)” or “2.00 (10 / 5)”.
+            </p>
+            <p class="mt-2 text-sm text-gray-700 dark:text-slate-300">
+                Same-quarter repeat overdoses count events after a patient's first event in that calendar quarter.
+                All-time-history repeats include earlier recorded events in this agency, even before the reporting year.
+                Both divide by all overdose events in the reporting period. Events without patient IDs remain in the
+                denominator but cannot be classified as repeats. Calendar quarters are not rolling 90-day windows.
+            </p>
+            <p id="hargrove-ytd-status" role="status" class="mt-2 text-sm text-gray-700 dark:text-slate-300" hidden></p>
         </div>
 
         {# Yearly Accordions #}
@@ -139,7 +172,7 @@
                                             </div>
                                             <div class="flex flex-none items-center gap-2">
                                                 <a
-                                                    href="{% url 'dashboard:hargrove_grant_export' year_data.year forloop.counter %}"
+                                                    href="{% url 'dashboard:hargrove_grant_export' year_data.year forloop.counter %}?agency_id={{ report_agency.id }}"
                                                     @click.stop
                                                     class="group/export flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-600 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
                                                     title="Download {{ quarter.label }} {{ year_data.year }} as Word document"
@@ -186,34 +219,43 @@
                                                                 <div x-data="hgZipTable({ {% for row in section.rows %}{% if not row.is_zip_total %}'{{ row.id|escapejs }}':'{{ row.value|escapejs }}',{% endif %}{% endfor %}})" @hg-zip-saved="onZipSaved($event)">
                                                                 {% endif %}
                                                                 <div class="overflow-x-auto">
-                                                                    <table class="w-full table-fixed text-xs">
+                                                                    <table class="hargrove-report-table w-full table-fixed text-xs">
                                                                         <colgroup>
-                                                                            <col class="w-[8%]" />
-                                                                            <col class="w-[40%]" />
-                                                                            <col class="w-[10%]" />
-                                                                            <col class="w-[42%]" />
+                                                                            {% for width in section.column_widths %}
+                                                                                <col style="width: {{ width }}%;" />
+                                                                            {% endfor %}
                                                                         </colgroup>
                                                                         <thead>
                                                                             <tr class="border-b border-slate-200 dark:border-slate-700">
-                                                                                <th class="px-1.5 py-1.5 text-left font-semibold text-gray-700 dark:text-slate-300">{{ section.columns.0 }}</th>
-                                                                                <th class="px-1.5 py-1.5 text-left font-semibold text-gray-700 dark:text-slate-300">{{ section.columns.1 }}</th>
-                                                                                <th class="px-1.5 py-1.5 text-left font-semibold text-gray-700 dark:text-slate-300">{{ section.columns.2 }}</th>
-                                                                                <th class="px-1.5 py-1.5 text-left font-semibold text-gray-700 dark:text-slate-300">{{ section.columns.3 }}</th>
+                                                                                {% for column in section.report_columns %}
+                                                                                    <th scope="col" class="px-1.5 py-1.5 text-left font-semibold text-gray-700 dark:text-slate-300">{{ column }}</th>
+                                                                                {% endfor %}
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                             {% if section.rows %}
                                                                                 {% for row in section.rows %}
                                                                                     <tr class="border-b border-slate-100 last:border-0 dark:border-slate-800{% if row.is_zip_total %} font-semibold bg-slate-50 dark:bg-slate-800/50{% endif %}">
-                                                                                        <td class="px-1.5 py-1 align-top text-gray-600 dark:text-slate-400 whitespace-nowrap">{{ row.id }}</td>
-                                                                                        <td class="px-1.5 py-1 pr-1 align-top text-gray-900 dark:text-white">{{ row.metric }}</td>
+                                                                                        <td class="px-1.5 py-1 align-top text-gray-600 dark:text-slate-400">{{ row.id }}</td>
+                                                                                        <td class="px-1.5 py-1 pr-1 align-top text-gray-900 dark:text-white">
+                                                                                            {% with short_metric=row.metric|truncatewords:5 %}
+                                                                                                {% if short_metric != row.metric %}
+                                                                                                    <details>
+                                                                                                        <summary class="cursor-pointer" title="{{ row.metric }}">{{ short_metric }}</summary>
+                                                                                                        <span class="block mt-1">{{ row.metric }}</span>
+                                                                                                    </details>
+                                                                                                {% else %}
+                                                                                                    {{ row.metric }}
+                                                                                                {% endif %}
+                                                                                            {% endwith %}
+                                                                                        </td>
                                                                                         {# ---- Value cell ---- #}
                                                                                         {% if row.is_zip_total %}
-                                                                                        <td class="px-1.5 py-1 align-top font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                                                                                        <td class="px-1.5 py-1 align-top font-medium text-gray-900 dark:text-white">
                                                                                             <span x-text="total">{{ row.value }}</span>
                                                                                         </td>
                                                                                         {% elif row.editable %}
-                                                                                        <td class="p-0 align-top font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                                                                                        <td class="p-0 align-top font-medium text-gray-900 dark:text-white">
                                                                                             <span
                                                                                                 x-data="hgEditCell('{{ row.value|escapejs }}', {{ year_data.year }}, {{ quarter.q }}, '{{ row.metric|escapejs }}', '{{ row.id|escapejs }}', 'value'{% if section.section_variant == "zip" %}, {isZipRow:true}{% endif %})"
                                                                                                 class="block h-full"
@@ -228,7 +270,7 @@
                                                                                                 ></span>
                                                                                                 <form
                                                                                                     x-show="editing"
-                                                                                                    hx-post="{% url 'dashboard:hargrove_metric_save' %}"
+                                                                                                    hx-post="{% url 'dashboard:hargrove_metric_save' %}?agency_id={{ report_agency.id }}"
                                                                                                     hx-swap="none"
                                                                                                     x-on:htmx:afterRequest="handleSave($event)"
                                                                                                     class="px-1.5 py-1"
@@ -253,8 +295,12 @@
                                                                                             </span>
                                                                                         </td>
                                                                                         {% else %}
-                                                                                        <td class="px-1.5 py-1 align-top font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ row.value }}</td>
+                                                                                        <td class="px-1.5 py-1 align-top font-medium text-gray-900 dark:text-white">{{ row.value }}</td>
                                                                                         {% endif %}
+                                                                                        {% for value in row.previous_values %}
+                                                                                            <td data-hargrove-ytd="{{ year_data.year }}:{{ quarter.q }}:{{ section.title }}:{{ row.metric }}:previous:{{ forloop.counter }}" class="px-1.5 py-1 align-top font-medium text-gray-900 dark:text-white">{{ value }}</td>
+                                                                                        {% endfor %}
+                                                                                        <td data-hargrove-ytd="{{ year_data.year }}:{{ quarter.q }}:{{ section.title }}:{{ row.metric }}:running" class="px-1.5 py-1 align-top font-semibold text-gray-900 dark:text-white">{{ row.running_total }}</td>
                                                                                         {# ---- Notes cell ---- #}
                                                                                         {% if row.editable %}
                                                                                         <td class="p-0 align-top text-gray-600 dark:text-slate-400">
@@ -272,7 +318,7 @@
                                                                                                 ></span>
                                                                                                 <form
                                                                                                     x-show="editing"
-                                                                                                    hx-post="{% url 'dashboard:hargrove_metric_save' %}"
+                                                                                                    hx-post="{% url 'dashboard:hargrove_metric_save' %}?agency_id={{ report_agency.id }}"
                                                                                                     hx-swap="none"
                                                                                                     x-on:htmx:afterRequest="handleSave($event)"
                                                                                                     class="px-1.5 py-1"
@@ -302,7 +348,7 @@
                                                                                 {% endfor %}
                                                                             {% else %}
                                                                                 <tr>
-                                                                                    <td colspan="4" class="px-2 py-5 text-center text-gray-500 dark:text-slate-400">
+                                                                                    <td colspan="{{ section.report_columns|length }}" class="px-2 py-5 text-center text-gray-500 dark:text-slate-400">
                                                                                         <div class="flex flex-col items-center gap-2">
                                                                                             <svg class="h-8 w-8 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
@@ -348,7 +394,7 @@
                                                                                     </div>
                                                                                     <form
                                                                                         x-show="editing"
-                                                                                        hx-post="{% url 'dashboard:hargrove_metric_save' %}"
+                                                                                        hx-post="{% url 'dashboard:hargrove_metric_save' %}?agency_id={{ report_agency.id }}"
                                                                                         hx-swap="none"
                                                                                         x-on:htmx:beforeRequest="handleBeforeSave($event)"
                                                                                         x-on:htmx:afterRequest="handleSave($event)"
@@ -456,6 +502,39 @@
 </div>
 {% block extra_js %}
 <script>
+let hargroveYtdRequest = 0;
+
+async function refreshHargroveYtd() {
+    const request = ++hargroveYtdRequest;
+    const status = document.getElementById('hargrove-ytd-status');
+    status.hidden = false;
+    status.textContent = 'Refreshing YTD totals…';
+    try {
+        const response = await fetch(window.location.href, {credentials: 'same-origin'});
+        if (!response.ok || response.redirected) {
+            throw new Error('Report refresh failed');
+        }
+        const html = new DOMParser().parseFromString(await response.text(), 'text/html');
+        if (request !== hargroveYtdRequest) return;
+        const current = document.querySelectorAll('[data-hargrove-ytd]');
+        const updated = new Map(
+            Array.from(html.querySelectorAll('[data-hargrove-ytd]'),
+                cell => [cell.dataset.hargroveYtd, cell.textContent])
+        );
+        if (!updated.size || current.length !== updated.size ||
+                Array.from(current).some(cell => !updated.has(cell.dataset.hargroveYtd))) {
+            throw new Error('Report contents changed');
+        }
+        current.forEach(cell => {
+            cell.textContent = updated.get(cell.dataset.hargroveYtd);
+        });
+        status.textContent = 'YTD totals updated.';
+    } catch (error) {
+        if (request !== hargroveYtdRequest) return;
+        status.textContent = 'Your edit was saved, but YTD totals could not be refreshed. Reload this page before using the totals.';
+    }
+}
+
 /**
  * hgEditCell — Alpine component for inline-editable table/narrative cells.
  * opts: { isZipRow: bool }  — ZIP value cells dispatch hg-zip-saved on success
@@ -510,6 +589,9 @@ function hgEditCell(initVal, year, quarter, metricKey, metricId, field, opts) {
                 this.original = this.current;
                 this.hasPersisted = !!String(this.current || '').trim();
                 this.saved = true;
+                if (this.field === 'value') {
+                    refreshHargroveYtd();
+                }
                 if (this.isZipRow && this.field === 'value') {
                     this.$el.dispatchEvent(new CustomEvent('hg-zip-saved', {
                         detail: { key: this.metricId, val: this.current },
@@ -556,16 +638,20 @@ function hgEditCell(initVal, year, quarter, metricKey, metricId, field, opts) {
  */
 function hgZipTable(initVals) {
     return {
-        vals: Object.fromEntries(
-            Object.entries(initVals).map(([k, v]) => [k, Number(v) || 0])
-        ),
+        vals: {...initVals},
         get total() {
-            return Object.values(this.vals).reduce((a, b) => a + b, 0);
+            const values = Object.values(this.vals).map(value =>
+                String(value).trim()
+            );
+            if (values.some(value => !/^-?(?:\d+|\d{1,3}(?:,\d{3})+)$/.test(value))) return 'Not available';
+            return values.reduce((sum, value) =>
+                sum + Number(value.replaceAll(',', '')), 0
+            ).toLocaleString('en-US');
         },
         onZipSaved(event) {
             const { key, val } = event.detail;
             if (Object.prototype.hasOwnProperty.call(this.vals, key)) {
-                this.vals[key] = Number(val) || 0;
+                this.vals[key] = val;
             }
         },
     };
