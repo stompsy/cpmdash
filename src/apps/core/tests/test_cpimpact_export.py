@@ -52,6 +52,8 @@ def data(db):
         sex="M",
         insurance="Medicaid",
         behavioral_health=True,
+        created_date=date(2021, 2, 14),
+        modified_date=date(2024, 8, 1),
     )
     for i, d in enumerate([date(2024, 12, 30), date(2024, 12, 30), date(2025, 1, 20)]):
         Encounters.objects.create(
@@ -100,6 +102,8 @@ def test_export_scrubs_identifiers(data, tmp_path):
     pats = _read(zf, "patients.csv")
     assert pats[0]["age_band"] == "80p" and pats[0]["behavioral_health"] == "1"
     assert pats[0]["patient_key"].startswith("P")
+    assert (pats[0]["first_year"], pats[0]["first_quarter"]) == ("2021", "1")
+    assert (pats[0]["last_year"], pats[0]["last_quarter"]) == ("2024", "3")
 
     enc = _read(zf, "encounters.csv")
     assert [(e["year"], e["quarter"], e["seq"], e["gap_from_prev"]) for e in enc] == [

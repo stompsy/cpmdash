@@ -43,8 +43,8 @@ DROPPED = {
         "sex",
         "race",
         "marital_status",
-        "created_date",
-        "modified_date",
+        "created_date (exported as first_year, first_quarter)",
+        "modified_date (exported as last_year, last_quarter)",
         "age (exported as a band)",
     ],
     "encounters": ["encounter_date (exported as year, quarter, seq, gap)"],
@@ -245,6 +245,10 @@ def build_patients(agencies: Sequence[str] | None) -> Table:
             "insurance",
             "pcp_agency",
             "veteran_status",
+            "first_year",
+            "first_quarter",
+            "last_year",
+            "last_quarter",
             *PATIENT_BOOLS,
         ],
         ["insurance", "pcp_agency", "veteran_status"],
@@ -256,9 +260,15 @@ def build_patients(agencies: Sequence[str] | None) -> Table:
         "insurance",
         "pcp_agency",
         "veteran_status",
+        "created_date",
+        "modified_date",
         *PATIENT_BOOLS,
     ]
     for r in _filtered(Patients.objects.order_by("id"), agencies, None, None).values(*fields):
+        # When the record was created (first seen) and last changed, as year and quarter only.
+        # Missing created dates fall back to modified, as cpmdash's patients-served counts do.
+        fy, fq = year_quarter(r["created_date"] or r["modified_date"])
+        ly, lq = year_quarter(r["modified_date"] or r["created_date"])
         row = {
             "patient_key": key("P", r["id"]),
             "agency": r["agency__slug"],
@@ -266,6 +276,10 @@ def build_patients(agencies: Sequence[str] | None) -> Table:
             "insurance": clean_text(r["insurance"]),
             "pcp_agency": clean_text(r["pcp_agency"]),
             "veteran_status": clean_text(r["veteran_status"]),
+            "first_year": fy,
+            "first_quarter": fq,
+            "last_year": ly,
+            "last_quarter": lq,
         }
         row.update({b: bool_cell(r[b]) for b in PATIENT_BOOLS})
         t.rows.append(row)
@@ -474,7 +488,8 @@ districts, any dates, jail dates, sex, race or marital status. Ages are bands.
 Text values that appeared fewer than {min_count} times in a column read "(rare)".
 
 Files
-  patients.csv      one row per patient (patient_key = P + cpmdash row id)
+  patients.csv      one row per patient (patient_key = P + cpmdash row id);
+                    first/last year and quarter = record created / last changed
   encounters.csv    one row per encounter; seq = patient's nth encounter,
                     gap_from_prev = time since their previous encounter
                     (first, same_day, 1_7d, 8_30d, 31_90d, 91d_plus)
